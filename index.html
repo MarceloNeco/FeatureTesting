@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>FeatureTesting — Laboratório de Features</title>
+<style>
+:root{
+  --bg:#0f1115; --card:#1a1d24; --card-hover:#22262f;
+  --text:#e8eaed; --muted:#9aa0a6; --border:#2a2f3a;
+  --accent:#4285f4; --accent-soft:#1a2c4e;
+  --ok:#34a853; --soon:#f9ab00; --danger:#ea4335;
+}
+*{box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;margin:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+header{padding:40px 16px 24px;text-align:center}
+header h1{font-size:1.6rem;font-weight:700;letter-spacing:-.5px}
+header h1 span{color:var(--accent)}
+header p{color:var(--muted);font-size:.95rem;margin-top:6px}
+main{flex:1;max-width:860px;width:100%;margin:0 auto;padding:8px 16px 40px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+a.card{display:block;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:18px;text-decoration:none;color:var(--text);transition:all .18s}
+a.card:hover{background:var(--card-hover);border-color:var(--accent);transform:translateY(-2px)}
+.card .ico{font-size:1.8rem}
+.card h2{font-size:1.02rem;margin:10px 0 4px}
+.card p{color:var(--muted);font-size:.85rem;line-height:1.45}
+.card .tag{display:inline-block;border-radius:20px;padding:3px 10px;font-size:.72rem;font-weight:600;margin-top:12px}
+.tag.ativo{background:#12351e;color:#7ee2a0}
+.tag.breve{background:#3d3113;color:#ffd66e}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px;border-top:1px solid var(--border)}
+footer a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧪 Feature<span>Testing</span></h1>
+  <p>Laboratório de experimentos — cada card é uma feature que roda direto no navegador</p>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  <a href="https://github.com/SEUUSUARIO/FeatureTesting" target="_blank">repositório no GitHub</a> · atualizado em 20/09/2026
+</footer>
+
+<script>
+/* ====== ADICIONE NOVAS FEATURES AQUI ======
+   Para incluir uma feature nova, acrescente um objeto:
+   { ic:"🔧", nome:"Nome curto", desc:"O que ela faz (1 linha)",
+     url:"arquivo.html", status:"ativo" }        ← "ativo" ou "breve"
+   O card aparece sozinho na lista. */
+const FEATURES = [
+  {
+    ic: "🧾",
+    nome: "Leitor de Comprovantes (OCR)",
+    desc: "Fotografa a via do cliente da maquininha e extrai os campos (valor, data, CNPJ, NSU...) automaticamente.",
+    url: "leitor-ocr.html",
+    status: "ativo"
+  },
+  {
+    ic: "➕",
+    nome: "Próxima feature",
+    desc: "Espaço reservado — troque este card pela próxima ideia a ser testada.",
+    url: "#",
+    status: "breve"
+  }
+];
+
+const grid = document.getElementById('grid');
+FEATURES.forEach(f => {
+  const a = document.createElement('a');
+  a.className = 'card';
+  a.href = f.url;
+  if (f.status !== 'ativo') a.addEventListener('click', e => e.preventDefault());
+  a.innerHTML =
+    '<div class="ico">' + f.ic + '</div>' +
+    '<h2>' + f.nome + '</h2>' +
+    '<p>' + f.desc + '</p>' +
+    '<span class="tag ' + f.status + '">' + (f.status === 'ativo' ? '✅ testar' : '🚧 em breve') + '</span>';
+  grid.appendChild(a);
+});
+</script>
+</body>
+</html>
