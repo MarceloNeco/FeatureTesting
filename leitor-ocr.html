@@ -620,6 +620,31 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       align-items: center;
     }
 
+    /* Amount not found: red alert on the field so it stands out and can be typed over */
+    .field-row.field-missing .fld-val {
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    .field-row.field-missing .fld-val::placeholder {
+      color: var(--danger);
+      opacity: 0.95;
+      font-weight: 600;
+    }
+
+    .field-row.field-missing .fld-key {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .field-row.field-missing .fld-val:focus {
+      background: transparent;
+      color: var(--text);
+      font-weight: 500;
+    }
+
     .btn-field-del {
       width: 34px;
       height: 36px;
@@ -1532,6 +1557,89 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       });
     }
 
+    // Discovers how tilted the receipt is in the photo. Text lines make
+    // dark stripes; the angle where those stripes are sharpest is the right one.
+    function estimateAngles(img) {
+      const SIZE = 360;
+      const w0 = img.naturalWidth || img.width;
+      const h0 = img.naturalHeight || img.height;
+      const s = Math.min(1, SIZE / Math.max(w0, h0));
+      const w = Math.max(1, Math.round(w0 * s));
+      const h = Math.max(1, Math.round(h0 * s));
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const d = ctx.getImageData(0, 0, w, h).data;
+
+      // Grayscale, then local threshold so only the printed ink stays
+      const g = new Float32Array(w * h);
+      for (let i = 0; i < g.length; i++) {
+        g[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2];
+      }
+      const integ = new Float64Array((w + 1) * (h + 1));
+      for (let y = 0; y < h; y++) {
+        let row = 0;
+        for (let x = 0; x < w; x++) {
+          row += g[y * w + x];
+          integ[(y + 1) * (w + 1) + x + 1] = integ[y * (w + 1) + x + 1] + row;
+        }
+      }
+      const r = Math.max(6, Math.round(w / 12));
+      const ink = new Float32Array(w * h);
+      for (let y = 0; y < h; y++) {
+        const ya = Math.max(0, y - r), yb = Math.min(h, y + r + 1);
+        for (let x = 0; x < w; x++) {
+          const xa = Math.max(0, x - r), xb = Math.min(w, x + r + 1);
+          const area = (xb - xa) * (yb - ya);
+          const sum = integ[yb * (w + 1) + xb] - integ[ya * (w + 1) + xb] - integ[yb * (w + 1) + xa] + integ[ya * (w + 1) + xa];
+          ink[y * w + x] = g[y * w + x] * area < sum * 0.9 ? 1 : 0;
+        }
+      }
+
+      // For each candidate angle, count ink per line and measure how much
+      // it jumps from line to line — many sharp jumps means the text is level
+      const cx = w / 2, cy = h / 2;
+      const diag = Math.ceil(Math.sqrt(w * w + h * h));
+      const scores = [];
+      for (let a = -87; a < 90; a += 3) {
+        const ar = (a * Math.PI) / 180;
+        const sa = Math.sin(ar), ca = Math.cos(ar);
+        const prof = new Float32Array(diag + 2);
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            if (!ink[y * w + x]) continue;
+            // spread each dot between the two nearest lines, otherwise
+            // diagonal angles produce a false striped pattern
+            const yy = -(x - cx) * sa + (y - cy) * ca + diag / 2;
+            const y0 = Math.floor(yy);
+            if (y0 < 0 || y0 >= diag) continue;
+            const f = yy - y0;
+            prof[y0] += 1 - f;
+            prof[y0 + 1] += f;
+          }
+        }
+        let score = 0;
+        for (let i = 1; i <= diag; i++) {
+          const dv = prof[i] - prof[i - 1];
+          score += dv * dv;
+        }
+        scores.push({ a, score });
+      }
+      scores.sort((p, q) => q.score - p.score);
+
+      // Keep the best angle plus one clearly different runner-up
+      const out = [scores[0].a];
+      for (const s2 of scores) {
+        if (Math.abs(s2.a - out[0]) > 12 && Math.abs(Math.abs(s2.a - out[0]) - 180) > 12) {
+          out.push(s2.a);
+          break;
+        }
+      }
+      return out;
+    }
+
     // Builds a high-resolution image just for OCR: finds the receipt paper,
     // crops it, enlarges the text and turns it into clean black-on-white.
     function buildOcrCanvas(img, rotation = 0, binarize = false, targetW = 1000) {
@@ -1542,13 +1650,18 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       w = Math.round(w * s);
       h = Math.round(h * s);
 
-      const rot = (rotation % 180) !== 0;
+      // Rotation by any angle (not only 90°), enlarging the canvas so nothing is cut off
+      const rad = (rotation * Math.PI) / 180;
+      const cos = Math.abs(Math.cos(rad));
+      const sin = Math.abs(Math.sin(rad));
       const src = document.createElement('canvas');
-      src.width = rot ? h : w;
-      src.height = rot ? w : h;
+      src.width = Math.round(w * cos + h * sin);
+      src.height = Math.round(w * sin + h * cos);
       const sctx = src.getContext('2d');
+      sctx.fillStyle = '#808080';
+      sctx.fillRect(0, 0, src.width, src.height);
       sctx.translate(src.width / 2, src.height / 2);
-      sctx.rotate((rotation * Math.PI) / 180);
+      sctx.rotate(rad);
       sctx.drawImage(img, -w / 2, -h / 2, w, h);
 
       // 1. Find the paper: largest bright area on a small copy of the photo
@@ -1693,14 +1806,19 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
           }
         });
 
+        // Straighten the photo automatically: the app measures how tilted the
+        // receipt is instead of assuming it was photographed square
+        const tilt = estimateAngles(currentImage);
+        const a1 = currentRotation + tilt[0];
+
         // Several attempts, stopping at the first one that finds the amount:
-        // grayscale, black/white, larger text, then upside down
+        // straightened, as photographed, with reinforced contrast, upside down
         const passes = [
+          [a1, false, 1000],
           [currentRotation, false, 1000],
-          [currentRotation, true, 1000],
-          [currentRotation, false, 1400],
-          [(currentRotation + 180) % 360, false, 1000]
-        ];
+          [a1, true, 1000],
+          [a1 + 180, true, 1000]
+        ].filter((p, i, all) => all.findIndex(q => q[0] === p[0] && q[1] === p[1] && q[2] === p[2]) === i);
         let best = null;
         for (const [rot, bin, size] of passes) {
           const res = await worker.recognize(buildOcrCanvas(currentImage, rot, bin, size));
@@ -1739,7 +1857,11 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       // Parse and display fields
       const extracted = parseReceiptText(ocrText);
       renderFieldsEditor(extracted, confidence);
-      showToast('Comprovante processado com sucesso!', 'ok');
+      if (extracted.some(f => f.key === 'Valor')) {
+        showToast('Comprovante processado com sucesso!', 'ok');
+      } else {
+        showToast('Não consegui ler o valor. Digite no campo em vermelho.', 'warn');
+      }
     }
 
     function generateFallbackFromCanvas() {
@@ -1934,25 +2056,40 @@ table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 
       fieldsListContainer.innerHTML = '';
       confidenceVal.textContent = `${confidence}% de confiança`;
 
-      fields.forEach((f, idx) => {
-        createFieldRow(f.key, f.val);
+      // The amount is the point of the whole reading, so its field is always
+      // on screen: empty and marked in red when it could not be read
+      const list = fields.slice();
+      if (!list.some(f => f.key === 'Valor')) {
+        const at = list.findIndex(f => ORDERED_FIELD_KEYS.indexOf(f.key) > ORDERED_FIELD_KEYS.indexOf('Valor'));
+        list.splice(at === -1 ? list.length : at, 0, { key: 'Valor', val: '', missing: true });
+      }
+
+      list.forEach(f => {
+        createFieldRow(f.key, f.val, f.missing);
       });
 
       fieldsEditorCard.style.display = 'flex';
       fieldsEditorCard.scrollIntoView({ behavior: 'smooth' });
     }
 
-    function createFieldRow(key = '', val = '') {
+    function createFieldRow(key = '', val = '', missing = false) {
       const row = document.createElement('div');
-      row.className = 'field-row';
+      row.className = missing ? 'field-row field-missing' : 'field-row';
       row.innerHTML = `
         <input type="text" class="fld fld-sm fld-key" value="${escapeHtml(key)}" placeholder="Campo">
-        <input type="text" class="fld fld-sm fld-val" value="${escapeHtml(val)}" placeholder="Valor">
+        <input type="text" class="fld fld-sm fld-val" value="${escapeHtml(val)}" placeholder="${missing ? 'Não detectado — digite aqui' : 'Valor'}">
         <button type="button" class="btn-field-del" title="Remover">✕</button>
       `;
       row.querySelector('.btn-field-del').addEventListener('click', () => {
         row.remove();
       });
+      if (missing) {
+        // The red alert clears as soon as the amount is typed in
+        const valInput = row.querySelector('.fld-val');
+        valInput.addEventListener('input', () => {
+          row.classList.toggle('field-missing', !valInput.value.trim());
+        });
+      }
       fieldsListContainer.appendChild(row);
     }
 
