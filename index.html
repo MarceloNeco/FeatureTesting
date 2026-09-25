@@ -29,6 +29,13 @@ a.card:hover{background:var(--card-hover);border-color:var(--accent);transform:t
 .card .tag{display:inline-block;border-radius:20px;padding:3px 10px;font-size:.72rem;font-weight:600;margin-top:12px}
 .tag.ativo{background:#12351e;color:#7ee2a0}
 .tag.breve{background:#3d3113;color:#ffd66e}
+/* celular: título fixo no topo enquanto a lista rola */
+@media (max-width:700px){
+  header{position:sticky;top:0;z-index:10;background:var(--bg);padding:16px 16px 12px;
+    border-bottom:1px solid var(--border);padding-top:max(16px,env(safe-area-inset-top))}
+  header p{font-size:.85rem}
+  main{padding-top:16px}
+}
 footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px;border-top:1px solid var(--border)}
 footer a{color:var(--accent);text-decoration:none}
 </style>
@@ -91,6 +98,11 @@ FEATURES.forEach(f => {
   a.className = 'card';
   a.href = f.url;
   if (f.status !== 'ativo') a.addEventListener('click', e => e.preventDefault());
+  // computador (com mouse): abre em outra aba; no celular abre na mesma
+  else if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    a.target = '_blank';
+    a.rel = 'noopener';
+  }
   a.innerHTML =
     '<div class="ico">' + f.ic + '</div>' +
     '<h2>' + f.nome + '</h2>' +
