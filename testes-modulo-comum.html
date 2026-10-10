@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Roteiros de teste — módulo comum 1.9.0</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
+<style>
+:root{
+  --bg:#0f1115; --card:#1a1d24; --card-hover:#22262f;
+  --text:#e8eaed; --muted:#9aa0a6; --border:#2a2f3a;
+  --accent:#4285f4; --accent-soft:#1a2c4e;
+  --ok:#34a853; --soon:#f9ab00; --danger:#ea4335;
+}
+*{box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;margin:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+header{padding:28px 16px 16px;text-align:center}
+header h1{font-size:1.4rem;font-weight:700}
+header h1 span{color:var(--accent)}
+header p{color:var(--muted);font-size:.9rem;margin-top:6px}
+.barra{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.barra a,.barra button{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:20px;
+  padding:7px 14px;font-size:.85rem;text-decoration:none;cursor:pointer}
+.barra button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+main{max-width:860px;margin:0 auto;padding:8px 16px 40px}
+section.tema{margin-top:28px;scroll-margin-top:12px}
+section.tema>h2{font-size:1.15rem;margin-bottom:6px}
+.nota{background:#3d3113;color:#ffd66e;border-radius:10px;padding:10px 12px;font-size:.88rem;margin:8px 0}
+details.cartao{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-top:12px}
+details.cartao[open]{border-color:var(--accent)}
+details.cartao summary{cursor:pointer;padding:14px 16px;font-weight:600;list-style:none}
+details.cartao summary::-webkit-details-marker{display:none}
+details.cartao summary::before{content:"▸ ";color:var(--accent)}
+details.cartao[open] summary::before{content:"▾ "}
+.corpo{padding:0 16px 16px;font-size:.92rem}
+.corpo h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:14px 0 4px}
+.corpo ol{padding-left:22px}
+.corpo li{margin:4px 0}
+.apps{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.apps span{border-radius:20px;padding:2px 10px;font-size:.75rem;font-weight:600;background:#12351e;color:#7ee2a0}
+.apps span.espera{background:#3d3113;color:#ffd66e}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px;border-top:1px solid var(--border)}
+footer a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧪 <span id="titulo"></span></h1>
+  <p id="subtitulo"></p>
+  <div class="barra" id="barra"></div>
+</header>
+
+<main id="main"></main>
+
+<footer><a href="index.html" id="voltar"></a></footer>
+
+<script>
+/* ====== ONDE CADA ROTEIRO VALE HOJE ======
+   Quando um app receber o módulo comum 1.9.0, acrescente-o em APPS e o id dele
+   no "apps" dos cartões que já dá para testar nele. Ex.:
+   hypernutry: { nome: "HyperNutry", versao: "x.y.z", url: "https://solverone.com.br/hypernutry/" } */
+const APPS = {
+  rootify: { nome: "RootifyONE", versao: "0.15.0", url: "https://rootify-one.pages.dev/" }
+};
+const AGUARDANDO = { pt: "HyperNutry e CifrasONE (em atualização)", en: "HyperNutry and CifrasONE (being updated)" };
+
+/* ====== OS CARTÕES ======
+   Cada tema tem cartões com: titulo, objetivo, onde, passos (lista), esperado, anotar.
+   Todo texto em { pt, en }. "apps": ids de APPS onde o cartão já vale ([] = ainda em nenhum). */
+const TEMAS = [
+{
+  id: "fundo", ic: "⏳",
+  nome: { pt: "Fundo — trabalho demorado em segundo plano", en: "Fundo — long work in the background" },
+  nota: { pt: "Para os cartões de IA, o RootifyONE precisa de uma chave de IA já guardada no cofre dele (nunca cole a chave aqui nem no chat).",
+          en: "For the AI cards, RootifyONE needs an AI key already saved in its vault (never paste the key here or in a chat)." },
+  cartoes: [
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Publicar e trocar de tela: a pílula continua", en: "Publish and switch screens: the pill keeps going" },
+      objetivo: { pt: "Ver que um trabalho demorado não morre quando você sai da tela.", en: "Check that long work doesn't die when you leave the screen." },
+      onde: { pt: "RootifyONE → 🚀 Publicar (celular ou computador).", en: "RootifyONE → 🚀 Publish (phone or computer)." },
+      passos: {
+        pt: ["Entre no RootifyONE.", "Mude algo pequeno no Controle dos apps (ex.: desligue e religue um interruptor) para ter o que publicar.", "Abra 🚀 Publicar e toque em Publicar.", "Logo em seguida, abra o menu ☰ e vá para outra tela (ex.: Início). Troque de tela mais 2 vezes.", "Observe o canto de baixo da tela."],
+        en: ["Sign in to RootifyONE.", "Change something small in App control (e.g. turn a switch off and on) so there is something to publish.", "Open 🚀 Publish and tap Publish.", "Right after, open the ☰ menu and go to another screen (e.g. Home). Switch screens 2 more times.", "Watch the bottom corner of the screen."]
+      },
+      esperado: { pt: "Uma pílula \"Publicando no GitHub…\" fica visível em todas as telas. No fim ela fica verde: \"Publicado no GitHub\", com ✕ e \"Toque para voltar a …\". Tocar nela leva de volta à tela de onde você veio.",
+                  en: "A \"Publishing to GitHub…\" pill stays visible on every screen. At the end it turns green: \"Published to GitHub\", with ✕ and \"Tap to go back to …\". Tapping it takes you back to the screen you came from." },
+      anotar: { pt: "Em que tela a pílula sumiu ou travou; se apareceu erro (copie o texto); celular ou computador e qual navegador; print da tela.",
+                en: "On which screen the pill disappeared or froze; any error (copy the text); phone or computer and which browser; a screenshot." }
+    },
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Pedido à IA longe da tela e o ✕ da pílula", en: "AI request away from the screen and the pill's ✕" },
+      objetivo: { pt: "Ver que a resposta da IA chega mesmo em outra tela, e que o ✕ cancela.", en: "Check that the AI answer arrives even on another screen, and that ✕ cancels." },
+      onde: { pt: "RootifyONE → Suporte → abrir um chamado → ✨ Sugerir resposta (IA).", en: "RootifyONE → Support → open a ticket → ✨ Suggest reply (AI)." },
+      passos: {
+        pt: ["Abra um chamado no Suporte e toque em ✨ Sugerir resposta (IA).", "Na hora, vá para outra tela pelo ☰.", "Espere a pílula ficar verde e toque nela.", "Repita o pedido, mas desta vez toque no ✕ da pílula enquanto ela ainda está trabalhando.", "Se der, peça duas coisas seguidas (ex.: a sugestão e o 🤖 Agente de políticas em Termos e políticas)."],
+        en: ["Open a ticket in Support and tap ✨ Suggest reply (AI).", "Immediately go to another screen through ☰.", "Wait for the pill to turn green and tap it.", "Repeat the request, but this time tap the pill's ✕ while it is still working.", "If you can, start two things in a row (e.g. the suggestion and the 🤖 Policy agent in Terms and policies)."]
+      },
+      esperado: { pt: "A pílula verde leva de volta ao chamado e a sugestão aparece na caixa de resposta. O ✕ para o pedido e a pílula some. Com dois ao mesmo tempo aparece \"2 em andamento\". Se ninguém tocar na pílula verde em uns 6 segundos, o aviso vai para a 📥 Inbox.",
+                  en: "The green pill takes you back to the ticket and the suggestion shows in the reply box. ✕ stops the request and the pill goes away. With two at once you see \"2 in progress\". If nobody taps the green pill within about 6 seconds, the notice goes to the 📥 Inbox." },
+      anotar: { pt: "Se a sugestão se perdeu; se o ✕ não parou; o texto de qualquer pílula vermelha; print.", en: "Whether the suggestion was lost; whether ✕ didn't stop it; the text of any red pill; a screenshot." }
+    },
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Aviso ao tentar fechar a aba", en: "Warning when trying to close the tab" },
+      objetivo: { pt: "Ver que o navegador pergunta antes de fechar ou recarregar no meio de um trabalho.", en: "Check that the browser asks before closing or reloading in the middle of a job." },
+      onde: { pt: "RootifyONE no computador (é onde o aviso aparece melhor).", en: "RootifyONE on a computer (where the warning shows best)." },
+      passos: {
+        pt: ["Comece um trabalho demorado (Publicar ou um pedido à IA).", "Enquanto a pílula ainda estiver trabalhando, tente fechar a aba (ou apertar F5 para recarregar).", "Na pergunta do navegador, escolha ficar (Cancelar).", "Depois que tudo terminar, tente fechar a aba de novo.", "Teste extra: comece outro trabalho, recarregue mesmo assim e veja o que aparece quando o RootifyONE abrir."],
+        en: ["Start a long job (Publish or an AI request).", "While the pill is still working, try to close the tab (or press F5 to reload).", "When the browser asks, choose to stay (Cancel).", "After everything finishes, try to close the tab again.", "Extra test: start another job, reload anyway and see what shows when RootifyONE opens."]
+      },
+      esperado: { pt: "Com trabalho rodando, o navegador pergunta se quer mesmo sair. Sem nada rodando, fecha sem perguntar. No teste extra, ao voltar aparece que o trabalho \"foi interrompido\".",
+                  en: "With work running, the browser asks if you really want to leave. With nothing running, it closes without asking. In the extra test, when you come back it says the job \"was interrupted\"." },
+      anotar: { pt: "Se fechou sem perguntar com trabalho rodando, ou perguntou sem nada rodando; nome e versão do navegador.", en: "Whether it closed without asking while working, or asked with nothing running; browser name and version." }
+    },
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Tela não apaga no celular (Wake Lock)", en: "Phone screen stays on (Wake Lock)" },
+      objetivo: { pt: "Ver que o celular não apaga a tela enquanto um trabalho roda.", en: "Check that the phone doesn't turn the screen off while a job runs." },
+      onde: { pt: "RootifyONE no celular (Chrome ou Samsung Internet).", en: "RootifyONE on a phone (Chrome or Samsung Internet)." },
+      passos: {
+        pt: ["No celular, em Configurações → Tela, deixe o \"tempo para desligar a tela\" no menor valor (15 ou 30 segundos). Anote o valor de antes.", "Abra o RootifyONE e comece um trabalho longo (o 🤖 Agente de políticas é o mais demorado).", "Não toque na tela e espere passar o tempo de desligar.", "Depois que a pílula ficar verde, espere de novo sem tocar.", "No fim, volte o tempo de desligar da tela para o valor de antes."],
+        en: ["On the phone, in Settings → Display, set \"screen timeout\" to the shortest value (15 or 30 seconds). Note the previous value.", "Open RootifyONE and start a long job (the 🤖 Policy agent takes the longest).", "Don't touch the screen and wait past the timeout.", "After the pill turns green, wait again without touching.", "At the end, set the screen timeout back to the previous value."]
+      },
+      esperado: { pt: "Enquanto a pílula trabalha, a tela continua acesa. Depois que termina, a tela volta a apagar normalmente. No iPhone antigo ou no Firefox pode não segurar: aí a pílula pede para manter a tela aberta.",
+                  en: "While the pill is working, the screen stays on. After it finishes, the screen turns off normally again. On older iPhones or Firefox it may not hold: then the pill asks you to keep the screen open." },
+      anotar: { pt: "Se a tela apagou no meio; marca e modelo do celular, navegador e versão do Android/iOS.", en: "Whether the screen went off midway; phone brand and model, browser and Android/iOS version." }
+    }
+  ]
+},
+{
+  id: "interruptores", ic: "⚡",
+  nome: { pt: "Interruptores e Modo DEUS", en: "Switches and GOD Mode" },
+  nota: { pt: "Depois de Publicar, o site leva alguns minutos para ficar no ar, e o app só relê os interruptores ao abrir (no máximo a cada 5 minutos). Espere uns 5 minutos antes de recarregar o app. O Modo DEUS só aparece para o dono. O RootifyONE nunca entra em manutenção: teste num app que já esteja na grade.",
+          en: "After Publish, the site takes a few minutes to go live, and the app only re-reads the switches when it opens (at most every 5 minutes). Wait about 5 minutes before reloading the app. GOD Mode only shows for the owner. RootifyONE never goes into maintenance: test on an app that is already in the grid." },
+  cartoes: [
+    {
+      apps: [],
+      titulo: { pt: "Desligar e religar uma função de um app", en: "Turn an app feature off and back on" },
+      objetivo: { pt: "Ver que o interruptor do Modo DEUS vale de verdade no app.", en: "Check that the GOD Mode switch really works in the app." },
+      onde: { pt: "RootifyONE → Controle dos apps → ⚡ Modo DEUS, e o app escolhido em outra aba ou no celular.", en: "RootifyONE → App control → ⚡ GOD Mode, and the chosen app in another tab or on the phone." },
+      passos: {
+        pt: ["Abra o RootifyONE → Controle dos apps → aba ⚡ Modo DEUS.", "Filtre pelo app que vai testar. Se aparecer \"ainda não publicou a lista\", esse app ainda não está pronto: anote e pare aqui.", "Escolha uma função fácil de ver (uma aba ou botão grande) e veja na coluna \"Quem obedece\" se o app aparece.", "Desligue a função na coluna \"Neste app\".", "Toque em 🚀 Publicar agora e publique.", "Espere uns 5 minutos, abra o app e recarregue a página.", "Volte ao Modo DEUS, religue a função, publique, espere e recarregue o app de novo."],
+        en: ["Open RootifyONE → App control → ⚡ GOD Mode tab.", "Filter by the app you'll test. If it says \"has not published its list yet\", that app isn't ready: note it and stop here.", "Pick a feature that's easy to see (a tab or big button) and check in the \"Who obeys\" column that the app is listed.", "Turn the feature off in the \"This app\" column.", "Tap 🚀 Publish now and publish.", "Wait about 5 minutes, open the app and reload the page.", "Go back to GOD Mode, turn the feature back on, publish, wait and reload the app again."]
+      },
+      esperado: { pt: "Desligada, a função some do app. Religada, ela volta. Se a função não tiver o app em \"Quem obedece\" (⚠), o interruptor não faz nada nesse app — isso é um problema a anotar.",
+                  en: "Off, the feature disappears from the app. Back on, it returns. If the feature doesn't list the app under \"Who obeys\" (⚠), the switch does nothing in that app — that's a problem to note." },
+      anotar: { pt: "App e versão, nome da função, quanto tempo esperou, se a função sumiu/voltou; print do Modo DEUS e do app.", en: "App and version, feature name, how long you waited, whether the feature disappeared/came back; screenshot of GOD Mode and the app." }
+    },
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Coluna \"Quem obedece\"", en: "\"Who obeys\" column" },
+      objetivo: { pt: "Ver que o RootifyONE mostra quais apps leem cada interruptor.", en: "Check that RootifyONE shows which apps read each switch." },
+      onde: { pt: "RootifyONE → Controle dos apps → abas Recursos, Comportamentos e ⚡ Modo DEUS.", en: "RootifyONE → App control → Features, Behaviours and ⚡ GOD Mode tabs." },
+      passos: {
+        pt: ["Abra o Controle dos apps → aba Recursos.", "Procure a coluna \"Quem obedece\" e leia alguns itens (ex.: assistone, voz).", "Toque em ↻ para atualizar a lista.", "Faça o mesmo na aba Comportamentos e no ⚡ Modo DEUS."],
+        en: ["Open App control → Features tab.", "Find the \"Who obeys\" column and read a few items (e.g. assistone, voz).", "Tap ↻ to refresh the list.", "Do the same in the Behaviours tab and in ⚡ GOD Mode."]
+      },
+      esperado: { pt: "Cada interruptor mostra os apps que o leem; quando nenhum app lê, aparece ⚠. Há um resumo de quais apps já publicaram a lista e quais ainda não.",
+                  en: "Each switch shows the apps that read it; when no app reads it, ⚠ shows. There's a summary of which apps have published the list and which haven't." },
+      anotar: { pt: "Interruptor com app errado ou faltando; print da tabela.", en: "Switch with a wrong or missing app; screenshot of the table." }
+    },
+    {
+      apps: [],
+      titulo: { pt: "Manutenção: app inteiro fora do ar", en: "Maintenance: whole app offline" },
+      objetivo: { pt: "Ver a tela \"Em manutenção\" com a sua mensagem, e o app voltando ao religar.", en: "See the \"Under maintenance\" screen with your message, and the app coming back when switched on." },
+      onde: { pt: "RootifyONE → Controle dos apps → ⚡ Modo DEUS, linha \"App inteiro (manutenção)\" de um app que já esteja na grade.", en: "RootifyONE → App control → ⚡ GOD Mode, row \"Whole app (maintenance)\" of an app already in the grid." },
+      passos: {
+        pt: ["No Modo DEUS, filtre pelo app que vai testar (de preferência um que pouca gente esteja usando).", "Na linha \"App inteiro (manutenção)\", toque em ✏️ Mensagem e escreva algo como \"Teste de manutenção, volto já\".", "Desligue a linha \"App inteiro (manutenção)\". O RootifyONE pede para digitar o nome do app: digite exatamente.", "Publique, espere uns 5 minutos e abra o app (recarregue).", "Toque em \"Tentar de novo\" na tela do app.", "Religue a linha no Modo DEUS, publique, espere e toque em \"Tentar de novo\" outra vez."],
+        en: ["In GOD Mode, filter by the app you'll test (ideally one few people are using).", "On the \"Whole app (maintenance)\" row, tap ✏️ Message and write something like \"Maintenance test, back soon\".", "Turn off the \"Whole app (maintenance)\" row. RootifyONE asks you to type the app name: type it exactly.", "Publish, wait about 5 minutes and open the app (reload).", "Tap \"Try again\" on the app screen.", "Turn the row back on in GOD Mode, publish, wait and tap \"Try again\" once more."]
+      },
+      esperado: { pt: "O app mostra a tela cheia \"Em manutenção\" com a sua mensagem e o botão \"Tentar de novo\" (que diz \"Ainda em manutenção\" enquanto estiver desligado). Depois de religar, \"Tentar de novo\" abre o app normal. Digitar o nome errado não desliga nada. O RootifyONE continua abrindo sempre.",
+                  en: "The app shows the full-screen \"Under maintenance\" with your message and the \"Try again\" button (which says \"Still under maintenance\" while it's off). After switching back on, \"Try again\" opens the app normally. Typing the wrong name turns nothing off. RootifyONE always keeps opening." },
+      anotar: { pt: "App e versão; se a mensagem apareceu certa (PT/EN); se o app ficou preso em manutenção depois de religar; print.", en: "App and version; whether the message showed correctly (PT/EN); whether the app got stuck in maintenance after switching on; screenshot." }
+    }
+  ]
+},
+{
+  id: "compat", ic: "🧩",
+  nome: { pt: "Compatibilidade do navegador", en: "Browser compatibility" },
+  nota: { pt: "As faixas de aviso têm ✕. Depois de fechada, a faixa não volta naquele navegador — para repetir o teste, use uma aba anônima.",
+          en: "The warning bars have an ✕. Once closed, the bar doesn't come back in that browser — to repeat the test, use a private tab." },
+  cartoes: [
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Dados bloqueados: só uma faixa, o app abre", en: "Blocked data: just a bar, the app opens" },
+      objetivo: { pt: "Ver que, quando o navegador não deixa guardar dados, o app avisa mas não trava.", en: "Check that when the browser won't store data, the app warns but doesn't lock." },
+      onde: { pt: "RootifyONE no Chrome do computador.", en: "RootifyONE in Chrome on a computer." },
+      passos: {
+        pt: ["Abra o RootifyONE no Chrome.", "Clique no ícone à esquerda do endereço (cadeado ou ajustes) → Configurações do site.", "Em \"Cookies e dados do site\" (ou \"Cookies de terceiros\"/\"Cookies\"), escolha Bloquear.", "Volte à aba do RootifyONE e recarregue.", "Depois do teste, volte essa configuração para Permitir e recarregue."],
+        en: ["Open RootifyONE in Chrome.", "Click the icon left of the address (padlock or sliders) → Site settings.", "Under \"Cookies and site data\" (or \"Cookies\"), choose Block.", "Go back to the RootifyONE tab and reload.", "After the test, set it back to Allow and reload."]
+      },
+      esperado: { pt: "O app abre e aparece só uma faixa: \"Este navegador não deixa guardar dados\". Não aparece a tela de \"navegador antigo\". (Em navegadores novos, só abrir uma aba anônima normalmente não basta para ver a faixa.)",
+                  en: "The app opens and only a bar shows: \"This browser does not let the app save data\". The \"old browser\" screen does not show. (In new browsers, just opening a private tab usually isn't enough to see the bar.)" },
+      anotar: { pt: "Se a tela travou ou ficou em branco; o texto que apareceu; navegador e versão.", en: "Whether the screen locked or went blank; the text shown; browser and version." }
+    },
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Aberto dentro de outro app (WhatsApp, Instagram)", en: "Opened inside another app (WhatsApp, Instagram)" },
+      objetivo: { pt: "Ver a faixa que pede para abrir no navegador de verdade.", en: "See the bar asking to open it in a real browser." },
+      onde: { pt: "Celular: link do RootifyONE aberto pelo Instagram, Facebook ou WhatsApp.", en: "Phone: RootifyONE link opened from Instagram, Facebook or WhatsApp." },
+      passos: {
+        pt: ["Mande para você mesmo, numa mensagem do Instagram (ou WhatsApp), o link https://rootify-one.pages.dev/.", "Toque no link dentro do próprio app (sem escolher \"abrir no Chrome\").", "Veja o topo da página e toque em \"Como fazer\".", "Feche a faixa no ✕ e recarregue."],
+        en: ["Send yourself, in an Instagram (or WhatsApp) message, the link https://rootify-one.pages.dev/.", "Tap the link inside the app itself (without choosing \"open in Chrome\").", "Look at the top of the page and tap \"How to\".", "Close the bar with ✕ and reload."]
+      },
+      esperado: { pt: "Aparece a faixa \"Abra no navegador (Chrome/Safari)\"; \"Como fazer\" mostra o passo a passo (os três pontinhos) e, no Android, um botão para abrir no Chrome. Fechada, não volta ao recarregar.",
+                  en: "The bar \"Open in the browser (Chrome/Safari)\" shows; \"How to\" shows the steps (the three dots) and, on Android, a button to open in Chrome. Once closed, it doesn't come back on reload." },
+      anotar: { pt: "Qual app (Instagram, WhatsApp…), Android ou iPhone; se a faixa não apareceu; print.", en: "Which app (Instagram, WhatsApp…), Android or iPhone; whether the bar didn't show; screenshot." }
+    },
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Versão mínima do navegador", en: "Minimum browser version" },
+      objetivo: { pt: "Ver o aviso de navegador desatualizado, controlado pelo RootifyONE.", en: "See the outdated browser warning, controlled from RootifyONE." },
+      onde: { pt: "RootifyONE → Controle dos apps → Comportamentos → Global → compat.minimos.", en: "RootifyONE → App control → Behaviours → Global → compat.minimos." },
+      passos: {
+        pt: ["No RootifyONE, abra Controle dos apps → Comportamentos, no grupo Global, e toque em compat.minimos.", "Anote (ou copie) o valor que está lá antes de mexer.", "Troque o número do navegador que você usa (ex.: chrome) para 999 e salve.", "Publique, espere uns 5 minutos e abra o RootifyONE numa aba anônima.", "Abra também ⚙ Configurações e veja o quadro \"O seu aparelho\" no topo.", "Volte o valor de compat.minimos para o que estava e publique de novo."],
+        en: ["In RootifyONE, open App control → Behaviours, in the Global group, and tap compat.minimos.", "Note (or copy) the current value before changing it.", "Change the number for the browser you use (e.g. chrome) to 999 and save.", "Publish, wait about 5 minutes and open RootifyONE in a private tab.", "Also open ⚙ Settings and look at the \"Your device\" box at the top.", "Put compat.minimos back to its old value and publish again."]
+      },
+      esperado: { pt: "Aparece uma faixa fechável dizendo que o navegador está desatualizado (o app continua funcionando), e o quadro \"O seu aparelho\" mostra o navegador abaixo do recomendado. Com o valor de volta, a faixa não aparece mais.",
+                  en: "A closable bar says the browser is outdated (the app keeps working), and the \"Your device\" box shows the browser below the recommended one. With the value back, the bar no longer shows." },
+      anotar: { pt: "O valor que você usou, quanto tempo esperou, se a faixa apareceu; print.", en: "The value you used, how long you waited, whether the bar showed; screenshot." }
+    },
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Navegador antigo demais (opcional)", en: "Browser too old (optional)" },
+      objetivo: { pt: "Ver a tela que impede entrar quando falta algo essencial.", en: "See the screen that blocks entry when something essential is missing." },
+      onde: { pt: "Só se você tiver um aparelho bem antigo (celular ou tablet de muitos anos atrás, sem atualização).", en: "Only if you have a very old device (phone or tablet from many years ago, not updated)." },
+      passos: {
+        pt: ["No aparelho antigo, abra o navegador que vem nele.", "Abra https://rootify-one.pages.dev/.", "Leia a tela que aparecer."],
+        en: ["On the old device, open its built-in browser.", "Open https://rootify-one.pages.dev/.", "Read the screen that shows."]
+      },
+      esperado: { pt: "Se faltar o essencial, aparece a tela cheia \"Este navegador é antigo demais\", com o passo a passo para atualizar ou trocar de navegador e onde o app funciona. Se o aparelho ainda der conta, o app abre (talvez com a faixa de desatualizado) — também está certo.",
+                  en: "If something essential is missing, the full screen \"This browser is too old\" shows, with steps to update or switch browsers and where the app works. If the device can still cope, the app opens (maybe with the outdated bar) — that's also correct." },
+      anotar: { pt: "Marca, modelo, versão do sistema e do navegador; o que apareceu (tela em branco é problema); print ou foto da tela.", en: "Brand, model, OS and browser version; what showed (a blank screen is a problem); screenshot or photo of the screen." }
+    }
+  ]
+},
+{
+  id: "feedback", ic: "💬",
+  nome: { pt: "Feedback dos usuários", en: "User feedback" },
+  nota: { pt: "Importante: a Central de feedback e o envio para o banco só funcionam depois que o dono rodar no Supabase o arquivo entrega/solverone-app/supabase/2026-10-10-feedback-usuarios.sql (do repositório do RootifyONE). Antes disso, o envio fica guardado no aparelho e a Central avisa qual SQL falta. Anexos: até 5 por envio, 10 MB cada.",
+          en: "Important: the Feedback center and sending to the database only work after the owner runs the file entrega/solverone-app/supabase/2026-10-10-feedback-usuarios.sql (from the RootifyONE repository) in Supabase. Before that, sends are kept on the device and the center says which SQL is missing. Attachments: up to 5 per send, 10 MB each." },
+  cartoes: [
+    {
+      apps: ["rootify"],
+      titulo: { pt: "💬 em toda tela: enviar opinião e problema com print e vídeo", en: "💬 on every screen: send feedback and a problem with screenshot and video" },
+      objetivo: { pt: "Ver que dá para mandar opinião de qualquer lugar e que o formulário sabe em que tela você estava.", en: "Check you can send feedback from anywhere and the form knows which screen you were on." },
+      onde: { pt: "RootifyONE: balão do AssistONE, pé do menu ☰ e ⚙ Configurações → Ajuda e opinião.", en: "RootifyONE: AssistONE bubble, bottom of the ☰ menu and ⚙ Settings → Help and feedback." },
+      passos: {
+        pt: ["Numa tela qualquer (ex.: Clientes), abra o balão do AssistONE e toque em 💬.", "Confira no topo do formulário o \"Sobre:\" com a tela onde você estava. Feche.", "Repita pelo pé do menu ☰ e por ⚙ Configurações → Ajuda e opinião.", "Envie uma opinião: escolha 💡 Sugestão, dê 4 estrelas, escreva uma frase e envie.", "Envie um problema: escolha 🐞 Deu erro, escreva, anexe um print da tela e um vídeo curto (até 10 MB) e envie.", "Tente enviar sem escrever nada, sem nota e sem anexo.", "Abra ⚙ → Ajuda e opinião → 📋 Meus envios."],
+        en: ["On any screen (e.g. Clients), open the AssistONE bubble and tap 💬.", "Check the \"About:\" at the top of the form shows the screen you were on. Close it.", "Repeat from the bottom of the ☰ menu and from ⚙ Settings → Help and feedback.", "Send feedback: choose 💡 Suggestion, give 4 stars, write a sentence and send.", "Send a problem: choose 🐞 Something broke, write, attach a screenshot and a short video (up to 10 MB) and send.", "Try to send with no text, no rating and no attachment.", "Open ⚙ → Help and feedback → 📋 What I sent."]
+      },
+      esperado: { pt: "Os três caminhos abrem o mesmo formulário com a tela certa. Há um aviso curto de privacidade. O envio mostra a pílula \"Enviando sua opinião\" e depois \"Obrigado!\" com o número. Sem nada preenchido, ele pede algo antes de enviar. \"Meus envios\" lista o que você mandou e deixa apagar.",
+                  en: "All three paths open the same form with the right screen. There's a short privacy note. Sending shows the \"Sending your feedback\" pill and then \"Thank you!\" with the number. With nothing filled in, it asks for something before sending. \"What I sent\" lists what you sent and lets you delete it." },
+      anotar: { pt: "Caminho que não abriu; tela errada no \"Sobre:\"; anexo que não subiu (tamanho e tipo); mensagem de erro; print.", en: "Path that didn't open; wrong screen in \"About:\"; attachment that didn't upload (size and type); error message; screenshot." }
+    },
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Sem internet: fica na fila e envia quando voltar", en: "No internet: queued and sent when back" },
+      objetivo: { pt: "Ver que nenhuma opinião se perde sem conexão.", en: "Check no feedback is lost without a connection." },
+      onde: { pt: "RootifyONE no celular (modo avião) ou no computador (Wi-Fi desligado).", en: "RootifyONE on a phone (airplane mode) or computer (Wi-Fi off)." },
+      passos: {
+        pt: ["Abra o RootifyONE com internet.", "Ligue o modo avião (ou desligue o Wi-Fi).", "Abra 💬, escreva uma opinião e envie.", "Religue a internet e espere alguns segundos (ou reabra o app).", "Abra ⚙ → Ajuda e opinião → 📋 Meus envios."],
+        en: ["Open RootifyONE with internet.", "Turn on airplane mode (or turn Wi-Fi off).", "Open 💬, write feedback and send.", "Turn internet back on and wait a few seconds (or reopen the app).", "Open ⚙ → Help and feedback → 📋 What I sent."]
+      },
+      esperado: { pt: "Sem internet aparece \"Guardado no aparelho… mandamos sozinho quando a conexão voltar\". Com a internet de volta, ele envia sozinho, uma vez só (sem duplicar).",
+                  en: "Without internet it says \"Saved on this device… we'll send it on our own when the connection is back\". With internet back, it sends on its own, only once (no duplicates)." },
+      anotar: { pt: "Se a opinião sumiu ou chegou duplicada; quanto tempo levou para enviar.", en: "Whether the feedback vanished or arrived twice; how long it took to send." }
+    },
+    {
+      apps: [],
+      titulo: { pt: "Pergunta do dia", en: "Question of the day" },
+      objetivo: { pt: "Ver o balão \"Está gostando do <app> hoje?\" e suas regras.", en: "See the \"Are you enjoying <app> today?\" bubble and its rules." },
+      onde: { pt: "Num app já atualizado (não aparece no RootifyONE, que é interno). Antes, ligue a pergunta em RootifyONE → Clientes → Central de feedback → Perguntas do dia (a padrão vem desligada).", en: "In an updated app (it never shows in RootifyONE, which is internal). First, turn the question on in RootifyONE → Clients → Feedback center → Questions of the day (the default comes off)." },
+      passos: {
+        pt: ["Na Central de feedback, ligue a pergunta do dia do app que vai testar.", "Abra o app num aparelho que já tenha usado o app antes (na primeira visita ela nunca aparece).", "Use o app normalmente por uns 2 minutos, sem deixar janela aberta.", "Quando o balão aparecer, toque em 👍 Sim.", "Recarregue o app e use mais 2 minutos.", "Em outro dia, quando aparecer, toque em \"Agora não\"."],
+        en: ["In the Feedback center, turn on the question of the day for the app you'll test.", "Open the app on a device that has used it before (it never shows on the first visit).", "Use the app normally for about 2 minutes, without leaving a window open.", "When the bubble shows, tap 👍 Yes.", "Reload the app and use it 2 more minutes.", "On another day, when it shows, tap \"Not now\"."]
+      },
+      esperado: { pt: "O balão é pequeno (👍 Sim / 👎 Não / Agora não), não trava a tela e não aparece ao abrir. 👍 abre o formulário com \"Gostei\" marcado e já conta como resposta rápida. Aparece no máximo uma vez por dia (recarregar não mostra de novo). \"Agora não\" três vezes seguidas faz esperar 7 dias.",
+                  en: "The bubble is small (👍 Yes / 👎 No / Not now), doesn't lock the screen and doesn't show on opening. 👍 opens the form with \"I liked it\" selected and already counts as a quick answer. It shows at most once a day (reloading doesn't show it again). \"Not now\" three times in a row makes it wait 7 days." },
+      anotar: { pt: "App e versão; se apareceu na primeira visita, ao abrir ou duas vezes no mesmo dia; print.", en: "App and version; whether it showed on the first visit, on opening, or twice the same day; screenshot." }
+    },
+    {
+      apps: ["rootify"],
+      titulo: { pt: "Central de feedback: ver, responder e virar chamado", en: "Feedback center: view, reply and turn into a ticket" },
+      objetivo: { pt: "Ver que o que as pessoas mandam chega organizado e dá para responder.", en: "Check that what people send arrives organized and can be answered." },
+      onde: { pt: "RootifyONE → Clientes → Central de feedback (só depois do SQL rodado).", en: "RootifyONE → Clients → Feedback center (only after the SQL has been run)." },
+      passos: {
+        pt: ["Abra Clientes → Central de feedback. Se pedir, toque em \"Entrar no Supabase\" com a conta da equipe.", "Veja a lista: devem estar os envios dos cartões acima.", "Use o filtro de app.", "Abra o envio com print e vídeo: confira tela, função, aparelho, trilha e os anexos (abra o print e assista ao vídeo).", "Toque em \"Mudar situação\" e escolha outra situação.", "Escreva uma resposta à pessoa e toque em \"Responder\".", "Toque em \"Virar chamado de suporte\" e depois abra o Suporte.", "Veja o painel (total, nota média, 👍/👎)."],
+        en: ["Open Clients → Feedback center. If asked, tap \"Sign in to Supabase\" with the team account.", "Look at the list: the sends from the cards above should be there.", "Use the app filter.", "Open the send with screenshot and video: check screen, feature, device, trail and the attachments (open the screenshot and play the video).", "Tap \"Change status\" and pick another status.", "Write a reply to the person and tap \"Reply\".", "Tap \"Turn into support ticket\" and then open Support.", "Look at the dashboard (total, average rating, 👍/👎)."]
+      },
+      esperado: { pt: "A lista mostra app, tipo, texto e tela; abrir um envio novo marca como lido; os anexos abrem na própria ficha; a situação e a resposta ficam salvas; o chamado aparece no Suporte e o feedback guarda o número dele. Sem o SQL, a Central e o painel avisam qual SQL falta rodar.",
+                  en: "The list shows app, type, text and screen; opening a new send marks it read; attachments open in the record itself; status and reply are saved; the ticket shows in Support and the feedback keeps its number. Without the SQL, the center and dashboard say which SQL is missing." },
+      anotar: { pt: "Envio que não chegou (número #); anexo que não abriu; mensagem de erro; print.", en: "Send that didn't arrive (# number); attachment that didn't open; error message; screenshot." }
+    }
+  ]
+}
+];
+
+/* ====== tela (não precisa mexer daqui para baixo) ====== */
+const TXT = {
+  titulo: { pt: "Roteiros de teste — módulo comum 1.9.0", en: "Test scripts — common module 1.9.0" },
+  subtitulo: { pt: "Abra um cartão e siga os passos. Funciona no celular e no computador.", en: "Open a card and follow the steps. Works on phone and computer." },
+  objetivo: { pt: "Objetivo", en: "Goal" }, onde: { pt: "Onde testar", en: "Where to test" },
+  passos: { pt: "Passo a passo", en: "Steps" }, esperado: { pt: "Resultado esperado", en: "Expected result" },
+  anotar: { pt: "Se der errado, anote", en: "If it goes wrong, note down" },
+  vale: { pt: "Já dá para testar em", en: "Can be tested in" }, aguarda: { pt: "Aguardando", en: "Waiting for" },
+  voltar: { pt: "← Voltar ao FeatureTesting", en: "← Back to FeatureTesting" }
+};
+let lang = 'pt';
+try { lang = localStorage.getItem('ft:idioma') || ''; } catch (e) { lang = ''; }
+if (lang !== 'pt' && lang !== 'en') lang = /^pt/i.test(navigator.language || 'pt') ? 'pt' : 'en';
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const t = o => esc(o[lang]);
+
+function desenhar() {
+  document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+  document.title = TXT.titulo[lang];
+  document.getElementById('titulo').textContent = TXT.titulo[lang];
+  document.getElementById('subtitulo').textContent = TXT.subtitulo[lang];
+  document.getElementById('voltar').textContent = TXT.voltar[lang];
+  const barra = document.getElementById('barra');
+  barra.innerHTML = TEMAS.map(g => '<a href="#' + g.id + '">' + g.ic + ' ' + t(g.nome) + '</a>').join('') +
+    '<button type="button" data-l="pt" aria-pressed="' + (lang === 'pt') + '">PT</button>' +
+    '<button type="button" data-l="en" aria-pressed="' + (lang === 'en') + '">EN</button>';
+  barra.querySelectorAll('button').forEach(b => b.onclick = () => {
+    lang = b.dataset.l;
+    try { localStorage.setItem('ft:idioma', lang); } catch (e) {}
+    desenhar();
+  });
+  document.getElementById('main').innerHTML = TEMAS.map(g =>
+    '<section class="tema" id="' + g.id + '"><h2>' + g.ic + ' ' + t(g.nome) + '</h2>' +
+    (g.nota ? '<p class="nota">⚠️ ' + t(g.nota) + '</p>' : '') +
+    g.cartoes.map(c =>
+      '<details class="cartao"><summary>' + t(c.titulo) + '</summary><div class="corpo">' +
+      '<h3>' + t(TXT.vale) + '</h3><div class="apps">' +
+        (c.apps.length ? c.apps.map(a => '<span>' + esc(APPS[a].nome + ' ' + APPS[a].versao) + '</span>').join('')
+                       : '<span class="espera">' + t(TXT.aguarda) + ': ' + t(AGUARDANDO) + '</span>') + '</div>' +
+      '<h3>' + t(TXT.objetivo) + '</h3><p>' + t(c.objetivo) + '</p>' +
+      '<h3>' + t(TXT.onde) + '</h3><p>' + t(c.onde) + '</p>' +
+      '<h3>' + t(TXT.passos) + '</h3><ol>' + c.passos[lang].map(p => '<li>' + esc(p) + '</li>').join('') + '</ol>' +
+      '<h3>' + t(TXT.esperado) + '</h3><p>' + t(c.esperado) + '</p>' +
+      '<h3>' + t(TXT.anotar) + '</h3><p>' + t(c.anotar) + '</p>' +
+      '</div></details>'
+    ).join('') + '</section>'
+  ).join('');
+  if (location.hash) { const alvo = document.getElementById(location.hash.slice(1)); if (alvo) alvo.scrollIntoView(); }
+}
+desenhar();
+</script>
+</body>
+</html>
