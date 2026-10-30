@@ -1,0 +1,13 @@
+{
+  "name": "Dança na Sala",
+  "short_name": "Dança",
+  "description": "A TV toca a música do YouTube e mostra quem está dançando. / Living Room Dance.",
+  "start_url": "danca-na-sala.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
+  "lang": "pt-BR",
+  "icons": [{ "src": "danca-na-sala-icone.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }]
+}
