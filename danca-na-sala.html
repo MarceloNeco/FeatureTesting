@@ -670,7 +670,8 @@ desenharHist();
 try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 
 /* Atalho: ?tv abre direto a tela de escolha com foco no botão da TV (para apertar OK no controle). */
-if (/[?&]tv\b/.test(location.search)) $('btTV').focus();
+if (/[?&]tv=auto\b/.test(location.search)) iniciarTV();   // aberto pelo app da LG: já entra como TV
+else if (/[?&]tv\b/.test(location.search)) $('btTV').focus();
 })();
 </script>
 </body>
