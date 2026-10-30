@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Dança na Sala — FeatureTesting</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💃</text></svg>">
+<link rel="manifest" href="danca-na-sala.webmanifest">
+<link rel="apple-touch-icon" href="danca-na-sala-icone.png">
+<meta name="theme-color" content="#0f1115">
+<meta name="mobile-web-app-capable" content="yes">
 <!--
   Dança na Sala / Living Room Dance — experimento do FeatureTesting (SolverONE)
 
@@ -185,7 +189,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '0.3.0', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '0.4.0', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -663,6 +667,7 @@ $('btAnterior').onclick = function () { enviar({ t: 'cmd', acao: 'anterior' }); 
 document.querySelectorAll('button.fx').forEach(function (b) { b.onclick = function () { document.querySelectorAll('button.fx').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); enviar({ t: 'cmd', acao: 'efeitos', modo: b.getAttribute('data-fx') }); }; });
 window.addEventListener('pagehide', function () { if (cel.pc) enviar({ t: 'sair', id: cel.id }); });
 desenharHist();
+try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 
 /* Atalho: ?tv abre direto a tela de escolha com foco no botão da TV (para apertar OK no controle). */
 if (/[?&]tv\b/.test(location.search)) $('btTV').focus();
