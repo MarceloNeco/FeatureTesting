@@ -1,0 +1,13 @@
+{
+  "id": "br.com.solverone.dancanasala",
+  "version": "0.4.0",
+  "vendor": "SolverONE",
+  "type": "web",
+  "main": "index.html",
+  "title": "Dança na Sala",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "iconColor": "#ff2bd6",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": false
+}
