@@ -79,6 +79,7 @@ a{color:var(--accent)}
 .status{font-size:.85rem;color:var(--muted)}
 .status.ok{color:#7ee2a0}
 button.fx.ativo{border-color:var(--accent);background:#1a2c4e}
+.hist button.atual{border-color:#ffd66e;color:#ffd66e}
 .hist button{text-align:left;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;width:100%}
 footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 </style>
@@ -152,7 +153,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
     <div class="placar" id="placar"></div>
 
     <h2 style="font-size:1.05rem;margin-top:8px" data-t="🎵 Música|🎵 Song"></h2>
-    <input id="link" inputmode="url" data-ph="Cole aqui o link do YouTube|Paste the YouTube link here">
+    <input id="link" inputmode="url" data-ph="Cole o link de um vídeo ou de uma playlist do YouTube|Paste a YouTube video or playlist link">
     <div class="row">
       <button id="btTocarLink" data-t="▶️ Tocar na TV|▶️ Play on TV"></button>
       <button class="sec" id="btBuscar" data-t="🔎 Procurar no YouTube|🔎 Search YouTube"></button>
@@ -161,6 +162,11 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
       <button class="sec" id="btPausa" data-t="⏯️ Pausar / continuar|⏯️ Pause / resume"></button>
       <button class="sec" id="btReiniciar" data-t="⏮️ Do início|⏮️ From the start"></button>
     </div>
+    <div class="row" id="plNav" style="display:none">
+      <button class="sec" id="btAnterior" data-t="⏪ Anterior|⏪ Previous"></button>
+      <button class="sec" id="btProxima" data-t="⏩ Próxima|⏩ Next"></button>
+    </div>
+    <div class="hist col" id="plLista" style="gap:6px;margin-top:0;display:none"></div>
     <h2 style="font-size:1.05rem;margin-top:8px" data-t="✨ Efeitos na TV|✨ TV effects"></h2>
     <div class="row">
       <button class="sec fx" data-fx="off" data-t="Sem|Off"></button>
@@ -179,7 +185,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '0.2.0', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '0.3.0', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -218,6 +224,7 @@ function enviar(m) { if (canal) canal.send({ type: 'broadcast', event: 'm', payl
 function idNovo() { return Math.random().toString(36).slice(2, 10); }
 
 /* ---------- YouTube: link → id ---------- */
+function idPlaylist(s) { var m = (s || '').match(/[?&]list=([A-Za-z0-9_-]{10,})/); return m ? m[1] : ''; }
 function idYouTube(s) {
   s = (s || '').trim();
   var m = s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/);
@@ -229,7 +236,7 @@ function idYouTube(s) {
 /* =====================================================================
    TV
    ===================================================================== */
-var tv = { pcs: {}, tiles: {}, pontos: {}, energia: {}, quente: {}, tocando: false, player: null, titulo: '', fimMostrado: false };
+var tv = { pcs: {}, tiles: {}, pontos: {}, energia: {}, quente: {}, tocando: false, player: null, titulo: '', fimMostrado: false, videoAtual: '', lista: [], indice: -1, podioAte: 0, timerPodio: 0 };
 
 function iniciarTV() {
   var letras = 'ABCDEFGHJKLMNPRSTUVWXYZ', c = '';
@@ -250,9 +257,11 @@ function iniciarTV() {
   });
   carregarYouTube();
   fxIniciar();
+  window.DancaDebug = tv;   // só para testes automáticos (nada de segredo aqui)
 }
 
 function tvReceber(m) {
+  tv.ultimaMsg = m.t + (m.acao ? ':' + m.acao : '');
   if (m.t === 'join') { enviar({ t: 'tv' }); return; }
   if (m.t === 'offer') { tvNovoJogador(m); return; }
   if (m.t === 'ice' && m.to === 'tv' && tv.pcs[m.id]) { try { tv.pcs[m.id].addIceCandidate(m.c); } catch (e) {} return; }
@@ -304,7 +313,7 @@ function tvEnergia(id, e) {
 function tvEstado() {
   var p = {};
   Object.keys(tv.pontos).forEach(function (k) { p[k] = { nome: tv.pontos[k].nome, pontos: Math.round(tv.pontos[k].pontos) }; });
-  enviar({ t: 'estado', tocando: tv.tocando, titulo: tv.titulo, pontos: p });
+  enviar({ t: 'estado', tocando: tv.tocando, titulo: tv.titulo, pontos: p, lista: tv.lista, indice: tv.indice, video: tv.videoAtual });
 }
 
 /* --- YouTube na TV --- */
@@ -312,33 +321,69 @@ function carregarYouTube() {
   window.onYouTubeIframeAPIReady = function () {
     tv.player = new YT.Player('yt', {
       width: '100%', height: '100%', playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1, playsinline: 1, origin: location.origin },
-      events: { onStateChange: tvYouTubeEstado }
+      events: { onReady: function () { if (tv.pendente) { var m = tv.pendente; tv.pendente = null; tvComando(m); } }, onStateChange: tvYouTubeEstado, onError: tvYouTubeErro }
     });
   };
   var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
 }
 function tvYouTubeEstado(ev) {
+  var p = tv.player;
   tv.tocando = (ev.data === YT.PlayerState.PLAYING);
-  if (ev.data === YT.PlayerState.ENDED && !tv.fimMostrado) tvFim();
+  try { tv.lista = p.getPlaylist() || []; tv.indice = p.getPlaylistIndex(); } catch (e) { tv.lista = []; tv.indice = -1; }
+  if (ev.data === YT.PlayerState.PLAYING) {
+    var d = p.getVideoData ? p.getVideoData() : null, id = d && d.video_id;
+    if (id && id !== tv.videoAtual) {
+      // música nova (numa playlist o YouTube emenda sozinho): zera o placar e, se o pódio
+      // acabou de aparecer, segura 8 s para todo mundo ver antes de continuar
+      tv.videoAtual = id; tv.titulo = (d.title || id);
+      $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '🎵 ' + tv.titulo;
+      tvZerar();
+      if (Date.now() < tv.podioAte) {
+        p.pauseVideo(); $('tvFim').classList.add('ativa');
+        clearTimeout(tv.timerPodio);
+        tv.timerPodio = setTimeout(function () { $('tvFim').classList.remove('ativa'); tv.fimMostrado = false; p.playVideo(); }, tv.podioAte - Date.now());
+      }
+    }
+  }
+  if (ev.data === YT.PlayerState.ENDED && !tv.fimMostrado) { tvFim(); tv.podioAte = Date.now() + 8000; }
+}
+/* Erros do tocador: 2 = link inválido; 5 = problema no tocador; 100 = vídeo não existe/privado;
+   101 e 150 = o dono não deixa tocar fora do YouTube. Numa playlist, pula para a próxima. */
+function tvYouTubeErro(ev) {
+  var c = ev.data, msg = (c === 101 || c === 150) ? T('Esse clipe não deixa tocar fora do YouTube. Pulando…', 'That clip cannot play outside YouTube. Skipping…')
+    : (c === 100) ? T('Vídeo indisponível ou privado.', 'Video unavailable or private.')
+    : (c === 2) ? T('Playlist privada ou link inválido. No YouTube, mude a playlist para “Não listada”.', 'Private playlist or bad link. On YouTube, set the playlist to “Unlisted”.')
+    : T('Erro do YouTube ', 'YouTube error ') + c;
+  tv.titulo = msg; $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '⚠️ ' + msg;
+  try { if (tv.player.getPlaylist && (tv.player.getPlaylist() || []).length > 1) setTimeout(function () { tv.player.nextVideo(); }, 1500); } catch (e) {}
+}
+function tvZerar() {
+  Object.keys(tv.pontos).forEach(function (k) { tv.pontos[k].pontos = 0; tv.tiles[k] && (tv.tiles[k].querySelector('.pontos').textContent = '0'); });
 }
 function tvComando(m) {
   var p = tv.player;
-  if (!p || !p.loadVideoById) return;
+  tv.ultimoCmd = m.acao + (p && p.loadVideoById ? '' : ' (tocador ainda não pronto)');
+  if (!p || !p.loadVideoById) { if (m.acao === 'carregar' || m.acao === 'playlist') tv.pendente = m; return; }   // chegou antes do tocador: toca assim que ele ficar pronto
+  function comecar() { tv.fimMostrado = false; tv.podioAte = 0; clearTimeout(tv.timerPodio); $('tvFim').classList.remove('ativa'); $('tvCapa').style.display = 'none'; tvZerar(); }
   if (m.acao === 'carregar' && m.video) {
-    tv.titulo = m.titulo || m.video;
-    Object.keys(tv.pontos).forEach(function (k) { tv.pontos[k].pontos = 0; tv.tiles[k] && (tv.tiles[k].querySelector('.pontos').textContent = '0'); });
-    tv.fimMostrado = false; $('tvFim').classList.remove('ativa');
-    $('tvCapa').style.display = 'none';
+    comecar(); tv.titulo = m.titulo || m.video; tv.videoAtual = m.video; tv.lista = []; tv.indice = -1;
     $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '🎵 ' + tv.titulo;
     p.loadVideoById(m.video); p.playVideo();
+  } else if (m.acao === 'playlist' && m.lista) {
+    comecar(); tv.videoAtual = ''; tv.titulo = T('Playlist…', 'Playlist…');
+    p.loadPlaylist({ list: m.lista, listType: 'playlist', index: m.indice || 0 }); p.playVideo();
+  } else if (m.acao === 'indice' && tv.lista.length) {
+    comecar(); p.playVideoAt(+m.i || 0);
+  } else if (m.acao === 'proxima' && tv.lista.length) {
+    comecar(); p.nextVideo();
+  } else if (m.acao === 'anterior' && tv.lista.length) {
+    comecar(); p.previousVideo();
   } else if (m.acao === 'efeitos') {
     fxModo(m.modo);
   } else if (m.acao === 'pausa') {
     if (p.getPlayerState && p.getPlayerState() === YT.PlayerState.PLAYING) p.pauseVideo(); else p.playVideo();
   } else if (m.acao === 'reiniciar') {
-    tv.fimMostrado = false; $('tvFim').classList.remove('ativa');
-    Object.keys(tv.pontos).forEach(function (k) { tv.pontos[k].pontos = 0; tv.tiles[k] && (tv.tiles[k].querySelector('.pontos').textContent = '0'); });
-    p.seekTo(0, true); p.playVideo();
+    comecar(); p.seekTo(0, true); p.playVideo();
   }
 }
 function tvFim() {
@@ -502,8 +547,44 @@ function medirEnergia() {
   if (agora - ultimoEnvio > 400) { ultimoEnvio = agora; enviar({ t: 'energia', id: cel.id, e: Math.round(suave) }); }
 }
 
+/* Lista da playlist no celular: a TV manda os ids; o nome de cada música vem do YouTube (oEmbed,
+   sem chave) e fica guardado no celular para não buscar de novo. */
+var titulos = {}, buscandoTitulo = false;
+try { titulos = JSON.parse(localStorage.getItem('danca:titulos') || '{}'); } catch (e) {}
+function buscarTitulos(ids) {
+  if (buscandoTitulo) return;
+  var falta = ids.filter(function (id) { return !titulos[id]; });
+  if (!falta.length) return;
+  buscandoTitulo = true;
+  fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=' + falta[0] + '&format=json')
+    .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+    .then(function (j) {
+      titulos[falta[0]] = (j && j.title) || falta[0];
+      try { localStorage.setItem('danca:titulos', JSON.stringify(titulos)); } catch (e) {}
+      buscandoTitulo = false; desenharLista(cel.ultimoEstado);
+      if (falta.length > 1) setTimeout(function () { buscarTitulos(ids); }, 150);
+    });
+}
+var listaDesenhada = '';
+function desenharLista(m) {
+  var ids = (m && m.lista) || [], d = $('plLista'), nav = $('plNav');
+  if (!ids.length) { d.style.display = 'none'; nav.style.display = 'none'; listaDesenhada = ''; return; }
+  d.style.display = ''; nav.style.display = '';
+  var chave = ids.join(',') + '|' + m.indice + '|' + Object.keys(titulos).length;
+  if (chave === listaDesenhada) return;
+  listaDesenhada = chave; d.innerHTML = '';
+  var t = document.createElement('div'); t.className = 'muted'; t.textContent = T('Playlist (toque para tocar)', 'Playlist (tap to play)'); d.appendChild(t);
+  ids.forEach(function (id, i) {
+    var b = document.createElement('button'); b.className = 'sec' + (i === m.indice ? ' atual' : '');
+    b.textContent = (i === m.indice ? '▶️ ' : (i + 1) + '. ') + (titulos[id] || '…');
+    b.onclick = function () { enviar({ t: 'cmd', acao: 'indice', i: i }); };
+    d.appendChild(b);
+  });
+  buscarTitulos(ids);
+}
 function mostrarEstado(m) {
   cel.ultimoEstado = m;
+  desenharLista(m);
   var p = $('placar'), ks = Object.keys(m.pontos || {}).sort(function (a, b) { return m.pontos[b].pontos - m.pontos[a].pontos; });
   p.innerHTML = ks.map(function (k) { return '<div><span>' + (k === cel.id ? '⭐ ' : '') + escapar(m.pontos[k].nome) + '</span><b>' + m.pontos[k].pontos + '</b></div>'; }).join('');
   if (m.tocando) status('🎵 ' + escapar(m.titulo || ''), 'ok');
@@ -518,7 +599,10 @@ function pedirWakeLock() {
 
 /* --- Música --- */
 function tocarLink(link) {
-  var id = idYouTube(link || $('link').value);
+  link = link || $('link').value;
+  var pl = idPlaylist(link);
+  if (pl) { enviar({ t: 'cmd', acao: 'playlist', lista: pl }); guardarHist('list:' + pl, T('Playlist', 'Playlist') + ' ' + pl.slice(0, 6) + '…'); $('link').value = ''; status(T('Mandei a playlist para a TV…', 'Sent the playlist to the TV…'), 'ok'); return; }
+  var id = idYouTube(link);
   if (!id) { status(T('Não achei um link do YouTube aí.', 'That is not a YouTube link.'), 'erro'); return; }
   $('btTocarLink').disabled = true;
   fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=' + id + '&format=json')
@@ -542,7 +626,7 @@ function desenharHist() {
   var h = lerHist(), d = $('hist'); d.innerHTML = '';
   if (!h.length) return;
   var t = document.createElement('div'); t.className = 'muted'; t.textContent = T('Últimas músicas', 'Recent songs'); d.appendChild(t);
-  h.forEach(function (x) { var b = document.createElement('button'); b.className = 'sec'; b.textContent = '🎵 ' + x.titulo; b.onclick = function () { tocarLink(x.id); }; d.appendChild(b); });
+  h.forEach(function (x) { var b = document.createElement('button'); b.className = 'sec'; var pl = x.id.indexOf('list:') === 0; b.textContent = (pl ? '📜 ' : '🎵 ') + x.titulo; b.onclick = function () { tocarLink(pl ? 'https://www.youtube.com/playlist?list=' + x.id.slice(5) : x.id); }; d.appendChild(b); });
 }
 
 function sair() {
@@ -568,6 +652,8 @@ $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') toca
 $('btBuscar').onclick = function () { window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(T('just dance kids', 'just dance kids')), '_blank'); };
 $('btPausa').onclick = function () { enviar({ t: 'cmd', acao: 'pausa' }); };
 $('btReiniciar').onclick = function () { enviar({ t: 'cmd', acao: 'reiniciar' }); };
+$('btProxima').onclick = function () { enviar({ t: 'cmd', acao: 'proxima' }); };
+$('btAnterior').onclick = function () { enviar({ t: 'cmd', acao: 'anterior' }); };
 document.querySelectorAll('button.fx').forEach(function (b) { b.onclick = function () { document.querySelectorAll('button.fx').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); enviar({ t: 'cmd', acao: 'efeitos', modo: b.getAttribute('data-fx') }); }; });
 window.addEventListener('pagehide', function () { if (cel.pc) enviar({ t: 'sair', id: cel.id }); });
 desenharHist();
