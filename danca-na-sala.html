@@ -42,12 +42,16 @@ a{color:var(--accent)}
 /* ---------- TV ---------- */
 #tv{display:none;position:fixed;inset:0;background:#000;color:#fff}
 #tv.ativa{display:block}
-#tvPalco{position:absolute;inset:0;display:grid;grid-template-columns:1fr 34vw;grid-template-rows:1fr}
-#tvVideo{position:relative;background:#000}
+#tvPalco{position:absolute;inset:0}
+#tvVideo{position:absolute;inset:0;background:#000}
 #tvVideo iframe,#tvVideo #yt{position:absolute;inset:0;width:100%;height:100%;border:0}
-#tvJogadores{display:flex;flex-direction:column;gap:2vh;padding:2vh;overflow:hidden;background:#07080a}
-.tile{position:relative;flex:1;min-height:0;border-radius:1.5vh;overflow:hidden;background:#111;border:.4vh solid #222}
-.tile video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#tvJogadores{position:absolute;right:2vh;top:2vh;bottom:9vh;width:30vw;display:flex;flex-direction:column;justify-content:center;gap:2.5vh;z-index:4;pointer-events:none}
+.tile{position:relative;flex:1;min-height:0;max-height:46vh;border-radius:2vh;overflow:hidden;background:#000;border:.5vh solid #fff;box-shadow:0 0 3vh .5vh var(--neon,#ff2bd6);transition:box-shadow .25s}
+.tile video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);filter:saturate(1.5) contrast(1.1) hue-rotate(var(--hue,0deg))}
+.tile .combo{position:absolute;left:0;right:0;top:1.5vh;text-align:center;font-size:4vh;font-weight:900;color:#fff;text-shadow:0 0 2vh var(--neon,#ff2bd6),0 0 .5vh #000;opacity:0;transition:opacity .3s}
+.tile.quente .combo{opacity:1}
+#tvFx{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+#tvFlash{position:absolute;inset:0;z-index:6;pointer-events:none;background:#fff;opacity:0;transition:opacity .18s}
 .tile .nome{position:absolute;left:0;right:0;bottom:0;padding:1.2vh 1.6vh;background:linear-gradient(transparent,rgba(0,0,0,.85));font-size:3vh;font-weight:800;display:flex;justify-content:space-between;align-items:flex-end}
 .tile .pontos{font-size:4.5vh;color:#ffd66e}
 .tile .barra{position:absolute;left:0;top:0;bottom:0;width:1.2vh;background:#222}
@@ -57,7 +61,7 @@ a{color:var(--accent)}
 #tvCapa .codigo{font-size:18vh;font-weight:900;letter-spacing:2vh;line-height:1;color:#ffd66e}
 #tvCapa p{font-size:3vh;color:#cfd3d8;max-width:80vw;line-height:1.4}
 #tvCapa .url{font-size:3.2vh;color:#fff;font-weight:700;background:#1a1d24;padding:1.5vh 3vh;border-radius:2vh}
-#tvCanto{position:absolute;right:calc(34vw + 2vh);top:2vh;z-index:5;font-size:2.6vh;font-weight:800;background:rgba(0,0,0,.6);padding:1vh 2vh;border-radius:1.5vh;color:#ffd66e}
+#tvCanto{position:absolute;right:calc(30vw + 4vh);top:2vh;z-index:5;font-size:2.6vh;font-weight:800;background:rgba(0,0,0,.6);padding:1vh 2vh;border-radius:1.5vh;color:#ffd66e}
 #tvTitulo{position:absolute;left:2vh;bottom:2vh;z-index:5;font-size:2.4vh;background:rgba(0,0,0,.6);padding:1vh 2vh;border-radius:1.5vh;max-width:60vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:none}
 #tvFim{position:absolute;inset:0;z-index:9;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2vh;background:rgba(0,0,0,.88);text-align:center}
 #tvFim.ativa{display:flex}
@@ -74,6 +78,7 @@ a{color:var(--accent)}
 .placar b{color:#ffd66e}
 .status{font-size:.85rem;color:var(--muted)}
 .status.ok{color:#7ee2a0}
+button.fx.ativo{border-color:var(--accent);background:#1a2c4e}
 .hist button{text-align:left;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;width:100%}
 footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 </style>
@@ -103,8 +108,10 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
   <div id="tvTitulo"></div>
   <div id="tvPalco">
     <div id="tvVideo"><div id="yt"></div></div>
+    <canvas id="tvFx"></canvas>
     <div id="tvJogadores"></div>
   </div>
+  <div id="tvFlash"></div>
   <div id="tvCapa">
     <p data-t="No celular, abra|On the phone, open"></p>
     <div class="url" id="tvUrl"></div>
@@ -154,6 +161,13 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
       <button class="sec" id="btPausa" data-t="⏯️ Pausar / continuar|⏯️ Pause / resume"></button>
       <button class="sec" id="btReiniciar" data-t="⏮️ Do início|⏮️ From the start"></button>
     </div>
+    <h2 style="font-size:1.05rem;margin-top:8px" data-t="✨ Efeitos na TV|✨ TV effects"></h2>
+    <div class="row">
+      <button class="sec fx" data-fx="off" data-t="Sem|Off"></button>
+      <button class="sec fx ativo" data-fx="suave" data-t="Suave|Soft"></button>
+      <button class="sec fx" data-fx="forte" data-t="Forte 🎆|Strong 🎆"></button>
+    </div>
+    <p class="muted" data-t="⚠️ “Forte” faz a TV piscar luzes. Evite se alguém em casa tiver epilepsia ou sensibilidade a luzes.|⚠️ “Strong” flashes lights on the TV. Avoid it if anyone at home has epilepsy or light sensitivity."></p>
     <div class="hist col" id="hist" style="gap:6px;margin-top:0"></div>
     <div class="aviso" data-t="Dica: deixe o celular apoiado, na horizontal, apontando para quem dança. A tela precisa ficar ligada.|Tip: prop the phone up, landscape, facing the dancers. The screen must stay on."></div>
   </div>
@@ -165,7 +179,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '0.1.0', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '0.2.0', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -215,7 +229,7 @@ function idYouTube(s) {
 /* =====================================================================
    TV
    ===================================================================== */
-var tv = { pcs: {}, tiles: {}, pontos: {}, tocando: false, player: null, titulo: '', fimMostrado: false };
+var tv = { pcs: {}, tiles: {}, pontos: {}, energia: {}, quente: {}, tocando: false, player: null, titulo: '', fimMostrado: false };
 
 function iniciarTV() {
   var letras = 'ABCDEFGHJKLMNPRSTUVWXYZ', c = '';
@@ -235,6 +249,7 @@ function iniciarTV() {
     $('tvEspera').textContent = T('Sem conexão com o servidor de pareamento. Confira a internet da TV e recarregue.', 'No connection to the pairing server. Check the TV internet and reload.');
   });
   carregarYouTube();
+  fxIniciar();
 }
 
 function tvReceber(m) {
@@ -267,7 +282,7 @@ function tvNovoJogador(m) {
 function tvTile(id, nome) {
   var d = document.createElement('div');
   d.className = 'tile';
-  d.innerHTML = '<video autoplay muted playsinline></video><div class="barra"><i></i></div><div class="nome"><span></span><span class="pontos">0</span></div>';
+  d.innerHTML = '<video autoplay muted playsinline></video><div class="barra"><i></i></div><div class="combo"></div><div class="nome"><span></span><span class="pontos">0</span></div>';
   d.querySelector('.nome span').textContent = nome || '?';
   $('tvJogadores').appendChild(d);
   tv.tiles[id] = d;
@@ -278,10 +293,11 @@ function tvRemover(id) {
   try { tv.pcs[id] && tv.pcs[id].close(); } catch (e) {}
   delete tv.pcs[id];
   if (tv.tiles[id]) { tv.tiles[id].remove(); delete tv.tiles[id]; }
-  delete tv.pontos[id];
+  delete tv.pontos[id]; delete tv.energia[id]; delete tv.quente[id];
 }
 function tvEnergia(id, e) {
   e = Math.max(0, Math.min(100, +e || 0));
+  tv.energia[id] = e;
   tv.tiles[id].querySelector('.barra i').style.height = e + '%';
   if (tv.tocando) { tv.pontos[id].pontos += e / 10; tv.tiles[id].querySelector('.pontos').textContent = Math.round(tv.pontos[id].pontos); }
 }
@@ -315,6 +331,8 @@ function tvComando(m) {
     $('tvCapa').style.display = 'none';
     $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '🎵 ' + tv.titulo;
     p.loadVideoById(m.video); p.playVideo();
+  } else if (m.acao === 'efeitos') {
+    fxModo(m.modo);
   } else if (m.acao === 'pausa') {
     if (p.getPlayerState && p.getPlayerState() === YT.PlayerState.PLAYING) p.pauseVideo(); else p.playVideo();
   } else if (m.acao === 'reiniciar') {
@@ -329,7 +347,77 @@ function tvFim() {
   var med = ['🥇', '🥈', '🥉'];
   $('tvRanking').innerHTML = lista.map(function (j, i) { return '<div>' + (med[i] || '🎉') + ' ' + escapar(j.nome) + ' — <b style="color:#ffd66e">' + Math.round(j.pontos) + '</b></div>'; }).join('') || '<div>' + T('Ninguém dançou?', 'Nobody danced?') + '</div>';
   $('tvFim').classList.add('ativa');
+  fxConfete();
 }
+/* --- Efeitos: neon nas câmeras, fogos e clarões, tudo puxado pela energia de quem dança.
+   Canvas em 960x540 esticado para a tela (leve para o navegador da TV). Modos: off | suave | forte.
+   "forte" pisca a tela inteira (no máximo ~3 vezes por segundo): aviso de fotossensibilidade no celular. --- */
+var fx = { modo: 'suave', parts: [], ctx: null, hue: 0, ultimoFlash: 0, ultimoQuadro: 0, frases: null };
+function fxIniciar() {
+  var c = $('tvFx'); c.width = 960; c.height = 540; fx.ctx = c.getContext('2d');
+  fx.frases = EN ? ['🔥 ON FIRE!', '⭐ AMAZING!', '💃 GO GO GO!', '🎉 WOW!'] : ['🔥 PEGANDO FOGO!', '⭐ ARRASOU!', '💃 VAI VAI VAI!', '🎉 UAU!'];
+  requestAnimationFrame(fxQuadro);
+}
+function fxModo(m) {
+  fx.modo = (m === 'off' || m === 'forte') ? m : 'suave';
+  if (fx.modo === 'off') {
+    fx.parts = [];
+    Object.keys(tv.tiles).forEach(function (k) { tv.tiles[k].style.setProperty('--hue', '0deg'); tv.tiles[k].style.setProperty('--neon', '#fff'); tv.tiles[k].style.boxShadow = 'none'; });
+  }
+}
+function fxQuadro(ts) {
+  requestAnimationFrame(fxQuadro);
+  var dt = Math.min(50, ts - fx.ultimoQuadro) / 16.7; fx.ultimoQuadro = ts;   // em "quadros de 60 fps"
+  var ids = Object.keys(tv.tiles), ctx = fx.ctx, W = 960, H = 540;
+  var soma = 0; ids.forEach(function (k) { soma += tv.energia[k] || 0; });
+  if (fx.modo === 'off') { ctx.clearRect(0, 0, W, H); return; }
+  var forte = fx.modo === 'forte';
+  fx.hue = (fx.hue + dt * (0.4 + soma / 150)) % 360;
+  var maior = 0;
+  ids.forEach(function (k, i) {
+    var t = tv.tiles[k], e = tv.energia[k] || 0; if (e > maior) maior = e;
+    var h = (fx.hue + i * 120) % 360;
+    t.style.setProperty('--neon', 'hsl(' + h + ',100%,60%)');
+    t.style.setProperty('--hue', (tv.tocando ? Math.round(Math.sin(ts / 900 + i) * (forte ? 60 : 25) * (e / 100)) : 0) + 'deg');
+    t.style.boxShadow = '0 0 ' + (2 + e / 8) + 'vh ' + (0.3 + e / 40) + 'vh hsl(' + h + ',100%,60%)';
+    // combo: energia alta por 1,5 s acende a frase
+    if (e > 65) { tv.quente[k] = (tv.quente[k] || ts); if (ts - tv.quente[k] > 1500 && !t.classList.contains('quente')) { t.querySelector('.combo').textContent = fx.frases[Math.floor(Math.random() * fx.frases.length)]; t.classList.add('quente'); } }
+    else if (e < 40) { delete tv.quente[k]; t.classList.remove('quente'); }
+    // fogos: quanto mais energia, mais explosões perto da câmera
+    if (tv.tocando && Math.random() < Math.pow(e / 100, 2) * (forte ? 0.22 : 0.09) * dt && fx.parts.length < 900) {
+      var r = t.getBoundingClientRect(), sx = W / innerWidth, sy = H / innerHeight;
+      fxFogo((r.left - 40 + Math.random() * (r.width + 80)) * sx, (r.top - 40 + Math.random() * (r.height + 80)) * sy, h);
+    }
+  });
+  // clarão (só no modo forte, no máximo a cada 350 ms)
+  if (forte && tv.tocando && maior > 60 && ts - fx.ultimoFlash > 350 && Math.random() < 0.5) {
+    fx.ultimoFlash = ts; var f = $('tvFlash');
+    f.style.background = 'hsl(' + fx.hue + ',100%,70%)'; f.style.transition = 'none'; f.style.opacity = '.3';
+    setTimeout(function () { f.style.transition = 'opacity .18s'; f.style.opacity = '0'; }, 60);
+  }
+  // partículas
+  ctx.clearRect(0, 0, W, H); ctx.globalCompositeOperation = 'lighter';
+  for (var i = fx.parts.length - 1; i >= 0; i--) {
+    var p = fx.parts[i];
+    p.x += p.vx * dt; p.y += p.vy * dt; p.vy += p.g * dt; p.vx *= 0.985; p.vida -= dt;
+    if (p.vida <= 0 || p.y > H + 10) { fx.parts.splice(i, 1); continue; }
+    ctx.globalAlpha = Math.max(0, Math.min(1, p.vida / 25));
+    ctx.fillStyle = p.cor; ctx.fillRect(p.x, p.y, p.tam, p.tam);
+  }
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+}
+function fxFogo(x, y, h) {
+  var n = 28 + Math.floor(Math.random() * 16), hh = (h + Math.random() * 60 - 30 + 360) % 360;
+  for (var i = 0; i < n; i++) {
+    var a = Math.random() * Math.PI * 2, v = 1.5 + Math.random() * 4.5;
+    fx.parts.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 0.06, vida: 40 + Math.random() * 35, tam: 2 + Math.random() * 3, cor: 'hsl(' + (hh + Math.random() * 40) + ',100%,' + (55 + Math.random() * 30) + '%)' });
+  }
+}
+function fxConfete() {
+  if (fx.modo === 'off') return;
+  for (var i = 0; i < 220; i++) fx.parts.push({ x: Math.random() * 960, y: -20 - Math.random() * 300, vx: Math.random() * 2 - 1, vy: 1 + Math.random() * 2, g: 0.01, vida: 300, tam: 4 + Math.random() * 5, cor: 'hsl(' + Math.random() * 360 + ',100%,60%)' });
+}
+
 function escapar(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
 /* =====================================================================
@@ -480,6 +568,7 @@ $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') toca
 $('btBuscar').onclick = function () { window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(T('just dance kids', 'just dance kids')), '_blank'); };
 $('btPausa').onclick = function () { enviar({ t: 'cmd', acao: 'pausa' }); };
 $('btReiniciar').onclick = function () { enviar({ t: 'cmd', acao: 'reiniciar' }); };
+document.querySelectorAll('button.fx').forEach(function (b) { b.onclick = function () { document.querySelectorAll('button.fx').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); enviar({ t: 'cmd', acao: 'efeitos', modo: b.getAttribute('data-fx') }); }; });
 window.addEventListener('pagehide', function () { if (cel.pc) enviar({ t: 'sair', id: cel.id }); });
 desenharHist();
 
