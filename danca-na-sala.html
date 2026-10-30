@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dança na Sala — FeatureTesting</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💃</text></svg>">
+<!--
+  Dança na Sala / Living Room Dance — experimento do FeatureTesting (SolverONE)
+
+  A MESMA página serve a TV e o celular:
+    TV      → abre no navegador da TV, aperta "Esta é a TV", mostra um código de 4 letras.
+    Celular → abre a mesma página, digita nome e código, liga a câmera.
+  O celular manda o vídeo da câmera para a TV direto pelo Wi-Fi (WebRTC, ponto a ponto: por isso
+  não tem atraso) e mede quanto a pessoa se mexe (diferença entre quadros, sem IA). A TV toca a
+  música do YouTube, mostra as câmeras e o placar. Os comandos (tocar, pausar, trocar música)
+  saem do celular. Celular e TV se encontram pelo Supabase Realtime da plataforma (só mensagens
+  pequenas; nenhum vídeo passa pelo servidor; chave publishable, pública por desenho).
+-->
+<style>
+:root{--bg:#0f1115;--card:#1a1d24;--text:#e8eaed;--muted:#9aa0a6;--border:#2a2f3a;--accent:#4285f4;--ok:#34a853;--warn:#f9ab00;--danger:#ea4335}
+*{box-sizing:border-box;margin:0;font-family:system-ui,-apple-system,sans-serif}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);overflow-x:hidden}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:14px 18px;background:var(--accent);color:#fff;font-weight:700}
+button.sec{background:var(--card);border:1px solid var(--border);color:var(--text)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+input{font:inherit;width:100%;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text)}
+.tela{display:none;min-height:100%;padding:24px 16px;max-width:560px;margin:0 auto}
+.tela.ativa{display:block}
+h1{font-size:1.5rem;margin-bottom:6px}
+.muted{color:var(--muted);font-size:.9rem;line-height:1.45}
+.col{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1}
+.big{font-size:1.25rem;padding:22px}
+.aviso{background:#3d3113;color:#ffd66e;border-radius:12px;padding:12px;font-size:.9rem;line-height:1.4}
+.erro{background:#3a1512;color:#ff9a93;border-radius:12px;padding:12px;font-size:.9rem}
+a{color:var(--accent)}
+
+/* ---------- TV ---------- */
+#tv{display:none;position:fixed;inset:0;background:#000;color:#fff}
+#tv.ativa{display:block}
+#tvPalco{position:absolute;inset:0;display:grid;grid-template-columns:1fr 34vw;grid-template-rows:1fr}
+#tvVideo{position:relative;background:#000}
+#tvVideo iframe,#tvVideo #yt{position:absolute;inset:0;width:100%;height:100%;border:0}
+#tvJogadores{display:flex;flex-direction:column;gap:2vh;padding:2vh;overflow:hidden;background:#07080a}
+.tile{position:relative;flex:1;min-height:0;border-radius:1.5vh;overflow:hidden;background:#111;border:.4vh solid #222}
+.tile video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.tile .nome{position:absolute;left:0;right:0;bottom:0;padding:1.2vh 1.6vh;background:linear-gradient(transparent,rgba(0,0,0,.85));font-size:3vh;font-weight:800;display:flex;justify-content:space-between;align-items:flex-end}
+.tile .pontos{font-size:4.5vh;color:#ffd66e}
+.tile .barra{position:absolute;left:0;top:0;bottom:0;width:1.2vh;background:#222}
+.tile .barra i{position:absolute;left:0;right:0;bottom:0;height:0;background:var(--ok);transition:height .15s}
+.tile.off{opacity:.35}
+#tvCapa{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;text-align:center;padding:4vh;background:radial-gradient(ellipse at center,#1a2c4e 0%,#000 70%)}
+#tvCapa .codigo{font-size:18vh;font-weight:900;letter-spacing:2vh;line-height:1;color:#ffd66e}
+#tvCapa p{font-size:3vh;color:#cfd3d8;max-width:80vw;line-height:1.4}
+#tvCapa .url{font-size:3.2vh;color:#fff;font-weight:700;background:#1a1d24;padding:1.5vh 3vh;border-radius:2vh}
+#tvCanto{position:absolute;right:calc(34vw + 2vh);top:2vh;z-index:5;font-size:2.6vh;font-weight:800;background:rgba(0,0,0,.6);padding:1vh 2vh;border-radius:1.5vh;color:#ffd66e}
+#tvTitulo{position:absolute;left:2vh;bottom:2vh;z-index:5;font-size:2.4vh;background:rgba(0,0,0,.6);padding:1vh 2vh;border-radius:1.5vh;max-width:60vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:none}
+#tvFim{position:absolute;inset:0;z-index:9;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2vh;background:rgba(0,0,0,.88);text-align:center}
+#tvFim.ativa{display:flex}
+#tvFim h2{font-size:9vh;color:#ffd66e}
+#tvFim .lista{font-size:4.5vh;line-height:1.6}
+
+/* ---------- Celular ---------- */
+#cam{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;object-fit:cover}
+#cam.frente{transform:scaleX(-1)}
+.energia{height:14px;background:var(--card);border-radius:7px;overflow:hidden;border:1px solid var(--border)}
+.energia i{display:block;height:100%;width:0;background:var(--ok);transition:width .15s}
+.placar{display:flex;flex-direction:column;gap:6px}
+.placar div{display:flex;justify-content:space-between;background:var(--card);padding:10px 14px;border-radius:10px;font-weight:700}
+.placar b{color:#ffd66e}
+.status{font-size:.85rem;color:var(--muted)}
+.status.ok{color:#7ee2a0}
+.hist button{text-align:left;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;width:100%}
+footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
+</style>
+</head>
+<body>
+
+<!-- ===== Escolha do papel ===== -->
+<section id="inicio" class="tela ativa" data-recurso="danca-na-sala">
+  <h1>💃 <span data-t="Dança na Sala|Living Room Dance"></span></h1>
+  <p class="muted" data-t="A TV toca a música do YouTube e mostra quem está dançando. O celular filma, mede a energia e comanda tudo. Nada para instalar.|The TV plays the YouTube song and shows who is dancing. The phone films, measures energy and runs the show. Nothing to install."></p>
+  <div class="col">
+    <button class="big" id="btTV">📺 <span data-t="Esta é a TV|This is the TV"></span></button>
+    <button class="big sec" id="btCel">📱 <span data-t="Este é o celular|This is the phone"></span></button>
+  </div>
+  <p class="muted" style="margin-top:18px" data-t="Como usar: 1) na TV, abra esta página no navegador e aperte “Esta é a TV”. 2) No celular, abra a mesma página, aperte “Este é o celular”, digite o nome e o código que a TV mostra. 3) Apoie o celular virado para quem vai dançar.|How to: 1) on the TV, open this page in its browser and press “This is the TV”. 2) On the phone, open the same page, press “This is the phone”, type a name and the code the TV shows. 3) Prop the phone facing the dancers."></p>
+  <footer>Dança na Sala <span id="ver"></span> · FeatureTesting · SolverONE</footer>
+</section>
+
+<section id="desligado" class="tela">
+  <h1>💤</h1>
+  <p class="muted" data-t="Este experimento está desligado no momento.|This experiment is switched off right now."></p>
+</section>
+
+<!-- ===== TV ===== -->
+<div id="tv">
+  <div id="tvCanto"></div>
+  <div id="tvTitulo"></div>
+  <div id="tvPalco">
+    <div id="tvVideo"><div id="yt"></div></div>
+    <div id="tvJogadores"></div>
+  </div>
+  <div id="tvCapa">
+    <p data-t="No celular, abra|On the phone, open"></p>
+    <div class="url" id="tvUrl"></div>
+    <p data-t="aperte “Este é o celular” e digite o código:|press “This is the phone” and type the code:"></p>
+    <div class="codigo" id="tvCodigo">····</div>
+    <p id="tvEspera" class="muted" style="font-size:2.4vh" data-t="Esperando os celulares…|Waiting for phones…"></p>
+  </div>
+  <div id="tvFim"><h2>🏆</h2><div class="lista" id="tvRanking"></div></div>
+</div>
+
+<!-- ===== Celular: entrar ===== -->
+<section id="entrar" class="tela">
+  <h1>📱 <span data-t="Entrar na sala|Join the room"></span></h1>
+  <div class="col">
+    <input id="nome" maxlength="14" autocomplete="off" data-ph="Seu nome (ex.: Ana)|Your name (e.g. Ana)">
+    <input id="codigo" maxlength="4" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;font-size:1.6rem;letter-spacing:.3em;text-align:center" data-ph="CÓDIGO DA TV|TV CODE">
+    <button class="big" id="btEntrar" data-t="Entrar e ligar a câmera|Join and start the camera"></button>
+    <div id="entrarErro" class="erro" style="display:none"></div>
+  </div>
+</section>
+
+<!-- ===== Celular: jogando ===== -->
+<section id="jogo" class="tela">
+  <div class="row" style="align-items:center;justify-content:space-between">
+    <div><b id="jogoNome"></b> · <span id="jogoCodigo" style="color:#ffd66e;font-weight:800"></span></div>
+    <div class="status" id="jogoStatus" style="flex:0 0 auto"></div>
+  </div>
+  <div class="col">
+    <video id="cam" autoplay muted playsinline></video>
+    <div class="row">
+      <button class="sec" id="btCamera">🔄 <span data-t="Trocar câmera|Switch camera"></span></button>
+      <button class="sec" id="btSair">🚪 <span data-t="Sair|Leave"></span></button>
+    </div>
+    <div>
+      <div class="muted" style="margin-bottom:6px" data-t="Sua energia agora|Your energy now"></div>
+      <div class="energia"><i id="energiaBarra"></i></div>
+    </div>
+    <div class="placar" id="placar"></div>
+
+    <h2 style="font-size:1.05rem;margin-top:8px" data-t="🎵 Música|🎵 Song"></h2>
+    <input id="link" inputmode="url" data-ph="Cole aqui o link do YouTube|Paste the YouTube link here">
+    <div class="row">
+      <button id="btTocarLink" data-t="▶️ Tocar na TV|▶️ Play on TV"></button>
+      <button class="sec" id="btBuscar" data-t="🔎 Procurar no YouTube|🔎 Search YouTube"></button>
+    </div>
+    <div class="row">
+      <button class="sec" id="btPausa" data-t="⏯️ Pausar / continuar|⏯️ Pause / resume"></button>
+      <button class="sec" id="btReiniciar" data-t="⏮️ Do início|⏮️ From the start"></button>
+    </div>
+    <div class="hist col" id="hist" style="gap:6px;margin-top:0"></div>
+    <div class="aviso" data-t="Dica: deixe o celular apoiado, na horizontal, apontando para quem dança. A tela precisa ficar ligada.|Tip: prop the phone up, landscape, facing the dancers. The screen must stay on."></div>
+  </div>
+  <footer>Dança na Sala <span class="ver2"></span></footer>
+</section>
+
+<script src="recursos.js" data-app="feature-tester"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {
+'use strict';
+var APP_VERSION = '0.1.0', APP_UPDATED = '30/10/2026';
+
+/* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
+var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_oRJmeUwlBbOP_HoOXf0xLw_4O8v43EA';
+var ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+/* ---------- PT / EN ---------- */
+var EN = /^en/i.test(navigator.language || '');
+function T(pt, en) { return EN ? en : pt; }
+document.querySelectorAll('[data-t]').forEach(function (el) { var p = el.getAttribute('data-t').split('|'); el.textContent = T(p[0], p[1] || p[0]); });
+document.querySelectorAll('[data-ph]').forEach(function (el) { var p = el.getAttribute('data-ph').split('|'); el.placeholder = T(p[0], p[1] || p[0]); });
+document.getElementById('ver').textContent = 'v' + APP_VERSION + ' · ' + APP_UPDATED;
+document.querySelectorAll('.ver2').forEach(function (e) { e.textContent = 'v' + APP_VERSION; });
+
+var $ = function (id) { return document.getElementById(id); };
+function tela(id) { document.querySelectorAll('.tela').forEach(function (s) { s.classList.toggle('ativa', s.id === id); }); }
+
+/* Interruptor do RootifyONE: se o dono desligar "danca-na-sala", a página inteira para. */
+if (window.SolverRecursos && !SolverRecursos.ligado('danca-na-sala', true)) { tela('desligado'); return; }
+
+/* ---------- Canal (celular e TV) ---------- */
+var sb = null, canal = null, CODIGO = '';
+function abrirCanal(codigo, aoReceber) {
+  if (!sb) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: 20 } } });
+  return new Promise(function (ok, falha) {
+    var pronto = false;
+    canal = sb.channel('danca-' + codigo, { config: { broadcast: { self: false } } });
+    canal.on('broadcast', { event: 'm' }, function (x) { try { aoReceber(x.payload || {}); } catch (e) { console.warn(e); } });
+    canal.subscribe(function (st) {
+      if (st === 'SUBSCRIBED' && !pronto) { pronto = true; ok(); }
+      else if ((st === 'CHANNEL_ERROR' || st === 'TIMED_OUT') && !pronto) { pronto = true; falha(new Error(st)); }
+    });
+  });
+}
+function enviar(m) { if (canal) canal.send({ type: 'broadcast', event: 'm', payload: m }); }
+function idNovo() { return Math.random().toString(36).slice(2, 10); }
+
+/* ---------- YouTube: link → id ---------- */
+function idYouTube(s) {
+  s = (s || '').trim();
+  var m = s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/);
+  if (m) return m[1];
+  if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
+  return '';
+}
+
+/* =====================================================================
+   TV
+   ===================================================================== */
+var tv = { pcs: {}, tiles: {}, pontos: {}, tocando: false, player: null, titulo: '', fimMostrado: false };
+
+function iniciarTV() {
+  var letras = 'ABCDEFGHJKLMNPRSTUVWXYZ', c = '';
+  for (var i = 0; i < 4; i++) c += letras[Math.floor(Math.random() * letras.length)];
+  CODIGO = c;
+  tela('');
+  $('tv').classList.add('ativa');
+  $('tvCodigo').textContent = c;
+  $('tvCanto').textContent = T('Código: ', 'Code: ') + c;
+  $('tvUrl').textContent = location.host + location.pathname.replace(/index\.html$/, '');
+  try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch (e) {}
+
+  abrirCanal(c, tvReceber).then(function () {
+    enviar({ t: 'tv' });
+    setInterval(tvEstado, 1500);
+  }).catch(function () {
+    $('tvEspera').textContent = T('Sem conexão com o servidor de pareamento. Confira a internet da TV e recarregue.', 'No connection to the pairing server. Check the TV internet and reload.');
+  });
+  carregarYouTube();
+}
+
+function tvReceber(m) {
+  if (m.t === 'join') { enviar({ t: 'tv' }); return; }
+  if (m.t === 'offer') { tvNovoJogador(m); return; }
+  if (m.t === 'ice' && m.to === 'tv' && tv.pcs[m.id]) { try { tv.pcs[m.id].addIceCandidate(m.c); } catch (e) {} return; }
+  if (m.t === 'energia' && tv.tiles[m.id]) { tvEnergia(m.id, m.e); return; }
+  if (m.t === 'sair' && tv.tiles[m.id]) { tvRemover(m.id); return; }
+  if (m.t === 'cmd') { tvComando(m); return; }
+}
+
+function tvNovoJogador(m) {
+  if (tv.pcs[m.id]) { try { tv.pcs[m.id].close(); } catch (e) {} }
+  var pc = new RTCPeerConnection(ICE);
+  tv.pcs[m.id] = pc;
+  var tile = tv.tiles[m.id] || tvTile(m.id, m.nome);
+  tile.classList.remove('off');
+  pc.ontrack = function (ev) { var v = tile.querySelector('video'); if (v.srcObject !== ev.streams[0]) { v.srcObject = ev.streams[0]; v.play().catch(function () {}); } };
+  pc.onicecandidate = function (ev) { if (ev.candidate) enviar({ t: 'ice', to: m.id, c: ev.candidate.toJSON() }); };
+  pc.onconnectionstatechange = function () {
+    if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') tile.classList.add('off');
+    if (pc.connectionState === 'connected') tile.classList.remove('off');
+  };
+  pc.setRemoteDescription(m.sdp).then(function () { return pc.createAnswer(); })
+    .then(function (a) { return pc.setLocalDescription(a).then(function () { enviar({ t: 'answer', to: m.id, sdp: pc.localDescription.toJSON() }); }); })
+    .catch(function (e) { console.warn('answer', e); });
+  $('tvEspera').textContent = T('Conectado! Agora escolha a música no celular.', 'Connected! Now pick a song on the phone.');
+}
+
+function tvTile(id, nome) {
+  var d = document.createElement('div');
+  d.className = 'tile';
+  d.innerHTML = '<video autoplay muted playsinline></video><div class="barra"><i></i></div><div class="nome"><span></span><span class="pontos">0</span></div>';
+  d.querySelector('.nome span').textContent = nome || '?';
+  $('tvJogadores').appendChild(d);
+  tv.tiles[id] = d;
+  tv.pontos[id] = { nome: nome || '?', pontos: 0 };
+  return d;
+}
+function tvRemover(id) {
+  try { tv.pcs[id] && tv.pcs[id].close(); } catch (e) {}
+  delete tv.pcs[id];
+  if (tv.tiles[id]) { tv.tiles[id].remove(); delete tv.tiles[id]; }
+  delete tv.pontos[id];
+}
+function tvEnergia(id, e) {
+  e = Math.max(0, Math.min(100, +e || 0));
+  tv.tiles[id].querySelector('.barra i').style.height = e + '%';
+  if (tv.tocando) { tv.pontos[id].pontos += e / 10; tv.tiles[id].querySelector('.pontos').textContent = Math.round(tv.pontos[id].pontos); }
+}
+function tvEstado() {
+  var p = {};
+  Object.keys(tv.pontos).forEach(function (k) { p[k] = { nome: tv.pontos[k].nome, pontos: Math.round(tv.pontos[k].pontos) }; });
+  enviar({ t: 'estado', tocando: tv.tocando, titulo: tv.titulo, pontos: p });
+}
+
+/* --- YouTube na TV --- */
+function carregarYouTube() {
+  window.onYouTubeIframeAPIReady = function () {
+    tv.player = new YT.Player('yt', {
+      width: '100%', height: '100%', playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1, playsinline: 1, origin: location.origin },
+      events: { onStateChange: tvYouTubeEstado }
+    });
+  };
+  var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
+}
+function tvYouTubeEstado(ev) {
+  tv.tocando = (ev.data === YT.PlayerState.PLAYING);
+  if (ev.data === YT.PlayerState.ENDED && !tv.fimMostrado) tvFim();
+}
+function tvComando(m) {
+  var p = tv.player;
+  if (!p || !p.loadVideoById) return;
+  if (m.acao === 'carregar' && m.video) {
+    tv.titulo = m.titulo || m.video;
+    Object.keys(tv.pontos).forEach(function (k) { tv.pontos[k].pontos = 0; tv.tiles[k] && (tv.tiles[k].querySelector('.pontos').textContent = '0'); });
+    tv.fimMostrado = false; $('tvFim').classList.remove('ativa');
+    $('tvCapa').style.display = 'none';
+    $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '🎵 ' + tv.titulo;
+    p.loadVideoById(m.video); p.playVideo();
+  } else if (m.acao === 'pausa') {
+    if (p.getPlayerState && p.getPlayerState() === YT.PlayerState.PLAYING) p.pauseVideo(); else p.playVideo();
+  } else if (m.acao === 'reiniciar') {
+    tv.fimMostrado = false; $('tvFim').classList.remove('ativa');
+    Object.keys(tv.pontos).forEach(function (k) { tv.pontos[k].pontos = 0; tv.tiles[k] && (tv.tiles[k].querySelector('.pontos').textContent = '0'); });
+    p.seekTo(0, true); p.playVideo();
+  }
+}
+function tvFim() {
+  tv.fimMostrado = true;
+  var lista = Object.keys(tv.pontos).map(function (k) { return tv.pontos[k]; }).sort(function (a, b) { return b.pontos - a.pontos; });
+  var med = ['🥇', '🥈', '🥉'];
+  $('tvRanking').innerHTML = lista.map(function (j, i) { return '<div>' + (med[i] || '🎉') + ' ' + escapar(j.nome) + ' — <b style="color:#ffd66e">' + Math.round(j.pontos) + '</b></div>'; }).join('') || '<div>' + T('Ninguém dançou?', 'Nobody danced?') + '</div>';
+  $('tvFim').classList.add('ativa');
+}
+function escapar(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+/* =====================================================================
+   CELULAR
+   ===================================================================== */
+var cel = { id: idNovo(), nome: '', pc: null, stream: null, frente: false, timerEnergia: 0, tvViu: false, wake: null, ultimoEstado: null };
+
+function entrar() {
+  var nome = $('nome').value.trim(), cod = $('codigo').value.trim().toUpperCase();
+  var erro = $('entrarErro'); erro.style.display = 'none';
+  if (!nome || cod.length !== 4) { erro.textContent = T('Digite o nome e as 4 letras do código.', 'Type the name and the 4-letter code.'); erro.style.display = 'block'; return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.RTCPeerConnection) {
+    erro.textContent = T('Este navegador não deixa usar a câmera. Abra no Chrome ou no Safari.', 'This browser cannot use the camera. Open it in Chrome or Safari.'); erro.style.display = 'block'; return;
+  }
+  cel.nome = nome; CODIGO = cod;
+  try { localStorage.setItem('danca:nome', nome); } catch (e) {}
+  $('btEntrar').disabled = true;
+  ligarCamera().then(function () {
+    return abrirCanal(cod, celReceber);
+  }).then(function () {
+    tela('jogo');
+    $('jogoNome').textContent = nome; $('jogoCodigo').textContent = cod;
+    status(T('Procurando a TV…', 'Looking for the TV…'));
+    enviar({ t: 'join', id: cel.id, nome: nome });
+    setTimeout(function () { if (!cel.tvViu) status(T('TV não encontrada. Confira o código e se a TV está nesta página.', 'TV not found. Check the code and that the TV is on this page.'), 'erro'); }, 6000);
+    pedirWakeLock();
+    cel.timerEnergia = setInterval(medirEnergia, 120);
+  }).catch(function (e) {
+    $('btEntrar').disabled = false;
+    erro.textContent = (e && e.name === 'NotAllowedError') ? T('Você precisa permitir a câmera.', 'You need to allow the camera.') : T('Não deu para conectar: ', 'Could not connect: ') + (e && e.message || e);
+    erro.style.display = 'block';
+  });
+}
+
+function ligarCamera() {
+  if (cel.stream) cel.stream.getTracks().forEach(function (t) { t.stop(); });
+  var c = { video: { facingMode: cel.frente ? 'user' : 'environment', width: { ideal: 640 }, height: { ideal: 360 }, frameRate: { ideal: 24 } }, audio: false };
+  return navigator.mediaDevices.getUserMedia(c).catch(function () { return navigator.mediaDevices.getUserMedia({ video: true, audio: false }); })
+    .then(function (s) {
+      cel.stream = s; $('cam').srcObject = s; $('cam').classList.toggle('frente', cel.frente);
+      if (cel.pc) { var sender = cel.pc.getSenders().find(function (x) { return x.track && x.track.kind === 'video'; }); if (sender) sender.replaceTrack(s.getVideoTracks()[0]); }
+    });
+}
+
+function celReceber(m) {
+  if (m.t === 'tv') { cel.tvViu = true; if (!cel.pc || cel.pc.connectionState === 'failed' || cel.pc.connectionState === 'closed') oferecer(); return; }
+  if (m.to !== cel.id && m.t !== 'estado') return;
+  if (m.t === 'answer' && cel.pc) { cel.pc.setRemoteDescription(m.sdp).catch(function (e) { console.warn(e); }); return; }
+  if (m.t === 'ice' && cel.pc) { try { cel.pc.addIceCandidate(m.c); } catch (e) {} return; }
+  if (m.t === 'estado') { cel.tvViu = true; mostrarEstado(m); return; }
+}
+
+function oferecer() {
+  if (cel.pc) { try { cel.pc.close(); } catch (e) {} }
+  var pc = new RTCPeerConnection(ICE); cel.pc = pc;
+  cel.stream.getTracks().forEach(function (t) { pc.addTrack(t, cel.stream); });
+  pc.onicecandidate = function (ev) { if (ev.candidate) enviar({ t: 'ice', id: cel.id, to: 'tv', c: ev.candidate.toJSON() }); };
+  pc.onconnectionstatechange = function () {
+    if (pc.connectionState === 'connected') status(T('Ao vivo na TV ✅', 'Live on the TV ✅'), 'ok');
+    else if (pc.connectionState === 'failed') { status(T('Caiu. Tentando de novo…', 'Dropped. Retrying…'), 'erro'); setTimeout(function () { enviar({ t: 'join', id: cel.id, nome: cel.nome }); }, 2000); }
+    else if (pc.connectionState === 'disconnected') status(T('Reconectando…', 'Reconnecting…'));
+  };
+  pc.createOffer().then(function (o) { return pc.setLocalDescription(o); })
+    .then(function () { enviar({ t: 'offer', id: cel.id, nome: cel.nome, sdp: pc.localDescription.toJSON() }); status(T('Conectando à TV…', 'Connecting to the TV…')); })
+    .catch(function (e) { status(T('Erro ao conectar: ', 'Connect error: ') + e.message, 'erro'); });
+}
+
+/* Energia: quanto a imagem mudou entre dois quadros pequenos (sem IA, leve para qualquer celular). */
+var cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true }), anterior = null, suave = 0, ultimoEnvio = 0;
+cv.width = 48; cv.height = 27;
+function medirEnergia() {
+  var v = $('cam'); if (!v.videoWidth) return;
+  cx.drawImage(v, 0, 0, cv.width, cv.height);
+  var d = cx.getImageData(0, 0, cv.width, cv.height).data, soma = 0, n = d.length / 4;
+  if (anterior) { for (var i = 0; i < d.length; i += 4) { soma += Math.abs((d[i] + d[i + 1] + d[i + 2]) - (anterior[i] + anterior[i + 1] + anterior[i + 2])); } }
+  anterior = new Uint8ClampedArray(d);
+  var dif = soma / n / 3;                          // 0..255, ruído da câmera ≈ 1–3
+  var e = Math.max(0, Math.min(100, (dif - 2) * 4));
+  suave = suave * 0.6 + e * 0.4;
+  $('energiaBarra').style.width = Math.round(suave) + '%';
+  var agora = Date.now();
+  if (agora - ultimoEnvio > 400) { ultimoEnvio = agora; enviar({ t: 'energia', id: cel.id, e: Math.round(suave) }); }
+}
+
+function mostrarEstado(m) {
+  cel.ultimoEstado = m;
+  var p = $('placar'), ks = Object.keys(m.pontos || {}).sort(function (a, b) { return m.pontos[b].pontos - m.pontos[a].pontos; });
+  p.innerHTML = ks.map(function (k) { return '<div><span>' + (k === cel.id ? '⭐ ' : '') + escapar(m.pontos[k].nome) + '</span><b>' + m.pontos[k].pontos + '</b></div>'; }).join('');
+  if (m.tocando) status('🎵 ' + escapar(m.titulo || ''), 'ok');
+  else if (cel.pc && cel.pc.connectionState === 'connected') status(T('Ao vivo na TV ✅ (sem música)', 'Live on the TV ✅ (no song)'), 'ok');
+}
+function status(txt, tipo) { var s = $('jogoStatus'); s.textContent = txt; s.className = 'status' + (tipo === 'ok' ? ' ok' : ''); if (tipo === 'erro') s.style.color = '#ff9a93'; else s.style.color = ''; }
+
+function pedirWakeLock() {
+  try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { cel.wake = w; }).catch(function () {}); } catch (e) {}
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') pedirWakeLock(); });
+}
+
+/* --- Música --- */
+function tocarLink(link) {
+  var id = idYouTube(link || $('link').value);
+  if (!id) { status(T('Não achei um link do YouTube aí.', 'That is not a YouTube link.'), 'erro'); return; }
+  $('btTocarLink').disabled = true;
+  fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=' + id + '&format=json')
+    .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+    .then(function (j) {
+      var titulo = (j && j.title) || id;
+      enviar({ t: 'cmd', acao: 'carregar', video: id, titulo: titulo });
+      guardarHist(id, titulo);
+      $('link').value = ''; $('btTocarLink').disabled = false;
+      status(T('Mandei tocar: ', 'Sent to play: ') + titulo, 'ok');
+    });
+}
+function guardarHist(id, titulo) {
+  var h = lerHist().filter(function (x) { return x.id !== id; });
+  h.unshift({ id: id, titulo: titulo });
+  try { localStorage.setItem('danca:hist', JSON.stringify(h.slice(0, 8))); } catch (e) {}
+  desenharHist();
+}
+function lerHist() { try { return JSON.parse(localStorage.getItem('danca:hist') || '[]'); } catch (e) { return []; } }
+function desenharHist() {
+  var h = lerHist(), d = $('hist'); d.innerHTML = '';
+  if (!h.length) return;
+  var t = document.createElement('div'); t.className = 'muted'; t.textContent = T('Últimas músicas', 'Recent songs'); d.appendChild(t);
+  h.forEach(function (x) { var b = document.createElement('button'); b.className = 'sec'; b.textContent = '🎵 ' + x.titulo; b.onclick = function () { tocarLink(x.id); }; d.appendChild(b); });
+}
+
+function sair() {
+  enviar({ t: 'sair', id: cel.id });
+  clearInterval(cel.timerEnergia);
+  try { cel.pc && cel.pc.close(); } catch (e) {}
+  if (cel.stream) cel.stream.getTracks().forEach(function (t) { t.stop(); });
+  try { canal && sb.removeChannel(canal); } catch (e) {}
+  canal = null; cel.pc = null; cel.tvViu = false;
+  $('btEntrar').disabled = false;
+  tela('entrar');
+}
+
+/* ---------- Botões ---------- */
+$('btTV').onclick = iniciarTV;
+$('btCel').onclick = function () { tela('entrar'); try { $('nome').value = localStorage.getItem('danca:nome') || ''; } catch (e) {} ($('nome').value ? $('codigo') : $('nome')).focus(); };
+$('btEntrar').onclick = entrar;
+$('codigo').addEventListener('keydown', function (e) { if (e.key === 'Enter') entrar(); });
+$('btCamera').onclick = function () { cel.frente = !cel.frente; ligarCamera().catch(function () {}); };
+$('btSair').onclick = sair;
+$('btTocarLink').onclick = function () { tocarLink(); };
+$('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') tocarLink(); });
+$('btBuscar').onclick = function () { window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(T('just dance kids', 'just dance kids')), '_blank'); };
+$('btPausa').onclick = function () { enviar({ t: 'cmd', acao: 'pausa' }); };
+$('btReiniciar').onclick = function () { enviar({ t: 'cmd', acao: 'reiniciar' }); };
+window.addEventListener('pagehide', function () { if (cel.pc) enviar({ t: 'sair', id: cel.id }); });
+desenharHist();
+
+/* Atalho: ?tv abre direto a tela de escolha com foco no botão da TV (para apertar OK no controle). */
+if (/[?&]tv\b/.test(location.search)) $('btTV').focus();
+})();
+</script>
+</body>
+</html>
