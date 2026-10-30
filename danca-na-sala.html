@@ -69,6 +69,8 @@ a{color:var(--accent)}
 .tile .barra{position:absolute;left:0;top:0;bottom:0;width:1.2vh;background:#222}
 .tile .barra i{position:absolute;left:0;right:0;bottom:0;height:0;background:var(--ok);transition:height .15s}
 .tile.off{opacity:.35}
+.tile.composto video{filter:none !important;transform:none}
+.tile.composto .brilho,.tile.composto .disco{display:none}
 #tvCapa{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;text-align:center;padding:4vh;background:radial-gradient(ellipse at center,#1a2c4e 0%,#000 70%)}
 #tvCapa .codigo{font-size:18vh;font-weight:900;letter-spacing:2vh;line-height:1;color:#ffd66e}
 #tvCapa p{font-size:3vh;color:#cfd3d8;max-width:80vw;line-height:1.4}
@@ -88,6 +90,14 @@ a{color:var(--accent)}
 .camBox{position:relative;flex:0 0 46%;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:4/3}
 #cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #cam.frente{transform:scaleX(-1)}
+#comp{position:absolute;inset:0;width:100%;height:100%;display:none}
+#jogo.comp #comp{display:block}
+#jogo.solo .painel{flex-direction:column}
+#jogo.solo .camBox{flex:0 0 auto;aspect-ratio:16/9}
+#jogo.solo #plPosicao,#jogo.solo #btComp{display:none}
+.ytSolo{display:none;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;margin-top:10px}
+#jogo.solo .ytSolo{display:block}
+.ytSolo iframe{width:100%;height:100%;border:0}
 .camNome{position:absolute;left:0;right:0;bottom:0;font-size:.7rem;padding:3px 6px;background:rgba(0,0,0,.6);color:#cfd3d8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lado{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
 .ctl button{font-size:1.5rem;padding:12px 0}
@@ -121,6 +131,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
   <div class="col">
     <button class="big" id="btTV">📺 <span data-t="Esta é a TV|This is the TV"></span></button>
     <button class="big sec" id="btCel">📱 <span data-t="Este é o celular|This is the phone"></span></button>
+    <button class="big sec" id="btSolo">🎧 <span data-t="Só o celular (sem TV)|Phone only (no TV)"></span></button>
   </div>
   <p class="muted" style="margin-top:18px" data-t="Como usar: 1) na TV, abra esta página no navegador e aperte “Esta é a TV”. 2) No celular, abra a mesma página, aperte “Este é o celular”, digite o nome e o código que a TV mostra. 3) Apoie o celular virado para quem vai dançar.|How to: 1) on the TV, open this page in its browser and press “This is the TV”. 2) On the phone, open the same page, press “This is the phone”, type a name and the code the TV shows. 3) Prop the phone facing the dancers."></p>
   <footer>Dança na Sala <span id="ver"></span> · FeatureTesting · SolverONE</footer>
@@ -164,8 +175,9 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <!-- ===== Celular: jogando ===== -->
 <section id="jogo" class="tela">
   <div class="topo"><b id="jogoNome"></b> · <span id="jogoCodigo" style="color:#ffd66e;font-weight:800"></span> <span class="status" id="jogoStatus"></span></div>
+  <div class="ytSolo"><div id="ytSolo"></div></div>
   <div class="painel">
-    <div class="camBox"><video id="cam" autoplay muted playsinline></video><div class="camNome" id="camNome"></div></div>
+    <div class="camBox"><video id="cam" autoplay muted playsinline></video><canvas id="comp" width="640" height="360"></canvas><div class="camNome" id="camNome"></div></div>
     <div class="lado">
       <div class="energia" title="energia"><i id="energiaBarra"></i></div>
       <div class="placar" id="placar"></div>
@@ -203,9 +215,11 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
           <button class="sec fx" data-fx="forte" data-t="Forte 🎆|Strong 🎆"></button>
         </div>
         <p class="muted" data-t="⚠️ “Forte” faz a TV piscar luzes. Evite se alguém em casa tiver epilepsia ou sensibilidade a luzes.|⚠️ “Strong” flashes lights on the TV. Avoid it if anyone at home has epilepsy or light sensitivity."></p>
+        <button class="sec" id="btComp" data-t="🎨 Transmitir já com os efeitos (mais sincronizado)|🎨 Send the video with effects baked in (more in sync)"></button>
+        <p class="muted" data-t="Ligado, o celular desenha os efeitos na própria imagem e manda o vídeo pronto. As faíscas ficam coladas no movimento, mas gasta mais bateria.|On, the phone draws the effects into its own picture and sends the finished video. Sparkles stick to the movement, but it uses more battery."></p>
       </div>
     </details>
-    <details>
+    <details id="plPosicao">
       <summary data-t="📺 Posição na TV|📺 Position on the TV"></summary>
       <div class="col">
         <div class="row">
@@ -232,7 +246,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '0.8.0', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '0.9.0', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -283,7 +297,7 @@ function idYouTube(s) {
 /* =====================================================================
    TV
    ===================================================================== */
-var tv = { pcs: {}, tiles: {}, pontos: {}, energia: {}, quente: {}, mov: {}, tocando: false, player: null, titulo: '', fimMostrado: false, videoAtual: '', lista: [], indice: -1, podioAte: 0, timerPodio: 0 };
+var tv = { pcs: {}, tiles: {}, pontos: {}, energia: {}, quente: {}, mov: {}, composto: {}, tocando: false, player: null, titulo: '', fimMostrado: false, videoAtual: '', lista: [], indice: -1, podioAte: 0, timerPodio: 0 };
 
 function iniciarTV() {
   var letras = 'ABCDEFGHJKLMNPRSTUVWXYZ', c = '';
@@ -312,7 +326,7 @@ function tvReceber(m) {
   if (m.t === 'join') { enviar({ t: 'tv' }); return; }
   if (m.t === 'offer') { tvNovoJogador(m); return; }
   if (m.t === 'ice' && m.to === 'tv' && tv.pcs[m.id]) { try { tv.pcs[m.id].addIceCandidate(m.c); } catch (e) {} return; }
-  if (m.t === 'energia' && tv.tiles[m.id]) { tvEnergia(m.id, m.e); tv.mov[m.id] = m.p || []; return; }
+  if (m.t === 'energia' && tv.tiles[m.id]) { tvEnergia(m.id, m.e); tv.mov[m.id] = m.p || []; if ((!!m.c) !== !!tv.composto[m.id]) { tv.composto[m.id] = !!m.c; tv.tiles[m.id].classList.toggle('composto', !!m.c); } return; }
   if (m.t === 'sair' && tv.tiles[m.id]) { tvRemover(m.id); return; }
   if (m.t === 'cmd') { tvComando(m); return; }
 }
@@ -326,7 +340,7 @@ function tvNovoJogador(m) {
   var tile = tv.tiles[m.id] || tvTile(m.id, m.nome);
   tile.classList.remove('off');
   pc.ontrack = function (ev) { var v = tile.querySelector('video'); if (v.srcObject !== ev.streams[0]) { v.srcObject = ev.streams[0]; v.play().catch(function () {}); } };
-  pc.ondatachannel = function (ev) { ev.channel.onmessage = function (x) { try { var d = JSON.parse(x.data); if (tv.tiles[m.id]) { tvEnergia(m.id, d.e); tv.mov[m.id] = d.p || []; } } catch (e) {} }; };
+  pc.ondatachannel = function (ev) { ev.channel.onmessage = function (x) { try { var d = JSON.parse(x.data); if (tv.tiles[m.id]) { tvEnergia(m.id, d.e); tv.mov[m.id] = d.p || []; if ((!!d.c) !== !!tv.composto[m.id]) { tv.composto[m.id] = !!d.c; tv.tiles[m.id].classList.toggle('composto', !!d.c); } } } catch (e) {} }; };
   pc.onicecandidate = function (ev) { if (ev.candidate) enviar({ t: 'ice', to: m.id, c: ev.candidate.toJSON() }); };
   pc.onconnectionstatechange = function () {
     if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected' || pc.connectionState === 'closed') {
@@ -371,14 +385,22 @@ function tvEstado() {
 }
 
 /* --- YouTube na TV --- */
+var ytFila = [], ytPedido = false;
+function apiYouTube(cb) {
+  if (window.YT && YT.Player) return cb();
+  ytFila.push(cb);
+  if (ytPedido) return;
+  ytPedido = true;
+  window.onYouTubeIframeAPIReady = function () { var f = ytFila; ytFila = []; f.forEach(function (x) { x(); }); };
+  var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
+}
 function carregarYouTube() {
-  window.onYouTubeIframeAPIReady = function () {
+  apiYouTube(function () {
     tv.player = new YT.Player('yt', {
       width: '100%', height: '100%', playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1, playsinline: 1, origin: location.origin },
       events: { onReady: function () { if (tv.pendente) { var m = tv.pendente; tv.pendente = null; tvComando(m); } }, onStateChange: tvYouTubeEstado, onError: tvYouTubeErro }
     });
-  };
-  var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
+  });
 }
 function tvYouTubeEstado(ev) {
   var p = tv.player;
@@ -479,6 +501,7 @@ function fxQuadro(ts) {
     var t = tv.tiles[k], e = tv.energia[k] || 0; if (e > maior) maior = e;
     var h = (fx.hue + i * 120) % 360;
     t.style.setProperty('--neon', 'hsl(' + h + ',100%,60%)');
+    if (tv.composto[k]) { t.style.boxShadow = '0 0 ' + (2 + e / 8) + 'vh ' + (0.3 + e / 40) + 'vh hsl(' + h + ',100%,60%)'; return; }   // o celular já desenhou tudo
     // a imagem em si: cor girando o arco-íris inteiro (mais rápido quanto mais energia), luz pulsando
     // a 120 bpm mesmo sem música, saturação forte; no Forte, clarões invertidos e lavagens de cor
     var batida = Math.pow(Math.abs(Math.sin(ts * Math.PI / 500)), 6);           // 0..1, pico a cada 500 ms
@@ -516,7 +539,7 @@ function fxQuadro(ts) {
   }
   // faíscas e rastros de luz ONDE a pessoa se mexeu (pontos que o celular manda)
   ids.forEach(function (k, i) {
-    var pts = tv.mov[k]; if (!pts || !pts.length) return;
+    var pts = tv.mov[k]; if (!pts || !pts.length || tv.composto[k]) return;
     var t = tv.tiles[k], v = t.querySelector('video'), r = t.getBoundingClientRect(), sx = W / innerWidth, sy = H / innerHeight;
     var vw = v.videoWidth || 16, vh = v.videoHeight || 9, esc = Math.max(r.width / vw, r.height / vh), dw = vw * esc, dh = vh * esc;
     var ox = r.left + (r.width - dw) / 2, oy = r.top + (r.height - dh) / 2, h = (fx.hue + i * 120) % 360, forte = fx.modo === 'forte';
@@ -572,17 +595,33 @@ function escapar(s) { return String(s).replace(/[&<>"]/g, function (c) { return 
    CELULAR
    ===================================================================== */
 var cel = { id: idNovo(), nome: '', pc: null, stream: null, frente: false, cams: [], camIdx: -1, timerEnergia: 0, tvViu: false, wake: null, ultimoEstado: null };
+var modo = { solo: false, comp: false };   // solo: sem TV, tudo no celular; comp: o celular desenha os efeitos e manda o vídeo pronto
 
 function entrar() {
-  var nome = $('nome').value.trim(), cod = $('codigo').value.trim().toUpperCase();
+  var nome = $('nome').value.trim(), cod = modo.solo ? 'SOLO' : $('codigo').value.trim().toUpperCase();
   var erro = $('entrarErro'); erro.style.display = 'none';
   if (!nome || cod.length !== 4) { erro.textContent = T('Digite o nome e as 4 letras do código.', 'Type the name and the 4-letter code.'); erro.style.display = 'block'; return; }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.RTCPeerConnection) {
     erro.textContent = T('Este navegador não deixa usar a câmera. Abra no Chrome ou no Safari.', 'This browser cannot use the camera. Open it in Chrome or Safari.'); erro.style.display = 'block'; return;
   }
   cel.nome = nome; CODIGO = cod;
-  try { localStorage.setItem('danca:nome', nome); localStorage.setItem('danca:codigo', cod); } catch (e) {}
+  try { localStorage.setItem('danca:nome', nome); if (!modo.solo) localStorage.setItem('danca:codigo', cod); } catch (e) {}
   $('btEntrar').disabled = true;
+  if (modo.solo) {
+    ligarCamera().then(function () {
+      tela('jogo'); $('jogo').classList.add('solo');
+      $('jogoNome').textContent = nome; $('jogoCodigo').textContent = '🎧';
+      status(T('Só o celular', 'Phone only'), 'ok');
+      ligarComp(true); soloIniciar();
+      pedirWakeLock();
+      cel.timerEnergia = setInterval(medirEnergia, 120);
+    }).catch(function (e) {
+      $('btEntrar').disabled = false;
+      erro.textContent = (e && e.name === 'NotAllowedError') ? T('Você precisa permitir a câmera.', 'You need to allow the camera.') : T('Não deu: ', 'Failed: ') + (e && e.message || e);
+      erro.style.display = 'block';
+    });
+    return;
+  }
   ligarCamera().then(function () {
     return abrirCanal(cod, celReceber);
   }).then(function () {
@@ -614,7 +653,7 @@ function ligarCamera(deviceId) {
       var track = s.getVideoTracks()[0], st = track.getSettings ? track.getSettings() : {};
       cel.frente = st.facingMode === 'user' || /front|frontal|user/i.test(track.label || '');
       $('cam').classList.toggle('frente', cel.frente);
-      if (cel.pc) { var sender = cel.pc.getSenders().find(function (x) { return x.track && x.track.kind === 'video'; }); if (sender) sender.replaceTrack(track); }
+      if (cel.pc && !modo.comp) { var sender = cel.pc.getSenders().find(function (x) { return x.track && x.track.kind === 'video'; }); if (sender) sender.replaceTrack(track); }
       anterior = null;
       return listarCameras(st.deviceId).then(function () { prepararZoom(track); });
     });
@@ -658,7 +697,8 @@ function celReceber(m) {
 function oferecer() {
   if (cel.pc) { try { cel.pc.close(); } catch (e) {} }
   var pc = new RTCPeerConnection(ICE); cel.pc = pc;
-  cel.stream.getTracks().forEach(function (t) { pc.addTrack(t, cel.stream); });
+  var fonte = (modo.comp && comp.stream) ? comp.stream : cel.stream;
+  fonte.getVideoTracks().forEach(function (t) { pc.addTrack(t, fonte); });
   try { cel.dc = pc.createDataChannel('mov', { ordered: false, maxRetransmits: 0 }); } catch (e) { cel.dc = null; }
   pc.onicecandidate = function (ev) { if (ev.candidate) enviar({ t: 'ice', id: cel.id, to: 'tv', c: ev.candidate.toJSON() }); };
   pc.onconnectionstatechange = function () {
@@ -696,6 +736,7 @@ function medirEnergia() {
     if (!perto) grupos.push(pt);
   }
   var pontosMov = grupos.map(function (g) { return [+((g[0] + 0.5) / W).toFixed(3), +((g[1] + 0.5) / H).toFixed(3), Math.min(100, Math.round(g[2] / 4))]; });
+  comp.mov = pontosMov;
   var dif = soma / n / 3;                          // 0..255, ruído da câmera ≈ 1–3
   var e = Math.max(0, Math.min(100, (dif - 2) * 4));
   suave = suave * 0.6 + e * 0.4;
@@ -703,8 +744,9 @@ function medirEnergia() {
   var agora = Date.now();
   // pelo canal direto (mesmo caminho do vídeo): 10x por segundo, com os pontos de movimento
   if (cel.dc && cel.dc.readyState === 'open') {
-    if (agora - ultimoEnvioDC > 100) { ultimoEnvioDC = agora; try { cel.dc.send(JSON.stringify({ e: Math.round(suave), p: pontosMov })); } catch (e2) {} }
-  } else if (agora - ultimoEnvio > 400) { ultimoEnvio = agora; enviar({ t: 'energia', id: cel.id, e: Math.round(suave), p: pontosMov.slice(0, 3) }); }
+    if (agora - ultimoEnvioDC > 100) { ultimoEnvioDC = agora; try { cel.dc.send(JSON.stringify({ e: Math.round(suave), p: modo.comp ? [] : pontosMov, c: modo.comp ? 1 : 0 })); } catch (e2) {} }
+  } else if (!modo.solo && agora - ultimoEnvio > 400) { ultimoEnvio = agora; enviar({ t: 'energia', id: cel.id, e: Math.round(suave), p: pontosMov.slice(0, 3), c: modo.comp ? 1 : 0 }); }
+  if (modo.solo && solo.tocando) solo.pontos += suave / 10 * 0.3;
 }
 var ultimoEnvioDC = 0;
 
@@ -739,7 +781,7 @@ function desenharLista(m) {
   ids.forEach(function (id, i) {
     var b = document.createElement('button'); b.className = 'sec' + (i === m.indice ? ' atual' : '');
     b.textContent = (i === m.indice ? '▶️ ' : (i + 1) + '. ') + (titulos[id] || '…');
-    b.onclick = function () { enviar({ t: 'cmd', acao: 'indice', i: i }); };
+    b.onclick = function () { comando({ acao: 'indice', i: i }); };
     d.appendChild(b);
   });
   buscarTitulos(ids);
@@ -750,6 +792,7 @@ function mostrarEstado(m) {
   var p = $('placar'), ks = Object.keys(m.pontos || {}).sort(function (a, b) { return m.pontos[b].pontos - m.pontos[a].pontos; });
   p.innerHTML = ks.map(function (k) { return '<div><span>' + (k === cel.id ? '⭐ ' : '') + escapar(m.pontos[k].nome) + '</span><b>' + m.pontos[k].pontos + '</b></div>'; }).join('');
   if (m.tocando) status('🎵 ' + escapar(m.titulo || ''), 'ok');
+  else if (modo.solo) status(T('Só o celular (sem música)', 'Phone only (no song)'), 'ok');
   else if (cel.pc && cel.pc.connectionState === 'connected') status(T('Ao vivo na TV ✅ (sem música)', 'Live on the TV ✅ (no song)'), 'ok');
 }
 function status(txt, tipo) { var s = $('jogoStatus'); s.textContent = txt; s.className = 'status' + (tipo === 'ok' ? ' ok' : ''); if (tipo === 'erro') s.style.color = '#ff9a93'; else s.style.color = ''; }
@@ -766,11 +809,12 @@ function pedirWakeLock() {
 }
 
 /* --- Música --- */
+function comando(m) { if (modo.solo) soloComando(m); else enviar({ t: 'cmd', acao: m.acao, video: m.video, titulo: m.titulo, lista: m.lista, i: m.i, modo: m.modo, pos: m.pos, grande: m.grande }); }
 function tocarLink(link) {
   link = link || $('link').value;
   var pl = idPlaylist(link);
   if (pl) {
-    enviar({ t: 'cmd', acao: 'playlist', lista: pl }); $('link').value = ''; status(T('Mandei a playlist para a TV…', 'Sent the playlist to the TV…'), 'ok');
+    comando({ acao: 'playlist', lista: pl }); $('link').value = ''; status(modo.solo ? T('Carregando a playlist…', 'Loading the playlist…') : T('Mandei a playlist para a TV…', 'Sent the playlist to the TV…'), 'ok');
     fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/playlist?list=' + pl + '&format=json')
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
       .then(function (j) { guardarHist('list:' + pl, (j && j.title) || (T('Playlist', 'Playlist') + ' ' + pl.slice(0, 6) + '…')); });
@@ -783,10 +827,10 @@ function tocarLink(link) {
     .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
     .then(function (j) {
       var titulo = (j && j.title) || id;
-      enviar({ t: 'cmd', acao: 'carregar', video: id, titulo: titulo });
+      comando({ acao: 'carregar', video: id, titulo: titulo });
       guardarHist(id, titulo);
       $('link').value = ''; $('btTocarLink').disabled = false;
-      status(T('Mandei tocar: ', 'Sent to play: ') + titulo, 'ok');
+      status((modo.solo ? '🎵 ' : T('Mandei tocar: ', 'Sent to play: ')) + titulo, 'ok');
     });
 }
 function guardarHist(id, titulo) {
@@ -810,6 +854,13 @@ function desenharHist() {
 }
 
 function sair() {
+  if (modo.solo) {
+    clearInterval(cel.timerEnergia); clearInterval(solo.timer); ligarComp(false);
+    try { solo.player && solo.player.stopVideo(); } catch (e) {}
+    if (cel.stream) cel.stream.getTracks().forEach(function (t) { t.stop(); });
+    $('jogo').classList.remove('solo'); $('codigo').style.display = ''; $('btEntrar').textContent = T('Entrar e ligar a câmera', 'Join and start the camera'); $('btEntrar').disabled = false;
+    modo.solo = false; tela('inicio'); return;
+  }
   enviar({ t: 'sair', id: cel.id });
   clearInterval(cel.timerEnergia);
   try { cel.pc && cel.pc.close(); } catch (e) {}
@@ -818,6 +869,138 @@ function sair() {
   canal = null; cel.pc = null; cel.tvViu = false;
   $('btEntrar').disabled = false;
   tela('entrar');
+}
+
+/* =====================================================================
+   COMPOSITOR NO CELULAR: desenha a câmera já com cores, pulsos, faíscas e pontinhos num canvas.
+   Usado no modo "só o celular" e no "transmitir já com os efeitos" (o canvas vira o vídeo enviado).
+   ===================================================================== */
+var comp = { ativo: false, stream: null, ctx: null, modo: 'suave', hue: 0, parts: [], textos: [], mov: [], ultimo: 0, ultimoMais: 0, ultimoInv: 0, inv: 0, quenteDesde: 0, frase: '', fraseAte: 0 };
+function ligarComp(on) {
+  var c = $('comp');
+  if (on && !comp.ativo) {
+    comp.ativo = true; comp.ctx = c.getContext('2d');
+    try { comp.stream = c.captureStream ? c.captureStream(30) : null; } catch (e) { comp.stream = null; }
+    requestAnimationFrame(compQuadro);
+  }
+  if (!on) comp.ativo = false;
+  modo.comp = on && !!comp.ativo && (modo.solo || !!comp.stream);
+  $('jogo').classList.toggle('comp', modo.comp);
+  $('btComp').classList.toggle('ativo', modo.comp);
+  // troca a faixa enviada para a TV: canvas pronto ou câmera crua
+  if (cel.pc) {
+    var sender = cel.pc.getSenders().find(function (x) { return x.track && x.track.kind === 'video' || !x.track; });
+    var faixa = modo.comp && comp.stream ? comp.stream.getVideoTracks()[0] : (cel.stream && cel.stream.getVideoTracks()[0]);
+    if (sender && faixa) sender.replaceTrack(faixa).catch(function () {});
+  }
+}
+function compQuadro(ts) {
+  if (!comp.ativo) return;
+  requestAnimationFrame(compQuadro);
+  var ctx = comp.ctx, v = $('cam'), W = 640, H = 360; if (!v.videoWidth) return;
+  var dt = Math.min(50, ts - comp.ultimo) / 16.7; comp.ultimo = ts;
+  var e = suave, forte = comp.modo === 'forte', off = comp.modo === 'off';
+  var batida = Math.pow(Math.abs(Math.sin(ts * Math.PI / 500)), 6);
+  comp.hue = (comp.hue + dt * (forte ? 2.5 : 1.2) * (0.5 + e / 60)) % 360;
+  var h = comp.hue, neon = 'hsl(' + h + ',100%,60%)';
+  // 1) a câmera, espelhada, cobrindo o quadro, com as cores tratadas
+  var esc = Math.max(W / v.videoWidth, H / v.videoHeight), dw = v.videoWidth * esc, dh = v.videoHeight * esc;
+  ctx.save();
+  if (!off) {
+    var luz = 1.2 + batida * (0.5 + e / 120) * (forte ? 1.4 : 1);
+    if (forte && e > 50 && ts - comp.ultimoInv > 330 && Math.random() < 0.6) { comp.ultimoInv = ts; comp.inv = 1; setTimeout(function () { comp.inv = 0; }, 45); }
+    try { ctx.filter = 'brightness(' + luz.toFixed(2) + ') contrast(' + (forte ? 1.5 : 1.3) + ') saturate(' + (forte ? 3.2 : 2.4) + ') hue-rotate(' + Math.round(h) + 'deg)' + (comp.inv ? ' invert(1)' : ''); } catch (e2) {}
+  }
+  ctx.translate(W, 0); ctx.scale(-1, 1);
+  ctx.drawImage(v, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  ctx.restore();
+  if (!off) {
+    // 2) lavagem de cor e brilho neon
+    var ang = (ts / 12) % 360 * Math.PI / 180, g = ctx.createLinearGradient(W / 2 - Math.cos(ang) * W, H / 2 - Math.sin(ang) * H, W / 2 + Math.cos(ang) * W, H / 2 + Math.sin(ang) * H);
+    g.addColorStop(0, 'hsl(' + h + ',100%,55%)'); g.addColorStop(0.5, 'transparent'); g.addColorStop(1, 'hsl(' + ((h + 180) % 360) + ',100%,55%)');
+    ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = (forte ? 0.7 : 0.32) * (0.4 + 0.6 * batida) * (0.5 + e / 200); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    var rg = ctx.createRadialGradient(W / 2, H * 0.6, 10, W / 2, H * 0.6, W * 0.6); rg.addColorStop(0, neon); rg.addColorStop(1, 'transparent');
+    ctx.globalAlpha = (forte ? 0.6 : 0.4) * Math.min(1, 0.3 + e / 70) * (0.6 + 0.4 * batida); ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1;
+    // 3) faíscas e rastros onde mexeu (os mesmos pontos que iriam para a TV)
+    ctx.globalCompositeOperation = 'lighter';
+    comp.mov.forEach(function (p) {
+      var x = (1 - p[0]) * W, y = p[1] * H, f = p[2] / 100;
+      if (comp.parts.length < 900) comp.parts.push({ x: x, y: y, vx: 0, vy: 0, g: 0, vida: 14, tam: 10 + f * 16, cor: 'hsla(' + h + ',100%,70%,.55)' });
+      for (var j = 0, n = Math.round(f * (forte ? 7 : 4)); j < n && comp.parts.length < 900; j++) {
+        var a = Math.random() * Math.PI * 2, vel = 0.8 + Math.random() * 2.5;
+        comp.parts.push({ x: x, y: y, vx: Math.cos(a) * vel, vy: Math.sin(a) * vel - 0.8, g: 0.03, vida: 18 + Math.random() * 18, tam: 2 + Math.random() * 3, cor: 'hsl(' + (h + Math.random() * 60) + ',100%,' + (65 + Math.random() * 25) + '%)' });
+      }
+      if (f > 0.5 && Math.random() < 0.025 * dt) comp.textos.push({ x: x, y: y, t: ['✨', '💫', '⚡', '🎵', '💖', '🌈'][Math.floor(Math.random() * 6)], vida: 70 });
+    });
+    // fogos pela energia geral
+    if (Math.random() < Math.pow(e / 100, 2) * (forte ? 0.32 : 0.16) * dt && comp.parts.length < 900) {
+      var fx0 = Math.random() * W, fy0 = Math.random() * H, nn = 28 + Math.floor(Math.random() * 16), hh = (h + Math.random() * 60 - 30 + 360) % 360;
+      for (var i2 = 0; i2 < nn; i2++) { var a2 = Math.random() * Math.PI * 2, v2 = 1.5 + Math.random() * 4.5; comp.parts.push({ x: fx0, y: fy0, vx: Math.cos(a2) * v2, vy: Math.sin(a2) * v2, g: 0.06, vida: 40 + Math.random() * 35, tam: 2 + Math.random() * 3, cor: 'hsl(' + (hh + Math.random() * 40) + ',100%,' + (55 + Math.random() * 30) + '%)' }); }
+    }
+    for (var i = comp.parts.length - 1; i >= 0; i--) {
+      var p2 = comp.parts[i];
+      p2.x += p2.vx * dt; p2.y += p2.vy * dt; p2.vy += p2.g * dt; p2.vx *= 0.985; p2.vida -= dt;
+      if (p2.vida <= 0 || p2.y > H + 10) { comp.parts.splice(i, 1); continue; }
+      ctx.globalAlpha = Math.max(0, Math.min(1, p2.vida / 25)); ctx.fillStyle = p2.cor;
+      if (p2.tam > 6) { ctx.beginPath(); ctx.arc(p2.x, p2.y, p2.tam / 2, 0, 6.2832); ctx.fill(); } else ctx.fillRect(p2.x, p2.y, p2.tam, p2.tam);
+    }
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    // 4) pontinhos e frases de combo
+    if (e > 45 && ts - comp.ultimoMais > (forte ? 350 : 600)) { comp.ultimoMais = ts; comp.textos.push({ x: 60 + Math.random() * (W - 120), y: H * 0.4 + Math.random() * H * 0.3, t: (modo.solo ? solo.tocando : true) ? '+' + Math.round(e / 10) : ['✨', '💥', '⭐', '🔥'][Math.floor(Math.random() * 4)], vida: 70, grande: true }); }
+    if (e > 65) { comp.quenteDesde = comp.quenteDesde || ts; if (ts - comp.quenteDesde > 1500 && ts > comp.fraseAte) { comp.frase = (EN ? ['🔥 ON FIRE!', '⭐ AMAZING!', '💃 GO GO GO!', '🎉 WOW!'] : ['🔥 PEGANDO FOGO!', '⭐ ARRASOU!', '💃 VAI VAI VAI!', '🎉 UAU!'])[Math.floor(Math.random() * 4)]; comp.fraseAte = ts + 2500; } }
+    else if (e < 40) comp.quenteDesde = 0;
+    ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.7)';
+    for (var k = comp.textos.length - 1; k >= 0; k--) {
+      var tx = comp.textos[k]; tx.vida -= dt; tx.y -= 1.2 * dt;
+      if (tx.vida <= 0) { comp.textos.splice(k, 1); continue; }
+      ctx.globalAlpha = Math.min(1, tx.vida / 30); ctx.font = '900 ' + (tx.grande ? 36 : 30) + 'px system-ui,sans-serif'; ctx.fillStyle = '#fff';
+      ctx.strokeText(tx.t, tx.x, tx.y); ctx.fillText(tx.t, tx.x, tx.y);
+    }
+    ctx.globalAlpha = 1;
+    if (ts < comp.fraseAte) { ctx.font = '900 34px system-ui,sans-serif'; ctx.fillStyle = '#fff'; ctx.shadowColor = neon; ctx.shadowBlur = 18; ctx.strokeText(comp.frase, W / 2, 48); ctx.fillText(comp.frase, W / 2, 48); ctx.shadowBlur = 0; }
+  }
+  // 5) no modo solo, o placar vai na própria imagem
+  if (modo.solo) {
+    ctx.font = '800 22px system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(0, H - 40, W, 40);
+    ctx.fillStyle = '#fff'; ctx.fillText(cel.nome, 12, H - 12); ctx.textAlign = 'right'; ctx.fillStyle = '#ffd66e'; ctx.font = '900 28px system-ui,sans-serif'; ctx.fillText(Math.round(solo.pontos), W - 12, H - 10);
+  }
+}
+
+/* ---------- Só o celular: o YouTube toca aqui mesmo ---------- */
+var solo = { player: null, tocando: false, titulo: '', lista: [], indice: -1, pontos: 0, videoAtual: '', timer: 0, pendente: null };
+function soloIniciar() {
+  solo.pontos = 0;
+  apiYouTube(function () {
+    if (solo.player) return;
+    solo.player = new YT.Player('ytSolo', {
+      width: '100%', height: '100%', playerVars: { autoplay: 0, controls: 1, rel: 0, modestbranding: 1, playsinline: 1, origin: location.origin },
+      events: {
+        onReady: function () { if (solo.pendente) { var m = solo.pendente; solo.pendente = null; soloComando(m); } },
+        onStateChange: function (ev) {
+          var p = solo.player; solo.tocando = (ev.data === YT.PlayerState.PLAYING);
+          try { solo.lista = p.getPlaylist() || []; solo.indice = p.getPlaylistIndex(); } catch (e) { solo.lista = []; solo.indice = -1; }
+          if (ev.data === YT.PlayerState.PLAYING) { var d = p.getVideoData ? p.getVideoData() : null, id = d && d.video_id; if (id && id !== solo.videoAtual) { solo.videoAtual = id; solo.titulo = d.title || id; solo.pontos = 0; } }
+          if (ev.data === YT.PlayerState.ENDED) comp.textos.push({ x: 320, y: 200, t: '🏆 ' + Math.round(solo.pontos), vida: 240, grande: true });
+        },
+        onError: function (ev) { status(T('Esse clipe não toca aqui. Pulando…', 'That clip cannot play here. Skipping…'), 'erro'); try { if ((solo.player.getPlaylist() || []).length > 1) setTimeout(function () { solo.player.nextVideo(); }, 1500); } catch (e) {} }
+      }
+    });
+  });
+  clearInterval(solo.timer);
+  solo.timer = setInterval(function () { var pts = {}; pts[cel.id] = { nome: cel.nome, pontos: Math.round(solo.pontos) }; mostrarEstado({ tocando: solo.tocando, titulo: solo.titulo, pontos: pts, lista: solo.lista, indice: solo.indice }); }, 1000);
+}
+function soloComando(m) {
+  var p = solo.player;
+  if (m.acao === 'efeitos') { comp.modo = m.modo; return; }
+  if (!p || !p.loadVideoById) { if (m.acao === 'carregar' || m.acao === 'playlist') solo.pendente = m; return; }
+  if (m.acao === 'carregar' && m.video) { solo.pontos = 0; solo.titulo = m.titulo || m.video; solo.videoAtual = m.video; p.loadVideoById(m.video); p.playVideo(); }
+  else if (m.acao === 'playlist' && m.lista) { solo.pontos = 0; p.loadPlaylist({ list: m.lista, listType: 'playlist', index: 0 }); p.playVideo(); }
+  else if (m.acao === 'indice') { solo.pontos = 0; p.playVideoAt(+m.i || 0); }
+  else if (m.acao === 'proxima') { solo.pontos = 0; p.nextVideo(); }
+  else if (m.acao === 'anterior') { solo.pontos = 0; p.previousVideo(); }
+  else if (m.acao === 'pausa') { if (p.getPlayerState() === YT.PlayerState.PLAYING) p.pauseVideo(); else p.playVideo(); }
+  else if (m.acao === 'reiniciar') { solo.pontos = 0; p.seekTo(0, true); p.playVideo(); }
 }
 
 /* ---------- Botões ---------- */
@@ -830,15 +1013,17 @@ $('btSair').onclick = sair;
 $('btTocarLink').onclick = function () { tocarLink(); };
 $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') tocarLink(); });
 $('btBuscar').onclick = function () { window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(T('just dance kids', 'just dance kids')), '_blank'); };
-$('btPausa').onclick = function () { enviar({ t: 'cmd', acao: 'pausa' }); };
-$('btReiniciar').onclick = function () { enviar({ t: 'cmd', acao: 'reiniciar' }); };
-$('btProxima').onclick = function () { enviar({ t: 'cmd', acao: 'proxima' }); };
-$('btAnterior').onclick = function () { enviar({ t: 'cmd', acao: 'anterior' }); };
+$('btPausa').onclick = function () { comando({ acao: 'pausa' }); };
+$('btReiniciar').onclick = function () { comando({ acao: 'reiniciar' }); };
+$('btProxima').onclick = function () { comando({ acao: 'proxima' }); };
+$('btAnterior').onclick = function () { comando({ acao: 'anterior' }); };
 var posicao = { pos: 'dir', grande: false };
 function mandarPosicao() { enviar({ t: 'cmd', acao: 'posicao', pos: posicao.pos, grande: posicao.grande }); }
 document.querySelectorAll('button.pos').forEach(function (b) { b.onclick = function () { document.querySelectorAll('button.pos').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); posicao.pos = b.getAttribute('data-pos'); mandarPosicao(); }; });
 $('btGrande').onclick = function () { posicao.grande = !posicao.grande; $('btGrande').classList.toggle('ativo', posicao.grande); mandarPosicao(); };
-document.querySelectorAll('button.fx').forEach(function (b) { b.onclick = function () { document.querySelectorAll('button.fx').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); enviar({ t: 'cmd', acao: 'efeitos', modo: b.getAttribute('data-fx') }); }; });
+document.querySelectorAll('button.fx').forEach(function (b) { b.onclick = function () { document.querySelectorAll('button.fx').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); comp.modo = b.getAttribute('data-fx'); comando({ acao: 'efeitos', modo: comp.modo }); }; });
+$('btComp').onclick = function () { ligarComp(!modo.comp); };
+$('btSolo').onclick = function () { modo.solo = true; $('btCel').click(); $('codigo').style.display = 'none'; $('btEntrar').textContent = T('Começar', 'Start'); };
 window.addEventListener('pagehide', function () { if (cel.pc) enviar({ t: 'sair', id: cel.id }); });
 desenharHist();
 try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
