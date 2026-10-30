@@ -1,0 +1,7 @@
+{
+  "app": "feature-tester",
+  "nota": "Interruptores do RootifyONE que este app obedece (data-recurso nas páginas). Nada de segredo aqui.",
+  "recursos": [
+    { "id": "danca-na-sala", "nome": { "pt": "Dança na Sala", "en": "Living Room Dance" }, "pagina": "danca-na-sala.html" }
+  ]
+}
