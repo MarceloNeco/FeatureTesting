@@ -9,5 +9,21 @@
   "background_color": "#0f1115",
   "theme_color": "#0f1115",
   "lang": "pt-BR",
-  "icons": [{ "src": "danca-na-sala-icone.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }]
+  "icons": [
+    {
+      "src": "danca-na-sala-icone.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "share_target": {
+    "action": "danca-na-sala.html",
+    "method": "GET",
+    "params": {
+      "title": "titulo",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

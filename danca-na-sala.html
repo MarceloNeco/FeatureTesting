@@ -50,11 +50,18 @@ a{color:var(--accent)}
 #tvVideo{position:absolute;inset:0;background:#000}
 #tvVideo iframe,#tvVideo #yt{position:absolute;inset:0;width:100%;height:100%;border:0}
 #tvJogadores{position:absolute;right:2vh;top:2vh;bottom:9vh;width:30vw;display:flex;flex-direction:column;justify-content:center;gap:2.5vh;z-index:4;pointer-events:none}
+#tv.esq #tvJogadores{right:auto;left:2vh}
+#tv.baixo #tvJogadores{left:2vh;right:2vh;top:auto;bottom:2vh;width:auto;height:34vh;flex-direction:row;justify-content:center}
+#tv.baixo .tile{flex:0 1 50vh;max-height:none;height:100%}
+#tv.grande #tvJogadores{width:44vw}
 .tile{position:relative;flex:1;min-height:0;max-height:46vh;border-radius:2vh;overflow:hidden;background:#000;border:.5vh solid #fff;box-shadow:0 0 3vh .5vh var(--neon,#ff2bd6);transition:box-shadow .25s}
-.tile video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);filter:saturate(1.5) contrast(1.1) hue-rotate(var(--hue,0deg))}
+.tile video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);filter:brightness(var(--luz,1.3)) contrast(1.2) saturate(1.7) hue-rotate(var(--hue,0deg))}
+.tile .brilho{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(ellipse at 50% 60%,var(--neon,#ff2bd6) 0%,transparent 70%);opacity:0;transition:opacity .2s}
+.tile .mais{position:absolute;font-size:5vh;font-weight:900;color:#fff;text-shadow:0 0 1.5vh var(--neon,#ff2bd6),0 0 .4vh #000;animation:sobe 1.1s ease-out forwards;pointer-events:none}
+@keyframes sobe{0%{opacity:1;transform:translateY(0) scale(.8)}100%{opacity:0;transform:translateY(-14vh) scale(1.4)}}
 .tile .combo{position:absolute;left:0;right:0;top:1.5vh;text-align:center;font-size:4vh;font-weight:900;color:#fff;text-shadow:0 0 2vh var(--neon,#ff2bd6),0 0 .5vh #000;opacity:0;transition:opacity .3s}
 .tile.quente .combo{opacity:1}
-#tvFx{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+#tvFx{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
 #tvFlash{position:absolute;inset:0;z-index:6;pointer-events:none;background:#fff;opacity:0;transition:opacity .18s}
 .tile .nome{position:absolute;left:0;right:0;bottom:0;padding:1.2vh 1.6vh;background:linear-gradient(transparent,rgba(0,0,0,.85));font-size:3vh;font-weight:800;display:flex;justify-content:space-between;align-items:flex-end}
 .tile .pontos{font-size:4.5vh;color:#ffd66e}
@@ -65,24 +72,40 @@ a{color:var(--accent)}
 #tvCapa .codigo{font-size:18vh;font-weight:900;letter-spacing:2vh;line-height:1;color:#ffd66e}
 #tvCapa p{font-size:3vh;color:#cfd3d8;max-width:80vw;line-height:1.4}
 #tvCapa .url{font-size:3.2vh;color:#fff;font-weight:700;background:#1a1d24;padding:1.5vh 3vh;border-radius:2vh}
-#tvCanto{position:absolute;right:calc(30vw + 4vh);top:2vh;z-index:5;font-size:2.6vh;font-weight:800;background:rgba(0,0,0,.6);padding:1vh 2vh;border-radius:1.5vh;color:#ffd66e}
-#tvTitulo{position:absolute;left:2vh;bottom:2vh;z-index:5;font-size:2.4vh;background:rgba(0,0,0,.6);padding:1vh 2vh;border-radius:1.5vh;max-width:60vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:none}
+#tvRodape{position:absolute;left:2vh;bottom:2vh;z-index:6;display:flex;gap:1.5vh;align-items:center;max-width:64vw}
+#tvCanto{font-size:2.6vh;font-weight:800;background:rgba(0,0,0,.65);padding:1vh 2vh;border-radius:1.5vh;color:#ffd66e;white-space:nowrap}
+#tvTitulo{font-size:2.4vh;background:rgba(0,0,0,.65);padding:1vh 2vh;border-radius:1.5vh;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:none}
+#tv.baixo #tvRodape{bottom:auto;top:2vh}
 #tvFim{position:absolute;inset:0;z-index:9;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2vh;background:rgba(0,0,0,.88);text-align:center}
 #tvFim.ativa{display:flex}
 #tvFim h2{font-size:9vh;color:#ffd66e}
 #tvFim .lista{font-size:4.5vh;line-height:1.6}
 
 /* ---------- Celular ---------- */
-#cam{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;object-fit:cover}
+.topo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.95rem}
+.painel{display:flex;gap:10px;margin-top:10px;align-items:stretch}
+.camBox{position:relative;flex:0 0 46%;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:4/3}
+#cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #cam.frente{transform:scaleX(-1)}
+.camNome{position:absolute;left:0;right:0;bottom:0;font-size:.7rem;padding:3px 6px;background:rgba(0,0,0,.6);color:#cfd3d8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lado{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+.ctl button{font-size:1.5rem;padding:12px 0}
+.zoomBox{display:flex;align-items:center;gap:8px;flex:1}
+.zoomBox input{flex:1;padding:0;height:28px}
+details{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0 12px}
+details summary{padding:12px 0;font-weight:700;cursor:pointer;list-style:none}
+details summary::before{content:'▸ ';color:var(--muted)}
+details[open] summary::before{content:'▾ '}
+details .col{margin-top:0;padding-bottom:12px}
 .energia{height:14px;background:var(--card);border-radius:7px;overflow:hidden;border:1px solid var(--border)}
 .energia i{display:block;height:100%;width:0;background:var(--ok);transition:width .15s}
 .placar{display:flex;flex-direction:column;gap:6px}
-.placar div{display:flex;justify-content:space-between;background:var(--card);padding:10px 14px;border-radius:10px;font-weight:700}
+.placar div{display:flex;justify-content:space-between;background:var(--card);padding:6px 10px;border-radius:8px;font-weight:700;font-size:.9rem;gap:6px}
+.placar div span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .placar b{color:#ffd66e}
 .status{font-size:.85rem;color:var(--muted)}
 .status.ok{color:#7ee2a0}
-button.fx.ativo{border-color:var(--accent);background:#1a2c4e}
+button.fx.ativo,button.pos.ativo,#btGrande.ativo{border-color:var(--accent);background:#1a2c4e}
 .hist button.atual{border-color:#ffd66e;color:#ffd66e}
 .hist button{text-align:left;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;width:100%}
 footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
@@ -109,8 +132,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 
 <!-- ===== TV ===== -->
 <div id="tv">
-  <div id="tvCanto"></div>
-  <div id="tvTitulo"></div>
+  <div id="tvRodape"><div id="tvCanto"></div><div id="tvTitulo"></div></div>
   <div id="tvPalco">
     <div id="tvVideo"><div id="yt"></div></div>
     <canvas id="tvFx"></canvas>
@@ -140,48 +162,68 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 
 <!-- ===== Celular: jogando ===== -->
 <section id="jogo" class="tela">
-  <div class="row" style="align-items:center;justify-content:space-between">
-    <div><b id="jogoNome"></b> · <span id="jogoCodigo" style="color:#ffd66e;font-weight:800"></span></div>
-    <div class="status" id="jogoStatus" style="flex:0 0 auto"></div>
+  <div class="topo"><b id="jogoNome"></b> · <span id="jogoCodigo" style="color:#ffd66e;font-weight:800"></span> <span class="status" id="jogoStatus"></span></div>
+  <div class="painel">
+    <div class="camBox"><video id="cam" autoplay muted playsinline></video><div class="camNome" id="camNome"></div></div>
+    <div class="lado">
+      <div class="energia" title="energia"><i id="energiaBarra"></i></div>
+      <div class="placar" id="placar"></div>
+    </div>
   </div>
-  <div class="col">
-    <video id="cam" autoplay muted playsinline></video>
+  <div class="col" style="margin-top:10px">
     <div class="row">
-      <button class="sec" id="btCamera">🔄 <span data-t="Trocar câmera|Switch camera"></span></button>
-      <button class="sec" id="btSair">🚪 <span data-t="Sair|Leave"></span></button>
+      <button class="sec" id="btCamera" style="flex:0 0 auto">🔄 <span data-t="Câmera|Camera"></span></button>
+      <div class="zoomBox" id="zoomBox" style="display:none">🔍 <input type="range" id="zoom"><span id="zoomVal" class="muted" style="font-size:.8rem"></span></div>
     </div>
-    <div>
-      <div class="muted" style="margin-bottom:6px" data-t="Sua energia agora|Your energy now"></div>
-      <div class="energia"><i id="energiaBarra"></i></div>
-    </div>
-    <div class="placar" id="placar"></div>
-
-    <h2 style="font-size:1.05rem;margin-top:8px" data-t="🎵 Música|🎵 Song"></h2>
-    <input id="link" inputmode="url" data-ph="Cole o link de um vídeo ou de uma playlist do YouTube|Paste a YouTube video or playlist link">
-    <div class="row">
-      <button id="btTocarLink" data-t="▶️ Tocar na TV|▶️ Play on TV"></button>
-      <button class="sec" id="btBuscar" data-t="🔎 Procurar no YouTube|🔎 Search YouTube"></button>
+    <div class="row ctl">
+      <button class="sec" id="btAnterior" title="Anterior" disabled>⏪</button>
+      <button class="sec" id="btPausa" title="Pausar / continuar">⏯️</button>
+      <button class="sec" id="btReiniciar" title="Do início">⏮️</button>
+      <button class="sec" id="btProxima" title="Próxima" disabled>⏩</button>
     </div>
     <div class="row">
-      <button class="sec" id="btPausa" data-t="⏯️ Pausar / continuar|⏯️ Pause / resume"></button>
-      <button class="sec" id="btReiniciar" data-t="⏮️ Do início|⏮️ From the start"></button>
+      <input id="link" inputmode="url" data-ph="Link do YouTube (vídeo ou playlist)|YouTube link (video or playlist)">
+      <button id="btTocarLink" style="flex:0 0 auto">▶️ <span data-t="Tocar|Play"></span></button>
     </div>
-    <div class="row" id="plNav" style="display:none">
-      <button class="sec" id="btAnterior" data-t="⏪ Anterior|⏪ Previous"></button>
-      <button class="sec" id="btProxima" data-t="⏩ Próxima|⏩ Next"></button>
-    </div>
-    <div class="hist col" id="plLista" style="gap:6px;margin-top:0;display:none"></div>
-    <h2 style="font-size:1.05rem;margin-top:8px" data-t="✨ Efeitos na TV|✨ TV effects"></h2>
-    <div class="row">
-      <button class="sec fx" data-fx="off" data-t="Sem|Off"></button>
-      <button class="sec fx ativo" data-fx="suave" data-t="Suave|Soft"></button>
-      <button class="sec fx" data-fx="forte" data-t="Forte 🎆|Strong 🎆"></button>
-    </div>
-    <p class="muted" data-t="⚠️ “Forte” faz a TV piscar luzes. Evite se alguém em casa tiver epilepsia ou sensibilidade a luzes.|⚠️ “Strong” flashes lights on the TV. Avoid it if anyone at home has epilepsy or light sensitivity."></p>
-    <div class="hist col" id="hist" style="gap:6px;margin-top:0"></div>
-    <div class="aviso" data-t="Dica: deixe o celular apoiado, na horizontal, apontando para quem dança. A tela precisa ficar ligada.|Tip: prop the phone up, landscape, facing the dancers. The screen must stay on."></div>
+    <details open>
+      <summary data-t="🎵 Músicas|🎵 Songs"></summary>
+      <div class="col">
+        <div class="hist col" id="plLista" style="gap:6px;margin-top:0;display:none"></div>
+        <div class="hist col" id="hist" style="gap:6px;margin-top:0"></div>
+        <button class="sec" id="btBuscar" data-t="🔎 Procurar no YouTube|🔎 Search YouTube"></button>
+      </div>
+    </details>
+    <details>
+      <summary data-t="✨ Efeitos na TV|✨ TV effects"></summary>
+      <div class="col">
+        <div class="row">
+          <button class="sec fx" data-fx="off" data-t="Sem|Off"></button>
+          <button class="sec fx ativo" data-fx="suave" data-t="Suave|Soft"></button>
+          <button class="sec fx" data-fx="forte" data-t="Forte 🎆|Strong 🎆"></button>
+        </div>
+        <p class="muted" data-t="⚠️ “Forte” faz a TV piscar luzes. Evite se alguém em casa tiver epilepsia ou sensibilidade a luzes.|⚠️ “Strong” flashes lights on the TV. Avoid it if anyone at home has epilepsy or light sensitivity."></p>
+      </div>
+    </details>
+    <details>
+      <summary data-t="📺 Posição na TV|📺 Position on the TV"></summary>
+      <div class="col">
+        <div class="row">
+          <button class="sec pos ativo" data-pos="dir" data-t="Direita|Right"></button>
+          <button class="sec pos" data-pos="esq" data-t="Esquerda|Left"></button>
+          <button class="sec pos" data-pos="baixo" data-t="Embaixo|Bottom"></button>
+        </div>
+        <button class="sec" id="btGrande" data-t="🔍 Câmeras maiores|🔍 Bigger cameras"></button>
+      </div>
+    </details>
+    <details>
+      <summary data-t="⚙️ Mais|⚙️ More"></summary>
+      <div class="col">
+        <div class="aviso" data-t="Dica: deixe o celular apoiado, na horizontal, apontando para quem dança. A tela precisa ficar ligada. Se o celular tiver câmera grande-angular (0.5x), ela aparece no botão 🔄 Câmera.|Tip: prop the phone up, landscape, facing the dancers. The screen must stay on. If the phone has a wide-angle (0.5x) camera, it shows up under 🔄 Camera."></div>
+        <button class="sec" id="btSair">🚪 <span data-t="Sair da sala|Leave the room"></span></button>
+        <div class="muted" style="text-align:center;font-size:.75rem">Dança na Sala <span class="ver2"></span></div>
+      </div>
+    </details>
   </div>
-  <footer>Dança na Sala <span class="ver2"></span></footer>
 </section>
 
 <script src="recursos.js" data-app="feature-tester"></script>
@@ -189,7 +231,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '0.4.0', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '0.6.0', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -250,7 +292,7 @@ function iniciarTV() {
   $('tv').classList.add('ativa');
   $('tvCodigo').textContent = c;
   $('tvCanto').textContent = T('Código: ', 'Code: ') + c;
-  $('tvUrl').textContent = location.host + location.pathname.replace(/index\.html$/, '');
+  $('tvUrl').textContent = /solverone\.com\.br$/.test(location.host) ? 'solverone.com.br/tv' : location.host + location.pathname.replace(/index\.html$/, '');
   try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch (e) {}
 
   abrirCanal(c, tvReceber).then(function () {
@@ -276,6 +318,8 @@ function tvReceber(m) {
 
 function tvNovoJogador(m) {
   if (tv.pcs[m.id]) { try { tv.pcs[m.id].close(); } catch (e) {} }
+  // o mesmo nome entrando de novo (recarregou a página) substitui o antigo, em vez de duplicar
+  Object.keys(tv.tiles).forEach(function (k) { if (k !== m.id && tv.pontos[k] && tv.pontos[k].nome === m.nome) tvRemover(k); });
   var pc = new RTCPeerConnection(ICE);
   tv.pcs[m.id] = pc;
   var tile = tv.tiles[m.id] || tvTile(m.id, m.nome);
@@ -283,8 +327,12 @@ function tvNovoJogador(m) {
   pc.ontrack = function (ev) { var v = tile.querySelector('video'); if (v.srcObject !== ev.streams[0]) { v.srcObject = ev.streams[0]; v.play().catch(function () {}); } };
   pc.onicecandidate = function (ev) { if (ev.candidate) enviar({ t: 'ice', to: m.id, c: ev.candidate.toJSON() }); };
   pc.onconnectionstatechange = function () {
-    if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') tile.classList.add('off');
-    if (pc.connectionState === 'connected') tile.classList.remove('off');
+    if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected' || pc.connectionState === 'closed') {
+      tile.classList.add('off');
+      // sumiu de vez (fechou a página, acabou a bateria): tira da TV depois de 15 s
+      clearTimeout(tile.somir); tile.somir = setTimeout(function () { if (tv.pcs[m.id] === pc && pc.connectionState !== 'connected') tvRemover(m.id); }, 15000);
+    }
+    if (pc.connectionState === 'connected') { tile.classList.remove('off'); clearTimeout(tile.somir); }
   };
   pc.setRemoteDescription(m.sdp).then(function () { return pc.createAnswer(); })
     .then(function (a) { return pc.setLocalDescription(a).then(function () { enviar({ t: 'answer', to: m.id, sdp: pc.localDescription.toJSON() }); }); })
@@ -295,7 +343,7 @@ function tvNovoJogador(m) {
 function tvTile(id, nome) {
   var d = document.createElement('div');
   d.className = 'tile';
-  d.innerHTML = '<video autoplay muted playsinline></video><div class="barra"><i></i></div><div class="combo"></div><div class="nome"><span></span><span class="pontos">0</span></div>';
+  d.innerHTML = '<video autoplay muted playsinline></video><div class="brilho"></div><div class="barra"><i></i></div><div class="combo"></div><div class="nome"><span></span><span class="pontos">0</span></div>';
   d.querySelector('.nome span').textContent = nome || '?';
   $('tvJogadores').appendChild(d);
   tv.tiles[id] = d;
@@ -382,6 +430,8 @@ function tvComando(m) {
     comecar(); p.nextVideo();
   } else if (m.acao === 'anterior' && tv.lista.length) {
     comecar(); p.previousVideo();
+  } else if (m.acao === 'posicao') {
+    $('tv').className = 'ativa ' + (m.pos === 'esq' || m.pos === 'baixo' ? m.pos : '') + (m.grande ? ' grande' : '');
   } else if (m.acao === 'efeitos') {
     fxModo(m.modo);
   } else if (m.acao === 'pausa') {
@@ -429,13 +479,16 @@ function fxQuadro(ts) {
     t.style.setProperty('--neon', 'hsl(' + h + ',100%,60%)');
     t.style.setProperty('--hue', (tv.tocando ? Math.round(Math.sin(ts / 900 + i) * (forte ? 60 : 25) * (e / 100)) : 0) + 'deg');
     t.style.boxShadow = '0 0 ' + (2 + e / 8) + 'vh ' + (0.3 + e / 40) + 'vh hsl(' + h + ',100%,60%)';
+    t.querySelector('.brilho').style.opacity = (forte ? 0.55 : 0.35) * Math.min(1, e / 70);
+    // pontinhos subindo quando se mexe (com música valem pontos de verdade)
+    if (e > 45 && ts - (t.ultimoMais || 0) > (forte ? 350 : 600)) { t.ultimoMais = ts; fxMais(t, tv.tocando ? '+' + Math.round(e / 10) : ['✨', '💥', '⭐', '🔥'][Math.floor(Math.random() * 4)]); }
     // combo: energia alta por 1,5 s acende a frase
     if (e > 65) { tv.quente[k] = (tv.quente[k] || ts); if (ts - tv.quente[k] > 1500 && !t.classList.contains('quente')) { t.querySelector('.combo').textContent = fx.frases[Math.floor(Math.random() * fx.frases.length)]; t.classList.add('quente'); } }
     else if (e < 40) { delete tv.quente[k]; t.classList.remove('quente'); }
     // fogos: quanto mais energia, mais explosões perto da câmera
-    if (tv.tocando && Math.random() < Math.pow(e / 100, 2) * (forte ? 0.22 : 0.09) * dt && fx.parts.length < 900) {
+    if (Math.random() < Math.pow(e / 100, 2) * (forte ? 0.32 : 0.16) * (tv.tocando ? 1 : 0.4) * dt && fx.parts.length < 900) {
       var r = t.getBoundingClientRect(), sx = W / innerWidth, sy = H / innerHeight;
-      fxFogo((r.left - 40 + Math.random() * (r.width + 80)) * sx, (r.top - 40 + Math.random() * (r.height + 80)) * sy, h);
+      fxFogo((r.left - 30 + Math.random() * (r.width + 60)) * sx, (r.top - 30 + Math.random() * (r.height + 60)) * sy, h);
     }
   });
   // clarão (só no modo forte, no máximo a cada 350 ms)
@@ -462,6 +515,11 @@ function fxFogo(x, y, h) {
     fx.parts.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 0.06, vida: 40 + Math.random() * 35, tam: 2 + Math.random() * 3, cor: 'hsl(' + (hh + Math.random() * 40) + ',100%,' + (55 + Math.random() * 30) + '%)' });
   }
 }
+function fxMais(tile, texto) {
+  var d = document.createElement('div'); d.className = 'mais'; d.textContent = texto;
+  d.style.left = (10 + Math.random() * 60) + '%'; d.style.top = (30 + Math.random() * 40) + '%';
+  tile.appendChild(d); setTimeout(function () { d.remove(); }, 1200);
+}
 function fxConfete() {
   if (fx.modo === 'off') return;
   for (var i = 0; i < 220; i++) fx.parts.push({ x: Math.random() * 960, y: -20 - Math.random() * 300, vx: Math.random() * 2 - 1, vy: 1 + Math.random() * 2, g: 0.01, vida: 300, tam: 4 + Math.random() * 5, cor: 'hsl(' + Math.random() * 360 + ',100%,60%)' });
@@ -472,7 +530,7 @@ function escapar(s) { return String(s).replace(/[&<>"]/g, function (c) { return 
 /* =====================================================================
    CELULAR
    ===================================================================== */
-var cel = { id: idNovo(), nome: '', pc: null, stream: null, frente: false, timerEnergia: 0, tvViu: false, wake: null, ultimoEstado: null };
+var cel = { id: idNovo(), nome: '', pc: null, stream: null, frente: false, cams: [], camIdx: -1, timerEnergia: 0, tvViu: false, wake: null, ultimoEstado: null };
 
 function entrar() {
   var nome = $('nome').value.trim(), cod = $('codigo').value.trim().toUpperCase();
@@ -482,7 +540,7 @@ function entrar() {
     erro.textContent = T('Este navegador não deixa usar a câmera. Abra no Chrome ou no Safari.', 'This browser cannot use the camera. Open it in Chrome or Safari.'); erro.style.display = 'block'; return;
   }
   cel.nome = nome; CODIGO = cod;
-  try { localStorage.setItem('danca:nome', nome); } catch (e) {}
+  try { localStorage.setItem('danca:nome', nome); localStorage.setItem('danca:codigo', cod); } catch (e) {}
   $('btEntrar').disabled = true;
   ligarCamera().then(function () {
     return abrirCanal(cod, celReceber);
@@ -501,21 +559,58 @@ function entrar() {
   });
 }
 
-function ligarCamera() {
+/* Câmeras: a primeira vez pede a traseira; depois lista TODAS as câmeras do aparelho (nos Samsung a
+   grande-angular 0.5x aparece como uma câmera separada) e o botão 🔄 vai passando por elas. Zoom quando
+   o navegador oferece. */
+function ligarCamera(deviceId) {
   if (cel.stream) cel.stream.getTracks().forEach(function (t) { t.stop(); });
-  var c = { video: { facingMode: cel.frente ? 'user' : 'environment', width: { ideal: 640 }, height: { ideal: 360 }, frameRate: { ideal: 24 } }, audio: false };
-  return navigator.mediaDevices.getUserMedia(c).catch(function () { return navigator.mediaDevices.getUserMedia({ video: true, audio: false }); })
+  var v = { width: { ideal: 640 }, height: { ideal: 360 }, frameRate: { ideal: 24 } };
+  if (deviceId) v.deviceId = { exact: deviceId }; else v.facingMode = 'environment';
+  return navigator.mediaDevices.getUserMedia({ video: v, audio: false })
+    .catch(function () { return navigator.mediaDevices.getUserMedia({ video: true, audio: false }); })
     .then(function (s) {
-      cel.stream = s; $('cam').srcObject = s; $('cam').classList.toggle('frente', cel.frente);
-      if (cel.pc) { var sender = cel.pc.getSenders().find(function (x) { return x.track && x.track.kind === 'video'; }); if (sender) sender.replaceTrack(s.getVideoTracks()[0]); }
+      cel.stream = s; $('cam').srcObject = s;
+      var track = s.getVideoTracks()[0], st = track.getSettings ? track.getSettings() : {};
+      cel.frente = st.facingMode === 'user' || /front|frontal|user/i.test(track.label || '');
+      $('cam').classList.toggle('frente', cel.frente);
+      if (cel.pc) { var sender = cel.pc.getSenders().find(function (x) { return x.track && x.track.kind === 'video'; }); if (sender) sender.replaceTrack(track); }
+      anterior = null;
+      return listarCameras(st.deviceId).then(function () { prepararZoom(track); });
     });
+}
+function listarCameras(atual) {
+  if (!navigator.mediaDevices.enumerateDevices) return Promise.resolve();
+  return navigator.mediaDevices.enumerateDevices().then(function (ds) {
+    cel.cams = ds.filter(function (d) { return d.kind === 'videoinput'; });
+    cel.camIdx = Math.max(0, cel.cams.findIndex(function (d) { return d.deviceId === atual; }));
+    var c = cel.cams[cel.camIdx], nome = c && c.label ? nomeCamera(c.label) : '';
+    $('camNome').textContent = cel.cams.length > 1 ? (cel.camIdx + 1) + '/' + cel.cams.length + ' ' + nome : nome;
+    $('btCamera').disabled = cel.cams.length < 2;
+  }).catch(function () {});
+}
+function nomeCamera(label) {
+  var l = label.toLowerCase();
+  if (/ultra|wide|0\.5|grande/.test(l)) return T('grande-angular', 'wide-angle');
+  if (/tele|zoom/.test(l)) return T('tele', 'tele');
+  if (/front|user/.test(l)) return T('frontal', 'front');
+  if (/back|rear|environment/.test(l)) return T('traseira', 'back');
+  return label.slice(0, 22);
+}
+function prepararZoom(track) {
+  var box = $('zoomBox'), caps = track.getCapabilities ? track.getCapabilities() : {};
+  if (!caps.zoom || caps.zoom.max <= caps.zoom.min) { box.style.display = 'none'; return; }
+  var z = $('zoom'); z.min = caps.zoom.min; z.max = caps.zoom.max; z.step = caps.zoom.step || 0.1;
+  var st = track.getSettings(); z.value = st.zoom || caps.zoom.min;
+  $('zoomVal').textContent = (+z.value).toFixed(1) + 'x';
+  box.style.display = '';
+  z.oninput = function () { $('zoomVal').textContent = (+z.value).toFixed(1) + 'x'; track.applyConstraints({ advanced: [{ zoom: +z.value }] }).catch(function () {}); };
 }
 
 function celReceber(m) {
   if (m.t === 'tv') { cel.tvViu = true; if (!cel.pc || cel.pc.connectionState === 'failed' || cel.pc.connectionState === 'closed') oferecer(); return; }
   if (m.to !== cel.id && m.t !== 'estado') return;
-  if (m.t === 'answer' && cel.pc) { cel.pc.setRemoteDescription(m.sdp).catch(function (e) { console.warn(e); }); return; }
-  if (m.t === 'ice' && cel.pc) { try { cel.pc.addIceCandidate(m.c); } catch (e) {} return; }
+  if (m.t === 'answer' && cel.pc) { cel.pc.setRemoteDescription(m.sdp).then(function () { (cel.iceFila || []).forEach(function (c) { cel.pc.addIceCandidate(c).catch(function () {}); }); cel.iceFila = []; }).catch(function (e) { console.warn(e); }); return; }
+  if (m.t === 'ice' && cel.pc) { if (!cel.pc.remoteDescription) { (cel.iceFila = cel.iceFila || []).push(m.c); return; } cel.pc.addIceCandidate(m.c).catch(function () {}); return; }
   if (m.t === 'estado') { cel.tvViu = true; mostrarEstado(m); return; }
 }
 
@@ -571,9 +666,10 @@ function buscarTitulos(ids) {
 }
 var listaDesenhada = '';
 function desenharLista(m) {
-  var ids = (m && m.lista) || [], d = $('plLista'), nav = $('plNav');
-  if (!ids.length) { d.style.display = 'none'; nav.style.display = 'none'; listaDesenhada = ''; return; }
-  d.style.display = ''; nav.style.display = '';
+  var ids = (m && m.lista) || [], d = $('plLista');
+  $('btAnterior').disabled = $('btProxima').disabled = !ids.length;
+  if (!ids.length) { d.style.display = 'none'; listaDesenhada = ''; return; }
+  d.style.display = '';
   var chave = ids.join(',') + '|' + m.indice + '|' + Object.keys(titulos).length;
   if (chave === listaDesenhada) return;
   listaDesenhada = chave; d.innerHTML = '';
@@ -598,7 +694,13 @@ function status(txt, tipo) { var s = $('jogoStatus'); s.textContent = txt; s.cla
 
 function pedirWakeLock() {
   try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { cel.wake = w; }).catch(function () {}); } catch (e) {}
-  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') pedirWakeLock(); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible') return;
+    pedirWakeLock();
+    // voltou do YouTube (ou de outro app): se a câmera morreu no fundo, religa e reconecta
+    var tr = cel.stream && cel.stream.getVideoTracks()[0];
+    if (!tr || tr.readyState === 'ended' || tr.muted) ligarCamera(cel.cams[cel.camIdx] && cel.cams[cel.camIdx].deviceId).then(function () { if (!cel.pc || cel.pc.connectionState !== 'connected') enviar({ t: 'join', id: cel.id, nome: cel.nome }); }).catch(function () {});
+  });
 }
 
 /* --- Música --- */
@@ -628,15 +730,21 @@ function tocarLink(link) {
 function guardarHist(id, titulo) {
   var h = lerHist().filter(function (x) { return x.id !== id; });
   h.unshift({ id: id, titulo: titulo });
-  try { localStorage.setItem('danca:hist', JSON.stringify(h.slice(0, 8))); } catch (e) {}
+  try { localStorage.setItem('danca:hist', JSON.stringify(h.slice(0, 30))); } catch (e) {}
   desenharHist();
 }
 function lerHist() { try { return JSON.parse(localStorage.getItem('danca:hist') || '[]'); } catch (e) { return []; } }
 function desenharHist() {
   var h = lerHist(), d = $('hist'); d.innerHTML = '';
   if (!h.length) return;
-  var t = document.createElement('div'); t.className = 'muted'; t.textContent = T('Últimas músicas', 'Recent songs'); d.appendChild(t);
-  h.forEach(function (x) { var b = document.createElement('button'); b.className = 'sec'; var pl = x.id.indexOf('list:') === 0; b.textContent = (pl ? '📜 ' : '🎵 ') + x.titulo; b.onclick = function () { tocarLink(pl ? 'https://www.youtube.com/playlist?list=' + x.id.slice(5) : x.id); }; d.appendChild(b); });
+  var t = document.createElement('div'); t.className = 'muted'; t.textContent = T('Suas músicas (segure para tirar)', 'Your songs (hold to remove)'); d.appendChild(t);
+  h.forEach(function (x) {
+    var b = document.createElement('button'); b.className = 'sec'; var pl = x.id.indexOf('list:') === 0; b.textContent = (pl ? '📜 ' : '🎵 ') + x.titulo;
+    b.onclick = function () { tocarLink(pl ? 'https://www.youtube.com/playlist?list=' + x.id.slice(5) : x.id); };
+    var seg; b.addEventListener('touchstart', function () { seg = setTimeout(function () { if (confirm(T('Tirar da lista?', 'Remove from the list?') + ' ' + x.titulo)) { try { localStorage.setItem('danca:hist', JSON.stringify(lerHist().filter(function (y) { return y.id !== x.id; }))); } catch (e) {} desenharHist(); } }, 700); }, { passive: true });
+    b.addEventListener('touchend', function () { clearTimeout(seg); }); b.addEventListener('touchmove', function () { clearTimeout(seg); });
+    d.appendChild(b);
+  });
 }
 
 function sair() {
@@ -652,10 +760,10 @@ function sair() {
 
 /* ---------- Botões ---------- */
 $('btTV').onclick = iniciarTV;
-$('btCel').onclick = function () { tela('entrar'); try { $('nome').value = localStorage.getItem('danca:nome') || ''; } catch (e) {} ($('nome').value ? $('codigo') : $('nome')).focus(); };
+$('btCel').onclick = function () { tela('entrar'); try { $('nome').value = localStorage.getItem('danca:nome') || ''; $('codigo').value = localStorage.getItem('danca:codigo') || ''; } catch (e) {} ($('nome').value ? $('codigo') : $('nome')).focus(); };
 $('btEntrar').onclick = entrar;
 $('codigo').addEventListener('keydown', function (e) { if (e.key === 'Enter') entrar(); });
-$('btCamera').onclick = function () { cel.frente = !cel.frente; ligarCamera().catch(function () {}); };
+$('btCamera').onclick = function () { if (cel.cams.length < 2) return; var i = (cel.camIdx + 1) % cel.cams.length; ligarCamera(cel.cams[i].deviceId).catch(function () {}); };
 $('btSair').onclick = sair;
 $('btTocarLink').onclick = function () { tocarLink(); };
 $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') tocarLink(); });
@@ -664,12 +772,25 @@ $('btPausa').onclick = function () { enviar({ t: 'cmd', acao: 'pausa' }); };
 $('btReiniciar').onclick = function () { enviar({ t: 'cmd', acao: 'reiniciar' }); };
 $('btProxima').onclick = function () { enviar({ t: 'cmd', acao: 'proxima' }); };
 $('btAnterior').onclick = function () { enviar({ t: 'cmd', acao: 'anterior' }); };
+var posicao = { pos: 'dir', grande: false };
+function mandarPosicao() { enviar({ t: 'cmd', acao: 'posicao', pos: posicao.pos, grande: posicao.grande }); }
+document.querySelectorAll('button.pos').forEach(function (b) { b.onclick = function () { document.querySelectorAll('button.pos').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); posicao.pos = b.getAttribute('data-pos'); mandarPosicao(); }; });
+$('btGrande').onclick = function () { posicao.grande = !posicao.grande; $('btGrande').classList.toggle('ativo', posicao.grande); mandarPosicao(); };
 document.querySelectorAll('button.fx').forEach(function (b) { b.onclick = function () { document.querySelectorAll('button.fx').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); enviar({ t: 'cmd', acao: 'efeitos', modo: b.getAttribute('data-fx') }); }; });
 window.addEventListener('pagehide', function () { if (cel.pc) enviar({ t: 'sair', id: cel.id }); });
 desenharHist();
 try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 
 /* Atalho: ?tv abre direto a tela de escolha com foco no botão da TV (para apertar OK no controle). */
+/* Link que chegou pelo "Compartilhar" do YouTube (Web Share Target do manifesto): entra no campo e,
+   se nome e código já são conhecidos, já entra na sala com ele. */
+var compartilhado = (location.search.match(/[?&](?:link|text|url)=([^&]+)/) || []).map(decodeURIComponent)[1] || '';
+if (compartilhado && (idYouTube(compartilhado) || idPlaylist(compartilhado))) {
+  history.replaceState(null, '', location.pathname);
+  $('btCel').click();
+  $('link').value = compartilhado;
+  if ($('nome').value && $('codigo').value) { entrar(); var esperaTV = setInterval(function () { if (cel.tvViu && $('jogo').classList.contains('ativa')) { clearInterval(esperaTV); tocarLink(compartilhado); } }, 500); setTimeout(function () { clearInterval(esperaTV); }, 20000); }
+}
 if (/[?&]tv=auto\b/.test(location.search)) iniciarTV();   // aberto pelo app da LG: já entra como TV
 else if (/[?&]tv\b/.test(location.search)) $('btTV').focus();
 })();
