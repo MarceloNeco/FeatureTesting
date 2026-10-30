@@ -601,7 +601,13 @@ function pedirWakeLock() {
 function tocarLink(link) {
   link = link || $('link').value;
   var pl = idPlaylist(link);
-  if (pl) { enviar({ t: 'cmd', acao: 'playlist', lista: pl }); guardarHist('list:' + pl, T('Playlist', 'Playlist') + ' ' + pl.slice(0, 6) + '…'); $('link').value = ''; status(T('Mandei a playlist para a TV…', 'Sent the playlist to the TV…'), 'ok'); return; }
+  if (pl) {
+    enviar({ t: 'cmd', acao: 'playlist', lista: pl }); $('link').value = ''; status(T('Mandei a playlist para a TV…', 'Sent the playlist to the TV…'), 'ok');
+    fetch('https://www.youtube.com/oembed?url=https://www.youtube.com/playlist?list=' + pl + '&format=json')
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+      .then(function (j) { guardarHist('list:' + pl, (j && j.title) || (T('Playlist', 'Playlist') + ' ' + pl.slice(0, 6) + '…')); });
+    return;
+  }
   var id = idYouTube(link);
   if (!id) { status(T('Não achei um link do YouTube aí.', 'That is not a YouTube link.'), 'erro'); return; }
   $('btTocarLink').disabled = true;
