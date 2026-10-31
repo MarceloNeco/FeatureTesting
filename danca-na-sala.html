@@ -84,6 +84,24 @@ a{color:var(--accent)}
 #tv.baixo #tvRodape{bottom:auto;top:2vh}
 #tvFim{position:absolute;inset:0;z-index:9;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2vh;background:rgba(0,0,0,.88);text-align:center}
 #tvFim.ativa{display:flex}
+#tvCarga{position:absolute;inset:0;z-index:8;display:none;align-items:center;justify-content:center;flex-direction:column;gap:2vh;overflow:hidden;background:#000}
+#tvCarga.ativa{display:flex}
+#tvCarga .fundo{position:absolute;inset:-20%;background:conic-gradient(from 0deg,#ff2bd6,#ffd60a,#2bff88,#2bb5ff,#b52bff,#ff2bd6);animation:gira 6s linear infinite;opacity:.55;filter:blur(6vh)}
+#tvCarga .pisca{position:absolute;inset:0;background:radial-gradient(circle at 30% 40%,#fff 0,transparent 30%),radial-gradient(circle at 70% 60%,#fff 0,transparent 25%);mix-blend-mode:overlay;animation:piscaFundo .5s steps(2) infinite;opacity:.35}
+#tvCarga .anel{position:relative;width:34vh;height:34vh}
+#tvCarga .anel svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#tvCarga .anel circle{fill:none;stroke-width:3.2;stroke-linecap:round}
+#tvCarga .anel .trilho{stroke:rgba(255,255,255,.18)}
+#tvCarga .anel .barra{stroke:#fff;stroke-dasharray:100 100;stroke-dashoffset:100;transition:stroke-dashoffset .25s;filter:drop-shadow(0 0 1.5vh #fff)}
+#tvCarga .dancante{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15vh;animation:danca .6s ease-in-out infinite alternate}
+#tvCarga .pct{position:relative;font-size:8vh;font-weight:900;color:#fff;text-shadow:0 0 2vh #000}
+#tvCarga .msg{position:relative;font-size:3.2vh;color:#fff;text-shadow:0 0 1vh #000;max-width:80vw;text-align:center}
+#tvCarga .emojis{position:absolute;inset:0;pointer-events:none;font-size:6vh}
+#tvCarga .emojis span{position:absolute;animation:sobeEmoji 2.6s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+@keyframes piscaFundo{to{opacity:.12}}
+@keyframes danca{0%{transform:rotate(-12deg) scale(.95) translateY(1vh)}100%{transform:rotate(12deg) scale(1.1) translateY(-1vh)}}
+@keyframes sobeEmoji{0%{transform:translateY(0) rotate(0);opacity:0}15%{opacity:1}100%{transform:translateY(-80vh) rotate(60deg);opacity:0}}
 #tvFim h2{font-size:9vh;color:#ffd66e}
 #tvFim .lista{font-size:4.5vh;line-height:1.6}
 
@@ -121,6 +139,10 @@ details .col{margin-top:0;padding-bottom:12px}
 .status.ok{color:#7ee2a0}
 button.fx.ativo,button.pos.ativo,#btGrande.ativo{border-color:var(--accent);background:#1a2c4e}
 .hist button.atual{border-color:#ffd66e;color:#ffd66e}
+.resultado{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;cursor:pointer}
+.resultado img{width:96px;height:54px;object-fit:cover;border-radius:8px;flex:0 0 auto;background:#000}
+.resultado div{font-size:.85rem;line-height:1.3;overflow:hidden}
+.resultado small{color:var(--muted)}
 .hist button{text-align:left;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;width:100%}
 footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 </style>
@@ -162,6 +184,12 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
     <p id="tvEspera" class="muted" style="font-size:2.4vh" data-t="Esperando os celulares…|Waiting for phones…"></p>
   </div>
   <div id="tvFim"><h2>🏆</h2><div class="lista" id="tvRanking"></div></div>
+  <div id="tvCarga">
+    <div class="fundo"></div><div class="pisca"></div><div class="emojis" id="cargaEmojis"></div>
+    <div class="anel"><svg viewBox="0 0 36 36"><circle class="trilho" cx="18" cy="18" r="15.9"/><circle class="barra" id="cargaBarra" cx="18" cy="18" r="15.9" pathLength="100"/></svg><div class="dancante" id="cargaDancante">💃</div></div>
+    <div class="pct" id="cargaPct">0%</div>
+    <div class="msg" id="cargaMsg"></div>
+  </div>
 </div>
 
 <!-- ===== Celular: entrar ===== -->
@@ -204,9 +232,21 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
     <details open>
       <summary data-t="🎵 Músicas|🎵 Songs"></summary>
       <div class="col">
+        <div class="row">
+          <input id="busca" data-ph="🔎 Procurar música (ex.: Katy Perry)|🔎 Search a song (e.g. Katy Perry)">
+          <button id="btBuscarApp" style="flex:0 0 auto" data-t="Buscar|Search"></button>
+        </div>
+        <div class="col" id="buscaResultados" style="gap:6px;margin-top:0"></div>
+        <div id="chaveBox" class="col" style="gap:6px;margin-top:0;display:none">
+          <div class="aviso" data-t="Para buscar aqui dentro, o YouTube exige uma chave sua (grátis, 100 buscas por dia). Ela fica só neste celular. Como criar: 1) abra console.cloud.google.com e entre com sua conta Google; 2) crie um projeto; 3) menu “APIs e serviços” → “Biblioteca” → procure “YouTube Data API v3” → Ativar; 4) “Credenciais” → “Criar credenciais” → “Chave de API” → copiar; 5) cole aqui.|Searching inside the app needs your own YouTube key (free, 100 searches a day). It stays on this phone only. How: 1) open console.cloud.google.com and sign in; 2) create a project; 3) “APIs & Services” → “Library” → search “YouTube Data API v3” → Enable; 4) “Credentials” → “Create credentials” → “API key” → copy; 5) paste it here."></div>
+          <div class="row"><input id="chaveYT" autocomplete="off" data-ph="Cole a chave AIza…|Paste the AIza… key"><button class="sec" id="btChaveYT" style="flex:0 0 auto" data-t="Guardar|Save"></button></div>
+          <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener" class="muted" data-t="Abrir a página da YouTube Data API no Google Cloud ↗|Open the YouTube Data API page on Google Cloud ↗"></a>
+        </div>
+        <div class="muted" data-t="📚 Playlists prontas (toque para tocar)|📚 Ready-made playlists (tap to play)"></div>
+        <div class="hist col" id="sugestoes" style="gap:6px;margin-top:0"></div>
         <div class="hist col" id="plLista" style="gap:6px;margin-top:0;display:none"></div>
         <div class="hist col" id="hist" style="gap:6px;margin-top:0"></div>
-        <button class="sec" id="btBuscar" data-t="🔎 Procurar no YouTube|🔎 Search YouTube"></button>
+        <button class="sec" id="btBuscar" data-t="↗ Abrir a busca no app do YouTube (depois use Compartilhar)|↗ Open the search in the YouTube app (then use Share)"></button>
       </div>
     </details>
     <details>
@@ -249,7 +289,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '1.0.0', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '1.1.0', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -409,18 +449,23 @@ function tvYouTubeEstado(ev) {
   var p = tv.player;
   tv.tocando = (ev.data === YT.PlayerState.PLAYING);
   // pausou sem ninguém pedir (o navegador da TV faz isso quando engasga): retoma sozinho, até 5x por música
-  if (ev.data === YT.PlayerState.PAUSED && Date.now() - (tv.pausaPedida || 0) > 3000 && Date.now() >= (tv.podioAte || 0) && (tv.retomadas || 0) < 5) {
+  if (ev.data === YT.PlayerState.PAUSED && tv.preCarregado && Date.now() - (tv.pausaPedida || 0) > 3000 && Date.now() >= (tv.podioAte || 0) && (tv.retomadas || 0) < 5) {
     tv.retomadas = (tv.retomadas || 0) + 1;
     setTimeout(function () { try { if (p.getPlayerState() === YT.PlayerState.PAUSED && Date.now() - (tv.pausaPedida || 0) > 3000) p.playVideo(); } catch (e) {} }, 1200);
   }
   if (ev.data === YT.PlayerState.PLAYING) tv.retomadas = Math.max(0, (tv.retomadas || 0) - 0);
   try { tv.lista = p.getPlaylist() || []; tv.indice = p.getPlaylistIndex(); } catch (e) { tv.lista = []; tv.indice = -1; }
+  if (ev.data === YT.PlayerState.BUFFERING && tv.preCarregado && !carga.ativa && Date.now() - (tv.ultimoPlaying || 0) > 1500) cargaMostrar(T('O YouTube parou para carregar…', 'YouTube stopped to load…'));
   if (ev.data === YT.PlayerState.PLAYING) {
+    tv.ultimoPlaying = Date.now();
+    if (!tv.preCarregado) { var fr = 0; try { fr = p.getVideoLoadedFraction() || 0; } catch (e0) {} if (fr < carga.meta) { tv.pausaPedida = Date.now(); p.pauseVideo(); cargaMostrar(); } else { tv.preCarregado = true; cargaEsconder(); } }
+    else if (carga.ativa) cargaEsconder();
     var d = p.getVideoData ? p.getVideoData() : null, id = d && d.video_id;
     if (id && id !== tv.videoAtual) {
       // música nova (numa playlist o YouTube emenda sozinho): zera o placar e, se o pódio
       // acabou de aparecer, segura 8 s para todo mundo ver antes de continuar
       tv.videoAtual = id; tv.titulo = (d.title || id); tv.retomadas = 0;
+      if (tv.preCarregado && tv.lista.length > 1) { tv.preCarregado = false; tv.pausaPedida = Date.now(); p.pauseVideo(); cargaMostrar(T('Próxima música…', 'Next song…')); }
       $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '🎵 ' + tv.titulo;
       tvZerar();
       if (Date.now() < tv.podioAte) {
@@ -442,6 +487,42 @@ function tvYouTubeErro(ev) {
   tv.titulo = msg; $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '⚠️ ' + msg;
   try { if (tv.player.getPlaylist && (tv.player.getPlaylist() || []).length > 1) setTimeout(function () { tv.player.nextVideo(); }, 1500); } catch (e) {}
 }
+/* Tela de carregamento: anel com a porcentagem REAL do que o YouTube já baixou, dançarina pulando,
+   fundo girando e piscando, emojis subindo. Antes de começar, segura até ter ~12% baixado (uns
+   30-60 s de música), para não engasgar no meio. Também aparece quando o YouTube para para carregar. */
+var carga = { ativa: false, timer: 0, meta: 0.12, inicio: 0, emojiTimer: 0 };
+function cargaMostrar(msg) {
+  var el = $('tvCarga'); el.classList.add('ativa'); carga.ativa = true; carga.inicio = carga.inicio || Date.now();
+  if (msg) $('cargaMsg').textContent = msg;
+  if (!carga.emojiTimer) carga.emojiTimer = setInterval(function () {
+    var e = document.createElement('span'); e.textContent = ['🎵', '✨', '💃', '🕺', '🎉', '⭐', '🌈', '💥', '🎶', '💖'][Math.floor(Math.random() * 10)];
+    e.style.left = Math.random() * 95 + '%'; e.style.bottom = '-8vh'; $('cargaEmojis').appendChild(e); setTimeout(function () { e.remove(); }, 2700);
+    $('cargaDancante').textContent = Math.random() < 0.5 ? '💃' : '🕺';
+  }, 180);
+  if (!carga.timer) carga.timer = setInterval(cargaAtualizar, 250);
+}
+function cargaPct(p) { p = Math.max(0, Math.min(100, Math.round(p))); $('cargaPct').textContent = p + '%'; $('cargaBarra').style.strokeDashoffset = 100 - p; }
+function cargaEsconder() {
+  $('tvCarga').classList.remove('ativa'); carga.ativa = false; carga.inicio = 0; carga.ultimaF = -1; carga.parouEm = 0;
+  clearInterval(carga.timer); carga.timer = 0; clearInterval(carga.emojiTimer); carga.emojiTimer = 0; $('cargaEmojis').innerHTML = '';
+}
+function cargaAtualizar() {
+  var p = tv.player; if (!p || !p.getVideoLoadedFraction) return;
+  var f = 0; try { f = p.getVideoLoadedFraction() || 0; } catch (e) {}
+  var st = -1; try { st = p.getPlayerState(); } catch (e2) {}
+  if (!tv.preCarregado) {
+    cargaPct(f / carga.meta * 100);
+    // segura pausado até a meta (ou 20 s): depois libera
+    // o YouTube para de baixar quando está pausado e já tem uma reserva: se a barra não anda por 3 s, libera
+    if (f !== carga.ultimaF) { carga.ultimaF = f; carga.parouEm = Date.now(); }
+    var parado = f > 0.03 && Date.now() - (carga.parouEm || Date.now()) > 3000;
+    if (f >= carga.meta || parado || Date.now() - carga.inicio > 20000) { tv.preCarregado = true; tv.pausaPedida = 0; cargaEsconder(); try { p.playVideo(); } catch (e3) {} }
+    else if (st === YT.PlayerState.PLAYING) { tv.pausaPedida = Date.now(); try { p.pauseVideo(); } catch (e4) {} }
+  } else {
+    cargaPct(f * 100);
+    if (st === YT.PlayerState.PLAYING) cargaEsconder();
+  }
+}
 function tvZerar() {
   Object.keys(tv.pontos).forEach(function (k) { tv.pontos[k].pontos = 0; tv.tiles[k] && (tv.tiles[k].querySelector('.pontos').textContent = '0'); });
 }
@@ -449,7 +530,7 @@ function tvComando(m) {
   var p = tv.player;
   tv.ultimoCmd = m.acao + (p && p.loadVideoById ? '' : ' (tocador ainda não pronto)');
   if (!p || !p.loadVideoById) { if (m.acao === 'carregar' || m.acao === 'playlist') tv.pendente = m; return; }   // chegou antes do tocador: toca assim que ele ficar pronto
-  function comecar() { tv.fimMostrado = false; tv.podioAte = 0; clearTimeout(tv.timerPodio); $('tvFim').classList.remove('ativa'); $('tvCapa').style.display = 'none'; tvZerar(); }
+  function comecar() { tv.fimMostrado = false; tv.podioAte = 0; clearTimeout(tv.timerPodio); $('tvFim').classList.remove('ativa'); $('tvCapa').style.display = 'none'; tvZerar(); tv.preCarregado = false; cargaMostrar(T('Carregando a música…', 'Loading the song…')); }
   if (m.acao === 'carregar' && m.video) {
     comecar(); tv.titulo = m.titulo || m.video; tv.videoAtual = m.video; tv.lista = []; tv.indice = -1;
     $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '🎵 ' + tv.titulo;
@@ -1040,7 +1121,7 @@ $('btCamera').onclick = function () { if (cel.cams.length < 2) return; var i = (
 $('btSair').onclick = sair;
 $('btTocarLink').onclick = function () { tocarLink(); };
 $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') tocarLink(); });
-$('btBuscar').onclick = function () { window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(T('just dance kids', 'just dance kids')), '_blank'); };
+$('btBuscar').onclick = function () { window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent($('busca').value.trim() || 'just dance kids'), '_blank'); };
 $('btPausa').onclick = function () { comando({ acao: 'pausa' }); };
 $('btReiniciar').onclick = function () { comando({ acao: 'reiniciar' }); };
 $('btProxima').onclick = function () { comando({ acao: 'proxima' }); };
@@ -1054,6 +1135,52 @@ $('btComp').onclick = function () { ligarComp(!modo.comp); };
 $('btSolo').onclick = function () { modo.solo = true; $('btCel').click(); $('codigo').style.display = 'none'; $('btEntrar').textContent = T('Começar', 'Start'); };
 window.addEventListener('pagehide', function () { if (cel.pc) enviar({ t: 'sair', id: cel.id }); });
 desenharHist();
+/* Playlists públicas prontas (conferidas em 31/10/2026). Toque toca na TV e guarda em "Suas músicas". */
+var SUGESTOES = [
+  ['PLz485Fbsk1B46Jl7_qCH9J6Omod2JUU7S', '🧒 Just Dance Kid Friendly'],
+  ['PLBA7nqyBa-vzKaQUl5O1Yrlsa797OtDG8', '🧒 Just Dance Kids'],
+  ['PLBA7nqyBa-vx5HSaORK0MN6tsE--tN3tq', '🕹️ Just Dance 2025 Edition'],
+  ['PL83On1siwog7ORpx3c0Ym1AWnA_nOu9ui', '🇰🇷 Just Dance: K-pop'],
+  ['PLz68cPKdtIOxcO2jNfWrKN-4qY6QyDvw_', '🎤 Katy Perry – clipes oficiais'],
+  ['PL7hyetLZlkc7LhzfUBQ768INNd8r3YmKY', '🇰🇷 K-pop (BLACKPINK, BTS, NewJeans…)']
+];
+SUGESTOES.forEach(function (sg) { var b = document.createElement('button'); b.className = 'sec'; b.textContent = '📜 ' + sg[1]; b.onclick = function () { tocarLink('https://www.youtube.com/playlist?list=' + sg[0]); }; $('sugestoes').appendChild(b); });
+
+/* Busca dentro do app: usa a YouTube Data API com a chave da própria pessoa, guardada só neste
+   celular (localStorage). Nenhuma chave entra no código nem sai para outro lugar além do Google. */
+function chaveYT() { try { return localStorage.getItem('danca:ytkey') || ''; } catch (e) { return ''; } }
+$('btChaveYT').onclick = function () { var k = $('chaveYT').value.trim(); if (!/^AIza[0-9A-Za-z_-]{20,}$/.test(k)) { alert(T('Essa não parece uma chave do Google (começa com AIza).', 'That does not look like a Google key (starts with AIza).')); return; } try { localStorage.setItem('danca:ytkey', k); } catch (e) {} $('chaveYT').value = ''; $('chaveBox').style.display = 'none'; buscarNoApp(); };
+function buscarNoApp() {
+  var q = $('busca').value.trim(), out = $('buscaResultados');
+  if (!q) return;
+  var k = chaveYT();
+  if (!k) { $('chaveBox').style.display = ''; return; }
+  out.innerHTML = '<div class="muted">' + T('Buscando…', 'Searching…') + '</div>';
+  var base = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&safeSearch=strict&key=' + encodeURIComponent(k) + '&q=' + encodeURIComponent(q);
+  Promise.all([
+    fetch(base + '&type=video&videoEmbeddable=true').then(function (r) { return r.json(); }),
+    fetch(base + '&type=playlist&maxResults=4').then(function (r) { return r.json(); }).catch(function () { return {}; })
+  ]).then(function (rs) {
+    var v = rs[0], pl = rs[1];
+    if (v.error) { out.innerHTML = '<div class="erro">' + T('O Google recusou a chave (', 'Google refused the key (') + escapar(v.error.message || v.error.code) + ').' + T(' Confira se a YouTube Data API v3 está ativada, ou se acabou a cota do dia.', ' Check that YouTube Data API v3 is enabled, or the daily quota ran out.') + '</div>'; if (v.error.code === 400 || v.error.code === 403) { try { localStorage.removeItem('danca:ytkey'); } catch (e) {} $('chaveBox').style.display = ''; } return; }
+    out.innerHTML = '';
+    var itens = (pl.items || []).concat(v.items || []);
+    if (!itens.length) { out.innerHTML = '<div class="muted">' + T('Nada encontrado.', 'Nothing found.') + '</div>'; return; }
+    itens.forEach(function (it) {
+      var ehPl = it.id.kind === 'youtube#playlist', id = ehPl ? it.id.playlistId : it.id.videoId, sn = it.snippet || {};
+      var d = document.createElement('div'); d.className = 'resultado';
+      d.innerHTML = '<img alt=""><div><b></b><br><small></small></div>';
+      d.querySelector('img').src = (sn.thumbnails && (sn.thumbnails.medium || sn.thumbnails.default) || {}).url || '';
+      d.querySelector('b').textContent = (ehPl ? '📜 ' : '🎵 ') + decodificar(sn.title || id);
+      d.querySelector('small').textContent = decodificar(sn.channelTitle || '');
+      d.onclick = function () { tocarLink(ehPl ? 'https://www.youtube.com/playlist?list=' + id : id); window.scrollTo(0, 0); };
+      out.appendChild(d);
+    });
+  }).catch(function (e) { out.innerHTML = '<div class="erro">' + T('Não deu para buscar: ', 'Search failed: ') + escapar(e.message || e) + '</div>'; });
+}
+function decodificar(t) { var x = document.createElement('textarea'); x.innerHTML = t; return x.value; }
+$('btBuscarApp').onclick = buscarNoApp;
+$('busca').addEventListener('keydown', function (e) { if (e.key === 'Enter') buscarNoApp(); });
 try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 
 /* Atalho: ?tv abre direto a tela de escolha com foco no botão da TV (para apertar OK no controle). */
