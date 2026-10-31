@@ -289,7 +289,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '1.2.0', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '1.2.1', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -529,13 +529,15 @@ function cargaAtualizar() {
 /* Música de espera gerada pelo próprio app (Web Audio): bateria, baixo e arpejo estilo videogame,
    124 bpm, instrumental, sem direitos de ninguém. Toca só enquanto a tela de carregamento aparece,
    com entrada e saída suaves. Nenhum arquivo de áudio é baixado. */
-var jingle = { ac: null, master: null, timer: 0, passo: 0, proximo: 0, bpm: 124, ligado: false };
+var jingle = { ac: null, master: null, duck: null, timer: 0, passo: 0, proximo: 0, bpm: 128, ligado: false };
 function jingleLigar() {
   try {
     var AC = window.AudioContext || window.webkitAudioContext; if (!AC || jingle.ac) return;
     jingle.ac = new AC(); jingle.master = jingle.ac.createGain(); jingle.master.gain.value = 0;
     var lp = jingle.ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6500;
     jingle.master.connect(lp); lp.connect(jingle.ac.destination);
+    // "bombada" de pop de pista: tudo que não é bateria passa por aqui e abaixa a cada bumbo
+    jingle.duck = jingle.ac.createGain(); jingle.duck.gain.value = 1; jingle.duck.connect(jingle.master);
     if (jingle.ac.state === 'suspended') jingle.ac.resume();
   } catch (e) { jingle.ac = null; }
 }
@@ -553,29 +555,52 @@ function jingleAgendar() {
   while (jingle.proximo < ac.currentTime + 0.12) { jingleNota(jingle.passo, jingle.proximo, dur16); jingle.passo = (jingle.passo + 1) % 128; jingle.proximo += dur16; }
 }
 function jingleNota(passo, t, d) {
-  var ac = jingle.ac, out = jingle.master, p16 = passo % 16, compasso = Math.floor(passo / 16) % 8;
-  // acordes: C  G  Am F | C G F G  (tom alegre); frequências em Hz
-  var acordes = [[261.6, 329.6, 392.0], [392.0, 493.9, 587.3], [440.0, 523.3, 659.3], [349.2, 440.0, 523.3], [261.6, 329.6, 392.0], [392.0, 493.9, 587.3], [349.2, 440.0, 523.3], [392.0, 493.9, 587.3]];
-  var ac0 = acordes[compasso], raiz = ac0[0] / 2;
-  function osc(tipo, f, t0, dur, vol, para) {
-    var o = ac.createOscillator(), g = ac.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t0);
+  var ac = jingle.ac, bat = jingle.master, syn = jingle.duck, p16 = passo % 16, compasso = Math.floor(passo / 16) % 8, refrao = compasso >= 4;
+  // acordes pop (vi IV I V, a receita de "Teenage Dream"/"Firework"), em Hz
+  var acordes = [[220.0, 261.6, 329.6], [174.6, 220.0, 261.6], [261.6, 329.6, 392.0], [196.0, 246.9, 293.7]];
+  var acd = acordes[compasso % 4], raiz = acd[0] / 2;
+  function osc(tipo, f, t0, dur, vol, dest, detune, para) {
+    var o = ac.createOscillator(), g = ac.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t0); if (detune) o.detune.value = detune;
     if (para) o.frequency.exponentialRampToValueAtTime(para, t0 + dur);
-    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    o.connect(g); g.connect(out); o.start(t0); o.stop(t0 + dur + 0.02);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(dest); o.start(t0); o.stop(t0 + dur + 0.02);
   }
-  function ruido(t0, dur, vol, hp) {
+  function ruido(t0, dur, vol, hp, dest, lpf) {
     var n = Math.floor(ac.sampleRate * dur), b = ac.createBuffer(1, n, ac.sampleRate), x = b.getChannelData(0);
-    for (var i = 0; i < n; i++) x[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    for (var i = 0; i < n; i++) x[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 1.5);
     var src = ac.createBufferSource(), g = ac.createGain(), f = ac.createBiquadFilter(); src.buffer = b; f.type = 'highpass'; f.frequency.value = hp;
-    g.gain.value = vol; src.connect(f); f.connect(g); g.connect(out); src.start(t0);
+    g.gain.value = vol; src.connect(f);
+    if (lpf) { var l = ac.createBiquadFilter(); l.type = 'lowpass'; l.frequency.value = lpf; f.connect(l); l.connect(g); } else f.connect(g);
+    g.connect(dest); src.start(t0);
   }
-  if (p16 % 4 === 0) osc('sine', 150, t, 0.16, 0.9, 45);                       // bumbo
-  if (p16 === 4 || p16 === 12) { ruido(t, 0.14, 0.5, 1800); osc('triangle', 190, t, 0.08, 0.3); }   // caixa
-  if (p16 % 2 === 0) ruido(t, p16 % 4 === 2 ? 0.07 : 0.03, 0.18, 7000);         // chimbal
-  if (p16 % 2 === 0) osc('square', p16 % 8 === 6 ? raiz * 2 : raiz, t, d * 1.6, 0.16);   // baixo
-  var arp = [0, 1, 2, 1, 0, 2, 1, 2][p16 % 8];                                   // arpejo
-  osc('triangle', ac0[arp] * 2, t, d * 0.9, 0.12);
-  if (compasso % 2 === 1 && (p16 === 0 || p16 === 6 || p16 === 10)) osc('square', ac0[(p16 / 2) % 3] * 4, t, d * 2.5, 0.07);   // melodia
+  // bumbo em todos os tempos + bombada nos synths
+  if (p16 % 4 === 0) {
+    osc('sine', 160, t, 0.18, 1.0, bat, 0, 42);
+    var dg = syn.gain; dg.cancelScheduledValues(t); dg.setValueAtTime(0.3, t); dg.linearRampToValueAtTime(1, t + 0.28);
+  }
+  if (p16 === 4 || p16 === 12) { ruido(t, 0.2, 0.55, 1200, bat, 6000); ruido(t + 0.012, 0.12, 0.3, 2000, bat); }   // palma + caixa
+  if (refrao ? true : p16 % 2 === 0) ruido(t, p16 % 4 === 2 ? 0.09 : 0.035, p16 % 2 ? 0.08 : 0.16, 8000, bat);   // chimbal (16avos no refrão)
+  // baixo pulsante em colcheias, oitava acima nos contratempos
+  if (p16 % 2 === 0) { osc('sawtooth', p16 % 4 === 2 ? raiz * 2 : raiz, t, d * 1.7, 0.14, syn); osc('square', raiz, t, d * 1.7, 0.06, syn); }
+  // acordes de synth brilhante em rajadas (3 serras desafinadas por nota) no ritmo pop: 1, 2e, 3e
+  if (p16 === 0 || p16 === 6 || p16 === 10 || (refrao && p16 === 14)) {
+    var dur = (p16 === 0 ? 5 : 3) * d;
+    acd.forEach(function (f) { [-8, 0, 8].forEach(function (dt) { osc('sawtooth', f * 2, t, dur, refrao ? 0.05 : 0.035, syn, dt); }); });
+  }
+  // gancho de melodia no refrão (semitons acima de C5), com rajada no último compasso antes
+  var ganchoA = [7, null, 7, 9, null, 7, null, 4, 2, null, 0, null, 2, null, 4, null];
+  var ganchoB = [7, null, 9, 11, null, 12, null, 9, 7, null, 4, null, 2, null, 0, null];
+  if (refrao) { var n = (compasso % 2 ? ganchoB : ganchoA)[p16]; if (n !== null) { var f = 523.25 * Math.pow(2, n / 12); osc('square', f, t, d * 1.8, 0.09, syn); osc('sawtooth', f, t, d * 1.8, 0.05, syn, 6); } }
+  // subida ("vuuush") nos 2 compassos antes do refrão
+  if (compasso === 2 && p16 === 0) {
+    var n2 = Math.floor(ac.sampleRate * d * 32), b2 = ac.createBuffer(1, n2, ac.sampleRate), x2 = b2.getChannelData(0);
+    for (var i2 = 0; i2 < n2; i2++) x2[i2] = (Math.random() * 2 - 1) * Math.pow(i2 / n2, 2);
+    var s2 = ac.createBufferSource(), f2 = ac.createBiquadFilter(), g2 = ac.createGain(); s2.buffer = b2; f2.type = 'bandpass'; f2.Q.value = 1.2;
+    f2.frequency.setValueAtTime(300, t); f2.frequency.exponentialRampToValueAtTime(7000, t + d * 32); g2.gain.value = 0.22;
+    s2.connect(f2); f2.connect(g2); g2.connect(bat); s2.start(t);
+  }
+  // batida de caixa acelerando no fim da subida
+  if (compasso === 3 && p16 >= 8 && (p16 % 2 === 0 || p16 >= 12)) ruido(t, 0.12, 0.35 + (p16 - 8) * 0.04, 1500, bat, 6000);
 }
 function tvZerar() {
   Object.keys(tv.pontos).forEach(function (k) { tv.pontos[k].pontos = 0; tv.tiles[k] && (tv.tiles[k].querySelector('.pontos').textContent = '0'); });
