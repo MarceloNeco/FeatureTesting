@@ -11,7 +11,7 @@
   var ARQ = /^[A-Za-z0-9_-][A-Za-z0-9_.-]{0,60}\.mp3$/;
   var Ctx = root.AudioContext || root.webkitAudioContext;
   var M = root.PeluqueriaTrilhas;
-  var ctx = null, mestre = null, ruido = null, busAcordes = null, busLead = null, mudo = false;
+  var ctx = null, mestre = null, ruido = null, busAcordes = null, busLead = null, sala = null, mudo = false, swing = 0;
   var nivel = 'inicio', queda = 0, faixa = TESTE ? 0 : Math.floor(Math.random() * M.FAIXAS.length), compasso = 0, passo = 0;
   var tipo = 'abertura', rodadas = 0, batidas = [], distorcao = null;   // tipo: 'abertura' (tela de início) | 'jogo'
   var proximo = 0, relogio = 0, tocando = false, contador = 0, eventos = [];
@@ -38,6 +38,13 @@
         var n = ctx.sampleRate, b = ctx.createBuffer(1, n, n), d = b.getChannelData(0);
         for (var k = 0; k < n; k++) d[k] = Math.random() * 2 - 1;
         ruido = b;
+        // eco de ambiente (reverb): resposta de sala gerada aqui (ruído decaindo ~2 s), sem arquivo
+        if (ctx.createConvolver) {
+          var conv = ctx.createConvolver(), len = Math.floor(n * 2.2), ir = ctx.createBuffer(2, len, n);
+          for (var ch = 0; ch < 2; ch++) { var dd = ir.getChannelData(ch); for (var j = 0; j < len; j++) dd[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / len, 3); }
+          conv.buffer = ir; sala = ctx.createGain(); sala.gain.value = 0.22; sala.connect(conv); conv.connect(mestre);
+          busAcordes.connect(sala); busLead.connect(sala);
+        }
       }
       if (ctx.state === 'suspended' || ctx.state === 'interrupted') ctx.resume();
     } catch (e) { ctx = null; }
@@ -48,6 +55,11 @@
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(Math.max(0.0002, pico), t + ataque);
     g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(ataque + 0.01, dur));
+  }
+  /* posiciona um som entre a esquerda (-1) e a direita (+1); sem StereoPanner, vai direto */
+  function lado(no, pan) {
+    if (!ctx.createStereoPanner) return no;
+    var p = ctx.createStereoPanner(); p.pan.value = pan; p.connect(no); return p;
   }
   function osc(t, tipo, freq, detune, dur, destino) {
     var o = ctx.createOscillator(); o.type = tipo; o.frequency.setValueAtTime(freq, t);
@@ -65,15 +77,15 @@
     busAcordes.gain.cancelScheduledValues(t); busAcordes.gain.setValueAtTime(0.25, t); busAcordes.gain.linearRampToValueAtTime(1, t + 0.2);
   }
   function palma(t, vol) {
-    var g = ctx.createGain(); g.connect(mestre);
+    var g = ctx.createGain(); g.connect(mestre); if (sala) g.connect(sala);
     g.gain.setValueAtTime(0.0001, t);
     [0, 0.011, 0.022].forEach(function (d) { g.gain.setValueAtTime(0.7 * vol, t + d); g.gain.exponentialRampToValueAtTime(0.08 * vol, t + d + 0.009); });
     g.gain.setValueAtTime(0.6 * vol, t + 0.031); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
     ruidoEm(t, 0.22, filtro('bandpass', 1300, 0.9), g);
   }
-  function chimbal(t, vol, dur) { var g = ctx.createGain(); g.connect(mestre); env(g, t, 0.002, dur, vol); ruidoEm(t, dur, filtro('highpass', dur > 0.1 ? 7000 : 8500), g); }
+  function chimbal(t, vol, dur) { var g = ctx.createGain(); g.connect(lado(mestre, dur > 0.1 ? -0.3 : 0.3)); env(g, t, 0.002, dur, vol); ruidoEm(t, dur, filtro('highpass', dur > 0.1 ? 7000 : 8500), g); }
   function caixa(t, vol) {
-    var g = ctx.createGain(); g.connect(mestre); env(g, t, 0.002, 0.13, 0.6 * vol); ruidoEm(t, 0.14, filtro('bandpass', 1900, 0.7), g);
+    var g = ctx.createGain(); g.connect(mestre); if (sala && vol > 0.5) g.connect(sala); env(g, t, 0.002, 0.13, 0.6 * vol); ruidoEm(t, 0.14, filtro('bandpass', 1900, 0.7), g);
     var g2 = ctx.createGain(); g2.connect(mestre); env(g2, t, 0.002, 0.08, 0.4 * vol); osc(t, 'triangle', 190, 0, 0.1, g2);
   }
   function crash(t, vol) { var g = ctx.createGain(); g.connect(mestre); env(g, t, 0.003, 1.4, 0.35 * vol); ruidoEm(t, 1.5, filtro('highpass', 4500), g); }
@@ -103,6 +115,15 @@
   function lead(t, nota, dur, vol, timbre) {
     var g = ctx.createGain(), f; g.connect(busLead);
     if (timbre === 'pluck') { f = filtro('lowpass', 5000, 3); f.frequency.setValueAtTime(5000, t); f.frequency.exponentialRampToValueAtTime(700, t + 0.18); f.connect(g); env(g, t, 0.003, Math.min(dur, 0.35), 0.22 * vol); osc(t, 'sawtooth', hz(nota), 0, dur, f); osc(t, 'square', hz(nota), 7, dur, f); return; }
+    if (timbre === 'flauta') {   // flauta: seno com vibrato e um sopro de ruído
+      env(g, t, 0.04, dur * 0.95, 0.3 * vol); var fl = osc(t, 'sine', hz(nota), 0, dur, g);
+      var lfo = ctx.createOscillator(), pr = ctx.createGain(); lfo.frequency.value = 5.5; pr.gain.value = hz(nota) * 0.012; lfo.connect(pr); pr.connect(fl.frequency); lfo.start(t + 0.08); lfo.stop(t + dur + 0.05);
+      var gs = ctx.createGain(); gs.connect(busLead); env(gs, t, 0.01, 0.08, 0.05 * vol); ruidoEm(t, 0.1, filtro('bandpass', hz(nota) * 2, 2), gs); return;
+    }
+    if (timbre === 'metal') {    // metais: dente de serra com filtro que abre no ataque
+      f = filtro('lowpass', 900, 2); f.frequency.setValueAtTime(900, t); f.frequency.linearRampToValueAtTime(3600, t + 0.06); f.frequency.linearRampToValueAtTime(2200, t + Math.max(0.1, dur));
+      f.connect(g); env(g, t, 0.03, dur * 0.95, 0.2 * vol); osc(t, 'sawtooth', hz(nota), -6, dur, f); osc(t, 'sawtooth', hz(nota), 6, dur, f); osc(t, 'sawtooth', hz(nota - 12), 0, dur, f); return;
+    }
     if (timbre === 'sino') { env(g, t, 0.003, Math.max(0.4, dur), 0.25 * vol); osc(t, 'sine', hz(nota), 0, Math.max(0.4, dur), g); var g2 = ctx.createGain(); g2.connect(busLead); env(g2, t, 0.002, 0.25, 0.1 * vol); osc(t, 'sine', hz(nota + 12), 3, 0.3, g2); return; }
     f = filtro('lowpass', timbre === 'square' ? 2800 : 4200, 1); f.connect(g);
     env(g, t, 0.01, dur * 0.95, 0.17 * vol);
@@ -110,8 +131,9 @@
     else { osc(t, 'sawtooth', hz(nota), -9, dur, f); osc(t, 'sawtooth', hz(nota), 9, dur, f); osc(t, 'triangle', hz(nota + 12), 0, dur, f); }
   }
 
-  function arpejo(t, nota, dur, vol) {   // notinhas rápidas e curtas, passam pelo "respiro" dos acordes
-    var f = filtro('lowpass', 3400, 2), g = ctx.createGain(); f.connect(g); g.connect(busAcordes);
+  var ladoArp = 1;
+  function arpejo(t, nota, dur, vol) {   // notinhas rápidas e curtas, passam pelo "respiro" dos acordes, uma de cada lado
+    var f = filtro('lowpass', 3400, 2), g = ctx.createGain(); f.connect(g); ladoArp = -ladoArp; g.connect(lado(busAcordes, 0.45 * ladoArp));
     env(g, t, 0.003, Math.min(0.16, dur * 0.9), 0.3 * vol);
     osc(t, 'square', hz(nota), 0, 0.18, f); osc(t, 'triangle', hz(nota + 12), 4, 0.18, f);
   }
@@ -146,6 +168,7 @@
       case 'baixo': return baixo(t, e.nota, d, e.vol);
       case 'acorde': return acorde(t, e.notas, d, e.vol, e.filtro, e.estilo);
       case 'lead': return lead(t, e.nota, d, e.vol, F.lead);
+      case 'harmonia': return lead(t, e.nota, d, e.vol, F.lead === 'sino' ? 'flauta' : F.lead);
       case 'arpejo': return arpejo(t, e.nota, d, e.vol);
       case 'guitarra': return guitarra(t, [e.nota], d, e.vol, false);
       case 'power': return guitarra(t, e.notas, d, e.vol, true);
@@ -160,8 +183,9 @@
     while (proximo < ctx.currentTime + 0.12) {
       var ab = tipo === 'abertura', F = ab ? M.ABERTURA : M.FAIXAS[faixa];
       var s16 = 60 / (ab ? M.ABERTURA.bpm : M.andamento(F, nivel, queda)) / 4;
-      if (passo === 0) eventos = (ab ? M.abertura(compasso) : M.partitura(F, compasso)).eventos;
-      for (var k = 0; k < eventos.length; k++) if (eventos[k].t === passo) { try { tocarEvento(eventos[k], proximo, s16, F); } catch (e) {} }
+      if (passo === 0) { var pt = ab ? M.abertura(compasso) : M.partitura(F, compasso); eventos = pt.eventos; swing = pt.swing || 0; }
+      var quando = proximo + (passo % 2 ? swing * s16 : 0);   // swing: as semicolcheias de contratempo atrasam um pouco
+      for (var k = 0; k < eventos.length; k++) if (eventos[k].t === passo) { try { tocarEvento(eventos[k], quando, s16, F); } catch (e) {} }
       if (passo % 4 === 0 && batidas.length) avisarBatida(proximo - ctx.currentTime);
       contador++; passo++; proximo += s16;
       if (passo === 16) {
@@ -291,6 +315,7 @@
     minhas: function () { return minhas.slice(); }, fonte: function () { return fonte; },
     rodada: rodada, aoBater: function (fn) { batidas.push(fn); },
     posicao: function () { return tipo === 'abertura' ? { faixa: 'abertura', compasso: compasso, nome: M.ABERTURA.nome } : { faixa: faixa, compasso: compasso, nome: M.FAIXAS[faixa].nome }; },
+    _recursos: function () { return { eco: !!sala, estereo: !!(ctx && ctx.createStereoPanner) }; },
     _ctx: function () { return ctx; }, _passos: function () { return contador; }
   };
 })(typeof self !== 'undefined' ? self : this);

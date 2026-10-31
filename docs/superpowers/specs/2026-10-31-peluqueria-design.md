@@ -215,6 +215,10 @@ o som ligado/desligado e o "Minhas imagens". **Nenhuma imagem é salva nem expor
   acordes diferentes, acordes com sétima, refrão de 8 compassos (frase, resposta, parte nova mais aguda e
   fechamento), melodia própria no verso, arpejo, viradas de bateria e de baixo a cada 4 compassos e subida de
   um tom no último refrão; a melodia evita repetir a mesma nota em seguida.
+- **v0.3.2 (dono: "mais sofisticadas, umas 15 no mínimo"):** 16 músicas, 6 estilos de bateria (house, disco,
+  electro, funk, tropical, synthwave) e 6 timbres de melodia (saw, pluck, square, sino, flauta, metais); acordes
+  encadeados (inversão perto do meio da região), segunda voz em terça no último refrão, notas fantasmas na caixa,
+  swing em 3 músicas, estéreo (chimbal, arpejo) e eco de ambiente (reverb gerado no próprio jogo).
 - **v0.3.0 (dono):** **música de abertura** especial na tela de início (`M.ABERTURA`, 138 BPM, rock elétrico:
   guitarra distorcida em semicolcheias alternando nota pedal e notas que andam, só a guitarra no começo,
   bateria com virada de tons, acordes "power", baixo e melodia; em laço). **Cada rodada toca uma música
