@@ -170,6 +170,27 @@ async function comecar(pg, nivel) {
     await pmk.screenshot({ path: '/tmp/peluqueria-marcar.png' });
   }
 
+  /* ---------- TV com o controle ---------- */
+  const ptv = await abrir(browser, base + '?tv=auto&teste', { ctx: { viewport: { width: 1280, height: 720 } } });
+  confere(await D(ptv, () => document.documentElement.classList.contains('tv') && document.activeElement.id === 'btJogar'), 'TV: classe tv e foco no Jogar');
+  await ptv.keyboard.press('ArrowLeft');
+  confere(await D(ptv, () => document.activeElement.id !== 'btJogar'), 'TV: setas movem o foco');
+  await D(ptv, () => document.getElementById('btJogar').focus());
+  await ptv.keyboard.press('Enter'); await passo(ptv, 2200);
+  confere((await est(ptv)).fase === 'caindo', 'TV: Enter começa');
+  await D(ptv, () => PeluqueriaDebug.novaRodada('crianca'));
+  await ateAlvo(ptv); await ptv.keyboard.press('Enter');
+  const etv = await est(ptv);
+  confere(etv.res[0] === 'PERFEITO', 'TV: OK do controle para o item na hora certa', etv);
+  confere(await D(ptv, () => PeluqueriaDebug.leve === true), 'TV: modo leve ligado');
+  await passo(ptv, 300); await ptv.screenshot({ path: '/tmp/peluqueria-tv.png' });
+  confere(ptv.erros().length === 0, 'TV: sem erros', ptv.erros());
+
+  const pdb = await abrir(browser, base + '?debug&teste');
+  await passo(pdb, 500);
+  confere(/v0\.1\.0/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
+
   /* ---------- 320 px ---------- */
   const p320 = await abrir(browser, base + '?teste', { ctx: { viewport: { width: 320, height: 640 } } });
   confere(await D(p320, () => document.documentElement.scrollWidth <= 320), '320 px sem rolagem lateral (início)');

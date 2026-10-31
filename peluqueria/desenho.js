@@ -98,9 +98,9 @@
         var tam = Math.min(W, H) * 0.12;
         texto(extra.rotulo, W / 2, H * 0.2, tam, COR_CAT[r.categoria]);
         texto('+' + r.pontos + (r.mult > 1 ? '  ×' + r.mult : ''), W / 2, H * 0.2 + tam * 0.95, tam * 0.5, '#fff');
-        if (extra.uhul) texto(extra.uhul, W / 2, H * 0.82, tam * 0.9, '#ff4fa3');
+        if (extra.uhul) texto(extra.uhul, W / 2, H * 0.86, tam * 0.9, '#ff4fa3');
         if (!extra.pausado) {   // ▶ médio, como no Instagram
-          var R = Math.min(W, H) * 0.07, px = W / 2, py = H * 0.82 - (extra.uhul ? tam * 1.2 : 0);
+          var R = Math.min(W, H) * 0.06, px = W - R * 1.6, py = H - R * 1.6;
           ctx.save(); ctx.globalAlpha = 0.85; ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.beginPath(); ctx.arc(px, py, R, 0, Math.PI * 2); ctx.fill();
           ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(px - R * 0.35, py - R * 0.5); ctx.lineTo(px + R * 0.55, py); ctx.lineTo(px - R * 0.35, py + R * 0.5); ctx.closePath(); ctx.fill(); ctx.restore();
         }

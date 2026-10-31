@@ -7,6 +7,8 @@
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
+  var TV = /[?&]tv=auto\b/.test(location.search), DEBUG = /[?&]debug\b/.test(location.search);
+  if (TV) document.documentElement.classList.add('tv');
   var CHAVE_PREF = 'peluqueria-pref', CHAVE_RECORDE = 'peluqueria-recorde';
   var CONTAGEM = 0.7, ESPERA = 2, GUARDA = 0.4;
   var ROTULO = { PERFEITO: ['PERFEITO!', 'PERFECT!'], BOM: ['BOM!', 'GOOD!'], QUASE: ['QUASE!', 'ALMOST!'], LONGE: ['LONGE!', 'MISS!'] };
@@ -33,7 +35,7 @@
   function efeito(n) { if (som) som.efeito(n); }
   function falar(pt, en) { if (voz) voz.falar(pt, en); }
 
-  var desenho = PeluqueriaDesenho.criar($('palco'), { leve: false });
+  var desenho = PeluqueriaDesenho.criar($('palco'), { leve: TV });
   var catalogo = { cenarios: { jogo: [], meus: [] }, itens: { jogo: [], meus: [] } };
   // modo: inicio | contagem | jogo | fim
   var app = { modo: 'inicio', rodada: null, pausado: false, resto: 0, espera: 0, resultado: null, trava: null };
@@ -119,8 +121,20 @@
   $('palco').addEventListener('pointerdown', function (ev) { ev.preventDefault(); parar(); });
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') pausar(); });
 
+  /* setas andam entre os botões visíveis (controle da TV, teclado) */
+  function mover(passo) {
+    var bts = Array.prototype.filter.call(document.querySelectorAll('.tela.ativa button, .tela.ativa .faixa button'), function (b) { return !b.disabled && b.offsetParent !== null; });
+    bts = bts.filter(function (b, k) { return bts.indexOf(b) === k; });
+    if (!bts.length) return;
+    var k = bts.indexOf(document.activeElement);
+    bts[(k < 0 ? 0 : k + passo + bts.length) % bts.length].focus();
+  }
   document.addEventListener('keydown', function (ev) {
-    if (app.modo !== 'jogo') return;
+    if (app.modo !== 'jogo') {
+      if (ev.key === 'ArrowLeft' || ev.key === 'ArrowUp') { ev.preventDefault(); mover(-1); }
+      else if (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') { ev.preventDefault(); mover(1); }
+      return;
+    }
     var k = ev.key;
     if (k === 'Escape' || k === 'p' || k === 'P') { ev.preventDefault(); if (app.pausado) continuar(); else pausar(); return; }
     if (k === ' ' || k === 'Enter') {
@@ -198,12 +212,31 @@
     catalogo.cenarios = v[0]; catalogo.itens = v[1];
     $('btMinhas').hidden = !temMinhas();
     $('btJogar').disabled = false;
+    if (app.modo === 'inicio') $('btJogar').focus();
     if (TESTE) window.PeluqueriaDebug.pronto = true;
   });
+
+  /* ---------- ?debug: versão, fps, erros e avisos dos catálogos ---------- */
+  if (DEBUG) {
+    var errosVistos = [], qAnt = desenho.quadros(), tAnt = Date.now();
+    var guardar = function (m) { errosVistos.push(String(m).slice(0, 160)); if (errosVistos.length > 5) errosVistos.shift(); };
+    window.addEventListener('error', function (e) { guardar(e.message); });
+    window.addEventListener('unhandledrejection', function (e) { guardar(e.reason && e.reason.message || e.reason); });
+    var caixa = $('debug'); caixa.hidden = false;
+    var atualizar = function () {
+      var agora = Date.now(), q = desenho.quadros(), fps = Math.round((q - qAnt) * 1000 / Math.max(1, agora - tAnt));
+      qAnt = q; tAnt = agora;
+      var av = PeluqueriaCenarios.avisos.concat(PeluqueriaItens.avisos);
+      caixa.textContent = 'v' + APP_VERSION + (TV ? ' · TV leve' : '') + ' · fps ' + fps + '\n' +
+        (errosVistos.length ? 'erros: ' + errosVistos.join(' | ') : 'sem erros') + (av.length ? '\navisos: ' + av.join(' | ') : '');
+    };
+    atualizar(); setInterval(atualizar, 1000);
+  }
 
   if (TESTE) {
     window.PeluqueriaDebug = {
       pronto: false,
+      leve: desenho.leve,
       estado: function () { return app.rodada; },
       get pausado() { return app.pausado; },
       passo: function (ms) { var s = ms / 1000; while (s > 1e-9) { var d = Math.min(0.05, s); tick(d); pintar(d); s -= d; } },

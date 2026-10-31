@@ -69,7 +69,7 @@ Fora da pasta (fase 1):
    botão ⏸ pequeno (44 px). Com ⏸ o jogo congela e aparece um ▶ grande no meio; tocar no ▶ continua.
 4. **Resultado de cada queda**: o item fica congelado onde parou, o lugar certo aparece em contorno
    tracejado, a palavra da categoria aparece grande (PERFEITO! / BOM! / QUASE! / LONGE!) com os pontos, e um
-   ▶ médio no meio (como no Instagram). Segue sozinho depois de 2 s ou com um toque (os toques nos primeiros
+   ▶ médio no canto de baixo, à direita (no meio ele cobria a boca do cenário com o item). Segue sozinho depois de 2 s ou com um toque (os toques nos primeiros
    0,4 s são ignorados, para não pular sem querer).
 5. **Fim**: estrelas (0 a 3), pontos, recorde do nível ("Novo recorde!" quando bate), contagem de
    Perfeitos, botões **Jogar de novo** e **Início**.

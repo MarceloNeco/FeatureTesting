@@ -46,7 +46,7 @@ button:focus-visible { outline: 3px solid var(--lima); outline-offset: 3px; }
 
 .debug { position: fixed; left: 4px; bottom: 4px; z-index: 9; max-width: 90vw; background: rgba(0,0,0,.75); color: #9f9; font: 12px/1.3 monospace; padding: 4px 6px; white-space: pre-wrap; pointer-events: none; }
 
-html.tv body { font-size: 150%; }
+html.tv { font-size: 150%; }
 html.tv button:focus { outline: 4px solid var(--lima); outline-offset: 4px; }
 
 @media (prefers-reduced-motion: no-preference) {
