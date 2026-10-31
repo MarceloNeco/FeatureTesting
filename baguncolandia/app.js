@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.0', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.8.1', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -237,9 +237,10 @@
     }
     function quadro(ts) {
       tv.raf = requestAnimationFrame(quadro);
-      var dt = tv.ultimoQuadro ? ts - tv.ultimoQuadro : 16; tv.ultimoQuadro = ts;
+      if (Desenho.estaLeve() && ts - (tv.ultimoQuadro || 0) < 28) return;   // TV: no máximo ~30 quadros/s, a física soma o tempo que pulou
+      var dt = tv.ultimoQuadro ? Math.min(100, ts - tv.ultimoQuadro) : 16; tv.ultimoQuadro = ts;
       if (tv.local && tv.esqueletoLigado && Esqueleto.pronto() && tv.fase === 'jogando' && ts - (tv.ultimaMedida || 0) > 66) { tv.ultimaMedida = ts; var ks = Esqueleto.detectar(tv.videoLocal, ts); if (ks && ks[0]) tv.partida.esqueleto(0, ks[0], ts); }
-      else if (tv.local && tv.visaoLocal && (tv.fase === 'jogando') && ts - (tv.ultimaMedida || 0) > 100) { tv.ultimaMedida = ts; var m = tv.visaoLocal.medir(); if (m) { tv.partida.movimento(0, m.p, ts); if (tv.visaoLocal.temFundo()) { var cx = tv.visaoLocal.silhueta(m.bruto); if (cx) tv.partida.corpo(0, cx, ts); } } }
+      else if (tv.local && tv.visaoLocal && (tv.fase === 'jogando') && ts - (tv.ultimaMedida || 0) > 100) { tv.ultimaMedida = ts; var m = tv.visaoLocal.medir(tv.espelhar !== false); if (m) { tv.partida.movimento(0, m.p, ts); if (tv.visaoLocal.temFundo()) { var cx = tv.visaoLocal.silhueta(m.bruto); if (cx) tv.partida.corpo(0, cx, ts); } } }
       if (tv.toque && tv.partida && tv.fase === 'jogando' && ts - (tv.ultimaMedida || 0) > 100) { tv.ultimaMedida = ts; Object.keys(tv.dedoCorpo).forEach(function (j) { var c = tv.dedoCorpo[j], e = tv.partida.estado().jogadores[+j]; if (!e) return; var pul = ts < c.pulando, ab = !pul && ts < c.abaixado; tv.partida.corpo(+j, { x: Math.max(0, Math.min(0.8, e.corpo.x - 0.1)), y: pul ? -0.1 : (ab ? 0.45 : 0.1), w: ab ? 0.25 : 0.2, h: ab ? 0.45 : 0.8 }, ts); }); }
       if (TESTE && window.BaguncaTeste && window.BaguncaTeste.corpo && tv.partida && tv.fase === 'jogando') { var cb = window.BaguncaTeste.corpo(ts); if (cb) tv.partida.corpo(0, cb, ts); }
       if (TESTE && window.BaguncaTeste && window.BaguncaTeste.esqueleto && tv.partida && tv.fase === 'jogando' && ts - (tv.ultimaMedida || 0) > 66) { tv.ultimaMedida = ts; var ke = window.BaguncaTeste.esqueleto(ts); if (ke) tv.partida.esqueleto(0, ke, ts); }
@@ -247,8 +248,17 @@
       var estado = null, eventos = [];
       if (tv.partida) { tv.partida.avancar(dt); estado = tv.partida.estado(); eventos = tv.partida.eventos(); eventos.forEach(som); }
       Desenho.quadro(estado, eventos, ts);
+      $('tv').classList.toggle('leve', Desenho.estaLeve());
+      if (tv.debug) depurar(ts);
       if (estado && estado.fase === 'fim' && tv.fase !== 'fim') { tv.fase = 'fim'; $('tv').classList.remove('jogando'); tv.podio = estado; Som.tocar('fim'); dizer('Acabou! Muito bem!', 'Time’s up! Well done!'); setTimeout(function () { Desenho.legenda(tv.toque ? T('Quer jogar com o corpo todo? Chame a TV! ▶ joga de novo', 'Want to play with your whole body? Get the TV! ▶ plays again') : T('Toque em ▶ para jogar de novo', 'Tap ▶ to play again'), '#ffd166'); }, 2500); }
       if (tv.fase === 'fim' && tv.podio) { var ordem = tv.podio.jogadores.map(function (j, i) { return { j: i, pontos: j.pontos }; }).sort(function (a, b) { return b.pontos - a.pontos; }); Desenho.podio(null, ordem, tv.nomes, ts); }
+    }
+    /* ?debug na TV: caixa no canto com navegador, modo leve, quadros/s e os últimos erros (para o dono fotografar) */
+    function depurar(ts) {
+      tv.dbgN = (tv.dbgN || 0) + 1; if (ts - (tv.dbgT || 0) < 1000) return; tv.dbgFps = tv.dbgN; tv.dbgN = 0; tv.dbgT = ts;
+      var b = $('tvDebug'); if (!b) { b = document.createElement('div'); b.id = 'tvDebug'; $('tv').appendChild(b); }
+      var erros = Desenho.erros().concat(tv.errosJs || []);
+      b.textContent = 'v' + APP_VERSION + ' · ' + (Desenho.estaLeve() ? 'leve' : 'normal') + ' · ' + tv.dbgFps + ' fps · ' + tv.fase + '\n' + navigator.userAgent.slice(0, 90) + (erros.length ? '\nERROS:\n' + erros.join('\n') : '\nsem erros');
     }
     function som(ev) {
       if (ev.t === 'corte') Som.tocar('corte');
@@ -317,12 +327,14 @@
       if (tv.toque) { ligarToque(); try { tv.mostrarBoneco = localStorage.getItem('bagunca:bonecoDedo') === '1'; } catch (e) { tv.mostrarBoneco = false; } } else tv.mostrarBoneco = true;   // no dedo o boneco começa escondido
       $('localBoneco').classList.toggle('ativo', !!tv.mostrarBoneco); Desenho.mostrarBoneco(tv.mostrarBoneco);
       try { if (!tv.local && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
+      if (!tv.debug && /[?&]debug\b/.test(location.search)) { tv.debug = true; tv.errosJs = []; window.addEventListener('error', function (e) { tv.errosJs.push('js: ' + (e.message || e)); if (tv.errosJs.length > 5) tv.errosJs.shift(); }); }
       if (!tv.raf) tv.raf = requestAnimationFrame(quadro);
       carregar().then(function () { if (tv.local) lobby(); else capa(); if (!tv.local) carregarYouTube(); });
       if (tv.teclado) return;
       tv.teclado = true;
       $('localComecar').onclick = function () { if (tv.fase === 'lobby' || tv.fase === 'fim') comecar(); };
       $('localPausa').onclick = function () { comando({ acao: 'pausar' }); };
+      $('localCamera').onclick = function () { CelApp.trocarCameraLocal(); };
       $('localBoneco').onclick = function () { tv.mostrarBoneco = !tv.mostrarBoneco; $('localBoneco').classList.toggle('ativo', tv.mostrarBoneco); Desenho.mostrarBoneco(tv.mostrarBoneco); try { localStorage.setItem('bagunca:bonecoDedo', tv.mostrarBoneco ? '1' : '0'); } catch (e) {} };
       $('localPessoas').onclick = function () { var n = tv.cfg.jogadores === 2 ? 1 : 2; $('localPessoas').textContent = n === 2 ? '👥 2' : '👤 1'; comando({ acao: 'config', jogadores: n, celulares: 1 }); };
       $('localModos').querySelectorAll('button').forEach(function (b) { b.onclick = function () { $('localModos').querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); comando({ acao: 'config', modo: b.getAttribute('data-v') }); }; });
@@ -361,9 +373,10 @@
     function sairLocal() {
       dedos = {}; tv.dedoCorpo = {}; tv.toque = false; $('tv').classList.remove('toque');
       cancelAnimationFrame(tv.raf); tv.raf = 0; tv.partida = null; tv.fase = 'carregando'; Som.musica(false); Desenho.legenda(null);
-      $('tv').classList.remove('ativa', 'local'); while ($('tvFundo').firstChild) $('tvFundo').removeChild($('tvFundo').firstChild);
+      $('tv').classList.remove('ativa', 'local', 'semEspelho', 'leve'); while ($('tvFundo').firstChild) $('tvFundo').removeChild($('tvFundo').firstChild);
     }
-    return { iniciar: iniciar, comando: comando, sairLocal: sairLocal, tv: tv };
+    function espelhar(v) { tv.espelhar = v !== false; $('tv').classList.toggle('semEspelho', !tv.espelhar); }
+    return { iniciar: iniciar, comando: comando, sairLocal: sairLocal, espelhar: espelhar, tv: tv };
   })();
 
   /* =====================================================================
@@ -390,10 +403,19 @@
       }).catch(function (e) { $('btEntrar').disabled = false; erro.textContent = (e && e.name === 'NotAllowedError') ? T('Você precisa permitir a câmera.', 'You need to allow the camera.') : T('Não deu para conectar: ', 'Could not connect: ') + (e && e.message || e); erro.style.display = 'block'; });
     }
     /* só o celular: a TV roda aqui mesmo, com a câmera deste aparelho */
+    function trocarCameraLocal() {
+      if (!cel.streamLocal) return;
+      var lado = cel.ladoLocal === 'user' ? 'environment' : 'user';
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: lado, width: { ideal: 640 }, height: { ideal: 360 } }, audio: false }).then(function (s) {
+        cel.streamLocal.getTracks().forEach(function (t) { t.stop(); });
+        cel.streamLocal = s; cel.ladoLocal = lado; cel.videoLocal.srcObject = s; cel.videoLocal.play().catch(function () {});
+        cel.visao.zerar(); TVApp.espelhar(lado === 'user');
+      }).catch(function () { Desenho.legenda(T('Este aparelho só tem uma câmera.', 'This device has only one camera.'), '#ffd166'); });
+    }
     function entrarLocal(nome, erro) {
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 360 } }, audio: false }).catch(function () { return navigator.mediaDevices.getUserMedia({ video: true, audio: false }); }).then(function (s) {
         var v = document.createElement('video'); v.autoplay = true; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.srcObject = s; v.play().catch(function () {});
-        cel.streamLocal = s; cel.visao = Sala.criarVisao(v);
+        cel.streamLocal = s; cel.videoLocal = v; cel.ladoLocal = 'user'; cel.visao = Sala.criarVisao(v);
         TVApp.iniciar({ local: true, visao: cel.visao, video: v, nome: nome, gesto: true, esqueleto: cel.esqueleto && Esqueleto.pronto() });
         TVApp.comando(Object.assign({ acao: 'config' }, cel.cfg, { celulares: 1 })); mandarBonecos();
         $('btEntrar').disabled = false;
@@ -448,7 +470,7 @@
         aoFim: function (caixa) { cel.calib = null; $('btPularCal').style.display = 'none'; $('calTxt').textContent = '✅ ' + T('Pronto!', 'Ready!'); $('calTxt').className = 'cal ok'; cel.sala.enviarDados({ e: 0, p: [], cal: { passo: 'fim', ok: true, caixa: caixa } }); setTimeout(function () { $('calTxt').textContent = ''; }, 3000); }
       });
     }
-    function cameras(lista, atual) { var c = lista[atual]; $('camNome').textContent = lista.length > 1 ? (atual + 1) + '/' + lista.length + ' ' + nomeCamera(c && c.label || '') : nomeCamera(c && c.label || ''); $('btCamera').disabled = lista.length < 2; }
+    function cameras(lista, atual) { var c = lista[atual]; $('camNome').textContent = lista.length > 1 ? (atual + 1) + '/' + lista.length + ' ' + nomeCamera(c && c.label || '') : nomeCamera(c && c.label || ''); }
     function nomeCamera(label) { var l = label.toLowerCase(); if (/ultra|wide|0\.5|grande/.test(l)) return T('grande-angular', 'wide-angle'); if (/tele|zoom/.test(l)) return 'tele'; if (/front|user/.test(l)) return T('frontal', 'front'); if (/back|rear|environment/.test(l)) return T('traseira', 'back'); return label.slice(0, 22); }
 
     function mostrarEstado(m) {
@@ -602,7 +624,7 @@
     $('btParar').onclick = function () { comando({ acao: 'parar' }); };
     $('btCalibrar').onclick = function () { comando({ acao: 'calibrar' }); };
     $('btPularCal').onclick = function () { if (cel.calib) cel.calib.pular(); };
-    $('btCamera').onclick = function () { if (cel.sala) cel.sala.trocarCamera().then(function () { cel.visao && cel.visao.zerar(); }).catch(function () {}); };
+    $('btCamera').onclick = $('btCameraTopo').onclick = function () { if (cel.sala) cel.sala.trocarCamera().then(function () { cel.visao && cel.visao.zerar(); }).catch(function () {}); };
     $('btSair').onclick = sair;
     $('btTocarLink').onclick = function () { tocarLink(); };
     $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') tocarLink(); });
@@ -626,7 +648,7 @@
     $('linhaCelulares').style.display = 'none';
     try { if (localStorage.getItem('bagunca:esqueleto') === '1') setTimeout(function () { if (!cel.esqueleto) { Esqueleto.carregar().then(function () { cel.esqueleto = true; $('btEsqueleto').classList.add('ativo'); if (cel.local) TVApp.tv.esqueletoLigado = true; }).catch(function () {}); } }, 1500); } catch (e) {}
     desenharHist();
-    return { entrar: entrar, sair: sair, cel: cel };
+    return { entrar: entrar, sair: sair, trocarCameraLocal: trocarCameraLocal, cel: cel };
   })();
 
   /* ---------- papel ---------- */

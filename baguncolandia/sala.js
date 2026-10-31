@@ -113,7 +113,7 @@
     function oferecer() {
       if (pc) { try { pc.close(); } catch (e) {} }
       pc = new RTCPeerConnection(ICE);
-      stream.getVideoTracks().forEach(function (t) { try { t.contentHint = 'motion'; } catch (e) {} var snd = pc.addTrack(t, stream); try { var pr = snd.getParameters(); pr.degradationPreference = 'maintain-framerate'; if (!pr.encodings || !pr.encodings.length) pr.encodings = [{}]; pr.encodings[0].maxBitrate = 1200000; snd.setParameters(pr).catch(function () {}); } catch (e) {} });
+      stream.getVideoTracks().forEach(function (t) { try { t.contentHint = 'motion'; } catch (e) {} var snd = pc.addTrack(t, stream); try { var pr = snd.getParameters(); pr.degradationPreference = 'maintain-framerate'; if (!pr.encodings || !pr.encodings.length) pr.encodings = [{}]; pr.encodings[0].maxBitrate = 600000; snd.setParameters(pr).catch(function () {}); } catch (e) {} });
       try { dc = pc.createDataChannel('jogo', { ordered: false, maxRetransmits: 0 }); dc.onmessage = function (x) { var d; try { d = JSON.parse(x.data); } catch (e) { return; } d = V(d); if (d) opts.aoTV && opts.aoTV(d); }; } catch (e) { dc = null; }
       pc.onicecandidate = function (ev) { if (ev.candidate) mandar(canal, { t: 'ice', id: id, to: 'tv', c: ev.candidate.toJSON() }); };
       pc.onconnectionstatechange = function () {
@@ -126,10 +126,10 @@
         .catch(function (e) { status(opts.T('Erro ao conectar: ', 'Connect error: ') + e.message, 'erro'); });
     }
     /* câmera: primeiro a traseira; o botão 🔄 passa por todas (grande-angular aparece como câmera própria) */
-    function ligarCamera(deviceId) {
+    function ligarCamera(deviceId, lado) {
       if (stream) stream.getTracks().forEach(function (t) { t.stop(); });
-      var v = { width: { ideal: 640 }, height: { ideal: 360 }, frameRate: { ideal: 24 } };
-      if (deviceId) v.deviceId = { exact: deviceId }; else v.facingMode = 'environment';
+      var v = { width: { ideal: 480 }, height: { ideal: 270 }, frameRate: { ideal: 20 } };   // leve: a TV só precisa ver o movimento
+      if (deviceId) v.deviceId = { exact: deviceId }; else v.facingMode = lado || 'environment';
       return navigator.mediaDevices.getUserMedia({ video: v, audio: false })
         .catch(function () { return navigator.mediaDevices.getUserMedia({ video: true, audio: false }); })
         .then(function (s) {
@@ -168,7 +168,7 @@
       energia: function (e, p) { if (!enviarDados({ e: e, p: p })) mandar(canal, { t: 'energia', id: id, e: e, p: p.slice(0, 3) }); },
       comando: function (obj) { mandar(canal, Object.assign({ t: 'cmd', id: id }, obj)); },
       reentrar: function () { if (fechado || Date.now() - ultimoJoin < 5000) return; ultimoJoin = Date.now(); mandar(canal, { t: 'join', id: id, nome: nome }); },
-      trocarCamera: function () { if (cams.length < 2) return Promise.resolve(); var i = (camIdx + 1) % cams.length; return ligarCamera(cams[i].deviceId); },
+      trocarCamera: function () { if (cams.length < 2) return ligarCamera(null, frente ? 'environment' : 'user'); var i = (camIdx + 1) % cams.length; return ligarCamera(cams[i].deviceId); },
       cameras: function () { return { lista: cams, atual: camIdx }; },
       frente: function () { return frente; },
       stream: function () { return stream; },
