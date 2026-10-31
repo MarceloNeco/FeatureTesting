@@ -2,6 +2,19 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.6",
+      "data": "31/Out/2026",
+      "hora": "14:49:00",
+      "pt": [
+        "Menino e Menina agora são rostos diferentes de verdade, mesmo com o mesmo cabelo: menina com cílios, sobrancelhas finas e boquinha rosa; menino com sobrancelhas grossas e sorriso com dentinhos.",
+        "Escolher Menina troca o cabelo para longo, e Menino para curto (dá para mudar depois)."
+      ],
+      "en": [
+        "Boy and Girl are now truly different faces even with the same hair: girl with lashes, thin brows and pink lips; boy with thick brows and a toothy grin.",
+        "Picking Girl switches hair to long, Boy to short (changeable afterwards)."
+      ]
+    },
+    {
       "versao": "0.8.5",
       "data": "31/Out/2026",
       "hora": "14:41:00",
