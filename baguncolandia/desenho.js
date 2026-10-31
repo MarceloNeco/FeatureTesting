@@ -189,85 +189,122 @@
   function jg0(c, jogs) { return jogs[c.j] || jogs[0]; }
   function jg0chao(jg) { return jg.raia.y + jg.raia.h - 10; }
 
-  /* ---------- boneco: cabeça = figura da turma; corpo em vetor na cor do jogador ---------- */
+  /* ---------- boneco personalizável (como montar um boneco de pano): cabeça = figura da turma; roupa, cores,
+     acessório, sapato e pele escolhidos pela pessoa. cfg = { cabeca, cor, roupa, acessorio, sapato, pele } ---------- */
+  var ROUPAS = ['camiseta', 'vestido', 'macacao', 'capa'], ACESSORIOS = ['nenhum', 'laco', 'coroa', 'oculos', 'chapeu', 'asas', 'flor'];
+  function avatarCfg(j) {
+    var a = D.avatares[j] || D.avatares[0] || {};
+    if (typeof a === 'string') a = { cabeca: a };
+    return { cabeca: a.cabeca || (j === 1 ? 'donatella' : 'bolinhoDeChuva'), cor: a.cor || CORES.j[j] || CORES.j[0], roupa: ROUPAS.indexOf(a.roupa) >= 0 ? a.roupa : 'camiseta', acessorio: ACESSORIOS.indexOf(a.acessorio) >= 0 ? a.acessorio : 'nenhum', sapato: a.sapato || SAPATO, pele: a.pele || PELE };
+  }
+  function escurecer(hex, f) { var m = /^#([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return 'rgba(0,0,0,.35)'; var n = parseInt(m[1], 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255; return 'rgb(' + Math.round(r * f) + ',' + Math.round(g * f) + ',' + Math.round(b * f) + ')'; }
+  /* peças em coordenadas locais: origem no meio dos pés; A = altura do boneco; ty = topo do tronco; tw/th = tronco */
+  function asas(ctx, A, ty, ts) { ctx.save(); ctx.fillStyle = 'rgba(255,255,255,.85)'; var b = Math.sin(ts / 90) * 0.25; [-1, 1].forEach(function (s) { ctx.save(); ctx.translate(s * A * 0.12, ty + A * 0.1); ctx.scale(s, 1); ctx.rotate(-0.5 + b); ctx.beginPath(); ctx.ellipse(A * 0.16, 0, A * 0.18, A * 0.08, 0.2, 0, 6.2832); ctx.fill(); ctx.beginPath(); ctx.ellipse(A * 0.14, A * 0.08, A * 0.13, A * 0.06, -0.2, 0, 6.2832); ctx.fill(); ctx.restore(); }); ctx.restore(); }
+  function capa(ctx, A, ty, cor, balanco) { ctx.save(); ctx.fillStyle = escurecer(cor, 0.75); ctx.beginPath(); ctx.moveTo(-A * 0.14, ty + 4); ctx.lineTo(A * 0.14, ty + 4); ctx.quadraticCurveTo(A * 0.26 + balanco * 8, ty + A * 0.3, A * 0.2 + balanco * 14, ty + A * 0.5); ctx.lineTo(-A * 0.2 + balanco * 14, ty + A * 0.5); ctx.quadraticCurveTo(-A * 0.26 + balanco * 8, ty + A * 0.3, -A * 0.14, ty + 4); ctx.fill(); ctx.restore(); }
+  function tronco(ctx, cfg, A, tw, th, ty) {
+    ctx.fillStyle = cfg.cor; ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 3;
+    if (cfg.roupa === 'vestido') { ctx.beginPath(); ctx.moveTo(-tw / 2, ty); ctx.lineTo(tw / 2, ty); ctx.lineTo(tw * 0.9, ty + th * 1.25); ctx.lineTo(-tw * 0.9, ty + th * 1.25); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.moveTo(-tw * 0.7, ty + th * 1.1); ctx.lineTo(tw * 0.7, ty + th * 1.1); ctx.lineTo(tw * 0.8, ty + th * 1.22); ctx.lineTo(-tw * 0.8, ty + th * 1.22); ctx.fill(); }
+    else { arred(ctx, -tw / 2, ty, tw, th, tw * 0.3); ctx.fill(); ctx.stroke(); }
+    if (cfg.roupa === 'macacao') { ctx.fillStyle = escurecer(cfg.cor, 0.7); arred(ctx, -tw * 0.42, ty - 2, tw * 0.14, th * 0.5, 4); ctx.fill(); arred(ctx, tw * 0.28, ty - 2, tw * 0.14, th * 0.5, 4); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.3)'; arred(ctx, -tw * 0.2, ty + th * 0.35, tw * 0.4, th * 0.35, 4); ctx.fill(); }
+    else { ctx.fillStyle = 'rgba(255,255,255,.22)'; arred(ctx, -tw / 2 + 6, ty + 6, tw * 0.4, th * 0.5, 8); ctx.fill(); }
+  }
+  function acessorio(ctx, cfg, hs) {   // desenhado com a origem no centro da cabeça
+    var a = cfg.acessorio; if (!a || a === 'nenhum') return;
+    ctx.save();
+    if (a === 'laco') { ctx.translate(-hs * 0.3, -hs * 0.36); ctx.fillStyle = '#ff4fa3'; ctx.beginPath(); ctx.ellipse(-hs * 0.1, 0, hs * 0.12, hs * 0.07, -0.4, 0, 6.2832); ctx.fill(); ctx.beginPath(); ctx.ellipse(hs * 0.1, 0, hs * 0.12, hs * 0.07, 0.4, 0, 6.2832); ctx.fill(); ctx.fillStyle = '#ff2b8e'; ctx.beginPath(); ctx.arc(0, 0, hs * 0.04, 0, 6.2832); ctx.fill(); }
+    else if (a === 'coroa') { ctx.translate(0, -hs * 0.44); ctx.fillStyle = CORES.ouro; ctx.strokeStyle = '#c98a00'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-hs * 0.22, hs * 0.06); ctx.lineTo(-hs * 0.22, -hs * 0.12); ctx.lineTo(-hs * 0.11, -hs * 0.02); ctx.lineTo(0, -hs * 0.16); ctx.lineTo(hs * 0.11, -hs * 0.02); ctx.lineTo(hs * 0.22, -hs * 0.12); ctx.lineTo(hs * 0.22, hs * 0.06); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#ff4fa3'; ctx.beginPath(); ctx.arc(0, -hs * 0.02, hs * 0.03, 0, 6.2832); ctx.fill(); }
+    else if (a === 'oculos') { ctx.strokeStyle = '#1a1446'; ctx.lineWidth = Math.max(2, hs * 0.03); ctx.fillStyle = 'rgba(62,232,255,.35)'; [-1, 1].forEach(function (s) { ctx.beginPath(); ctx.arc(s * hs * 0.14, -hs * 0.02, hs * 0.11, 0, 6.2832); ctx.fill(); ctx.stroke(); }); ctx.beginPath(); ctx.moveTo(-hs * 0.03, -hs * 0.02); ctx.lineTo(hs * 0.03, -hs * 0.02); ctx.stroke(); }
+    else if (a === 'chapeu') { ctx.translate(0, -hs * 0.42); ctx.fillStyle = '#8e5bff'; ctx.beginPath(); ctx.moveTo(-hs * 0.18, hs * 0.04); ctx.lineTo(0, -hs * 0.34); ctx.lineTo(hs * 0.18, hs * 0.04); ctx.closePath(); ctx.fill(); ctx.fillStyle = CORES.ouro; ctx.beginPath(); ctx.arc(0, -hs * 0.34, hs * 0.05, 0, 6.2832); ctx.fill(); ctx.fillStyle = '#fff'; [[-0.08, -0.08], [0.04, -0.16], [0.06, -0.02]].forEach(function (q) { ctx.beginPath(); ctx.arc(q[0] * hs, q[1] * hs, hs * 0.02, 0, 6.2832); ctx.fill(); }); }
+    else if (a === 'flor') { ctx.translate(hs * 0.32, -hs * 0.34); ctx.fillStyle = '#ff6f91'; for (var k = 0; k < 5; k++) { ctx.beginPath(); ctx.ellipse(Math.cos(k * 1.2566) * hs * 0.07, Math.sin(k * 1.2566) * hs * 0.07, hs * 0.06, hs * 0.04, k * 1.2566, 0, 6.2832); ctx.fill(); } ctx.fillStyle = CORES.ouro; ctx.beginPath(); ctx.arc(0, 0, hs * 0.04, 0, 6.2832); ctx.fill(); }
+    ctx.restore();
+  }
+  function cabeca(ctx, cfg, hs) {
+    var fig = root.Figuras.porId(cfg.cabeca) || root.Figuras.lista()[0], img = imagem(fig, hs / 2.3);
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 6;
+    if (img) ctx.drawImage(img, -hs / 2, -hs / 2, hs, hs); else { ctx.fillStyle = fig.suco || '#fff'; ctx.beginPath(); ctx.arc(0, 0, hs / 2.3, 0, 6.2832); ctx.fill(); }
+    ctx.restore();
+    acessorio(ctx, cfg, hs);
+  }
+
   function boneco(ctx, jg, j, ts, dt) {
     if (jg.esqueleto) { marionete(ctx, jg, j, ts); return; }
-    var r = jg.raia, A = r.h * 0.42, chao = r.y + r.h * (root.Cenas ? root.Cenas.CHAO : 0.86), cor = CORES.j[j], corpo = jg.corpo || { x: 0.5 }, av = D.av[j] || (D.av[j] = {});
+    var r = jg.raia, A = r.h * 0.42, chao = r.y + r.h * (root.Cenas ? root.Cenas.CHAO : 0.86), cfg = avatarCfg(j), cor = cfg.cor, corpo = jg.corpo || { x: 0.5 }, av = D.av[j] || (D.av[j] = {});
     var x = r.x + corpo.x * r.w;
     if (av.x == null) av.x = x; av.vx = (x - av.x) / Math.max(dt, 0.001); av.x = x;
-    // pulo com mola; agachar com suavidade
     var alvoY = corpo.pulando ? -A * 0.5 : 0; av.y = av.y == null ? 0 : av.y + (alvoY - av.y) * Math.min(1, dt * 12);
     var alvoAg = corpo.abaixado ? 0.6 : 1; av.ag = av.ag == null ? 1 : av.ag + (alvoAg - av.ag) * Math.min(1, dt * 10);
     av.passo = (av.passo || 0) + Math.min(14, Math.abs(av.vx) / 40) * dt * 8;
     var andando = Math.abs(av.vx) > 30, balanco = andando ? Math.sin(av.passo) : 0;
-    // braços levantados? pelo rastro recente acima do ombro, de cada lado
     var bracoE = false, bracoD = false, ombroY = chao + av.y - A * 0.62 * av.ag;
     (jg.rastro || []).slice(-4).forEach(function (p) { if (ts - p.ts > 400) return; if (p.y < ombroY + A * 0.1) { if (p.x < x - A * 0.05) bracoE = true; else if (p.x > x + A * 0.05) bracoD = true; } });
     av.bE = av.bE == null ? 0 : av.bE + ((bracoE ? 1 : 0) - av.bE) * Math.min(1, dt * 10);
     av.bD = av.bD == null ? 0 : av.bD + ((bracoD ? 1 : 0) - av.bD) * Math.min(1, dt * 10);
-    // sombra no chão
     ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(x, chao + 4, A * 0.28 * (1 - av.y / A * 0.6), A * 0.07, 0, 0, 6.2832); ctx.fill(); ctx.restore();
     ctx.save(); ctx.translate(x, chao + av.y); ctx.scale(1 + (1 - av.ag) * 0.35, av.ag);
     if (jg.invencivel && Math.floor(ts / 90) % 2) ctx.globalAlpha = 0.45;
-    var L = A * 0.09; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    // pernas
-    ctx.strokeStyle = SAPATO; ctx.lineWidth = L;
-    var quadrilY = -A * 0.36, pernaL = A * 0.33;
+    desenharCorpoEmPe(ctx, cfg, A, { balanco: balanco, andando: andando, bE: av.bE, bD: av.bD, pulando: corpo.pulando, ts: ts });
+    ctx.restore();
+    ctx.save(); ctx.font = '600 22px ' + D.fonte; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = cor; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 6;
+    ctx.fillText(D.nomes[j] || '', x, chao + av.y - A * 1.02 * av.ag - 6); ctx.restore();
+  }
+  /* corpo em pé, origem no meio dos pés, altura A (usado pelo boneco do jogo e pela prévia no celular) */
+  function desenharCorpoEmPe(ctx, cfg, A, o) {
+    var L = A * 0.09, balanco = o.balanco || 0, cor = cfg.cor; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    var tw = A * 0.3, th = A * 0.34, ty = -A * 0.68, quadrilY = -A * 0.36, pernaL = A * 0.33;
+    if (cfg.acessorio === 'asas') asas(ctx, A, ty, o.ts || 0);
+    if (cfg.roupa === 'capa') capa(ctx, A, ty, cor, balanco);
+    // pernas (no macacão a perna tem a cor da roupa)
+    ctx.strokeStyle = cfg.roupa === 'macacao' ? cor : cfg.sapato; ctx.lineWidth = L;
     [[-1, balanco], [1, -balanco]].forEach(function (pp) {
-      var px = pp[0] * A * 0.08, kx = px + pp[1] * A * 0.12, ky = quadrilY + pernaL * 0.5, fx = px + pp[1] * A * 0.2, fy = corpo.pulando ? quadrilY + pernaL * 0.75 : -2;
+      var px = pp[0] * A * 0.08, kx = px + pp[1] * A * 0.12, ky = quadrilY + pernaL * 0.5, fx = px + pp[1] * A * 0.2, fy = o.pulando ? quadrilY + pernaL * 0.75 : -2;
       ctx.beginPath(); ctx.moveTo(px, quadrilY); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy); ctx.stroke();
-      ctx.fillStyle = SAPATO; ctx.beginPath(); ctx.ellipse(fx + pp[0] * 3, fy, L * 0.9, L * 0.55, 0, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = cfg.sapato; ctx.beginPath(); ctx.ellipse(fx + pp[0] * 3, fy, L * 0.9, L * 0.55, 0, 0, 6.2832); ctx.fill();
     });
-    // tronco
-    var tw = A * 0.3, th = A * 0.34, ty = -A * 0.68;
-    ctx.fillStyle = cor; ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 3;
-    arred(ctx, -tw / 2, ty, tw, th, tw * 0.3); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,.22)'; arred(ctx, -tw / 2 + 6, ty + 6, tw * 0.4, th * 0.5, 8); ctx.fill();
-    // braços
+    tronco(ctx, cfg, A, tw, th, ty);
     ctx.strokeStyle = cor; ctx.lineWidth = L;
-    [[-1, av.bE], [1, av.bD]].forEach(function (bb) {
+    [[-1, o.bE || 0], [1, o.bD || 0]].forEach(function (bb) {
       var s = bb[0], up = bb[1], ox = s * tw / 2, oy = ty + A * 0.05;
-      var ang = (-0.35 - up * 1.9) + (andando ? -balanco * s * 0.35 * (1 - up) : 0);   // 0 = braço para baixo
+      var ang = (-0.35 - up * 1.9) + (o.andando ? -balanco * s * 0.35 * (1 - up) : 0);
       var ex = ox + s * Math.sin(ang + Math.PI / 2) * A * 0.14, ey = oy + Math.cos(ang + Math.PI / 2) * A * 0.14 * -1;
       var hx = ex + s * Math.sin(ang + Math.PI / 2 + up * 0.4) * A * 0.14, hy = ey - Math.cos(ang + Math.PI / 2 + up * 0.4) * A * 0.14;
       ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ex, ey); ctx.lineTo(hx, hy); ctx.stroke();
-      ctx.fillStyle = PELE; ctx.beginPath(); ctx.arc(hx, hy, L * 0.8, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = cfg.pele; ctx.beginPath(); ctx.arc(hx, hy, L * 0.8, 0, 6.2832); ctx.fill();
     });
-    // cabeça (figura da turma), balançando de leve ao andar
-    var fig = root.Figuras.porId(D.avatares[j] || D.avatares[0]) || root.Figuras.lista()[0], hs = A * 0.44, img = imagem(fig, hs / 2.3);
-    ctx.save(); ctx.translate(0, ty - hs * 0.42 + Math.abs(balanco) * 3); ctx.rotate(balanco * 0.08);
-    ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 6;
-    if (img) ctx.drawImage(img, -hs / 2, -hs / 2, hs, hs); else { ctx.fillStyle = fig.suco || '#fff'; ctx.beginPath(); ctx.arc(0, 0, hs / 2.3, 0, 6.2832); ctx.fill(); }
+    var hs = A * 0.44;
+    ctx.save(); ctx.translate(0, ty - hs * 0.42 + Math.abs(balanco) * 3); ctx.rotate(balanco * 0.08); cabeca(ctx, cfg, hs); ctx.restore();
+  }
+  /* prévia no celular: um boneco parado, acenando, num canvas pequeno */
+  function previa(canvas, cfg, ts) {
+    var ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
+    cfg = avatarCfg.call(null, 0); if (arguments[1]) { var a = arguments[1]; cfg = { cabeca: a.cabeca || cfg.cabeca, cor: a.cor || cfg.cor, roupa: ROUPAS.indexOf(a.roupa) >= 0 ? a.roupa : 'camiseta', acessorio: ACESSORIOS.indexOf(a.acessorio) >= 0 ? a.acessorio : 'nenhum', sapato: a.sapato || SAPATO, pele: a.pele || PELE }; }
+    ctx.clearRect(0, 0, w, h);
+    ctx.save(); ctx.translate(w / 2, h * 0.92);
+    ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(0, 4, w * 0.22, 8, 0, 0, 6.2832); ctx.fill();
+    desenharCorpoEmPe(ctx, cfg, h * 0.78, { balanco: 0, andando: false, bE: 0, bD: 0.5 + 0.5 * Math.sin((ts || 0) / 300), pulando: false, ts: ts || 0 });
     ctx.restore();
-    ctx.restore();
-    // nome em cima
-    ctx.save(); ctx.font = '600 22px ' + D.fonte; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = cor; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 6;
-    ctx.fillText(D.nomes[j] || '', x, chao + av.y - A * 1.02 * av.ag - 6); ctx.restore();
   }
 
   /* ---------- marionete: o boneco desenhado em cima do esqueleto por IA (13 pontos) ---------- */
   function marionete(ctx, jg, j, ts) {
-    var r = jg.raia, k = jg.esqueleto, cor = CORES.j[j];
-    // pontos do esqueleto no palco; o corpo ocupa o lugar do boneco na raia (a altura segue a pessoa)
+    var r = jg.raia, k = jg.esqueleto, cfg = avatarCfg(j), cor = cfg.cor;
     var P = k.map(function (q) { return { x: r.x + q[0] * r.w, y: r.y + q[1] * r.h }; });
     var L = Math.max(8, Math.min(40, Math.hypot(P[1].x - P[7].x, P[1].y - P[7].y) * 0.2));
+    var hs = Math.max(60, Math.min(220, Math.hypot(P[2].x - P[1].x, P[2].y - P[1].y) * 1.3));
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     if (jg.invencivel && Math.floor(ts / 90) % 2) ctx.globalAlpha = 0.45;
-    // pernas
-    ctx.strokeStyle = SAPATO; ctx.lineWidth = L;
-    [[7, 9, 11], [8, 10, 12]].forEach(function (seg) { ctx.beginPath(); ctx.moveTo(P[seg[0]].x, P[seg[0]].y); ctx.lineTo(P[seg[1]].x, P[seg[1]].y); ctx.lineTo(P[seg[2]].x, P[seg[2]].y); ctx.stroke(); ctx.fillStyle = SAPATO; ctx.beginPath(); ctx.ellipse(P[seg[2]].x, P[seg[2]].y + L * 0.3, L * 0.9, L * 0.55, 0, 0, 6.2832); ctx.fill(); });
-    // tronco
+    var cx = (P[1].x + P[2].x) / 2, cy = (P[1].y + P[2].y) / 2, A = hs * 2.3;
+    if (cfg.acessorio === 'asas') { ctx.save(); ctx.translate(cx, cy); asas(ctx, A, -A * 0.05, ts); ctx.restore(); }
+    if (cfg.roupa === 'capa') { ctx.save(); ctx.translate(cx, cy); capa(ctx, A, -A * 0.05, cor, 0); ctx.restore(); }
+    ctx.strokeStyle = cfg.roupa === 'macacao' ? cor : cfg.sapato; ctx.lineWidth = L;
+    [[7, 9, 11], [8, 10, 12]].forEach(function (seg) { ctx.beginPath(); ctx.moveTo(P[seg[0]].x, P[seg[0]].y); ctx.lineTo(P[seg[1]].x, P[seg[1]].y); ctx.lineTo(P[seg[2]].x, P[seg[2]].y); ctx.stroke(); ctx.fillStyle = cfg.sapato; ctx.beginPath(); ctx.ellipse(P[seg[2]].x, P[seg[2]].y + L * 0.3, L * 0.9, L * 0.55, 0, 0, 6.2832); ctx.fill(); });
     ctx.fillStyle = cor; ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(P[1].x, P[1].y); ctx.lineTo(P[2].x, P[2].y); ctx.lineTo(P[8].x + L * 0.3, P[8].y); ctx.lineTo(P[7].x - L * 0.3, P[7].y); ctx.closePath(); ctx.fill(); ctx.stroke();
-    // braços
+    var ex = cfg.roupa === 'vestido' ? L * 1.6 : L * 0.3, ey = cfg.roupa === 'vestido' ? L * 1.5 : 0;
+    ctx.beginPath(); ctx.moveTo(P[1].x, P[1].y); ctx.lineTo(P[2].x, P[2].y); ctx.lineTo(P[8].x + ex, P[8].y + ey); ctx.lineTo(P[7].x - ex, P[7].y + ey); ctx.closePath(); ctx.fill(); ctx.stroke();
+    if (cfg.roupa === 'macacao') { ctx.fillStyle = escurecer(cor, 0.7); [1, 2].forEach(function (i) { ctx.beginPath(); ctx.arc(P[i].x, P[i].y + L * 0.6, L * 0.35, 0, 6.2832); ctx.fill(); }); }
     ctx.strokeStyle = cor; ctx.lineWidth = L;
-    [[1, 3, 5], [2, 4, 6]].forEach(function (seg) { ctx.beginPath(); ctx.moveTo(P[seg[0]].x, P[seg[0]].y); ctx.lineTo(P[seg[1]].x, P[seg[1]].y); ctx.lineTo(P[seg[2]].x, P[seg[2]].y); ctx.stroke(); ctx.fillStyle = PELE; ctx.beginPath(); ctx.arc(P[seg[2]].x, P[seg[2]].y, L * 0.8, 0, 6.2832); ctx.fill(); });
-    // cabeça = figura da turma, no nariz
-    var fig = root.Figuras.porId(D.avatares[j] || D.avatares[0]) || root.Figuras.lista()[0], hs = Math.max(60, Math.min(220, Math.hypot(P[2].x - P[1].x, P[2].y - P[1].y) * 1.3)), img = imagem(fig, hs / 2.3);
+    [[1, 3, 5], [2, 4, 6]].forEach(function (seg) { ctx.beginPath(); ctx.moveTo(P[seg[0]].x, P[seg[0]].y); ctx.lineTo(P[seg[1]].x, P[seg[1]].y); ctx.lineTo(P[seg[2]].x, P[seg[2]].y); ctx.stroke(); ctx.fillStyle = cfg.pele; ctx.beginPath(); ctx.arc(P[seg[2]].x, P[seg[2]].y, L * 0.8, 0, 6.2832); ctx.fill(); });
     var ang = Math.atan2(P[2].y - P[1].y, P[2].x - P[1].x);
-    ctx.save(); ctx.translate(P[0].x, P[0].y - hs * 0.05); ctx.rotate(ang * 0.5); ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 6;
-    if (img) ctx.drawImage(img, -hs / 2, -hs / 2, hs, hs); else { ctx.fillStyle = fig.suco || '#fff'; ctx.beginPath(); ctx.arc(0, 0, hs / 2.3, 0, 6.2832); ctx.fill(); }
-    ctx.restore();
+    ctx.save(); ctx.translate(P[0].x, P[0].y - hs * 0.05); ctx.rotate(ang * 0.5); cabeca(ctx, cfg, hs); ctx.restore();
     ctx.restore();
     ctx.save(); ctx.font = '600 22px ' + D.fonte; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = cor; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 6;
     ctx.fillText(D.nomes[j] || '', P[0].x, P[0].y - hs * 0.6); ctx.restore();
@@ -388,5 +425,5 @@
     ctx.restore();
   }
 
-  root.Desenho = { iniciar: iniciar, quadro: quadro, legenda: legenda, contagem: contagem, confete: confete, podio: podio, nomes: nomes, texto: texto, ambiente: ambiente, avatares: avatares, pulso: pulso, limpar: limpar, CORES: CORES, W: W, H: H };
+  root.Desenho = { iniciar: iniciar, quadro: quadro, legenda: legenda, contagem: contagem, confete: confete, podio: podio, nomes: nomes, texto: texto, ambiente: ambiente, avatares: avatares, previa: previa, ROUPAS: ROUPAS, ACESSORIOS: ACESSORIOS, pulso: pulso, limpar: limpar, CORES: CORES, W: W, H: H };
 })(typeof self !== 'undefined' ? self : this);

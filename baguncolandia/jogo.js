@@ -28,7 +28,7 @@
 
   /* ---------- validação das mensagens do canal (segurança: nada de fora entra sem passar aqui) ---------- */
   var ID = /^[a-z0-9]{6,12}$/i;
-  var ACOES = ['comecar', 'pausar', 'continuar', 'parar', 'config', 'carregar', 'playlist', 'indice', 'proxima', 'anterior', 'pausa', 'reiniciar', 'calibrar', 'pularCalibracao', 'fale', 'batida', 'bpm', 'musica'];
+  var ACOES = ['comecar', 'pausar', 'continuar', 'parar', 'config', 'carregar', 'playlist', 'indice', 'proxima', 'anterior', 'pausa', 'reiniciar', 'calibrar', 'pularCalibracao', 'fale', 'batida', 'bpm', 'musica', 'boneco'];
   function validar(m) {
     if (!m || typeof m !== 'object' || Array.isArray(m)) return null;
     var t = m.t, o = { t: t };
@@ -65,6 +65,7 @@
         if ('ambiente' in m) o.ambiente = AMBIENTES.indexOf(m.ambiente) >= 0 ? m.ambiente : 'paisagem';
         if ('cena' in m) o.cena = CENAS.indexOf(m.cena) >= 0 ? m.cena : 'aleatoria';
         if ('faixa' in m) o.faixa = typeof m.faixa === 'string' ? m.faixa.slice(0, 12) : '';
+        if (m.acao === 'boneco') { o.j = m.j === 1 ? 1 : 0; o.boneco = bonecoOk(m.boneco); if (!o.boneco) return null; }
         if ('turmas' in m && m.turmas && typeof m.turmas === 'object') o.turmas = { propria: !!m.turmas.propria, publica: !!m.turmas.publica, minhas: !!m.turmas.minhas };
         if ('video' in m) { if (typeof m.video !== 'string' || !/^[A-Za-z0-9_-]{11}$/.test(m.video)) return null; o.video = m.video; }
         if ('lista' in m) { if (typeof m.lista !== 'string' || !/^[A-Za-z0-9_-]{10,64}$/.test(m.lista)) return null; o.lista = m.lista; }
@@ -104,6 +105,16 @@
     if (!Array.isArray(k) || k.length !== 13) return null;
     var o = [];
     for (var i = 0; i < 13; i++) { var q = k[i]; if (!Array.isArray(q) || q.length < 2) return null; o.push([clamp(+q[0] || 0, -0.5, 1.5), clamp(+q[1] || 0, -0.5, 1.5)]); }
+    return o;
+  }
+  var COR = /^#[0-9a-f]{6}$/i, ROUPAS = ['camiseta', 'vestido', 'macacao', 'capa'], ACESSORIOS = ['nenhum', 'laco', 'coroa', 'oculos', 'chapeu', 'asas', 'flor'];
+  function bonecoOk(b) {
+    if (!b || typeof b !== 'object') return null;
+    var o = {};
+    if (typeof b.cabeca === 'string' && /^[A-Za-z0-9]{1,24}$/.test(b.cabeca)) o.cabeca = b.cabeca;
+    ['cor', 'sapato', 'pele'].forEach(function (k) { if (typeof b[k] === 'string' && COR.test(b[k])) o[k] = b[k]; });
+    if (ROUPAS.indexOf(b.roupa) >= 0) o.roupa = b.roupa;
+    if (ACESSORIOS.indexOf(b.acessorio) >= 0) o.acessorio = b.acessorio;
     return o;
   }
   function caixaOk(c) {

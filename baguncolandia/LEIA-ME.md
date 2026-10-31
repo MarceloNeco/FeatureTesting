@@ -49,6 +49,11 @@ e as bordas da TV pulsam na batida. O som não sai do celular.
 própria, o boneco vira marionete e a calibração não é necessária. Baixa uns 20 MB uma vez (o celular
 pergunta antes; melhor no Wi-Fi) e fica guardado. Pede mais do celular: em aparelho fraco, deixe desligado.
 
+**👗 Meu boneco**: na tela de entrar (ou em "Meu boneco" dentro da sala), monte o seu avatar: cabeça com
+qualquer personagem da turma (tem meninas: Lili Limão, Cerejinha, Uvinha, Abacatinha, Donatella, Alice),
+roupa (camiseta, vestido, macacão, capa), cor, acessório (laço, coroa, óculos, chapéu, asas, flor), pele e
+sapato. Boneco 1 e Boneco 2 (para duas pessoas no mesmo celular). Fica guardado no celular.
+
 **Só o celular (sem TV)**: na tela inicial, 🎧. O jogo roda no próprio celular, com a câmera frontal.
 
 **Suas imagens**: veja `meus/LEIA-ME.md` para colocar as figuras que você quiser no jogo.

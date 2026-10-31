@@ -159,6 +159,10 @@ test('validar: aceita mensagens certas e recusa lixo', () => {
   assert.equal(B.validar({ t: 'cmd', acao: 'musica', texto: 'x'.repeat(500) }).texto.length, 200);
   assert.equal(B.validar({ t: 'cmd', acao: 'config', ambiente: 'matrix' }).ambiente, 'paisagem');
   assert.equal(B.validar({ t: 'dados', bpm: 999 }).bpm, 220);
+  const bo = B.validar({ t: 'cmd', acao: 'boneco', j: 1, boneco: { cabeca: 'liliLimao', cor: '#ff4fa3', roupa: 'vestido', acessorio: 'laco', pele: 'red', sapato: '#fff' } });
+  assert.equal(bo.j, 1); assert.equal(bo.boneco.cabeca, 'liliLimao'); assert.equal(bo.boneco.roupa, 'vestido'); assert.equal(bo.boneco.pele, undefined); assert.equal(bo.boneco.sapato, undefined);
+  assert.equal(B.validar({ t: 'cmd', acao: 'boneco', boneco: 'x' }), null);
+  assert.equal(B.validar({ t: 'cmd', acao: 'boneco', boneco: { cabeca: '<img>' } }).boneco.cabeca, undefined);
   assert.deepEqual(B.validar({ t: 'dados', c: [0.1, 0.2, 0.3, 0.4] }).c, { x: 0.1, y: 0.2, w: 0.3, h: 0.4 });
   // estado (da TV para os celulares) também é conferido: fase de lista fechada, lista só de ids, pontos até 4
   const es = B.validar({ t: 'estado', fase: 'hack', lista: 'x', pontos: [{ nome: 'Ana', pontos: 10 }, {}, {}, {}, {}, {}], eu: 9 });

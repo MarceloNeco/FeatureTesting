@@ -91,7 +91,11 @@ function ok(msg) { console.log('✓ ' + msg); }
   await cel.goto(base + '?teste'); await cel.click('#btCel'); await cel.waitForTimeout(200);
   const largura = await cel.evaluate(() => document.documentElement.scrollWidth);
   if (largura <= 320) ok('celular sem rolagem lateral em 320 px'); else falhou('rolagem lateral: ' + largura);
-  await cel.screenshot({ path: '/tmp/pagina-cel-entrar.png' });
+  await cel.click('#bonecoEntrar summary'); await cel.waitForTimeout(600);
+  const picker = await cel.evaluate(() => ({ cabecas: document.querySelectorAll('#bonecoEntrar .cabecas button').length, meninas: window.BaguncaApp.Figuras.lista().filter(f => f.menina).length, largura: document.documentElement.scrollWidth }));
+  if (picker.cabecas >= 15 && picker.meninas >= 5 && picker.largura <= 320) ok('👗 Meu boneco: ' + picker.cabecas + ' cabeças (' + picker.meninas + ' meninas), sem rolagem lateral'); else falhou('picker: ' + JSON.stringify(picker));
+  await cel.click('#bonecoEntrar .grupo button:nth-child(2)'); await cel.waitForTimeout(300);   // vestido
+  await cel.screenshot({ path: '/tmp/pagina-cel-entrar.png', fullPage: true });
   await cel.evaluate(() => { document.getElementById('entrar').classList.remove('ativa'); document.getElementById('jogo').classList.add('ativa'); });
   const largura2 = await cel.evaluate(() => document.documentElement.scrollWidth);
   if (largura2 <= 320) ok('tela da sala sem rolagem lateral em 320 px'); else falhou('rolagem lateral na sala: ' + largura2);

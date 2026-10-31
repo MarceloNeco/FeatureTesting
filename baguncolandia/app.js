@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.4.0', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.5.0', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -26,7 +26,7 @@
      TV — também roda no celular no modo "só o celular" (local = true)
      ===================================================================== */
   var TVApp = (function () {
-    var tv = { sala: null, cfg: Object.assign({}, CFG_PADRAO, { turmas: Object.assign({}, CFG_PADRAO.turmas) }), partida: null, fase: 'carregando', local: false, visaoLocal: null, jog: [], raias: {}, player: null, tocando: false, titulo: '', videoAtual: '', lista: [], indice: -1, calib: null, nomes: [], ultimoQuadro: 0, raf: 0, podio: null, pendente: null, caixas: {}, vozLiberada: false, fimMusica: false };
+    var tv = { bonecos: {}, sala: null, cfg: Object.assign({}, CFG_PADRAO, { turmas: Object.assign({}, CFG_PADRAO.turmas) }), partida: null, fase: 'carregando', local: false, visaoLocal: null, jog: [], raias: {}, player: null, tocando: false, titulo: '', videoAtual: '', lista: [], indice: -1, calib: null, nomes: [], ultimoQuadro: 0, raf: 0, podio: null, pendente: null, caixas: {}, vozLiberada: false, fimMusica: false };
 
     var limpaLegenda = 0;
     function dizer(pt, en) {
@@ -75,6 +75,14 @@
       });
     }
     function porId(id) { return tv.jog.filter(function (j) { return j.id === id; })[0]; }
+    /* bonecos escolhidos nos celulares → um por raia (1 celular e 2 pessoas: os dois do mesmo celular) */
+    function aplicarBonecos() {
+      var lista = [];
+      if (tv.local) { var b = tv.bonecos.local || {}; lista = [b[0] || null]; }
+      else if (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2) { var b0 = tv.jog[0] ? (tv.bonecos[tv.jog[0].id] || {}) : {}; lista = [b0[0] || null, b0[1] || { cabeca: 'donatella' }]; }
+      else lista = tv.jog.slice(0, tv.cfg.jogadores).map(function (j) { return (tv.bonecos[j.id] || {})[0] || null; });
+      Desenho.avatares(lista.map(function (b, i) { return b || { cabeca: i === 1 ? 'donatella' : 'bolinhoDeChuva' }; }));
+    }
     /* uma câmera, duas pessoas: o esqueleto de quem está na metade esquerda vira coordenadas da raia 1 (e vice-versa) */
     function reescalar(k, j) { return k.map(function (p) { return [j === 0 ? p[0] * 2 : (p[0] - 0.5) * 2, p[1]]; }); }
     function indiceCelular(id) { return tv.jog.map(function (j) { return j.id; }).indexOf(id); }
@@ -155,6 +163,7 @@
       if (m.acao === 'calibrar') { if (tv.fase === 'lobby' || tv.fase === 'fim') comecar(true); return; }
       if (m.acao === 'pularCalibracao') { if (tv.calib) tv.calib.pular(); return; }
       if (m.acao === 'bpm') { if (tv.partida) tv.partida.batida(m.bpm); tv.bpm = m.bpm; return; }
+      if (m.acao === 'boneco') { var chave = m.id || 'local'; (tv.bonecos[chave] = tv.bonecos[chave] || {})[m.j] = m.boneco; aplicarBonecos(); return; }
       if (m.acao === 'musica') { tv.titulo = m.texto || ''; $('tvTitulo').style.display = tv.titulo ? 'block' : 'none'; $('tvTitulo').textContent = '🎵 ' + tv.titulo; return; }
       youtubeComando(m);
     }
@@ -166,7 +175,7 @@
       Som.musica(false); cheia(''); tv.podio = null;
       tv.nomes = tv.local ? [tv.nomes[0] || T('Você', 'You')] : (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2 ? [tv.jog[0].nome + ' 1', tv.jog[0].nome + ' 2'] : tv.jog.slice(0, tv.cfg.jogadores).map(function (j) { return j.nome; }));
       if (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2 && !tv.local) tv.nomes = [T('Esquerda', 'Left'), T('Direita', 'Right')];
-      Desenho.nomes(tv.nomes);
+      Desenho.nomes(tv.nomes); aplicarBonecos();
       calibrar().then(function () { if (soCalibrar) { lobby(); return; } return contagem().then(rodada); });
     }
     function calibrar() {
@@ -351,7 +360,7 @@
         var v = document.createElement('video'); v.autoplay = true; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.srcObject = s; v.play().catch(function () {});
         cel.streamLocal = s; cel.visao = Sala.criarVisao(v);
         TVApp.iniciar({ local: true, visao: cel.visao, video: v, nome: nome, gesto: true, esqueleto: cel.esqueleto && Esqueleto.pronto() });
-        TVApp.comando(Object.assign({ acao: 'config' }, cel.cfg, { celulares: 1 }));
+        TVApp.comando(Object.assign({ acao: 'config' }, cel.cfg, { celulares: 1 })); mandarBonecos();
         $('btEntrar').disabled = false;
       }).catch(function (e) { $('btEntrar').disabled = false; erro.textContent = (e && e.name === 'NotAllowedError') ? T('Você precisa permitir a câmera.', 'You need to allow the camera.') : T('Não deu: ', 'Failed: ') + (e && e.message || e); erro.style.display = 'block'; });
     }
@@ -423,7 +432,7 @@
       else if (cel.sala && cel.sala.conectado()) status(T('Ao vivo na TV ✅ — toque em ▶ Começar', 'Live on the TV ✅ — tap ▶ Start'), 'ok');
     }
     function comando(m) { if (cel.local) TVApp.comando(m); else if (cel.sala) cel.sala.comando(m); }
-    function mandarConfig() { comando(Object.assign({ acao: 'config' }, cel.cfg)); }
+    function mandarConfig() { comando(Object.assign({ acao: 'config' }, cel.cfg)); mandarBonecos(); }
 
     /* ---- música (YouTube) ---- */
     function tocarLink(link) {
@@ -458,6 +467,44 @@
       ids.forEach(function (id, i) { var b = document.createElement('button'); b.type = 'button'; b.className = 'sec' + (i === m.indice ? ' atual' : ''); b.textContent = (i === m.indice ? '▶️ ' : (i + 1) + '. ') + (titulos[id] || '…'); b.onclick = function () { comando({ acao: 'indice', i: i }); }; d.appendChild(b); });
       buscarTitulos(ids);
     }
+    /* ---- 👗 Meu boneco: monte o avatar (cabeça, roupa, cores, acessório); guardado neste celular ---- */
+    var PADRAO_BONECO = [{ cabeca: 'bolinhoDeChuva', cor: '#c6ff3d', roupa: 'camiseta', acessorio: 'nenhum', sapato: '#2b2250', pele: '#ffd9b3' }, { cabeca: 'donatella', cor: '#ff4fa3', roupa: 'vestido', acessorio: 'laco', sapato: '#2b2250', pele: '#ffd9b3' }];
+    var CORES_ROUPA = ['#c6ff3d', '#ff4fa3', '#3ee8ff', '#ffd166', '#8e5bff', '#ff7a00', '#ff5252', '#ffffff', '#2b2250', '#43a047'];
+    var CORES_PELE = ['#ffd9b3', '#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#5c3a21'];
+    var CORES_SAPATO = ['#2b2250', '#ffffff', '#ff4fa3', '#ffd166', '#8d5524', '#3ee8ff'];
+    cel.bonecos = PADRAO_BONECO.map(function (b) { return Object.assign({}, b); });
+    try { var gb = JSON.parse(localStorage.getItem('bagunca:bonecos') || 'null'); if (Array.isArray(gb)) gb.forEach(function (b, i) { if (b && i < 2) Object.assign(cel.bonecos[i], b); }); } catch (e) {}
+    cel.quem = 0;
+    function guardarBonecos() { try { localStorage.setItem('bagunca:bonecos', JSON.stringify(cel.bonecos)); } catch (e) {} }
+    function mandarBonecos() { comando({ acao: 'boneco', j: 0, boneco: cel.bonecos[0] }); comando({ acao: 'boneco', j: 1, boneco: cel.bonecos[1] }); }
+    function montarPicker(container) {
+      while (container.firstChild) container.removeChild(container.firstChild);
+      function linha(rotulo) { var d = document.createElement('div'); d.className = 'linha'; var sp = document.createElement('span'); sp.textContent = rotulo; d.appendChild(sp); container.appendChild(d); return d; }
+      function grupo(el, itens, valorAtual, aoEscolher, classe) {
+        var g = document.createElement('div'); g.className = classe || 'grupo'; el.appendChild(g);
+        itens.forEach(function (it) { var b = document.createElement('button'); b.type = 'button'; b.className = 'sec opt' + (it.v === valorAtual() ? ' ativo' : ''); if (it.cor) { b.style.background = it.cor; b.title = it.v; } else b.textContent = it.t; b.onclick = function () { g.querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); aoEscolher(it.v); }; g.appendChild(b); });
+        return g;
+      }
+      var prev = document.createElement('div'); prev.className = 'previa'; var cv = document.createElement('canvas'); cv.width = 280; cv.height = 360; prev.appendChild(cv); container.appendChild(prev);
+      var quem = linha(T('Quem', 'Who')); grupo(quem, [{ v: 0, t: T('Boneco 1', 'Avatar 1') }, { v: 1, t: T('Boneco 2', 'Avatar 2') }], function () { return cel.quem; }, function (v) { cel.quem = v; montarPicker(container); }, 'grupo quem');
+      var atual = function () { return cel.bonecos[cel.quem]; };
+      function muda(k, v) { atual()[k] = v; guardarBonecos(); mandarBonecos(); }
+      var cab = linha(T('Cabeça', 'Head')); var cabs = document.createElement('div'); cabs.className = 'cabecas'; cab.appendChild(cabs);
+      Figuras.lista().filter(function (f) { return f.papel === 'heroi'; }).forEach(function (f) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'sec opt' + (f.id === atual().cabeca ? ' ativo' : ''); b.title = T(f.nome.pt, f.nome.en) + (f.menina ? ' 👧' : '');
+        if (f.img) { var im = document.createElement('img'); im.src = f.img; im.alt = b.title; b.appendChild(im); } else { var im2 = document.createElement('img'); im2.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(f.svg); im2.alt = b.title; b.appendChild(im2); }
+        b.onclick = function () { cabs.querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); muda('cabeca', f.id); };
+        cabs.appendChild(b);
+      });
+      grupo(linha(T('Roupa', 'Outfit')), [{ v: 'camiseta', t: T('👕 Camiseta', '👕 T-shirt') }, { v: 'vestido', t: T('👗 Vestido', '👗 Dress') }, { v: 'macacao', t: T('🧥 Macacão', '🧥 Overalls') }, { v: 'capa', t: T('🦸 Capa', '🦸 Cape') }], function () { return atual().roupa; }, function (v) { muda('roupa', v); });
+      grupo(linha(T('Cor', 'Colour')), CORES_ROUPA.map(function (c) { return { v: c, cor: c }; }), function () { return atual().cor; }, function (v) { muda('cor', v); }, 'cores');
+      grupo(linha(T('Acessório', 'Accessory')), [{ v: 'nenhum', t: T('Nada', 'None') }, { v: 'laco', t: '🎀' }, { v: 'coroa', t: '👑' }, { v: 'oculos', t: '🕶️' }, { v: 'chapeu', t: '🎉' }, { v: 'asas', t: '🪽' }, { v: 'flor', t: '🌸' }], function () { return atual().acessorio; }, function (v) { muda('acessorio', v); });
+      grupo(linha(T('Pele', 'Skin')), CORES_PELE.map(function (c) { return { v: c, cor: c }; }), function () { return atual().pele; }, function (v) { muda('pele', v); }, 'cores');
+      grupo(linha(T('Sapato', 'Shoes')), CORES_SAPATO.map(function (c) { return { v: c, cor: c }; }), function () { return atual().sapato; }, function (v) { muda('sapato', v); }, 'cores');
+      var vivo = function (ts) { if (!document.body.contains(cv)) return; if (container.closest('details').open) Desenho.previa(cv, atual(), ts); requestAnimationFrame(vivo); }; requestAnimationFrame(vivo);
+    }
+    document.querySelectorAll('details.boneco .picker').forEach(montarPicker);
+    document.querySelectorAll('details.boneco').forEach(function (d) { d.addEventListener('toggle', function () { if (d.open) montarPicker(d.querySelector('.picker')); }); });
     /* ---- batida pelo microfone ---- */
     function alternarBatida() {
       if (cel.batida) { cel.batida.parar(); cel.batida = null; $('btBatida').classList.remove('ativo'); $('nivelBox').style.display = 'none'; comando({ acao: 'bpm', bpm: 0 }); return; }

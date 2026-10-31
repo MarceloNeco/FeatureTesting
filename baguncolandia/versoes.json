@@ -2,6 +2,19 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.5.0",
+      "data": "31/Out/2026",
+      "hora": "07:30:00",
+      "pt": [
+        "👗 Meu boneco: monte o seu avatar no celular (cabeça com qualquer personagem, roupa: camiseta, vestido, macacão ou capa; cor; acessório: laço, coroa, óculos, chapéu, asas, flor; pele; sapato), com prévia ao vivo. Fica guardado no celular e aparece na TV, inclusive na marionete do esqueleto.",
+        "👧 Meninas na turma: Lili Limão, Cerejinha, Uvinha e Abacatinha (mais Donatella e Alice)."
+      ],
+      "en": [
+        "👗 My avatar: build yours on the phone (any character as the head; outfit: t-shirt, dress, overalls or cape; colour; accessory: bow, crown, glasses, party hat, wings, flower; skin; shoes), with a live preview. Saved on the phone and shown on the TV, including the skeleton puppet.",
+        "👧 Girls in the crew: Lily Lemon, Cherry, Grapey and Avocadita (plus Donatella and Alice)."
+      ]
+    },
+    {
       "versao": "0.4.0",
       "data": "31/Out/2026",
       "hora": "06:20:00",

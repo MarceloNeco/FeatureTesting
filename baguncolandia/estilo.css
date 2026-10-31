@@ -68,6 +68,15 @@ footer { text-align: center; color: var(--muted); font-size: .75rem; padding: 1.
 .linha > span { flex: 0 0 5.5rem; color: var(--muted); font-size: .9rem; }
 .linha .grupo { flex: 1; }
 .ctl button { font-size: 1.4rem; padding: .6rem 0; }
+.picker .previa { display: flex; justify-content: center; }
+.picker canvas { width: 140px; height: 180px; background: radial-gradient(ellipse at 50% 30%, #2b2460, var(--card)); border-radius: 14px; border: 1px solid var(--border); }
+.picker .cabecas { display: flex; gap: .4rem; overflow-x: auto; padding: .2rem 0; scrollbar-width: thin; }
+.picker .cabecas button { flex: 0 0 56px; width: 56px; height: 56px; padding: 4px; border-radius: 14px; }
+.picker .cabecas button svg, .picker .cabecas button img { width: 100%; height: 100%; display: block; }
+.picker .cores { display: flex; gap: .4rem; flex-wrap: wrap; }
+.picker .cores button { width: 36px; height: 36px; min-height: 36px; padding: 0; border-radius: 50%; border: 3px solid transparent; }
+.picker .cores button.ativo { border-color: #fff; box-shadow: 0 0 0 2px var(--lima); }
+.picker .quem { display: flex; gap: .4rem; }
 .bloco { border-top: 1px solid var(--border); padding-top: .8rem; display: flex; flex-direction: column; gap: .6rem; }
 .nivel { position: relative; height: 14px; background: rgba(0,0,0,.4); border-radius: 7px; overflow: hidden; }
 .nivel i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--lima), var(--ciano)); transition: width .05s; }
