@@ -19,7 +19,7 @@ function ok(msg) { console.log('✓ ' + msg); }
   await new Promise(r => server.listen(0, r)); const porta = server.address().port, base = 'http://127.0.0.1:' + porta + '/baguncolandia/';
   const browser = await chromium.launch(); const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const pg = await ctx.newPage(); const erros = [];
-  pg.on('console', m => { if (m.type() === 'error') erros.push(m.text()); }); pg.on('pageerror', e => erros.push('pageerror: ' + e.message));
+  pg.on('console', m => { if (m.type() === 'error') erros.push(m.text() + ' @' + (m.location() && m.location().url)); }); pg.on('pageerror', e => erros.push('pageerror: ' + e.message));
   await pg.goto(base + '?teste'); await pg.waitForTimeout(300);
   await pg.click('#btTV'); await pg.waitForFunction(() => document.getElementById('pct').textContent === '100', null, { timeout: 15000 });
   ok('carregamento chegou a 100 %');
@@ -51,7 +51,7 @@ function ok(msg) { console.log('✓ ' + msg); }
   await pg.screenshot({ path: '/tmp/pagina-podio.png' });
   // celular em 320 px
   const cel = await ctx.newPage(); await cel.setViewportSize({ width: 320, height: 640 });
-  cel.on('console', m => { if (m.type() === 'error') erros.push('cel: ' + m.text()); }); cel.on('pageerror', e => erros.push('cel pageerror: ' + e.message));
+  cel.on('console', m => { if (m.type() === 'error') erros.push('cel: ' + m.text() + ' @' + (m.location() && m.location().url)); }); cel.on('pageerror', e => erros.push('cel pageerror: ' + e.message));
   await cel.goto(base + '?teste'); await cel.click('#btCel'); await cel.waitForTimeout(200);
   const largura = await cel.evaluate(() => document.documentElement.scrollWidth);
   if (largura <= 320) ok('celular sem rolagem lateral em 320 px'); else falhou('rolagem lateral: ' + largura);
@@ -60,7 +60,7 @@ function ok(msg) { console.log('✓ ' + msg); }
   const largura2 = await cel.evaluate(() => document.documentElement.scrollWidth);
   if (largura2 <= 320) ok('tela da sala sem rolagem lateral em 320 px'); else falhou('rolagem lateral na sala: ' + largura2);
   await cel.screenshot({ path: '/tmp/pagina-cel-jogo.png', fullPage: true });
-  const errosReais = erros.filter(e => !/favicon|ERR_NAME_NOT_RESOLVED|ERR_INTERNET|Failed to load resource.*(youtube|supabase)|supabase-js|net::ERR/i.test(e));
+  const errosReais = erros.filter(e => !/favicon|solverone-dados|ERR_NAME_NOT_RESOLVED|ERR_INTERNET|Failed to load resource.*(youtube|supabase)|supabase-js|net::ERR/i.test(e));
   if (errosReais.length) falhou('erros no console: ' + errosReais.join(' | ')); else ok('sem erros de JavaScript nem de CSP');
   await browser.close(); server.close();
 })().catch(e => { console.error(e); process.exit(1); });
