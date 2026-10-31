@@ -56,6 +56,11 @@ sapato. Boneco 1 e Boneco 2 (para duas pessoas no mesmo celular). Fica guardado 
 
 **Só o celular (sem TV)**: na tela inicial, 🎧. O jogo roda no próprio celular, com a câmera frontal.
 
+**🖐️ No dedo (celular ou tablet, sem câmera)**: na tela inicial, 🖐️. Deite o aparelho. O dedo corta, pega
+e chuta; deslize para cima para pular e para baixo para abaixar; o boneco anda com o dedo. 👥 2 = duas
+pessoas no mesmo tablet, uma em cada metade. Sem calibração. É a "versão de bolso": no fim, o jogo
+convida a chamar a TV e jogar com o corpo todo.
+
 **Suas imagens**: veja `meus/LEIA-ME.md` para colocar as figuras que você quiser no jogo.
 
 ## Segurança (como foi pensado)

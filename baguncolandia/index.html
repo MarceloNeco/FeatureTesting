@@ -35,6 +35,7 @@
     <button class="big" id="btTV" type="button">📺 <span data-t="Esta é a TV|This is the TV"></span></button>
     <button class="big sec" id="btCel" type="button">📱 <span data-t="Este é o celular|This is the phone"></span></button>
     <button class="big sec" id="btSolo" type="button">🎧 <span data-t="Só o celular (sem TV)|Phone only (no TV)"></span></button>
+    <button class="big sec" id="btToque" type="button">🖐️ <span data-t="No dedo (celular ou tablet, sem câmera)|By finger (phone or tablet, no camera)"></span></button>
   </div>
   <details class="como">
     <summary data-t="❓ Como usar|❓ How to use"></summary>
@@ -63,10 +64,11 @@
   </div>
   <div id="tvRodape"><div id="tvCanto"></div><div id="tvTitulo"></div></div>
   <button id="tvSair" type="button" aria-label="Sair / Exit">✕</button>
-  <div id="tvLocalBar">
+  <div id="tvLocalBar"><p id="dicaGire" class="muted" data-t="Fica melhor com o aparelho deitado 🔄|Better with the device in landscape 🔄"></p>
     <div class="grupo" id="localModos">
       <button class="sec opt ativo" data-v="corta" type="button">🍉</button><button class="sec opt" data-v="pega" type="button">🎈</button><button class="sec opt" data-v="chuta" type="button">⚽</button><button class="sec opt" data-v="pula" type="button">🪵</button><button class="sec opt" data-v="bolas" type="button">🎳</button><button class="sec opt" data-v="mistura" type="button">🎪</button>
     </div>
+    <button class="sec" id="localPessoas" type="button" title="1 ou 2 / 1 or 2">👤 1</button>
     <button id="localComecar" type="button">▶ <span data-t="Começar|Start"></span></button>
     <button class="sec" id="localPausa" type="button" title="Pausar / Pause">⏸</button>
   </div>

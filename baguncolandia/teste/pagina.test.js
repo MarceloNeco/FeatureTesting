@@ -85,6 +85,24 @@ function ok(msg) { console.log('✓ ' + msg); }
   await solo.waitForFunction(() => window.BaguncaApp.TVApp.tv.fase === 'jogando', null, { timeout: 30000 });
   ok('só o celular: rodada começou pelo ▶ da barra');
   await solo.screenshot({ path: '/tmp/pagina-solo.png' });
+  // v0.6: no dedo (sem câmera): o dedo varre uma fruta e marca ponto; deslizar para cima = pulo
+  const dedo = await ctx.newPage(); await dedo.setViewportSize({ width: 844, height: 390 });
+  dedo.on('pageerror', e => erros.push('dedo pageerror: ' + e.message));
+  await dedo.goto(base + '?teste'); await dedo.click('#btToque'); await dedo.fill('#nome', 'Téo'); await dedo.click('#btEntrar');
+  await dedo.waitForFunction(() => window.BaguncaApp.TVApp.tv.fase === 'lobby', null, { timeout: 20000 });
+  await dedo.click('#localComecar');
+  await dedo.waitForFunction(() => window.BaguncaApp.TVApp.tv.fase === 'jogando', null, { timeout: 30000 });
+  for (let i = 0; i < 40; i++) {
+    const f = await dedo.evaluate(() => { const e = window.BaguncaDebug.partida.estado(); const c = e.coisas.find(x => !x.morta && (x.papel === 'fruta' || x.papel === 'doce')); if (!c) return null; const r = document.getElementById('tvCanvas').getBoundingClientRect(); return { x: r.left + c.x / 1280 * r.width, y: r.top + c.y / 720 * r.height }; });
+    if (f) { await dedo.mouse.move(f.x - 60, f.y); await dedo.mouse.down(); await dedo.mouse.move(f.x + 60, f.y, { steps: 3 }); await dedo.mouse.up(); }
+    await dedo.waitForTimeout(150);
+  }
+  const pd = await dedo.evaluate(() => window.BaguncaDebug.partida.estado().jogadores[0].pontos);
+  if (pd > 0) ok('no dedo: cortou frutas com o dedo (' + pd + ' pontos)'); else falhou('no dedo: nenhum ponto');
+  await dedo.mouse.move(400, 220); await dedo.mouse.down(); await dedo.mouse.move(400, 60, { steps: 4 }); await dedo.mouse.up(); await dedo.waitForTimeout(150);
+  const pul = await dedo.evaluate(() => window.BaguncaDebug.partida.estado().jogadores[0].corpo.pulando);
+  if (pul) ok('no dedo: deslizar para cima = pulo'); else falhou('no dedo: não pulou');
+  await dedo.screenshot({ path: '/tmp/pagina-dedo.png' });
   // celular em 320 px
   const cel = await ctx.newPage(); await cel.setViewportSize({ width: 320, height: 640 });
   cel.on('console', m => { if (m.type() === 'error') erros.push('cel: ' + m.text() + ' @' + (m.location() && m.location().url)); }); cel.on('pageerror', e => erros.push('cel pageerror: ' + e.message));

@@ -110,8 +110,13 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #tvLocalBar { display: none; position: absolute; left: 0; right: 0; bottom: 0; z-index: 9; padding: .5rem .6rem calc(.5rem + env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgba(6,5,26,.9)); gap: .5rem; align-items: center; flex-wrap: wrap; }
 #tv.local #tvLocalBar { display: flex; }
 #tvLocalBar .grupo { flex: 1 1 100%; justify-content: center; }
+#dicaGire { flex: 1 1 100%; text-align: center; font-size: .8rem; margin: 0; display: none; }
+@media (orientation: portrait) { #tv.local #dicaGire { display: block; } }
+#tv.toque #tvCanvas { touch-action: none; cursor: crosshair; }
+#tv.toque #tvFundo { display: none; }
 #tvLocalBar .grupo button { flex: 0 0 auto; font-size: 1.3rem; padding: .4rem .7rem; }
 #tvLocalBar #localComecar { flex: 1; }
+#tv.jogando #localModos, #tv.jogando #localPessoas, #tv.jogando #dicaGire { display: none; }   /* durante a rodada a barra encolhe para não cobrir o palco */
 .cheia { position: absolute; inset: 0; z-index: 8; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; text-align: center; padding: 4vh; background: radial-gradient(ellipse at center, #241a5e 0%, #06051a 75%); }
 .cheia.ativa { display: flex; }
 .cheia p { font-size: 3vh; color: #d8d2f0; max-width: 84vw; line-height: 1.4; }

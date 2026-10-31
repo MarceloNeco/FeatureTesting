@@ -2,6 +2,19 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.6.0",
+      "data": "31/Out/2026",
+      "hora": "08:20:00",
+      "pt": [
+        "🖐️ No dedo: jogue no próprio celular ou tablet, sem câmera. O dedo corta, pega e chuta; deslizar para cima pula, para baixo abaixa; o boneco anda com o dedo. Duas pessoas no mesmo tablet, cada uma na sua metade.",
+        "Versão de bolso: sem calibração; no fim, convite para jogar com o corpo todo na TV."
+      ],
+      "en": [
+        "🖐️ By finger: play on the phone or tablet itself, no camera. Your finger slices, catches and kicks; swipe up to jump, down to duck; the avatar walks with your finger. Two people on one tablet, one half each.",
+        "Pocket version: no calibration; at the end, an invitation to play with your whole body on the TV."
+      ]
+    },
+    {
       "versao": "0.5.0",
       "data": "31/Out/2026",
       "hora": "07:30:00",
