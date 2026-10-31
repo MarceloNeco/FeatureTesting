@@ -108,7 +108,7 @@
     var bpm = 0, ultimaBatida = 0;
     var jogadores = [];
     for (var j = 0; j < nJog; j++) jogadores.push({ pontos: 0, vidas: 3, combo: 0, comboAte: 0, poder: null, poderAte: 0, rastro: [], zonaChute: 0.6, lento: 0 });
-    var trave = { x: W / 2 - 120, y: 80, w: 240, h: 130 };
+    var trave = { x: W / 2 - 120, y: 150, w: 240, h: 130 };   // abaixo do relógio e do nome do modo
     function raia(j) { return nJog === 1 ? { x: 0, y: 0, w: W, h: H } : { x: j * W / 2, y: 0, w: W / 2, h: H }; }
     function porPapel(papel) { return figs.filter(function (f) { return f.papel === papel; }); }
     function sortear(lista) { return lista.length ? lista[Math.floor(rnd() * lista.length) % lista.length] : null; }
