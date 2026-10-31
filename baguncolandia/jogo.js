@@ -223,8 +223,8 @@
         var atingiu = false;
         for (var k = 0; k < lamina.length && !atingiu; k++) {
           var L = lamina[k];
-          if (Math.hypot(L.b.x - c.x, L.b.y - c.y) <= c.raio + 14) atingiu = true;
-          else if (L.a && distSeg(L.a, L.b, c) <= c.raio + 10) atingiu = true;
+          if (Math.hypot(L.b.x - c.x, L.b.y - c.y) <= c.raio + 24) atingiu = true;          // folga generosa: jogo de criança
+          else if (L.a && distSeg(L.a, L.b, c) <= c.raio + 18) atingiu = true;
           if (atingiu && c.papel === 'bola' && L.b.y < r.y + r.h * jg.zonaChute) atingiu = false;   // bola só na zona de chute
         }
         if (!atingiu) return;

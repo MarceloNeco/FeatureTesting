@@ -1,0 +1,113 @@
+/* Bagunçolândia — visual. Paleta: noite #0b0a1f→#1a1446, lima #c6ff3d, rosa #ff4fa3, ciano #3ee8ff, dourado #ffd166.
+   Fonte Fredoka (variável, hospedada). Tudo em rem; sem rolagem lateral a partir de 320 px. */
+@font-face { font-family: 'Fredoka'; src: url('fontes/fredoka.woff2') format('woff2'); font-weight: 300 700; font-display: swap; }
+:root { --bg: #0b0a1f; --bg2: #1a1446; --card: #221b4d; --text: #f3f0ff; --muted: #b3acd6; --border: #3a2f73; --lima: #c6ff3d; --rosa: #ff4fa3; --ciano: #3ee8ff; --ouro: #ffd166; --erro: #ff5252; --fonte: 'Fredoka', system-ui, -apple-system, sans-serif; }
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; }
+body { background: radial-gradient(ellipse at 50% 0%, var(--bg2), var(--bg) 70%); color: var(--text); font-family: var(--fonte); overflow-x: hidden; min-height: 100%; }
+button { font: inherit; cursor: pointer; border: 0; border-radius: 14px; padding: .85rem 1.1rem; background: var(--lima); color: #1a1446; font-weight: 700; min-height: 44px; transition: transform .12s ease-out, box-shadow .12s; }
+button:active { transform: scale(.97); }
+button.sec { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+button.opt.ativo { border-color: var(--lima); background: #2b2460; box-shadow: inset 0 0 0 2px var(--lima); }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+input { font: inherit; width: 100%; padding: .85rem; border-radius: 14px; border: 1px solid var(--border); background: var(--card); color: var(--text); min-height: 44px; }
+label { color: var(--muted); font-size: .9rem; }
+.tela { display: none; min-height: 100%; padding: 1.5rem 1rem 1rem; max-width: 36rem; margin: 0 auto; }
+.tela.ativa { display: block; }
+h1 { font-size: 1.6rem; margin-bottom: .4rem; font-weight: 700; }
+.titulo { font-weight: 700; background: linear-gradient(90deg, var(--lima), var(--ciano) 40%, var(--rosa)); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: .02em; }
+.titulo.grande { font-size: clamp(2.4rem, 9vh, 7rem); line-height: 1; margin: 0 0 1.2vh; }
+.marca { display: flex; align-items: center; gap: .5rem; color: var(--muted); font-size: .9rem; }
+.marca .bolinho { font-size: 1.6rem; filter: drop-shadow(0 0 8px var(--ouro)); }
+.sub, .muted { color: var(--muted); font-size: .95rem; line-height: 1.45; }
+.col { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.1rem; }
+.row { display: flex; gap: .6rem; flex-wrap: wrap; }
+.row > * { flex: 1; }
+.big { font-size: 1.2rem; padding: 1.2rem; }
+.aviso { background: #3d3113; color: #ffd66e; border-radius: 14px; padding: .8rem; font-size: .9rem; line-height: 1.4; }
+.erro { background: #3a1512; color: #ff9a93; border-radius: 14px; padding: .8rem; font-size: .9rem; }
+.dourado { color: var(--ouro); font-weight: 700; }
+a { color: var(--ciano); }
+details { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 0 .8rem; }
+details summary { padding: .8rem 0; font-weight: 700; cursor: pointer; list-style: none; min-height: 44px; display: flex; align-items: center; }
+details summary::before { content: '▸ '; color: var(--muted); margin-right: .3rem; }
+details[open] summary::before { content: '▾ '; }
+details .col { margin-top: 0; padding-bottom: .8rem; }
+details.como { margin-top: 1.2rem; }
+details.como ol { padding-left: 1.2rem; color: var(--text); line-height: 1.5; display: flex; flex-direction: column; gap: .5rem; }
+details.como p { margin: .8rem 0; }
+footer { text-align: center; color: var(--muted); font-size: .75rem; padding: 1.5rem 0 .5rem; }
+.codigoInput { text-transform: uppercase; font-size: 1.7rem; letter-spacing: .35em; text-align: center; font-weight: 700; }
+
+/* ---------- celular na sala ---------- */
+.topo { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; font-size: .95rem; }
+.painel { display: flex; gap: .6rem; margin-top: .6rem; align-items: stretch; }
+.camBox { position: relative; flex: 0 0 46%; border-radius: 14px; overflow: hidden; background: #000; aspect-ratio: 4/3; border: 2px solid var(--border); }
+#cam { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+.camNome { position: absolute; left: 0; right: 0; top: 0; font-size: .7rem; padding: 3px 6px; background: rgba(0,0,0,.55); color: #cfd3d8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.energia { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: rgba(0,0,0,.5); }
+.energia i { display: block; height: 100%; width: 0; background: var(--lima); transition: width .15s; }
+.lado { flex: 1; display: flex; flex-direction: column; gap: .4rem; min-width: 0; }
+.placar { display: flex; flex-direction: column; gap: .3rem; }
+.placar div { display: flex; justify-content: space-between; background: var(--card); padding: .35rem .6rem; border-radius: 10px; font-weight: 700; font-size: .9rem; gap: .4rem; }
+.placar div span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.placar b { color: var(--ouro); }
+.cal { font-size: .95rem; font-weight: 700; min-height: 1.4rem; }
+.cal.espera { color: var(--erro); animation: pisca 1s step-end infinite; }
+.cal.ok { color: var(--lima); }
+@keyframes pisca { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .cal.espera { animation: none; } }
+.status { font-size: .85rem; color: var(--muted); }
+.status.ok { color: #9ef0b4; }
+.status.erro { color: #ff9a93; }
+.grupo { display: flex; gap: .4rem; flex-wrap: wrap; }
+.grupo button { flex: 1 1 auto; padding: .6rem .7rem; font-size: .95rem; }
+.grupo small { color: var(--muted); font-weight: 500; }
+.linha { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.linha > span { flex: 0 0 5.5rem; color: var(--muted); font-size: .9rem; }
+.linha .grupo { flex: 1; }
+.ctl button { font-size: 1.4rem; padding: .6rem 0; }
+.hist button.atual { border-color: var(--ouro); color: var(--ouro); }
+.hist button { text-align: left; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
+
+/* ---------- TV ---------- */
+#tv { display: none; position: fixed; inset: 0; background: #06051a; color: #fff; overflow: hidden; }
+#tv.ativa { display: block; }
+#tvPalco { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100%; aspect-ratio: 16/9; max-height: 100%; max-width: 100%; overflow: hidden; background: #06051a; }
+@supports not (aspect-ratio: 16/9) { #tvPalco { inset: 0; width: auto; transform: none; left: 0; top: 0; } }
+#tvFundo { position: absolute; inset: 0; display: flex; }
+#tvFundo video { flex: 1; min-width: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: saturate(1.15) brightness(.95); background: #000; }
+#tvFundo video.off { opacity: .3; }
+#tvCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+#tvYt { position: absolute; right: 1.5vh; bottom: 1.5vh; width: 26vw; aspect-ratio: 16/9; border-radius: 1.5vh; overflow: hidden; display: none; box-shadow: 0 0 2vh rgba(0,0,0,.7); z-index: 3; border: .3vh solid rgba(255,255,255,.35); }
+#tvYt.on { display: block; }
+#tvYt iframe, #yt { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+#tvRodape { position: absolute; left: 2vh; bottom: 2vh; z-index: 6; display: flex; gap: 1.5vh; align-items: center; max-width: 64vw; }
+#tvCanto { font-size: 2.6vh; font-weight: 700; background: rgba(0,0,0,.6); padding: 1vh 2vh; border-radius: 1.5vh; color: var(--ouro); white-space: nowrap; }
+#tvTitulo { font-size: 2.4vh; background: rgba(0,0,0,.6); padding: 1vh 2vh; border-radius: 1.5vh; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: none; }
+#tvSair { position: absolute; right: 1.5vh; top: 1.5vh; z-index: 9; display: none; background: rgba(0,0,0,.5); color: #fff; width: 44px; height: 44px; padding: 0; border-radius: 50%; font-size: 1.3rem; }
+#tv.local #tvSair { display: block; }
+#tv.local #tvRodape { display: none; }
+.cheia { position: absolute; inset: 0; z-index: 8; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; text-align: center; padding: 4vh; background: radial-gradient(ellipse at center, #241a5e 0%, #06051a 75%); }
+.cheia.ativa { display: flex; }
+.cheia p { font-size: 3vh; color: #d8d2f0; max-width: 84vw; line-height: 1.4; }
+.cheia h2 { font-size: 6vh; color: #fff; }
+.cheia .marca { font-size: 2.6vh; }
+.cheia .marca .bolinho { font-size: 5vh; }
+#tvCapa .codigo { font-size: 18vh; font-weight: 700; letter-spacing: 2vh; line-height: 1; color: var(--ouro); text-shadow: 0 0 4vh rgba(255,209,102,.6); }
+#tvCapa .url { font-size: 3.4vh; color: #fff; font-weight: 700; background: var(--card); padding: 1.5vh 3vh; border-radius: 2vh; border: .3vh solid var(--border); }
+.melancia { width: 28vh; height: 28vh; filter: drop-shadow(0 0 3vh rgba(255,60,95,.5)); }
+.melancia svg { width: 100%; height: 100%; }
+.pct { font-size: 9vh; font-weight: 700; color: var(--ouro); line-height: 1; }
+.barra { width: 60vw; height: 2.4vh; background: rgba(255,255,255,.12); border-radius: 2vh; overflow: hidden; border: .2vh solid rgba(255,255,255,.2); }
+.barra i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--lima), var(--ciano), var(--rosa)); transition: width .25s ease-out; }
+.cheia .dica { position: absolute; bottom: 3vh; font-size: 2.2vh; }
+.lobbyLista { display: flex; gap: 3vh; flex-wrap: wrap; justify-content: center; }
+.lobbyLista .jog { background: rgba(0,0,0,.45); border: .4vh solid var(--cor, #fff); border-radius: 2vh; padding: 2vh 3vh; min-width: 24vh; font-size: 3.5vh; font-weight: 700; color: var(--cor, #fff); box-shadow: 0 0 3vh var(--cor, #fff); }
+.lobbyLista .jog small { display: block; font-size: 2vh; color: #d8d2f0; font-weight: 500; }
+.lobbyLista .vazio { color: var(--muted); font-size: 3vh; }
+.resumo { font-size: 3.2vh; color: #fff; background: rgba(0,0,0,.4); padding: 1.5vh 3vh; border-radius: 2vh; }
+
+@media (max-width: 420px) { .painel { flex-direction: column; } .camBox { flex: 0 0 auto; aspect-ratio: 16/9; } .linha > span { flex-basis: 100%; } }
+@media (prefers-reduced-motion: reduce) { button { transition: none; } .barra i { transition: none; } }

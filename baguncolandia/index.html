@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.youtube.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.youtube.com https://accounts.spotify.com https://api.spotify.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com; img-src 'self' data: blob: https://i.ytimg.com https://i.scdn.co; media-src 'self' blob: mediastream:; font-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'">
+<title>Bagunçolândia — Bolinho de Chuva · SolverONE</title>
+<link rel="icon" href="icone-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-192.png">
+<meta name="theme-color" content="#0b0a1f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Jogo de sala para a família: a TV mostra frutas, doces e personagens; você corta, pega e chuta com o corpo. / Living-room game: slice, catch and kick with your body.">
+<link rel="stylesheet" href="estilo.css">
+<!--
+  Bagunçolândia / Mayhemland — primeira brincadeira da família Bolinho de Chuva (SolverONE · Feature Tester)
+
+  A MESMA página serve a TV e o celular (como o Dança na Sala):
+    TV      → "Esta é a TV": carrega tudo, mostra um código de 4 letras e espera os celulares.
+    Celular → "Este é o celular": nome + código, liga a câmera, manda o vídeo e o movimento para a TV.
+  Sem login, sem banco, sem cookie: só arquivos estáticos (cache no aparelho pelo sw.js). O pareamento
+  usa o Supabase Realtime (broadcast, chave publishable, pública por desenho) só para mensagens pequenas;
+  vídeo e jogo vão direto pelo Wi-Fi (WebRTC). Nenhum script inline: a CSP acima não permite.
+  Mapa dos arquivos: ARQUITETURA no LEIA-ME.md. Versão: APP_VERSION em app.js e VERSAO em sw.js.
+-->
+</head>
+<body>
+
+<!-- ===== Escolha do papel ===== -->
+<section id="inicio" class="tela ativa" data-recurso="baguncolandia">
+  <div class="marca"><span class="bolinho">🍩</span><small data-t="Bolinho de Chuva apresenta|Rain Dumpling presents"></small></div>
+  <h1><span class="titulo">Bagunçolândia</span></h1>
+  <p class="sub" data-t="Frutas, doces e personagens voando na TV. Você corta, pega e chuta com o corpo. Uma ou duas pessoas. Nada para instalar, nada para cadastrar.|Fruit, sweets and characters flying on the TV. You slice, catch and kick with your body. One or two people. Nothing to install, no sign-up."></p>
+  <div class="col">
+    <button class="big" id="btTV" type="button">📺 <span data-t="Esta é a TV|This is the TV"></span></button>
+    <button class="big sec" id="btCel" type="button">📱 <span data-t="Este é o celular|This is the phone"></span></button>
+    <button class="big sec" id="btSolo" type="button">🎧 <span data-t="Só o celular (sem TV)|Phone only (no TV)"></span></button>
+  </div>
+  <details class="como">
+    <summary data-t="❓ Como usar|❓ How to use"></summary>
+    <ol>
+      <li data-t="Na TV, abra esta página no navegador (ou digite solverone.com.br/tv/bagunca) e aperte “Esta é a TV”.|On the TV, open this page in its browser (or type solverone.com.br/tv/bagunca) and press “This is the TV”."></li>
+      <li data-t="No celular, abra a mesma página, aperte “Este é o celular”, digite o nome e o código que a TV mostra.|On the phone, open the same page, press “This is the phone”, type a name and the code the TV shows."></li>
+      <li data-t="Apoie o celular deitado, virado para quem vai jogar, a uns 2 metros. A tela precisa ficar ligada.|Prop the phone up in landscape, facing the players, about 2 metres away. The screen must stay on."></li>
+      <li data-t="Escolha o modo no celular e toque em ▶ Começar. Siga a voz: fique parado, levante o braço, chute, pule.|Pick the mode on the phone and tap ▶ Start. Follow the voice: stand still, raise your arm, kick, jump."></li>
+    </ol>
+    <p class="muted" data-t="Segurança: nada é gravado. O vídeo vai do celular para a TV pelo Wi-Fi de casa e não passa por servidor. Sem conta, sem cookie, sem anúncio.|Safety: nothing is recorded. Video goes from the phone to the TV over your home Wi-Fi and never through a server. No account, no cookies, no ads."></p>
+  </details>
+  <footer>Bagunçolândia <span id="ver"></span> · Bolinho de Chuva · FeatureTesting · SolverONE</footer>
+</section>
+
+<section id="desligado" class="tela">
+  <h1>💤</h1>
+  <p class="muted" data-t="Esta brincadeira está desligada no momento.|This game is switched off right now."></p>
+</section>
+
+<!-- ===== TV (também usada no modo "só o celular") ===== -->
+<div id="tv">
+  <div id="tvPalco">
+    <div id="tvFundo"></div>
+    <canvas id="tvCanvas" width="1280" height="720"></canvas>
+    <div id="tvYt"><div id="yt"></div></div>
+  </div>
+  <div id="tvRodape"><div id="tvCanto"></div><div id="tvTitulo"></div></div>
+  <button id="tvSair" type="button" aria-label="Sair">✕</button>
+
+  <div id="tvCarregando" class="cheia">
+    <div class="melancia" aria-hidden="true">
+      <svg viewBox="0 0 100 100"><defs><clipPath id="clipEnche"><rect id="encheRect" x="0" y="100" width="100" height="0"/></clipPath></defs>
+        <path d="M8 36 A42 42 0 0 0 92 36 Z" fill="#2e8b2e"/><path d="M15 36 A35 35 0 0 0 85 36 Z" fill="#eafbe0"/><path d="M19 36 A31 31 0 0 0 81 36 Z" fill="#3a2a44"/>
+        <g clip-path="url(#clipEnche)"><path d="M19 36 A31 31 0 0 0 81 36 Z" fill="#ff3c5f"/><g fill="#1f1b3a"><ellipse cx="42" cy="50" rx="2.2" ry="3.4"/><ellipse cx="58" cy="50" rx="2.2" ry="3.4"/><ellipse cx="50" cy="60" rx="2.2" ry="3.4"/><ellipse cx="34" cy="42" rx="2" ry="3"/><ellipse cx="66" cy="42" rx="2" ry="3"/></g></g>
+      </svg>
+    </div>
+    <div class="pct"><span id="pct">0</span>%</div>
+    <div class="barra"><i id="barra"></i></div>
+    <p id="carregandoTxt" class="muted"></p>
+    <p class="muted dica" data-t="Dica: com o controle da TV, OK = começar.|Tip: on the TV remote, OK = start."></p>
+  </div>
+
+  <div id="tvCapa" class="cheia">
+    <div class="marca"><span class="bolinho">🍩</span><small data-t="Bolinho de Chuva apresenta|Rain Dumpling presents"></small></div>
+    <h1 class="titulo grande">Bagunçolândia</h1>
+    <p data-t="No celular, abra|On the phone, open"></p>
+    <div class="url" id="tvUrl"></div>
+    <p data-t="aperte “Este é o celular” e digite o código:|press “This is the phone” and type the code:"></p>
+    <div class="codigo" id="tvCodigo">····</div>
+    <p id="tvEspera" class="muted" data-t="Esperando os celulares…|Waiting for phones…"></p>
+  </div>
+
+  <div id="tvLobby" class="cheia">
+    <h2 data-t="Quem vai jogar|Who’s playing"></h2>
+    <div id="lobbyJogadores" class="lobbyLista"></div>
+    <div id="lobbyResumo" class="resumo"></div>
+    <p class="muted" data-t="Escolha o modo no celular e toque em ▶ Começar (ou OK no controle da TV).|Pick the mode on the phone and tap ▶ Start (or OK on the TV remote)."></p>
+  </div>
+</div>
+
+<!-- ===== Celular: entrar ===== -->
+<section id="entrar" class="tela">
+  <h1>📱 <span data-t="Entrar na sala|Join the room"></span></h1>
+  <div class="col">
+    <label for="nome" data-t="Seu nome|Your name"></label>
+    <input id="nome" maxlength="14" autocomplete="off" data-ph="Ex.: Ana|E.g. Ana">
+    <label for="codigo" id="lblCodigo" data-t="Código que a TV mostra|Code shown on the TV"></label>
+    <input id="codigo" maxlength="4" autocomplete="off" autocapitalize="characters" class="codigoInput" data-ph="ABCD|ABCD">
+    <button class="big" id="btEntrar" type="button" data-t="Entrar e ligar a câmera|Join and start the camera"></button>
+    <div id="entrarErro" class="erro" style="display:none"></div>
+    <p class="muted" data-t="A câmera serve só para a TV ver quem joga. Nada é gravado nem enviado para servidor.|The camera is only so the TV can see who is playing. Nothing is recorded or sent to a server."></p>
+  </div>
+</section>
+
+<!-- ===== Celular: na sala ===== -->
+<section id="jogo" class="tela">
+  <div class="topo"><b id="jogoNome"></b> · <span id="jogoCodigo" class="dourado"></span> <span class="status" id="jogoStatus"></span></div>
+  <div class="painel">
+    <div class="camBox"><video id="cam" autoplay muted playsinline></video><div class="camNome" id="camNome"></div><div class="energia" title="energia"><i id="energiaBarra"></i></div></div>
+    <div class="lado">
+      <div class="placar" id="placar"></div>
+      <div id="calTxt" class="cal"></div>
+    </div>
+  </div>
+
+  <div class="col" style="margin-top:10px">
+    <div class="row">
+      <button class="big" id="btComecar" type="button">▶ <span data-t="Começar|Start"></span></button>
+      <button class="sec" id="btPausa" type="button" title="Pausar / continuar" style="flex:0 0 auto">⏸</button>
+      <button class="sec" id="btParar" type="button" title="Parar" style="flex:0 0 auto">⏹</button>
+    </div>
+    <div class="row">
+      <button class="sec" id="btPularCal" type="button" style="display:none" data-t="Pular a calibração|Skip calibration"></button>
+    </div>
+
+    <details open id="plModo">
+      <summary data-t="🎮 Modo e jogadores|🎮 Mode and players"></summary>
+      <div class="col">
+        <div class="grupo" data-cfg="modo">
+          <button class="sec opt ativo" data-v="corta" type="button">🍉 <span data-t="Corta-corta|Slice"></span></button>
+          <button class="sec opt" data-v="pega" type="button">🎈 <span data-t="Pega-pega|Catch"></span></button>
+          <button class="sec opt" data-v="chuta" type="button">⚽ <span data-t="Chuta-chuta|Kick"></span></button>
+          <button class="sec opt" data-v="mistura" type="button">🎪 <span data-t="Bagunça total|Total mayhem"></span></button>
+        </div>
+        <div class="linha"><span data-t="Pessoas|People"></span>
+          <div class="grupo" data-cfg="jogadores"><button class="sec opt ativo" data-v="1" type="button">1</button><button class="sec opt" data-v="2" type="button">2</button></div>
+        </div>
+        <div class="linha" id="linhaCelulares"><span data-t="Celulares|Phones"></span>
+          <div class="grupo" data-cfg="celulares"><button class="sec opt ativo" data-v="1" type="button">1 <small data-t="(filma os dois)|(films both)"></small></button><button class="sec opt" data-v="2" type="button">2 <small data-t="(um cada)|(one each)"></small></button></div>
+        </div>
+        <div class="linha"><span data-t="Tempo|Time"></span>
+          <div class="grupo" data-cfg="duracao"><button class="sec opt ativo" data-v="60" type="button">60 s</button><button class="sec opt" data-v="90" type="button">90 s</button><button class="sec opt" data-v="120" type="button">2 min</button><button class="sec opt" data-v="0" type="button">🎵 <span data-t="a música|the song"></span></button></div>
+        </div>
+        <div class="linha"><span data-t="Nível|Level"></span>
+          <div class="grupo" data-cfg="dificuldade"><button class="sec opt" data-v="crianca" type="button" data-t="Criança|Kids"></button><button class="sec opt ativo" data-v="normal" type="button">Normal</button><button class="sec opt" data-v="maluco" type="button" data-t="Maluco|Crazy"></button></div>
+        </div>
+        <div class="linha"><span data-t="Quem aparece|Who shows up"></span>
+          <div class="grupo multi" data-cfg="turmas"><button class="sec opt ativo" data-v="propria" type="button" data-t="Turma SolverONE|SolverONE crew"></button><button class="sec opt ativo" data-v="publica" type="button" data-t="Clássicos|Classics"></button><button class="sec opt ativo" data-v="minhas" type="button" data-t="Minhas imagens|My images"></button></div>
+        </div>
+      </div>
+    </details>
+
+    <details id="plMusica">
+      <summary data-t="🎵 Música|🎵 Music"></summary>
+      <div class="col">
+        <div class="row ctl">
+          <button class="sec" id="btAnterior" type="button" title="Anterior" disabled>⏪</button>
+          <button class="sec" id="btPlayPausa" type="button" title="Tocar / pausar">⏯️</button>
+          <button class="sec" id="btReiniciar" type="button" title="Do início">⏮️</button>
+          <button class="sec" id="btProxima" type="button" title="Próxima" disabled>⏩</button>
+        </div>
+        <div class="row">
+          <input id="link" inputmode="url" data-ph="Link do YouTube (vídeo ou playlist)|YouTube link (video or playlist)">
+          <button id="btTocarLink" type="button" style="flex:0 0 auto">▶️ <span data-t="Tocar|Play"></span></button>
+        </div>
+        <div class="hist col" id="plLista" style="gap:6px;margin-top:0;display:none"></div>
+        <div class="hist col" id="hist" style="gap:6px;margin-top:0"></div>
+        <button class="sec" id="btBuscar" type="button" data-t="🔎 Procurar no YouTube|🔎 Search YouTube"></button>
+        <p class="muted" data-t="Também dá para tocar música em qualquer outro aparelho (Spotify, rádio, caixinha): o jogo segue a batida pelo microfone deste celular (em breve).|You can also play music on any other device (Spotify, radio, speaker): the game follows the beat through this phone’s microphone (soon)."></p>
+      </div>
+    </details>
+
+    <details id="plMais">
+      <summary data-t="⚙️ Mais|⚙️ More"></summary>
+      <div class="col">
+        <button class="sec" id="btCamera" type="button">🔄 <span data-t="Trocar a câmera|Switch camera"></span></button>
+        <button class="sec" id="btCalibrar" type="button">🧍 <span data-t="Calibrar de novo (voz e legenda)|Calibrate again (voice and captions)"></span></button>
+        <div class="aviso" data-t="Dica: celular deitado, apoiado, apontando para quem joga, a uns 2 metros, com luz boa e o fundo sem gente passando. Se tiver câmera grande-angular (0.5x), ela aparece no botão Trocar a câmera.|Tip: phone in landscape, propped up, facing the players about 2 metres away, in good light, with nobody walking in the background. If the phone has a wide-angle (0.5x) camera, it shows up under Switch camera."></div>
+        <button class="sec" id="btSair" type="button">🚪 <span data-t="Sair da sala|Leave the room"></span></button>
+        <div class="muted" style="text-align:center;font-size:.75rem">Bagunçolândia <span class="ver2"></span></div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<script src="libs/supabase.js"></script>
+<script src="jogo.js"></script>
+<script src="figuras.js"></script>
+<script src="desenho.js"></script>
+<script src="sala.js"></script>
+<script src="voz.js"></script>
+<script src="som.js"></script>
+<script src="calibrar.js"></script>
+<script src="../recursos.js" data-app="feature-tester"></script>
+<script src="app.js"></script>
+</body>
+</html>

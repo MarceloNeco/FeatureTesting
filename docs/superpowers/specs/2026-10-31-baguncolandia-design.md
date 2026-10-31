@@ -170,3 +170,18 @@ números que pulam; combo em letreiro; pódio com confete. Celular: compacto, se
   movimento falsos, confere placar, calibração passo a passo, CSP sem violação no console.
 - Na sua TV (a cada fase): parear, calibrar, uma rodada de cada modo, 2 jogadores, fechar o celular
   no meio (TV avisa), reabrir (volta).
+
+## 12. Acréscimo de 31/Out/2026 — Ambientes, boneco e missões (pedido do dono)
+
+- **Ambiente** é uma escolha no celular: **Câmera** (a pessoa aparece espelhada na TV, como na v0.1) ou
+  **Paisagem** (cena desenhada em SVG, leve: praia, floresta, espaço, cidade) com um **boneco** da turma que
+  acompanha a criança. Avaliação: o vídeo serve bem para cortar e pegar (a pessoa se vê), mas não faz
+  sentido para obstáculos (ela não "bate" em nada); a paisagem com boneco fica mais bonita, mais leve e
+  deixa as missões de pular e abaixar serem de verdade. Recomendação: Paisagem como padrão a partir da v0.2.
+- **Como o boneco segue sem IA**: a calibração já guarda o fundo; o celular passa a mandar, 10× por segundo,
+  a **caixa da silhueta** (x, y, largura, altura) junto com os pontos de movimento. Boneco: posição = centro da
+  caixa; **pulo** = o topo da caixa sobe mais de 12 % da altura; **abaixar** = a altura cai abaixo de 70 % da
+  calibrada; **braço levantado** = movimento na zona do braço. Com o esqueleto por IA (v0.4) vira marionete.
+- **Missões novas**: 🪵 **Pula e abaixa** (troncos baixos e galhos altos chegando pelo lado, cada vez mais
+  rápido; a voz avisa "pula!"/"abaixa!"; errar tira vida) e 🎳 **Bagunça de bolas** (dezenas de bolas quicando;
+  encostar vale ponto, bomba tira). Entram na Bagunça total.

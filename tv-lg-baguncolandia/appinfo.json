@@ -1,0 +1,13 @@
+{
+  "id": "br.com.solverone.baguncolandia",
+  "version": "0.1.0",
+  "vendor": "SolverONE",
+  "type": "web",
+  "main": "index.html",
+  "title": "Bagunçolândia",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "iconColor": "#c6ff3d",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": false
+}

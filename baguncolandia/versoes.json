@@ -1,0 +1,24 @@
+{
+  "app": "baguncolandia",
+  "versoes": [
+    {
+      "versao": "0.1.0",
+      "data": "31/Out/2026",
+      "hora": "03:30:00",
+      "pt": [
+        "Primeira versão: Corta-corta, Pega-pega, Chuta-chuta e Bagunça total na TV, com o celular filmando.",
+        "Uma ou duas pessoas: um celular filmando os dois (tela repartida) ou dois celulares.",
+        "Calibração guiada por voz e legenda (fique parado, levante o braço, chute, pule).",
+        "Carregamento 0–100 % com música, turma própria SolverONE, personagens clássicos e suas imagens (pasta meus/).",
+        "Música do YouTube na TV; modo \"só o celular\"; funciona guardado no aparelho (sem baixar de novo)."
+      ],
+      "en": [
+        "First version: Slice, Catch, Kick and Total mayhem on the TV, with the phone filming.",
+        "One or two people: one phone filming both (split screen) or two phones.",
+        "Voice-and-caption guided calibration (stand still, raise your arm, kick, jump).",
+        "0–100 % loading with music, SolverONE crew, classic characters and your own images (meus/ folder).",
+        "YouTube music on the TV; phone-only mode; works cached on the device."
+      ]
+    }
+  ]
+}
