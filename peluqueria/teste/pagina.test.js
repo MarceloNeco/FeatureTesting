@@ -125,6 +125,22 @@ async function comecar(pg, nivel) {
   confere(pg.erros().length === 0, 'sem erros no console', pg.erros());
   confere((await D(pg, () => window.__csp)).length === 0, 'sem violação de CSP', await D(pg, () => window.__csp));
 
+  /* ---------- som e voz ---------- */
+  const ps = await abrir(browser, base + '?teste');
+  await D(ps, () => PeluqueriaDebug.novaRodada('crianca'));
+  await ateAlvo(ps); await tocar(ps);
+  const reg = await D(ps, () => window.PeluqueriaSom && PeluqueriaSom.registro);
+  confere(Array.isArray(reg) && reg.includes('PERFEITO') && reg.includes('conta'), 'som registra contagem e PERFEITO', reg);
+  confere(await D(ps, () => PeluqueriaVoz.ultimo === 'UHUL!'), 'voz diz UHUL! no PERFEITO');
+  await ps.click('#btPausa'); await ps.click('#btSeguir');
+  confere(ps.erros().length === 0, 'som: sem erros', ps.erros());
+
+  const mudo = await abrir(browser, base + '?teste', { antes: () => { delete window.speechSynthesis; delete window.AudioContext; delete window.webkitAudioContext; window.speechSynthesis = undefined; window.AudioContext = undefined; window.webkitAudioContext = undefined; } });
+  await D(mudo, () => PeluqueriaDebug.novaRodada('crianca'));
+  await ateAlvo(mudo); await tocar(mudo); await passo(mudo, 2100);
+  await ateAlvo(mudo); await tocar(mudo);
+  confere(/PERFEITO/.test(await mudo.textContent('#aviso')) && mudo.erros().length === 0, 'sem voz e sem WebAudio: joga com legenda e sem erro', mudo.erros());
+
   /* ---------- 320 px ---------- */
   const p320 = await abrir(browser, base + '?teste', { ctx: { viewport: { width: 320, height: 640 } } });
   confere(await D(p320, () => document.documentElement.scrollWidth <= 320), '320 px sem rolagem lateral (início)');
