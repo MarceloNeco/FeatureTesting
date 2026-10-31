@@ -10,8 +10,8 @@
     "pt": "Nível 0 do mapa vivo: os serviços de nuvem, os repositórios e os apps da SolverONE (solverone.com.br) e como se ligam. Tudo no plano gratuito, salvo o domínio. Este manifesto mora no solverone-dados (F1); na F0 é feito à mão pelo chat Arquitetura.",
     "en": "Level 0 of the living map: the cloud services, repositories and apps of SolverONE (solverone.com.br) and how they connect. Everything on free plans except the domain. This manifest lives in solverone-dados (F1); in F0 it is written by hand by the Architecture chat."
   },
-  "versao": "1.0",
-  "atualizado": "2026-10-23",
+  "versao": "1.1",
+  "atualizado": "2026-10-31",
   "linguagens": [
     "html",
     "css",
@@ -34,12 +34,19 @@
       "chave": "nenhuma",
       "onde_chave": "nao-se-aplica",
       "estado_vivo": {
-        "fonte": "RDAP público (rdap.registro.br/domain/solverone.com.br): expiração, status, servidores de nome"
+        "fonte": "RDAP público (rdap.registro.br/domain/solverone.com.br, CORS aberto): expiração, registro, status e servidores de nome, lido pelo próprio navegador; contatos descartados"
       },
       "limites": {
         "pt": "Sem API para o titular; só RDAP/WHOIS públicos. Renovação e DNS pelo painel do registro.br.",
         "en": "No API for the holder; only public RDAP/WHOIS. Renewal and DNS through the registro.br panel."
-      }
+      },
+      "empresa": {
+        "nome": "Núcleo de Informação e Coordenação do Ponto BR (NIC.br), operação Registro.br",
+        "pais": "Brasil",
+        "site": "https://registro.br",
+        "cnpj": "05.506.560/0001-36"
+      },
+      "atualizacao": "automatica-sem-chave"
     },
     {
       "id": "cloudflare-dns",
@@ -54,7 +61,13 @@
       "onde_chave": "secrets-edge-function",
       "estado_vivo": {
         "fonte": "API v4: zones/{zone}/dns_records (token com Zone.DNS:Read)"
-      }
+      },
+      "empresa": {
+        "nome": "Cloudflare, Inc.",
+        "pais": "Estados Unidos",
+        "site": "https://www.cloudflare.com"
+      },
+      "atualizacao": "automatica-com-chave"
     },
     {
       "id": "cloudflare-pages",
@@ -69,7 +82,13 @@
       "onde_chave": "secrets-edge-function",
       "estado_vivo": {
         "fonte": "API v4: accounts/{conta}/pages/projects/{nome}/deployments (último deploy, estado, branch)"
-      }
+      },
+      "empresa": {
+        "nome": "Cloudflare, Inc.",
+        "pais": "Estados Unidos",
+        "site": "https://pages.cloudflare.com"
+      },
+      "atualizacao": "automatica-com-chave"
     },
     {
       "id": "cloudflare-access",
@@ -84,7 +103,13 @@
       "onde_chave": "secrets-edge-function",
       "estado_vivo": {
         "fonte": "API v4: accounts/{conta}/access/apps e access/logs/access_requests (24 h de retenção no Free)"
-      }
+      },
+      "empresa": {
+        "nome": "Cloudflare, Inc.",
+        "pais": "Estados Unidos",
+        "site": "https://www.cloudflare.com/zero-trust/"
+      },
+      "atualizacao": "automatica-com-chave"
     },
     {
       "id": "cloudflare-web-analytics",
@@ -99,7 +124,13 @@
       "onde_chave": "secrets-edge-function",
       "estado_vivo": {
         "fonte": "GraphQL Analytics API (rumPageloadEventsAdaptiveGroups): visitas e tempo de carga por site"
-      }
+      },
+      "empresa": {
+        "nome": "Cloudflare, Inc.",
+        "pais": "Estados Unidos",
+        "site": "https://www.cloudflare.com/web-analytics/"
+      },
+      "atualizacao": "automatica-com-chave"
     },
     {
       "id": "github",
@@ -113,8 +144,14 @@
       "chave": "do-servidor",
       "onde_chave": "secrets-edge-function",
       "estado_vivo": {
-        "fonte": "REST API: commits, pulls, actions/runs, releases, pages, dependabot/alerts (token fine-grained só de leitura)"
-      }
+        "fonte": "REST API pública (api.github.com/repos/<dono>/<repo>, 60 req/h sem chave) para os repositórios públicos: último push, tamanho, visibilidade; os privados e Dependabot só com token nos Secrets (F2)"
+      },
+      "empresa": {
+        "nome": "GitHub, Inc. (Microsoft)",
+        "pais": "Estados Unidos",
+        "site": "https://github.com"
+      },
+      "atualizacao": "automatica-sem-chave"
     },
     {
       "id": "github-pages",
@@ -128,8 +165,14 @@
       "chave": "nenhuma",
       "onde_chave": "nao-se-aplica",
       "estado_vivo": {
-        "fonte": "REST API: repos/{dono}/{repo}/pages e pages/builds/latest; robô de disponibilidade (HTTP e tempo)"
-      }
+        "fonte": "versoes.json de cada app em solverone.com.br (CORS aberto): no ar e versão servida, lido pelo próprio navegador; builds do Pages pela API com token (F2)"
+      },
+      "empresa": {
+        "nome": "GitHub, Inc. (Microsoft)",
+        "pais": "Estados Unidos",
+        "site": "https://pages.github.com"
+      },
+      "atualizacao": "automatica-sem-chave"
     },
     {
       "id": "github-actions",
@@ -143,8 +186,14 @@
       "chave": "do-servidor",
       "onde_chave": "secrets-actions",
       "estado_vivo": {
-        "fonte": "REST API: actions/workflows e actions/runs (último resultado de cada robô)"
-      }
+        "fonte": "REST API pública (actions/runs) nos repositórios públicos: último resultado de cada robô sem chave; privados com token (F2)"
+      },
+      "empresa": {
+        "nome": "GitHub, Inc. (Microsoft)",
+        "pais": "Estados Unidos",
+        "site": "https://github.com/features/actions"
+      },
+      "atualizacao": "automatica-sem-chave"
     },
     {
       "id": "supabase",
@@ -163,7 +212,13 @@
       "limites": {
         "pt": "500 MB de banco, pausa após 7 dias sem uso (robô Manter o banco acordado), 2 projetos ativos.",
         "en": "500 MB database, pause after 7 idle days (Keep the database awake robot), 2 active projects."
-      }
+      },
+      "empresa": {
+        "nome": "Supabase, Inc.",
+        "pais": "Estados Unidos (projeto na região São Paulo)",
+        "site": "https://supabase.com"
+      },
+      "atualizacao": "automatica-com-chave"
     },
     {
       "id": "supabase-auth",
@@ -178,7 +233,13 @@
       "onde_chave": "nao-se-aplica",
       "estado_vivo": {
         "fonte": "Management API: config/auth (provedores ligados, URLs de retorno)"
-      }
+      },
+      "empresa": {
+        "nome": "Supabase, Inc.",
+        "pais": "Estados Unidos",
+        "site": "https://supabase.com/auth"
+      },
+      "atualizacao": "automatica-com-chave"
     },
     {
       "id": "supabase-storage",
@@ -193,7 +254,13 @@
       "onde_chave": "nao-se-aplica",
       "estado_vivo": {
         "fonte": "Management API: database/query em storage.objects (tamanho por bucket)"
-      }
+      },
+      "empresa": {
+        "nome": "Supabase, Inc.",
+        "pais": "Estados Unidos",
+        "site": "https://supabase.com/storage"
+      },
+      "atualizacao": "automatica-com-chave"
     },
     {
       "id": "supabase-funcoes",
@@ -208,7 +275,13 @@
       "onde_chave": "secrets-edge-function",
       "estado_vivo": {
         "fonte": "Management API: projects/{ref}/functions (lista, versão, status) e secrets (só nomes)"
-      }
+      },
+      "empresa": {
+        "nome": "Supabase, Inc.",
+        "pais": "Estados Unidos",
+        "site": "https://supabase.com/edge-functions"
+      },
+      "atualizacao": "automatica-com-chave"
     },
     {
       "id": "improvmx",
@@ -227,7 +300,12 @@
       "limites": {
         "pt": "Free: 1 domínio, 25 apelidos, 500 encaminhamentos/dia, logs de 7 dias, 30 requisições/min por endpoint; envio e lote só nos planos pagos.",
         "en": "Free: 1 domain, 25 aliases, 500 forwards/day, 7-day logs, 30 requests/min per endpoint; sending and batch only on paid plans."
-      }
+      },
+      "empresa": {
+        "nome": "ImprovMX",
+        "site": "https://improvmx.com"
+      },
+      "atualizacao": "automatica-com-chave"
     },
     {
       "id": "resend",
@@ -246,7 +324,13 @@
       "limites": {
         "pt": "10 requisições/s por time; leitura exige chave full_access (a sending_access só envia).",
         "en": "10 requests/s per team; reading requires a full_access key (sending_access only sends)."
-      }
+      },
+      "empresa": {
+        "nome": "Resend",
+        "pais": "Estados Unidos",
+        "site": "https://resend.com"
+      },
+      "atualizacao": "automatica-com-chave"
     },
     {
       "id": "solverone-dados",
@@ -261,7 +345,13 @@
       "onde_chave": "nao-se-aplica",
       "estado_vivo": {
         "fonte": "os próprios JSON (apps.json, recursos/, arquitetura/<app>.json) e o histórico de commits"
-      }
+      },
+      "empresa": {
+        "nome": "SolverONE (repositório próprio no GitHub Pages)",
+        "pais": "Brasil",
+        "site": "https://solverone.com.br/solverone-dados/"
+      },
+      "atualizacao": "automatica-sem-chave"
     },
     {
       "id": "ia-externa",
@@ -277,7 +367,12 @@
       "limites": {
         "pt": "A plataforma não vê a chave nem o consumo; o que dá para contar, com consentimento, é número de chamadas por app (sol_app_uso).",
         "en": "The platform sees neither the key nor the usage; what can be counted, with consent, is calls per app (sol_app_uso)."
-      }
+      },
+      "empresa": {
+        "nome": "Google, OpenAI, Anthropic, OpenRouter, Groq, Mistral (conta da própria pessoa)",
+        "site": "https://solverone.com.br/"
+      },
+      "atualizacao": "declarado"
     },
     {
       "id": "voz-externa",
@@ -289,7 +384,12 @@
       "fornecedor": "vários",
       "plano": "da pessoa",
       "chave": "da-pessoa",
-      "onde_chave": "cofre"
+      "onde_chave": "cofre",
+      "empresa": {
+        "nome": "ElevenLabs, Deepgram, AssemblyAI (conta da própria pessoa)",
+        "site": "https://solverone.com.br/"
+      },
+      "atualizacao": "declarado"
     },
     {
       "id": "dados-abertos",
@@ -301,7 +401,12 @@
       "fornecedor": "vários",
       "plano": "gratuito",
       "chave": "nenhuma",
-      "onde_chave": "nao-se-aplica"
+      "onde_chave": "nao-se-aplica",
+      "empresa": {
+        "nome": "Câmara dos Deputados, Senado, Open Food Facts, OpenStreetMap, ViaCEP (APIs públicas)",
+        "site": "https://dadosabertos.camara.leg.br"
+      },
+      "atualizacao": "declarado"
     }
   ],
   "apps": [
@@ -330,6 +435,19 @@
         "pt": "RootifyONE",
         "en": "RootifyONE"
       }
+    },
+    {
+      "app": "arch-one",
+      "nome": {
+        "pt": "ArchONE (mapa vivo)",
+        "en": "ArchONE (living map)"
+      },
+      "repositorio": "MarceloNeco/arch-one",
+      "visibilidade": "privado",
+      "hospedagem": "cloudflare-pages",
+      "url": "https://arch-one.pages.dev/",
+      "manifesto": "arquitetura.json",
+      "estado": "alpha"
     },
     {
       "app": "solverone-app",
@@ -715,6 +833,41 @@
       "de": "cloudflare-web-analytics",
       "para": "github-pages",
       "tipo": "depende"
+    },
+    {
+      "de": "cloudflare-pages",
+      "para": "arch-one",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "cloudflare-access",
+      "para": "arch-one",
+      "tipo": "autentica"
+    },
+    {
+      "de": "arch-one",
+      "para": "solverone-dados",
+      "tipo": "le"
+    },
+    {
+      "de": "arch-one",
+      "para": "supabase-auth",
+      "tipo": "autentica"
+    },
+    {
+      "de": "arch-one",
+      "para": "registro-br",
+      "tipo": "le"
+    },
+    {
+      "de": "arch-one",
+      "para": "github",
+      "tipo": "le"
+    },
+    {
+      "de": "arch-one",
+      "para": "github-pages",
+      "tipo": "le"
     }
   ]
 }
