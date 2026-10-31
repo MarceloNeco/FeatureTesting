@@ -290,7 +290,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '1.3.0', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '1.3.2', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -453,23 +453,21 @@ function tvYouTubeEstado(ev) {
   var p = tv.player;
   tv.tocando = (ev.data === YT.PlayerState.PLAYING);
   // pausou sem ninguém pedir (o navegador da TV faz isso quando engasga): retoma sozinho, até 5x por música
-  if (ev.data === YT.PlayerState.PAUSED && tv.preCarregado && Date.now() - (tv.pausaPedida || 0) > 3000 && Date.now() >= (tv.podioAte || 0) && (tv.retomadas || 0) < 5) {
+  if (ev.data === YT.PlayerState.PAUSED && Date.now() - (tv.pausaPedida || 0) > 3000 && Date.now() >= (tv.podioAte || 0) && (tv.retomadas || 0) < 5) {
     tv.retomadas = (tv.retomadas || 0) + 1;
     setTimeout(function () { try { if (p.getPlayerState() === YT.PlayerState.PAUSED && Date.now() - (tv.pausaPedida || 0) > 3000) p.playVideo(); } catch (e) {} }, 1200);
   }
   if (ev.data === YT.PlayerState.PLAYING) tv.retomadas = Math.max(0, (tv.retomadas || 0) - 0);
   try { tv.lista = p.getPlaylist() || []; tv.indice = p.getPlaylistIndex(); } catch (e) { tv.lista = []; tv.indice = -1; }
-  if (ev.data === YT.PlayerState.BUFFERING && tv.preCarregado && !carga.ativa && Date.now() - (tv.ultimoPlaying || 0) > 1500) cargaMostrar(T('O YouTube parou para carregar…', 'YouTube stopped to load…'));
+  if (ev.data === YT.PlayerState.BUFFERING && !carga.ativa && Date.now() - (tv.ultimoPlaying || 0) > 2500) cargaMostrar(T('O YouTube está carregando…', 'YouTube is loading…'));
   if (ev.data === YT.PlayerState.PLAYING) {
-    tv.ultimoPlaying = Date.now();
-    if (!tv.preCarregado) { var fr = 0; try { fr = p.getVideoLoadedFraction() || 0; } catch (e0) {} if (fr < carga.meta) { tv.pausaPedida = Date.now(); p.pauseVideo(); cargaMostrar(); } else { tv.preCarregado = true; cargaEsconder(); } }
-    else if (carga.ativa) cargaEsconder();
+    tv.ultimoPlaying = Date.now(); tv.preCarregado = true;
+    if (carga.ativa) cargaEsconder();
     var d = p.getVideoData ? p.getVideoData() : null, id = d && d.video_id;
     if (id && id !== tv.videoAtual) {
       // música nova (numa playlist o YouTube emenda sozinho): zera o placar e, se o pódio
       // acabou de aparecer, segura 8 s para todo mundo ver antes de continuar
       tv.videoAtual = id; tv.titulo = (d.title || id); tv.retomadas = 0;
-      if (tv.preCarregado && tv.lista.length > 1) { tv.preCarregado = false; tv.pausaPedida = Date.now(); p.pauseVideo(); cargaMostrar(T('Próxima música…', 'Next song…')); }
       $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '🎵 ' + tv.titulo;
       tvZerar();
       if (Date.now() < tv.podioAte) {
@@ -508,7 +506,7 @@ function cargaMostrar(msg) {
 }
 function cargaPct(p) { p = Math.max(0, Math.min(100, Math.round(p))); $('cargaPct').textContent = p + '%'; $('cargaBarra').style.strokeDashoffset = 100 - p; }
 function cargaEsconder() {
-  $('tvCarga').classList.remove('ativa'); carga.ativa = false; carga.inicio = 0; carga.ultimaF = -1; carga.parouEm = 0;
+  $('tvCarga').classList.remove('ativa'); carga.ativa = false; carga.inicio = 0; carga.ultimaF = -1; carga.parouEm = 0; carga.empurrou = false;
   clearInterval(carga.timer); carga.timer = 0; clearInterval(carga.emojiTimer); carga.emojiTimer = 0; $('cargaEmojis').innerHTML = '';
   jingleTocar(false);
 }
@@ -516,18 +514,13 @@ function cargaAtualizar() {
   var p = tv.player; if (!p || !p.getVideoLoadedFraction) return;
   var f = 0; try { f = p.getVideoLoadedFraction() || 0; } catch (e) {}
   var st = -1; try { st = p.getPlayerState(); } catch (e2) {}
-  if (!tv.preCarregado) {
-    cargaPct(f / carga.meta * 100);
-    // segura pausado até a meta (ou 20 s): depois libera
-    // o YouTube para de baixar quando está pausado e já tem uma reserva: se a barra não anda por 3 s, libera
-    if (f !== carga.ultimaF) { carga.ultimaF = f; carga.parouEm = Date.now(); }
-    var parado = f > 0.03 && Date.now() - (carga.parouEm || Date.now()) > 3000;
-    if (f >= carga.meta || parado || Date.now() - carga.inicio > 20000) { tv.preCarregado = true; tv.pausaPedida = 0; cargaEsconder(); try { p.playVideo(); } catch (e3) {} }
-    else if (st === YT.PlayerState.PLAYING) { tv.pausaPedida = Date.now(); try { p.pauseVideo(); } catch (e4) {} }
-  } else {
-    cargaPct(f * 100);
-    if (st === YT.PlayerState.PLAYING) cargaEsconder();
-  }
+  // porcentagem só quando o navegador informa (na LG vem 0): senão mostra reticências
+  if (f > 0) cargaPct(f * 100); else { $('cargaPct').textContent = '…'; $('cargaBarra').style.strokeDashoffset = 100 - ((Date.now() / 30) % 100); }
+  if (st === YT.PlayerState.PLAYING) { cargaEsconder(); return; }
+  var ha = Date.now() - carga.inicio;
+  // o YouTube nunca é pausado pelo app: se demorar, dá um empurrão e, passado o limite, sai da frente
+  if (ha > 6000 && !carga.empurrou) { carga.empurrou = true; try { p.playVideo(); } catch (e3) {} }
+  if (ha > 12000) cargaEsconder();
 }
 /* Música de espera gerada pelo próprio app (Web Audio): bateria, baixo e arpejo estilo videogame,
    124 bpm, instrumental, sem direitos de ninguém. Toca só enquanto a tela de carregamento aparece,
@@ -824,21 +817,53 @@ function entrar() {
 /* Câmeras: a primeira vez pede a traseira; depois lista TODAS as câmeras do aparelho (nos Samsung a
    grande-angular 0.5x aparece como uma câmera separada) e o botão 🔄 vai passando por elas. Zoom quando
    o navegador oferece. */
-function ligarCamera(deviceId) {
+/* Câmeras. Nos Samsung o navegador lista várias "câmeras" (grande-angular, tele, profundidade,
+   virtuais) e algumas abrem sem erro mas ficam PRETAS. Regras: tentar de novo se o aparelho ainda
+   estiver soltando a câmera anterior; se a nova ficar preta por 1,5 s, marcar como ruim (lembrada
+   neste celular) e pular para a próxima; se tudo falhar, voltar para a traseira/frontal por
+   facingMode, que sempre funciona. */
+function camsRuins() { try { return JSON.parse(localStorage.getItem('danca:camsRuins') || '[]'); } catch (e) { return []; } }
+function marcarRuim(id) { if (!id) return; var r = camsRuins(); if (r.indexOf(id) < 0) { r.push(id); try { localStorage.setItem('danca:camsRuins', JSON.stringify(r.slice(-12))); } catch (e) {} } }
+function ligarCamera(deviceId, tentativa) {
+  tentativa = tentativa || 0;
   if (cel.stream) cel.stream.getTracks().forEach(function (t) { t.stop(); });
   var v = { width: { ideal: 640 }, height: { ideal: 360 }, frameRate: { ideal: 24 } };
-  if (deviceId) v.deviceId = { exact: deviceId }; else v.facingMode = 'environment';
+  if (deviceId) v.deviceId = { exact: deviceId }; else v.facingMode = cel.frente ? 'user' : 'environment';
   return navigator.mediaDevices.getUserMedia({ video: v, audio: false })
-    .catch(function () { return navigator.mediaDevices.getUserMedia({ video: true, audio: false }); })
+    .catch(function (err) {
+      // o aparelho ainda está soltando a câmera anterior: espera e tenta de novo (2x)
+      if (tentativa < 2) return new Promise(function (ok) { setTimeout(ok, 600); }).then(function () { return navigator.mediaDevices.getUserMedia({ video: v, audio: false }); });
+      throw err;
+    })
+    .catch(function (err) {
+      if (deviceId) { marcarRuim(deviceId); status(T('Essa câmera não abriu. Voltando…', 'That camera did not open. Going back…'), 'erro'); }
+      // último recurso: traseira (ou frontal) por facingMode, depois qualquer uma
+      return navigator.mediaDevices.getUserMedia({ video: { facingMode: cel.frente ? 'user' : 'environment' }, audio: false })
+        .catch(function () { return navigator.mediaDevices.getUserMedia({ video: true, audio: false }); });
+    })
     .then(function (s) {
-      cel.stream = s; $('cam').srcObject = s;
+      cel.stream = s; $('cam').srcObject = s; $('cam').play && $('cam').play().catch(function () {});
       var track = s.getVideoTracks()[0], st = track.getSettings ? track.getSettings() : {};
       cel.frente = st.facingMode === 'user' || /front|frontal|user/i.test(track.label || '');
       $('cam').classList.toggle('frente', cel.frente);
       if (cel.pc && !modo.comp) { var sender = cel.pc.getSenders().find(function (x) { return x.track && x.track.kind === 'video'; }); if (sender) sender.replaceTrack(track); }
-      anterior = null;
+      anterior = null; cel.camLuz = -1; cel.camDesde = Date.now();
+      // vigia: se não vier imagem (sem quadros, faixa muda ou tudo preto) em 1,5 s, marca ruim e pula
+      var idAtual = st.deviceId || deviceId;
+      clearTimeout(cel.vigia);
+      cel.vigia = setTimeout(function () {
+        if (cel.stream !== s) return;
+        var v2 = $('cam'), morta = !v2.videoWidth || track.readyState !== 'live' || track.muted || (cel.camLuz >= 0 && cel.camLuz < 6);
+        if (morta) { marcarRuim(idAtual); status(T('Câmera sem imagem, pulando…', 'Camera shows nothing, skipping…'), 'erro'); proximaCamera(); }
+      }, 1500);
       return listarCameras(st.deviceId).then(function () { prepararZoom(track); });
     });
+}
+function proximaCamera() {
+  var ruins = camsRuins(), lista = cel.cams.filter(function (d) { return ruins.indexOf(d.deviceId) < 0 && !/depth|infrared|\bir\b|virtual|screen|obs|droidcam/i.test(d.label || ''); });
+  if (lista.length < 2) { ligarCamera().catch(function () {}); return; }   // só uma boa: volta para a padrão por facingMode
+  var atual = cel.cams[cel.camIdx] && cel.cams[cel.camIdx].deviceId, pos = lista.findIndex(function (d) { return d.deviceId === atual; });
+  ligarCamera(lista[(pos + 1) % lista.length].deviceId).catch(function () {});
 }
 function listarCameras(atual) {
   if (!navigator.mediaDevices.enumerateDevices) return Promise.resolve();
@@ -862,6 +887,7 @@ function prepararZoom(track) {
   var box = $('zoomBox'), caps = track.getCapabilities ? track.getCapabilities() : {};
   if (!caps.zoom || caps.zoom.max <= caps.zoom.min) { box.style.display = 'none'; return; }
   var z = $('zoom'); z.min = caps.zoom.min; z.max = caps.zoom.max; z.step = caps.zoom.step || 0.1;
+  if (caps.zoom.min < 1) $('camNome').textContent += T(' · arraste o zoom até 0.5x para grande-angular', ' · drag zoom to 0.5x for wide-angle');
   var st = track.getSettings(); z.value = st.zoom || caps.zoom.min;
   $('zoomVal').textContent = (+z.value).toFixed(1) + 'x';
   box.style.display = '';
@@ -904,7 +930,7 @@ cv.width = 48; cv.height = 27;
 function medirEnergia() {
   var v = $('cam'); if (!v.videoWidth) return;
   cx.drawImage(v, 0, 0, cv.width, cv.height);
-  var d = cx.getImageData(0, 0, cv.width, cv.height).data, soma = 0, n = d.length / 4, W = cv.width, H = cv.height;
+  var d = cx.getImageData(0, 0, cv.width, cv.height).data, soma = 0, n = d.length / 4, W = cv.width, H = cv.height, luz = 0;
   var quentes = [];                                  // onde mexeu: [x 0..1, y 0..1, força 0..100]
   if (anterior) {
     for (var i = 0, c = 0; i < d.length; i += 4, c++) {
@@ -913,6 +939,8 @@ function medirEnergia() {
       if (df > 60) quentes.push([c % W, (c / W) | 0, df]);
     }
   }
+  for (var li = 0; li < d.length; li += 16) luz += d[li] + d[li + 1] + d[li + 2];
+  cel.camLuz = luz / (d.length / 16) / 3;   // 0..255: média de brilho (câmera preta ≈ 0)
   anterior = new Uint8ClampedArray(d);
   // junta os pontos quentes em até 6 grupos (células vizinhas viram um ponto só)
   quentes.sort(function (a, b) { return b[2] - a[2]; });
@@ -1199,7 +1227,7 @@ $('btTV').onclick = iniciarTV;
 $('btCel').onclick = function () { tela('entrar'); try { $('nome').value = localStorage.getItem('danca:nome') || ''; $('codigo').value = localStorage.getItem('danca:codigo') || ''; } catch (e) {} ($('nome').value ? $('codigo') : $('nome')).focus(); };
 $('btEntrar').onclick = entrar;
 $('codigo').addEventListener('keydown', function (e) { if (e.key === 'Enter') entrar(); });
-$('btCamera').onclick = function () { if (cel.cams.length < 2) return; var i = (cel.camIdx + 1) % cel.cams.length; ligarCamera(cel.cams[i].deviceId).catch(function () {}); };
+$('btCamera').onclick = function () { if (cel.cams.length < 2) return; proximaCamera(); };
 $('btSair').onclick = sair;
 $('btTocarLink').onclick = function () { tocarLink(); };
 $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') tocarLink(); });
