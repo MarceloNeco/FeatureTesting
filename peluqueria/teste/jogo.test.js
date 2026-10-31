@@ -208,3 +208,21 @@ test('sincronia vale também para lugar fora do centro', () => {
     assert.ok(Math.abs(p.x - L.x) < 1e-9 && Math.abs(p.rot - L.rot) < 1e-9, q.lugar);
   }
 });
+
+/* TV (0.4.0): parar compensando o atraso da internet */
+test('parar com atraso usa a posição de quando o gesto aconteceu', () => {
+  const e = rodada('crianca');
+  P.avancar(e, ateAlvo(e) + 0.3);           // a mensagem chegou 0,3 s depois do instante certo
+  assert.equal(P.parar(e, 0.3).categoria, 'PERFEITO');
+  const e2 = rodada('crianca');
+  P.avancar(e2, ateAlvo(e2) + 0.3);
+  assert.notEqual(P.parar(e2).categoria, 'PERFEITO');   // sem compensar, erraria
+});
+test('atraso é limitado a 0,5 s e nunca negativo', () => {
+  const e = rodada('crianca');
+  P.avancar(e, ateAlvo(e) + 2);
+  assert.notEqual(P.parar(e, 9).categoria, 'PERFEITO');
+  const e3 = rodada('crianca');
+  P.avancar(e3, ateAlvo(e3));
+  assert.equal(P.parar(e3, -1).categoria, 'PERFEITO');
+});

@@ -171,25 +171,112 @@ async function comecar(pg, nivel) {
     await pmk.screenshot({ path: '/tmp/peluqueria-marcar.png' });
   }
 
-  /* ---------- TV com o controle ---------- */
-  const ptv = await abrir(browser, base + '?tv=auto&teste', { ctx: { viewport: { width: 1280, height: 720 } } });
-  confere(await D(ptv, () => document.documentElement.classList.contains('tv') && document.activeElement.id === 'btJogar'), 'TV: classe tv e foco no Jogar');
-  await ptv.keyboard.press('ArrowLeft');
-  confere(await D(ptv, () => document.activeElement.id !== 'btJogar'), 'TV: setas movem o foco');
-  await D(ptv, () => document.getElementById('btJogar').focus());
-  await ptv.keyboard.press('Enter'); await passo(ptv, 2200);
-  confere((await est(ptv)).fase === 'caindo', 'TV: Enter começa');
-  await D(ptv, () => PeluqueriaDebug.novaRodada('crianca'));
-  await ateAlvo(ptv); await ptv.keyboard.press('Enter');
-  const etv = await est(ptv);
-  confere(etv.res[0] === 'PERFEITO', 'TV: OK do controle para o item na hora certa', etv);
-  confere(await D(ptv, () => PeluqueriaDebug.leve === true), 'TV: modo leve ligado');
-  await passo(ptv, 300); await ptv.screenshot({ path: '/tmp/peluqueria-tv.png' });
-  confere(ptv.erros().length === 0, 'TV: sem erros', ptv.erros());
+  /* ---------- TV (0.4.0): código, celular como controle, corpo, dois jogadores ---------- */
+  {
+    const ctxTV = await browser.newContext({ viewport: { width: 1280, height: 720 }, locale: 'pt-BR' });
+    const tv = await ctxTV.newPage(); const errosTV = [];
+    tv.on('console', m => { const t = m.text() + ' @' + (m.location() && m.location().url); if (m.type() === 'error' && !IGNORAR.test(t)) errosTV.push(t); }); tv.on('pageerror', e => errosTV.push(e.message));
+    await tv.goto(base + '?tv=auto&teste'); await tv.waitForFunction(() => window.PeluqueriaTVDebug && PeluqueriaTVDebug.pronto);
+    const codigo = (await tv.textContent('#codigo')).trim();
+    confere(/^[A-Z]{4}$/.test(codigo) && await tv.isVisible('#tvLobby') && await D(tv, () => document.documentElement.classList.contains('tv')), 'TV mostra o código de 4 letras', codigo);
+    // TV sozinha com o controle remoto: OK começa e OK para
+    await tv.keyboard.press('Enter'); await D(tv, () => PeluqueriaTVDebug.passo(2200));
+    confere(await tv.isVisible('#tvJogo') && await D(tv, () => PeluqueriaTVDebug.jogadores()) === 1, 'TV sem celular: OK começa a rodada de 1 jogador');
+    await D(tv, () => PeluqueriaTVDebug.passo(PeluqueriaTVDebug.tempoAteAlvo(0))); await tv.keyboard.press('Enter');
+    confere(await D(tv, () => PeluqueriaTVDebug.ultimo(0)) === 'PERFEITO', 'TV: OK do controle para o item na hora certa');
+    confere(await D(tv, () => PeluqueriaTVDebug.leve === true), 'TV: modo leve ligado');
+    await tv.keyboard.press('Escape');
+    confere(await tv.isVisible('#tvLobby'), 'TV: Voltar/Esc leva ao lobby');
+
+    // celular entra com o código
+    const cel = await ctxTV.newPage(); const errosCel = [];
+    cel.on('console', m => { const t = m.text() + ' @' + (m.location() && m.location().url); if (m.type() === 'error' && !IGNORAR.test(t)) errosCel.push(t); }); cel.on('pageerror', e => errosCel.push(e.message));
+    await cel.setViewportSize({ width: 390, height: 844 });
+    await cel.goto(base + '?teste'); await cel.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
+    await cel.click('#btControle');
+    await cel.fill('#ctCodigo', codigo.toLowerCase()); await cel.fill('#ctNome', 'Ana'); await cel.click('#ctEntrar');
+    await tv.waitForFunction(() => /Ana/.test(document.getElementById('tvJogadores').textContent), null, { timeout: 5000 });
+    ok('celular entrou e a TV mostra o nome');
+    await cel.waitForFunction(() => document.getElementById('ctPainel') && !document.getElementById('ctPainel').hidden, null, { timeout: 5000 });
+    await cel.screenshot({ path: '/tmp/peluqueria-controle.png' });
+    await cel.click('#ctCrianca'); await cel.waitForTimeout(150);
+    confere(await D(tv, () => PeluqueriaTVDebug.nivel()) === 'crianca', 'celular escolhe o nível na TV');
+    await cel.click('#ctComecar'); await tv.waitForTimeout(150); await D(tv, () => PeluqueriaTVDebug.passo(2200));
+    confere(await tv.isVisible('#tvJogo'), 'celular começa a rodada');
+    await D(tv, () => PeluqueriaTVDebug.passo(PeluqueriaTVDebug.tempoAteAlvo(0)));
+    await cel.click('#ctParar'); await tv.waitForTimeout(250);
+    confere(await D(tv, () => PeluqueriaTVDebug.ultimo(0)) === 'PERFEITO', 'tocar PARAR no celular para o item na TV');
+    await D(tv, () => PeluqueriaTVDebug.passo(2100));
+    // corpo: gesto brusco simulado (esqueleto falso) para o item
+    await D(tv, () => PeluqueriaTVDebug.passo(500));
+    await D(cel, () => PeluqueriaControleDebug.tremer(1500));
+    await tv.waitForTimeout(200);
+    confere(await D(tv, () => PeluqueriaTVDebug.resultados(0)) === 1, 'tremidinha no celular não para o item');
+    // o relógio do jogo no teste fica parado: o gesto vem logo depois de chegar na hora certa
+    await D(tv, () => PeluqueriaTVDebug.passo(PeluqueriaTVDebug.tempoAteAlvo(0)));
+    await D(cel, () => PeluqueriaControleDebug.levantarBraco());
+    await tv.waitForTimeout(250);
+    confere(await D(tv, () => PeluqueriaTVDebug.resultados(0)) === 2 && await D(tv, () => PeluqueriaTVDebug.ultimo(0)) === 'PERFEITO', 'levantar o braço de repente para o item', await D(tv, () => [PeluqueriaTVDebug.resultados(0), PeluqueriaTVDebug.ultimo(0), PeluqueriaTVDebug.atraso()]));
+    // mensagem estranha no canal é ignorada
+    await D(tv, (c) => new BroadcastChannel('peluqueria-' + c).postMessage({ t: 'cmd', acao: 'apagar', id: 'x' }), codigo);
+    // segundo celular durante a rodada não entra; no lobby entra e a tela divide
+    const cel2 = await ctxTV.newPage(); await cel2.setViewportSize({ width: 390, height: 844 });
+    await cel2.goto(base + '?teste'); await cel2.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
+    await cel2.click('#btControle'); await cel2.fill('#ctCodigo', codigo); await cel2.fill('#ctNome', 'Bia'); await cel2.click('#ctEntrar');
+    await tv.waitForTimeout(400);
+    confere(!/Bia/.test(await tv.textContent('#tvJogadores')), 'durante a rodada ninguém novo entra');
+    await tv.keyboard.press('Escape'); await tv.waitForTimeout(100);
+    await D(cel2, () => PeluqueriaControleDebug.reentrar());
+    await tv.waitForFunction(() => /Bia/.test(document.getElementById('tvJogadores').textContent), null, { timeout: 5000 });
+    ok('no lobby, o segundo celular entra');
+    await cel.click('#ctComecar'); await tv.waitForTimeout(150); await D(tv, () => PeluqueriaTVDebug.passo(2200));
+    confere(await D(tv, () => PeluqueriaTVDebug.jogadores()) === 2 && await tv.isVisible('#tvPalco1'), 'dois jogadores: tela dividida');
+    await D(tv, () => PeluqueriaTVDebug.passo(PeluqueriaTVDebug.tempoAteAlvo(0)));
+    await cel.click('#ctParar'); await tv.waitForTimeout(200);
+    await D(tv, () => PeluqueriaTVDebug.passo(400));
+    await cel2.click('#ctParar'); await tv.waitForTimeout(200);
+    confere(await D(tv, () => [PeluqueriaTVDebug.ultimo(0), PeluqueriaTVDebug.resultados(1)]).then(r => r[0] === 'PERFEITO' && r[1] === 1), 'cada celular para o seu item');
+    await D(tv, () => PeluqueriaTVDebug.passo(300)); await tv.screenshot({ path: '/tmp/peluqueria-tv-dois.png' });
+    await D(tv, () => { for (let k = 0; k < 12 && PeluqueriaTVDebug.fase() !== 'fim'; k++) PeluqueriaTVDebug.passo(9000); });
+    confere(await tv.isVisible('#tvFim') && /Ana/.test(await tv.textContent('#tvPodio')), 'fim com pódio');
+    await tv.screenshot({ path: '/tmp/peluqueria-tv-fim.png' });
+    await cel.waitForTimeout(300);
+    confere(/Ana|venceu|empate/i.test(await cel.textContent('#ctStatus')), 'celular mostra o resultado', await cel.textContent('#ctStatus'));
+    // revisão 0.4.0: senha do celular, vaga fantasma, TV cheia, TV sumiu, sair da TV
+    await cel.click('#ctComecar'); await tv.waitForTimeout(150); await D(tv, () => PeluqueriaTVDebug.passo(2200));
+    const idAna = await D(cel, () => sessionStorage.getItem('peluqueria-id'));
+    const r0 = await D(tv, () => PeluqueriaTVDebug.resultados(0));
+    await D(tv, ([c, id]) => new BroadcastChannel('peluqueria-' + c).postMessage({ t: 'cmd', id, k: 'senhaerrada1234', acao: 'parar' }), [codigo, idAna]);
+    await tv.waitForTimeout(200);
+    confere(await D(tv, () => PeluqueriaTVDebug.resultados(0)) === r0 && await tv.isVisible('#tvJogo'), 'sem a senha do celular, ninguém se passa pelo jogador');
+    await tv.keyboard.press('Escape'); await tv.waitForTimeout(100);
+    const cel3 = await ctxTV.newPage(); await cel3.setViewportSize({ width: 390, height: 844 });
+    await cel3.goto(base + '?teste'); await cel3.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
+    await cel3.click('#btControle'); await cel3.fill('#ctCodigo', codigo); await cel3.fill('#ctNome', 'Caio'); await cel3.click('#ctEntrar');
+    await cel3.waitForTimeout(3500);
+    confere(/2 jogadores/.test(await cel3.textContent('#ctStatus')), 'terceiro celular vê "TV com 2 jogadores" (não "Conectado")', await cel3.textContent('#ctStatus'));
+    await cel2.close();   // Bia fechou a aba: sai na hora, e o Caio, que esperava, pega a vaga
+    await tv.waitForTimeout(2000);
+    confere(!/Bia/.test(await tv.textContent('#tvJogadores')), 'quem fecha a aba libera a vaga');
+    confere(/Caio/.test(await tv.textContent('#tvJogadores')), 'o celular que esperava entra na vaga livre');
+    await cel3.close(); await tv.waitForTimeout(400);
+    await D(tv, (c) => new BroadcastChannel('peluqueria-' + c).postMessage({ t: 'join', id: 'fantasma1', k: 'fantasmasenha12', nome: 'Fantasma' }), codigo);
+    await tv.waitForTimeout(300);
+    confere(/Fantasma/.test(await tv.textContent('#tvJogadores')), 'celular novo entra');
+    await tv.waitForTimeout(2500);
+    confere(!/Fantasma/.test(await tv.textContent('#tvJogadores')) && /Ana/.test(await tv.textContent('#tvJogadores')), 'celular que some (sem sinal) sai do lobby; quem está ativo fica');
+    await tv.click('#tvSair');
+    confere(await tv.isVisible('#inicio'), '🏠 no lobby da TV volta ao início');
+    await tv.close();
+    await cel.waitForTimeout(2500);
+    confere(/não encontrada|not found/i.test(await cel.textContent('#ctStatus')), 'celular percebe quando a TV some', await cel.textContent('#ctStatus'));
+    confere(errosTV.length === 0 && errosCel.length === 0, 'TV e celular sem erros', errosTV.concat(errosCel));
+    await ctxTV.close();
+  }
 
   const pdb = await abrir(browser, base + '?debug&teste');
   await passo(pdb, 500);
-  confere(/v0\.3\.2/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(/v0\.4\.0/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
 
   /* ---------- revisão final ---------- */
