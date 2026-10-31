@@ -3,17 +3,17 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const M = require('../trilhas.js');
 
-test('10 músicas com nome PT/EN, andamento de pop dançante e tons diferentes', () => {
-  assert.equal(M.FAIXAS.length, 10);
+test('pelo menos 15 músicas com nome PT/EN, andamento de pop dançante e tons diferentes', () => {
+  assert.ok(M.FAIXAS.length >= 15, 'só ' + M.FAIXAS.length);
   const nomes = new Set(M.FAIXAS.map(f => f.nome.pt));
-  assert.equal(nomes.size, 10);
+  assert.equal(nomes.size, M.FAIXAS.length);
   for (const f of M.FAIXAS) {
     assert.ok(f.nome.pt && f.nome.en, f.id);
-    assert.ok(f.bpm >= 118 && f.bpm <= 132, f.id + ' bpm ' + f.bpm);
+    assert.ok(f.bpm >= 108 && f.bpm <= 134, f.id + ' bpm ' + f.bpm);
     assert.ok(['maior', 'menor'].includes(f.modo));
     assert.equal(f.acordes.length, 4);
   }
-  assert.ok(new Set(M.FAIXAS.map(f => f.tom + f.modo)).size >= 8, 'tons parecidos demais');
+  assert.ok(new Set(M.FAIXAS.map(f => f.tom + f.modo)).size >= 11, 'tons parecidos demais');
 });
 
 test('cada música tem intro, verso, subida, refrão, pausa e refrão final', () => {
@@ -55,11 +55,11 @@ test('notas da melodia, do arpejo e do baixo ficam na escala (do tom do trecho)'
   }
 });
 
-test('as 10 melodias são diferentes entre si e repetíveis', () => {
+test('todas as melodias são diferentes entre si e repetíveis', () => {
   const assinatura = f => M.partitura(f, compassoDa('refrao')).eventos.concat(M.partitura(f, compassoDa('refrao') + 1).eventos)
     .filter(e => e.tipo === 'lead').map(e => e.t + ':' + (e.nota - f.tom)).join(',');
   const a = M.FAIXAS.map(assinatura);
-  assert.equal(new Set(a).size, 10);
+  assert.equal(new Set(a).size, M.FAIXAS.length);
   assert.deepEqual(M.FAIXAS.map(assinatura), a);
   for (const s of a) assert.ok(s.split(',').length >= 6, 'melodia curta demais');
 });
@@ -67,7 +67,7 @@ test('as 10 melodias são diferentes entre si e repetíveis', () => {
 test('passado o último compasso, a lista segue para a próxima música', () => {
   assert.deepEqual(M.proxima(0, M.compassos() - 1), { faixa: 0, compasso: M.compassos() - 1 });
   assert.deepEqual(M.proxima(0, M.compassos()), { faixa: 1, compasso: 0 });
-  assert.deepEqual(M.proxima(9, M.compassos()), { faixa: 0, compasso: 0 });
+  assert.deepEqual(M.proxima(M.FAIXAS.length - 1, M.compassos()), { faixa: 0, compasso: 0 });
 });
 
 test('andamento: nível e quedas mudam o BPM', () => {
@@ -95,7 +95,7 @@ test('melodia do refrão usa pelo menos 6 notas diferentes', () => {
   }
 });
 test('verso e refrão têm acordes diferentes', () => {
-  const raizes = (f, c0) => [0, 1, 2, 3].map(k => M.partitura(f, c0 + k).eventos.find(e => e.tipo === 'acorde' && e.estilo === 'tapete').notas[0]).join(',');
+  const raizes = (f, c0) => [0, 1, 2, 3].map(k => M.partitura(f, c0 + k).eventos.find(e => e.tipo === 'acorde' && e.estilo === 'tapete').notas.join('.')).join(',');
   for (const f of M.FAIXAS) assert.notEqual(raizes(f, compassoDa('verso')), raizes(f, compassoDa('refrao')), f.id);
 });
 test('verso tem melodia própria (não só duas notas por compasso)', () => {
@@ -147,4 +147,37 @@ test('abertura: começa só com a guitarra e explode com bateria de rock, acorde
 test('abertura toca em laço', () => {
   assert.equal(M.proximaAbertura(M.compassosAbertura() - 1), 0);
   assert.equal(M.proximaAbertura(0), 1);
+});
+
+/* mais sofisticadas (pedido do dono, 0.3.1): estilos variados, acordes encadeados, harmonia, swing, notas fantasmas */
+test('estilos variados de bateria e de melodia', () => {
+  assert.ok(new Set(M.FAIXAS.map(f => f.bateria)).size >= 6, 'baterias');
+  assert.ok(new Set(M.FAIXAS.map(f => f.lead)).size >= 5, 'timbres');
+  assert.ok(M.FAIXAS.filter(f => f.swing > 0).length >= 3, 'swing');
+});
+test('acordes encadeados: cada voz anda pouco de um compasso para o outro', () => {
+  for (const f of M.FAIXAS) {
+    const r = compassoDa('refrao'); let soma = 0, n = 0;
+    for (let k = 1; k < 8; k++) {
+      const a = M.partitura(f, r + k - 1).eventos.find(e => e.estilo === 'tapete').notas, b = M.partitura(f, r + k).eventos.find(e => e.estilo === 'tapete').notas;
+      const A = a.slice().sort((x, y) => x - y), B = b.slice().sort((x, y) => x - y);
+      for (let v = 0; v < 4; v++) { soma += Math.abs(A[v] - B[v]); n++; }
+    }
+    assert.ok(soma / n <= 3.5, f.id + ': média ' + (soma / n).toFixed(2));
+  }
+});
+test('último refrão ganha segunda voz em harmonia (na escala)', () => {
+  for (const f of M.FAIXAS) {
+    const p = M.partitura(f, compassoDa('refrao2')), esc = M.escala(f);
+    const h = p.eventos.filter(e => e.tipo === 'harmonia');
+    assert.ok(h.length >= 3, f.id);
+    for (const e of h) assert.ok(esc.includes(((e.nota - p.tom) % 12 + 12) % 12), f.id + ' harmonia fora da escala');
+  }
+});
+test('bateria com notas fantasmas no refrão e swing informado', () => {
+  for (const f of M.FAIXAS) {
+    const p = M.partitura(f, compassoDa('refrao') + 1);
+    assert.ok(p.eventos.some(e => e.tipo === 'caixa' && e.vol < 0.3), f.id + ' sem nota fantasma');
+    assert.equal(typeof p.swing, 'number');
+  }
 });

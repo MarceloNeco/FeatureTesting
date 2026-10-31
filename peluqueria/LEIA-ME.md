@@ -33,7 +33,7 @@ primeira abertura o jogo funciona sem internet.
 ## Suas imagens e suas músicas
 
 - Fotos e itens seus: `meus/LEIA-ME.md` (com a página `marcar.html`, sem programar).
-- Músicas suas (MP3): `musicas/LEIA-ME.md`. Sem elas, tocam as 10 músicas de pop dançante que o próprio jogo cria, em sequência, desde a tela de início.
+- Músicas suas (MP3): `musicas/LEIA-ME.md`. Sem elas, tocam a abertura e as 16 músicas de pop dançante que o próprio jogo cria, em sequência, desde a tela de início.
 
 ## Mapa dos arquivos
 
@@ -45,7 +45,7 @@ primeira abertura o jogo funciona sem internet.
 | `desenho.js` | desenha no canvas (cenário, item, lugar certo, confete, modo leve) |
 | `cenarios.js`, `itens.js` | leem e validam `cenarios/`, `itens/` e `meus/` |
 | `cenarios/`, `itens/` | os 12 cenários e 12 itens em SVG + listas `.json` |
-| `trilhas.js` | as 10 músicas (pop dançante): partitura de cada compasso, testada no Node |
+| `trilhas.js` | as 16 músicas (pop dançante) e a abertura: partitura de cada compasso, testada no Node |
 | `som.js`, `voz.js` | toca as músicas e os efeitos (torcida do "u-huuu!") no WebAudio; fala |
 | `marcar.html`, `marcar.js` | página para marcar o lugar certo nas suas fotos |
 | `sw.js` | guarda tudo no aparelho (cache `peluqueria-v…`); `VERSAO` igual à `APP_VERSION` |

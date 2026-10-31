@@ -2,6 +2,21 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.3.2",
+      "data": "31/Out/2026",
+      "hora": "19:45:00",
+      "pt": [
+        "16 músicas (6 novas): Brisa Tropical, Neon Anos 80, Patins de Ouro, Confete no Ar, Dança no Telhado e Estrela Cadente, com estilos tropical, synthwave e funk-pop.",
+        "Músicas mais sofisticadas: acordes encadeados, segunda voz em harmonia no último refrão, notas fantasmas na bateria, balanço (swing) em algumas, som espalhado entre esquerda e direita e eco de ambiente.",
+        "Timbres novos: flauta e metais."
+      ],
+      "en": [
+        "16 tracks (6 new): Tropical Breeze, 80s Neon, Golden Skates, Confetti Air, Rooftop Dance and Shooting Star, with tropical, synthwave and funk-pop styles.",
+        "More sophisticated music: smooth chord voicings, a second harmony voice in the last chorus, ghost notes on the drums, swing on some tracks, stereo spread and room reverb.",
+        "New sounds: flute and brass."
+      ]
+    },
+    {
       "versao": "0.3.1",
       "data": "31/Out/2026",
       "hora": "19:39:00",
