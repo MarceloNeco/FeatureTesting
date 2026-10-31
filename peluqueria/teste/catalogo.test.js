@@ -8,18 +8,19 @@ const pasta = path.resolve(__dirname, '..');
 const json = f => JSON.parse(fs.readFileSync(path.join(pasta, f), 'utf8'));
 const CENARIOS = ['cachorro', 'gato', 'tubarao', 'bebe', 'vovo', 'coruja', 'leao', 'robo', 'sapo', 'cavalo', 'pinguim', 'boneco-de-neve'];
 const ITENS = { 'peruca-oculos': 'olhos', 'boca-tubarao': 'boca', coroa: 'cabeca', cartola: 'cabeca', bigode: 'boca', 'nariz-palhaco': 'nariz', 'oculos-escuros': 'olhos', fone: 'cabeca', laco: 'cabeca', bone: 'cabeca', 'chapeu-pirata': 'cabeca', 'capacete-viking': 'cabeca' };
+Object.assign(ITENS, { sorvete: 'mao', balao: 'mao', pirulito: 'mao', microfone: 'mao', flor: 'orelha', brinco: 'orelha', papagaio: 'ombro', passarinho: 'ombro', 'gravata-borboleta': 'pescoco', medalha: 'pescoco' });
 
-test('12 cenários, todos válidos e com os 4 lugares', () => {
+test('12 cenários, todos válidos e com os 4 lugares do meio', () => {
   const lista = json('cenarios/cenarios.json');
   assert.deepEqual(lista.map(c => c.id).sort(), CENARIOS.slice().sort());
   for (const c of lista) {
     assert.ok(P.validarCenario(c), 'inválido: ' + c.id);
-    for (const l of P.LUGARES) assert.ok(c.lugares[l], c.id + ' sem ' + l);
+    for (const l of ['cabeca', 'olhos', 'nariz', 'boca']) assert.ok(c.lugares[l], c.id + ' sem ' + l);
     assert.ok(fs.existsSync(path.join(pasta, 'cenarios', c.arquivo)), 'falta ' + c.arquivo);
   }
 });
 
-test('12 itens, todos válidos e no lugar certo', () => {
+test('22 itens, todos válidos e no lugar certo', () => {
   const lista = json('itens/itens.json');
   assert.deepEqual(lista.map(i => i.id).sort(), Object.keys(ITENS).sort());
   for (const i of lista) {
@@ -59,8 +60,26 @@ test('carregar ignora meus/ quebrado', async () => {
   delete require.cache[require.resolve('../cenarios.js')]; delete require.cache[require.resolve('../itens.js')];
   const C = require('../cenarios.js'), I = require('../itens.js');
   const c = await C.carregar(), i = await I.carregar();
-  assert.equal(c.jogo.length, 12); assert.equal(i.jogo.length, 12);
+  assert.equal(c.jogo.length, 12); assert.equal(i.jogo.length, 22);
   assert.deepEqual(c.meus, []); assert.deepEqual(i.meus, []);
   assert.ok(C.avisos.length >= 1 && I.avisos.length >= 2, JSON.stringify([C.avisos, I.avisos]));
   assert.ok(c.jogo[0].img && c.jogo[0].src.startsWith('cenarios/'));
+});
+
+test('cada bicho tem mão, ombro e pescoço; orelha em pelo menos 8; lugares de lado bem fora do meio', () => {
+  const lista = json('cenarios/cenarios.json');
+  let comOrelha = 0, maoEsq = 0, maoDir = 0, novos = 0;
+  for (const c of lista) {
+    const L = c.lugares;
+    for (const k of ['mao', 'ombro', 'pescoco']) assert.ok(L[k], c.id + ' sem ' + k);
+    if (L.orelha) { comOrelha++; assert.ok(Math.abs(L.orelha.x - 0.5) >= 0.12, c.id + ' orelha no meio'); }
+    assert.ok(Math.abs(L.mao.x - 0.5) >= 0.3, c.id + ' mão perto do meio');
+    assert.ok(Math.abs(L.ombro.x - 0.5) >= 0.1, c.id + ' ombro no meio');
+    assert.ok((L.mao.x - 0.5) * (L.ombro.x - 0.5) < 0, c.id + ': ombro tem de ficar do lado oposto da mão');
+    if (L.mao.x < 0.5) maoEsq++; else maoDir++;
+    novos += ['mao', 'orelha', 'ombro', 'pescoco'].filter(k => L[k]).length;
+  }
+  assert.ok(comOrelha >= 8, 'orelhas: ' + comOrelha);
+  assert.ok(maoEsq >= 5 && maoDir >= 5, 'mão sempre do mesmo lado: ' + maoEsq + '/' + maoDir);
+  assert.ok(novos >= 44, 'lugares novos: ' + novos);
 });

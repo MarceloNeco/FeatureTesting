@@ -19,7 +19,10 @@
   var ORDEM = ['PERFEITO', 'BOM', 'QUASE', 'LONGE'];
   var MULTS = [1, 1.5, 2, 2.5, 3];
   var QUEDAS = 10, TOPO = -0.25, FUNDO = 1.25, ACELERA = 0.05, GIRO_LIMITE = 25;
-  var LUGARES = ['cabeca', 'olhos', 'nariz', 'boca'];
+  var LUGARES = ['cabeca', 'olhos', 'nariz', 'boca', 'mao', 'orelha', 'ombro', 'pescoco'];
+  var LATERAIS = ['mao', 'orelha', 'ombro'];   // fora do centro (o resto fica no meio do corpo)
+  /* quais quedas da rodada são de lado: Criança nenhuma, Normal metade, Maluco 8 de 10 */
+  var DE_LADO = { crianca: function () { return false; }, normal: function (k) { return k % 2 === 1; }, maluco: function (k) { return k % 5 !== 0; } };
 
   /* mulberry32: sorteio repetível pela semente */
   function aleatorio(semente) {
@@ -33,12 +36,15 @@
     };
   }
 
-  function sortear(cenarios, itens, n, rnd) {
-    var pares = [];
-    cenarios.forEach(function (c) { itens.forEach(function (it) { if (c.lugares && c.lugares[it.lugar]) pares.push({ cenario: c, item: it, lugar: it.lugar }); }); });
-    if (!pares.length) return [];
+  function sortear(cenarios, itens, n, rnd, nivel) {
+    var todos = [];
+    cenarios.forEach(function (c) { itens.forEach(function (it) { if (c.lugares && c.lugares[it.lugar]) todos.push({ cenario: c, item: it, lugar: it.lugar }); }); });
+    if (!todos.length) return [];
+    var lado = todos.filter(function (p) { return LATERAIS.indexOf(p.lugar) >= 0; }), meio = todos.filter(function (p) { return LATERAIS.indexOf(p.lugar) < 0; });
+    var regra = DE_LADO[nivel];
     var lista = [], ant = null;
     for (var k = 0; k < n; k++) {
+      var pares = !regra ? todos : regra(k) ? (lado.length ? lado : todos) : (meio.length ? meio : todos);
       var cand = pares;
       if (ant) {
         // prefere mudar cenário E item; se não der, ao menos o item; depois ao menos o cenário
@@ -81,7 +87,7 @@
 
   function criarRodada(op) {
     var rnd = aleatorio(op.semente == null ? Date.now() : op.semente);
-    var quedas = sortear(op.cenarios, op.itens, QUEDAS, rnd).map(function (q) {
+    var quedas = sortear(op.cenarios, op.itens, QUEDAS, rnd, op.nivel).map(function (q) {
       q.fase = rnd() * 2 * Math.PI; q.d = rnd() * 2 - 1; return q;
     });
     return { nivel: op.nivel, quedas: quedas, i: 0, t: 0, fase: quedas.length ? 'caindo' : 'fim', pontos: 0, combo: 0, mult: 1, resultados: [] };
@@ -164,7 +170,7 @@
   }
 
   return {
-    NIVEIS: NIVEIS, GIRO: GIRO, LIMITES: LIMITES, BASE: BASE, MULTS: MULTS, QUEDAS: QUEDAS, TOPO: TOPO, FUNDO: FUNDO, LUGARES: LUGARES,
+    NIVEIS: NIVEIS, GIRO: GIRO, LIMITES: LIMITES, BASE: BASE, MULTS: MULTS, QUEDAS: QUEDAS, TOPO: TOPO, FUNDO: FUNDO, LUGARES: LUGARES, LATERAIS: LATERAIS,
     aleatorio: aleatorio, sortear: sortear, posicao: posicao, distancia: distancia, pontuar: pontuar,
     criarRodada: criarRodada, avancar: avancar, parar: parar, proxima: proxima, estrelas: estrelas,
     validarCenario: validarCenario, validarItem: validarItem

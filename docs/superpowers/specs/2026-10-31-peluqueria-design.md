@@ -128,6 +128,15 @@ cartola (cabeça), bigode (boca), nariz de palhaço (nariz), óculos escuros (ol
 **Os 12 cenários:** cachorro, gato, tubarão, bebê, vovô, coruja, leão, robô, sapo, cavalo, pinguim, boneco
 de neve. Todos têm os quatro lugares, para qualquer item servir em qualquer cenário.
 
+**Lugares fora do centro (v0.3.1, pedido do dono):** além de `cabeca`, `olhos`, `nariz` e `boca`, os lugares
+`mao`, `orelha`, `ombro` e `pescoco`. Cada bicho levanta um braço com a mão aberta (asa, nadadeira ou luva), que é a
+pista visual de onde o item vai; o lado da mão muda de bicho para bicho e o ombro usado fica do lado oposto.
+`orelha` só onde o bicho tem orelha à vista (8 dos 12). Itens novos: sorvete, balão, pirulito, microfone (mão);
+flor, brinco (orelha); papagaio, passarinho (ombro); gravata-borboleta, medalha (pescoço). Item pode ter
+`escala` (0,3 a 3): largura = `tam` do lugar × escala. **Dificuldade:** Criança só lugares do meio (cabeça,
+olhos, nariz, boca, pescoço); Normal metade das quedas de lado (mão, orelha, ombro); Maluco 8 de 10 de lado. O
+balanço continua sincronizado: na altura certa o item passa exatamente pelo lugar, mesmo fora do centro.
+
 **Sorteio.** A rodada sorteia 10 pares (cenário, item) com semente: o mesmo cenário não aparece duas vezes
 seguidas, nem o mesmo item; cada item usa o lugar do seu tipo naquele cenário. Com "Minhas imagens" ligado,
 cenários e itens do dono entram no mesmo sorteio (um item do dono só vai para cenários que tenham o lugar

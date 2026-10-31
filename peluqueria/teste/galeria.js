@@ -6,14 +6,15 @@ const pasta = path.resolve(__dirname, '..');
 const C = JSON.parse(fs.readFileSync(path.join(pasta, 'cenarios/cenarios.json'), 'utf8'));
 const I = JSON.parse(fs.readFileSync(path.join(pasta, 'itens/itens.json'), 'utf8'));
 const dataUrl = f => 'data:image/svg+xml;base64,' + fs.readFileSync(path.join(pasta, f)).toString('base64');
-const POR_TIPO = { cabeca: ['coroa', 'cartola', 'fone', 'laco', 'bone', 'chapeu-pirata', 'capacete-viking'], olhos: ['oculos-escuros', 'peruca-oculos'], nariz: ['nariz-palhaco'], boca: ['bigode', 'boca-tubarao'] };
+const POR_TIPO = { cabeca: ['coroa', 'cartola', 'fone', 'laco', 'bone', 'chapeu-pirata', 'capacete-viking'], olhos: ['oculos-escuros', 'peruca-oculos'], nariz: ['nariz-palhaco'], boca: ['bigode', 'boca-tubarao'], mao: ['sorvete', 'balao', 'pirulito', 'microfone'], orelha: ['flor', 'brinco'], ombro: ['papagaio', 'passarinho'], pescoco: ['gravata-borboleta', 'medalha'] };
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1600, height: 1200 } });
   const quadros = [];
   C.forEach((c, k) => {
     // dois quadros por cenário: (cabeça + nariz) e (olhos + boca), girando os itens pelo índice
     const a = [POR_TIPO.cabeca[k % 7], POR_TIPO.nariz[0]], d = [POR_TIPO.olhos[k % 2], POR_TIPO.boca[k % 2]];
-    quadros.push({ c, itens: a }, { c, itens: d });
+    const lado = [POR_TIPO.mao[k % 4], POR_TIPO.ombro[k % 2], POR_TIPO.pescoco[k % 2]].concat(c.lugares.orelha ? [POR_TIPO.orelha[k % 2]] : []);
+    quadros.push({ c, itens: a }, { c, itens: d }, { c, itens: lado });
   });
   const html = `<body style="margin:0;background:#222;display:grid;grid-template-columns:repeat(6,1fr);gap:4px">` + quadros.map(q => {
     const its = q.itens.map(id => { const it = I.find(i => i.id === id), L = q.c.lugares[it.lugar]; const w = L.tam * (it.escala || 1) * 100;
