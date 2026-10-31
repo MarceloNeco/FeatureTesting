@@ -189,7 +189,7 @@ async function comecar(pg, nivel) {
 
   const pdb = await abrir(browser, base + '?debug&teste');
   await passo(pdb, 500);
-  confere(/v0\.2\.0/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(/v0\.2\.1/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
 
   /* ---------- revisão final ---------- */
@@ -274,6 +274,29 @@ async function comecar(pg, nivel) {
     const ptk = await abrir(browser, base + '?tv=auto&teste', { ctx: { viewport: { width: 1280, height: 720 } } });
     await ptk.keyboard.press('ArrowRight');
     confere(await D(ptk, () => PeluqueriaSom.fonte()) === 'jogo', 'TV: primeira tecla do controle liga a música');
+  }
+
+  // 🏠 na rodada e botão Voltar do celular levam ao menu (pedido do dono, 0.2.0)
+  {
+    const ph = await abrir(browser, base + '?teste');
+    await ph.click('#btNormal'); await ph.click('#btJogar'); await passo(ph, 2200);
+    confere(await ph.isVisible('#btCasa'), '🏠 visível durante a rodada');
+    await ph.click('#btCasa');
+    confere(await ph.isVisible('#inicio') && !(await ph.isVisible('#rodada')), '🏠 volta ao menu');
+    confere(await D(ph, () => PeluqueriaSom.fonte()) === 'jogo', 'música segue no menu depois do 🏠');
+    await ph.click('#btJogar'); await passo(ph, 2200);
+    await ph.goBack(); await ph.waitForTimeout(300);
+    confere(/peluqueria/.test(ph.url()) && await ph.isVisible('#inicio'), 'Voltar do celular na rodada vai ao menu (não sai do jogo)', ph.url());
+    await ph.click('#btJogar'); await passo(ph, 2200);
+    await D(ph, () => { for (let k = 0; k < 10; k++) { PeluqueriaDebug.passo(PeluqueriaDebug.tempoAteAlvo()); document.getElementById('palco').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); PeluqueriaDebug.passo(2100); } });
+    confere(await ph.isVisible('#fim'), 'chegou ao fim');
+    await ph.goBack(); await ph.waitForTimeout(300);
+    confere(/peluqueria/.test(ph.url()) && await ph.isVisible('#inicio'), 'Voltar na tela de fim vai ao menu', ph.url());
+    await ph.click('#btJogar'); await passo(ph, 2200); await ph.click('#btCasa');
+    await ph.click('#btJogar'); await passo(ph, 2200);
+    await ph.goBack(); await ph.waitForTimeout(300);
+    confere(/peluqueria/.test(ph.url()) && await ph.isVisible('#inicio'), 'depois de 🏠 e jogar de novo, Voltar ainda vai ao menu', ph.url());
+    confere(ph.erros().length === 0, '🏠/Voltar: sem erros', ph.erros());
   }
 
   /* ---------- 320 px ---------- */

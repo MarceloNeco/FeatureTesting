@@ -15,17 +15,18 @@
 
   // tom = nota MIDI da tônica na região dos acordes; acordes = graus da escala (0 = tônica)
   var FAIXAS = [
-    { id: 'pista-brilhante', nome: { pt: 'Pista Brilhante', en: 'Glitter Floor' }, bpm: 126, tom: 57, modo: 'menor', acordes: [0, 5, 2, 6], baixo: 'oitava', bateria: 'disco', lead: 'saw', ritmo: 0, semente: 11 },
-    { id: 'neon-no-ceu', nome: { pt: 'Neon no Céu', en: 'Neon Sky' }, bpm: 122, tom: 59, modo: 'menor', acordes: [0, 3, 6, 5], baixo: 'sincopa', bateria: 'house', lead: 'pluck', ritmo: 1, semente: 23 },
-    { id: 'purpurina', nome: { pt: 'Purpurina', en: 'Glitter Rain' }, bpm: 128, tom: 55, modo: 'maior', acordes: [5, 3, 0, 4], baixo: 'reto', bateria: 'electro', lead: 'square', ritmo: 2, semente: 37 },
-    { id: 'coracao-disco', nome: { pt: 'Coração Disco', en: 'Disco Heart' }, bpm: 124, tom: 54, modo: 'menor', acordes: [0, 6, 5, 6], baixo: 'galope', bateria: 'disco', lead: 'sino', ritmo: 3, semente: 41 },
-    { id: 'noite-de-festa', nome: { pt: 'Noite de Festa', en: 'Party Night' }, bpm: 130, tom: 52, modo: 'maior', acordes: [0, 4, 5, 3], baixo: 'oitava', bateria: 'electro', lead: 'saw', ritmo: 4, semente: 53 },
-    { id: 'pulo-alto', nome: { pt: 'Pulo Alto', en: 'Jump High' }, bpm: 120, tom: 56, modo: 'maior', acordes: [3, 4, 2, 5], baixo: 'sincopa', bateria: 'funk', lead: 'pluck', ritmo: 5, semente: 67 },
-    { id: 'bola-espelhada', nome: { pt: 'Bola Espelhada', en: 'Mirrorball' }, bpm: 127, tom: 50, modo: 'menor', acordes: [0, 6, 5, 4], baixo: 'reto', bateria: 'house', lead: 'square', ritmo: 2, semente: 79 },
-    { id: 'verao-eletrico', nome: { pt: 'Verão Elétrico', en: 'Electric Summer' }, bpm: 125, tom: 53, modo: 'maior', acordes: [0, 5, 3, 4], baixo: 'galope', bateria: 'disco', lead: 'saw', ritmo: 0, semente: 83 },
-    { id: 'luzes-da-cidade', nome: { pt: 'Luzes da Cidade', en: 'City Lights' }, bpm: 129, tom: 58, modo: 'maior', acordes: [5, 4, 3, 4], baixo: 'oitava', bateria: 'funk', lead: 'sino', ritmo: 3, semente: 97 },
-    { id: 'ate-o-sol-nascer', nome: { pt: 'Até o Sol Nascer', en: 'Till Sunrise' }, bpm: 123, tom: 55, modo: 'menor', acordes: [0, 2, 6, 3], baixo: 'sincopa', bateria: 'electro', lead: 'saw', ritmo: 1, semente: 101 }
+    { id: 'pista-brilhante', nome: { pt: 'Pista Brilhante', en: 'Glitter Floor' }, bpm: 126, tom: 57, modo: 'menor', acordes: [0, 5, 2, 6], verso: [0, 3, 0, 4], baixo: 'oitava', bateria: 'disco', lead: 'saw', ritmo: 0, arpejo: 'sobe', semente: 11 },
+    { id: 'neon-no-ceu', nome: { pt: 'Neon no Céu', en: 'Neon Sky' }, bpm: 122, tom: 59, modo: 'menor', acordes: [0, 3, 6, 5], verso: [5, 6, 0, 0], baixo: 'sincopa', bateria: 'house', lead: 'pluck', ritmo: 1, arpejo: 'vai-volta', semente: 23 },
+    { id: 'purpurina', nome: { pt: 'Purpurina', en: 'Glitter Rain' }, bpm: 128, tom: 55, modo: 'maior', acordes: [5, 3, 0, 4], verso: [0, 0, 3, 4], baixo: 'reto', bateria: 'electro', lead: 'square', ritmo: 2, arpejo: 'pula', semente: 37 },
+    { id: 'coracao-disco', nome: { pt: 'Coração Disco', en: 'Disco Heart' }, bpm: 124, tom: 54, modo: 'menor', acordes: [0, 6, 5, 6], verso: [0, 2, 3, 4], baixo: 'galope', bateria: 'disco', lead: 'sino', ritmo: 3, arpejo: 'desce', semente: 41 },
+    { id: 'noite-de-festa', nome: { pt: 'Noite de Festa', en: 'Party Night' }, bpm: 130, tom: 52, modo: 'maior', acordes: [0, 4, 5, 3], verso: [5, 3, 5, 4], baixo: 'oitava', bateria: 'electro', lead: 'saw', ritmo: 4, arpejo: 'sobe', semente: 53 },
+    { id: 'pulo-alto', nome: { pt: 'Pulo Alto', en: 'Jump High' }, bpm: 120, tom: 56, modo: 'maior', acordes: [3, 4, 2, 5], verso: [0, 5, 1, 4], baixo: 'sincopa', bateria: 'funk', lead: 'pluck', ritmo: 5, arpejo: 'pula', semente: 67 },
+    { id: 'bola-espelhada', nome: { pt: 'Bola Espelhada', en: 'Mirrorball' }, bpm: 127, tom: 50, modo: 'menor', acordes: [0, 6, 5, 4], verso: [0, 0, 5, 6], baixo: 'reto', bateria: 'house', lead: 'square', ritmo: 2, arpejo: 'vai-volta', semente: 79 },
+    { id: 'verao-eletrico', nome: { pt: 'Verão Elétrico', en: 'Electric Summer' }, bpm: 125, tom: 53, modo: 'maior', acordes: [0, 5, 3, 4], verso: [3, 0, 3, 4], baixo: 'galope', bateria: 'disco', lead: 'saw', ritmo: 0, arpejo: 'desce', semente: 83 },
+    { id: 'luzes-da-cidade', nome: { pt: 'Luzes da Cidade', en: 'City Lights' }, bpm: 129, tom: 58, modo: 'maior', acordes: [5, 4, 3, 4], verso: [0, 2, 3, 0], baixo: 'oitava', bateria: 'funk', lead: 'sino', ritmo: 3, arpejo: 'sobe', semente: 97 },
+    { id: 'ate-o-sol-nascer', nome: { pt: 'Até o Sol Nascer', en: 'Till Sunrise' }, bpm: 123, tom: 55, modo: 'menor', acordes: [0, 2, 6, 3], verso: [5, 4, 0, 0], baixo: 'sincopa', bateria: 'electro', lead: 'saw', ritmo: 1, arpejo: 'pula', semente: 101 }
   ];
+  var ARPEJOS = { sobe: [0, 1, 2, 3], desce: [3, 2, 1, 0], 'vai-volta': [0, 1, 2, 3, 2, 1], pula: [0, 2, 1, 3] };
 
   /* ritmos do gancho (2 compassos = 32 semicolcheias): [início, duração] */
   var RITMOS = [
@@ -58,32 +59,47 @@
   function escala(f) { return ESCALAS[f.modo]; }
   /* nota MIDI do grau d (pode passar de 6: sobe de oitava) */
   function grau(f, d) { var e = ESCALAS[f.modo], o = Math.floor(d / 7); return f.tom + 12 * o + e[((d % 7) + 7) % 7]; }
-  function triade(f, d) { return [grau(f, d), grau(f, d + 2), grau(f, d + 4)]; }
+  function tetrade(f, d) { return [grau(f, d), grau(f, d + 2), grau(f, d + 4), grau(f, d + 6)]; }
 
-  /* gancho do refrão: 4 compassos (ritmo de 2 compassos repetido sobre os acordes 1-2 e 3-4), em graus */
-  var cacheGancho = {};
-  function gancho(f) {
-    if (cacheGancho[f.id]) return cacheGancho[f.id];
-    var rnd = aleatorio(f.semente), ritmo = RITMOS[f.ritmo], notas = [], ant = 9 + Math.floor(rnd() * 3);
-    for (var metade = 0; metade < 2; metade++) {
-      ritmo.forEach(function (r, k) {
-        var s = r[0], ac = f.acordes[metade * 2 + Math.floor(s / 16)], d;
-        var ultima = metade === 1 && k === ritmo.length - 1;
-        if (ultima) d = 7 + f.acordes[0];                       // termina na tônica do primeiro acorde
-        else if (s % 4 === 0) {                                  // tempo forte: nota do acorde mais perto
-          var op = [ac, ac + 2, ac + 4, ac + 7, ac + 9, ac + 11].filter(function (x) { return x >= 7 && x <= 15; });
-          op.sort(function (a, b) { return Math.abs(a - ant) - Math.abs(b - ant) || rnd() - 0.5; });
-          d = op[rnd() < 0.7 ? 0 : Math.min(1, op.length - 1)];
-        } else {                                                 // passagem: anda 1 ou 2 graus
-          var passo = [1, 1, 2, -1, -1, -2, 0][Math.floor(rnd() * 7)];
-          d = Math.max(7, Math.min(15, ant + passo));
-        }
-        notas.push({ s: s + metade * 32, d: d, dur: r[1] });
-        ant = d;
-      });
-    }
-    cacheGancho[f.id] = notas;
-    return notas;
+  /* frase de 2 compassos (32 passos) sobre 2 acordes, numa faixa de graus [lo, hi]; devolve a última nota */
+  function frase(f, ritmo, acs, rnd, lo, hi, ant, termina, desloc, saida) {
+    ritmo.forEach(function (r, k) {
+      var s = r[0], ac = acs[Math.floor(s / 16)], d;
+      if (termina && k === ritmo.length - 1) d = lo + ((f.acordes[0] - lo) % 7 + 7) % 7;   // fecha na tônica do refrão
+      else if (s % 4 === 0) {                                  // tempo forte: nota do acorde mais perto
+        var op = [ac, ac + 2, ac + 4, ac + 7, ac + 9, ac + 11, ac + 14].filter(function (x) { return x >= lo && x <= hi; });
+        var dist = function (x) { return x === ant ? 3.5 : Math.abs(x - ant); };   // evita repetir a mesma nota
+        op.sort(function (a, b) { return dist(a) - dist(b) || rnd() - 0.5; });
+        d = op[rnd() < 0.65 ? 0 : Math.min(1, op.length - 1)];
+      } else {                                                 // passagem: anda 1 ou 2 graus
+        var passo = [1, 1, 2, -1, -1, -2, 3, -3][Math.floor(rnd() * 8)];
+        d = ant + passo;
+        if (d > hi || d < lo) d = ant - passo;                 // bateu no limite: quica de volta
+        d = Math.max(lo, Math.min(hi, d));
+      }
+      saida.push({ s: s + desloc, d: d, dur: r[1] });
+      ant = d;
+    });
+    return ant;
+  }
+  /* refrão: 8 compassos = A (frase), A' (mesmo ritmo, outros acordes), B (ritmo novo, mais agudo), A'' (fecha);
+     verso: 8 compassos com ritmo e região próprios (mais grave), segunda metade variada */
+  var cacheMel = {};
+  function melodias(f) {
+    if (cacheMel[f.id]) return cacheMel[f.id];
+    var rnd = aleatorio(f.semente), A = RITMOS[f.ritmo], B = RITMOS[(f.ritmo + 3) % RITMOS.length], V = RITMOS[(f.ritmo + 1) % RITMOS.length];
+    var ac = f.acordes, vs = f.verso, refrao = [], verso = [], ant = 9 + Math.floor(rnd() * 3);
+    ant = frase(f, A, [ac[0], ac[1]], rnd, 7, 14, ant, false, 0, refrao);
+    ant = frase(f, A, [ac[2], ac[3]], rnd, 7, 14, ant, false, 32, refrao);
+    ant = frase(f, B, [ac[0], ac[1]], rnd, 9, 16, ant + 2, false, 64, refrao);
+    frase(f, A, [ac[2], ac[3]], rnd, 7, 14, ant, true, 96, refrao);
+    ant = 5 + Math.floor(rnd() * 3);
+    ant = frase(f, V, [vs[0], vs[1]], rnd, 3, 11, ant, false, 0, verso);
+    ant = frase(f, V, [vs[2], vs[3]], rnd, 3, 11, ant, false, 32, verso);
+    ant = frase(f, V, [vs[0], vs[1]], rnd, 4, 12, ant, false, 64, verso);
+    frase(f, V, [vs[2], vs[3]], rnd, 3, 11, ant, false, 96, verso);
+    cacheMel[f.id] = { refrao: refrao, verso: verso };
+    return cacheMel[f.id];
   }
 
   function secaoDo(c) {
@@ -93,12 +109,16 @@
   }
   function compassos() { return ESTRUTURA.reduce(function (a, s) { return a + s[1]; }, 0); }
 
-  function partitura(f, c) {
-    var sec = secaoDo(c), ev = [], b = BATERIAS[f.bateria], ac = f.acordes[c % 4], nome = sec.nome;
+  function partitura(f0, c) {
+    var sec = secaoDo(c), nome = sec.nome, ev = [], b = BATERIAS[f0.bateria];
+    var tom = f0.tom + (nome === 'refrao2' ? 2 : 0);                      // último refrão sobe um tom
+    var f = { tom: tom, modo: f0.modo, acordes: f0.acordes, id: f0.id };
     var cheio = nome === 'refrao' || nome === 'refrao2';
+    var prog = cheio ? f0.acordes : nome === 'pausa' ? [f0.acordes[3], f0.acordes[2], f0.acordes[1], f0.acordes[0]] : f0.verso;
+    var ac = prog[sec.i % 4], fimDe4 = sec.i % 4 === 3;
     var add = function (o) { ev.push(o); };
     var ritmoBumbo = b.bumbo.slice();
-    if (f.bateria === 'electro' && c % 2 === 1) ritmoBumbo.push(14);
+    if (f0.bateria === 'electro' && c % 2 === 1) ritmoBumbo.push(14);
 
     // bateria
     if (nome !== 'pausa') {
@@ -110,39 +130,48 @@
     if (cheio || nome === 'verso') {
       b.aberto.forEach(function (t) { add({ t: t, tipo: 'aberto', dur: 2, vol: cheio ? 0.5 : 0.3 }); });
       b.chimbal.forEach(function (t) { add({ t: t, tipo: 'chimbal', dur: 1, vol: b.vChim * (t % 4 === 2 ? 1.4 : 1) }); });
+      if (fimDe4) [12, 13, 14, 15].forEach(function (t) { add({ t: t, tipo: 'caixa', dur: 1, vol: 0.45 + 0.1 * (t - 12) }); });   // virada
     } else if (nome === 'intro' && sec.i >= 2) b.chimbal.forEach(function (t) { add({ t: t, tipo: 'chimbal', dur: 1, vol: b.vChim * 0.8 }); });
     if ((nome === 'subida' || nome === 'pausa') && sec.i === sec.len - 1)
       for (var t = 0; t < 16; t++) add({ t: t, tipo: 'caixa', dur: 1, vol: 0.2 + 0.7 * t / 15 });
     if (nome === 'subida' && sec.i === 0) add({ t: 0, tipo: 'riser', dur: 64, vol: 0.5 });
     if (cheio && sec.i === 0) add({ t: 0, tipo: 'crash', dur: 8, vol: 0.6 });
 
-    // acordes: tapete o compasso inteiro (filtro abre na subida) + "stabs" no contratempo no verso e refrão
+    // acordes (com sétima): tapete o compasso inteiro (filtro abre na subida) + "stabs" no contratempo
     var filtro = nome === 'intro' ? 0.25 + 0.1 * sec.i : nome === 'subida' ? 0.35 + 0.65 * (sec.i + 1) / 4 : nome === 'pausa' ? 0.45 : 1;
-    add({ t: 0, tipo: 'acorde', notas: triade(f, ac), dur: 16, vol: cheio ? 0.55 : 0.45, filtro: filtro, estilo: 'tapete' });
-    if (cheio || nome === 'verso') [2, 6, 10, 14].forEach(function (t2) { add({ t: t2, tipo: 'acorde', notas: triade(f, ac + 7), dur: 1, vol: cheio ? 0.45 : 0.3, filtro: 1, estilo: 'stab' }); });
+    add({ t: 0, tipo: 'acorde', notas: tetrade(f, ac), dur: 16, vol: cheio ? 0.55 : 0.45, filtro: filtro, estilo: 'tapete' });
+    if (cheio || nome === 'verso') [2, 6, 10, 14].forEach(function (t2) { add({ t: t2, tipo: 'acorde', notas: tetrade(f, ac + 7).slice(0, 3), dur: 1, vol: cheio ? 0.45 : 0.3, filtro: 1, estilo: 'stab' }); });
 
-    // baixo
+    // arpejo: notas do acorde em sequência (colcheias no verso e na intro, semicolcheias no refrão e na subida)
+    if (cheio || nome === 'verso' || nome === 'subida' || (nome === 'intro' && sec.i >= 2)) {
+      var ordem = ARPEJOS[f0.arpejo], notasA = tetrade(f, ac + 7), denso = cheio || nome === 'subida';
+      for (var a = 0, k2 = 0; a < 16; a += denso ? 1 : 2, k2++)
+        add({ t: a, tipo: 'arpejo', nota: notasA[ordem[k2 % ordem.length]], dur: 1, vol: (cheio ? 0.3 : 0.22) * (nome === 'subida' ? 0.5 + 0.5 * sec.i / 3 : 1) });
+    }
+
+    // baixo (com caminhada no fim de cada 4 compassos)
     if (cheio || nome === 'verso' || (nome === 'subida' && sec.i < 3)) {
-      BAIXOS[f.baixo].forEach(function (p) {
+      BAIXOS[f0.baixo].forEach(function (p) {
         if (nome === 'subida' && p[0] % 4) return;   // na subida o baixo só marca o tempo
+        if (fimDe4 && nome !== 'subida' && p[0] >= 12) return;
         var d = ac + (p[1] === 'q' ? 4 : 0), nota = grau(f, d) - 24 + (p[1] === 1 ? 12 : 0);
         add({ t: p[0], tipo: 'baixo', nota: nota, dur: p[2], vol: 0.9 });
       });
+      if (fimDe4 && nome !== 'subida') [0, 1, 2, 3].forEach(function (k3) { add({ t: 12 + k3, tipo: 'baixo', nota: grau(f, ac + k3) - 24, dur: 1, vol: 0.85 }); });
     }
 
-    // melodia
-    var g = gancho(f), base = (c % 4) * 16;
-    if (cheio || nome === 'pausa') {
-      g.forEach(function (n) {   // o gancho tem 4 compassos (64 passos); este compasso pega a sua fatia
-        if (n.s >= base && n.s < base + 16) {
-          add({ t: n.s - base, tipo: 'lead', nota: grau(f, n.d), dur: n.dur, vol: nome === 'pausa' ? 0.45 : 0.8 });
-          if (nome === 'refrao2') add({ t: n.s - base, tipo: 'lead', nota: grau(f, n.d) + 12, dur: n.dur, vol: 0.35 });
-        }
-      });
-    } else if (nome === 'verso') {   // contracanto curto: nota do acorde nos tempos 1 e 3
-      [0, 8].forEach(function (t3, k) { add({ t: t3 + (k ? 2 : 0), tipo: 'lead', nota: grau(f, ac + 7 + (k ? 2 : 4)), dur: 4, vol: 0.4 }); });
-    }
-    return { secao: nome, eventos: ev };
+    // melodia: refrão (8 compassos A A' B A''), verso (8 compassos), pausa (B suave)
+    var mel = melodias(f0), lista = null, base = 0, vol = 0.8;
+    if (cheio) { lista = mel.refrao; base = sec.i * 16; }
+    else if (nome === 'verso') { lista = mel.verso; base = sec.i * 16; vol = 0.5; }
+    else if (nome === 'pausa') { lista = mel.refrao; base = 64 + (sec.i % 2) * 16; vol = 0.45; }
+    if (lista) lista.forEach(function (n) {
+      if (n.s >= base && n.s < base + 16) {
+        add({ t: n.s - base, tipo: 'lead', nota: grau(f, n.d), dur: n.dur, vol: vol });
+        if (nome === 'refrao2') add({ t: n.s - base, tipo: 'lead', nota: grau(f, n.d) + 12, dur: n.dur, vol: 0.35 });
+      }
+    });
+    return { secao: nome, tom: tom, eventos: ev };
   }
 
   function proxima(faixa, compasso) {

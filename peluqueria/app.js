@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.2.0', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.2.1', APP_UPDATED = '31/10/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -64,7 +64,21 @@
   $('btMinhas').addEventListener('click', function () { pref.minhas = !pref.minhas; gravar(CHAVE_PREF, pref); marcarMinhas(); });
   $('btJogar').addEventListener('click', jogar);
   $('btDeNovo').addEventListener('click', jogar);
-  $('btInicio').addEventListener('click', function () { app.modo = 'inicio'; tela('inicio'); $('btJogar').focus(); if (som) som.musica('inicio'); });
+  /* menu (🏠, "Início" e o botão Voltar do celular): a rodada ganha uma entrada no histórico, assim o Voltar
+     volta para o menu em vez de sair do jogo; no menu, o Voltar sai normalmente */
+  function irInicio() {
+    if (app.modo === 'inicio') return;
+    app.modo = 'inicio'; app.pausado = false; $('btSeguir').hidden = true; manterAcesa(false);
+    tela('inicio'); $('btJogar').focus();
+    if (som && musicaLigada) { som.ligar(); som.musica('inicio'); }
+  }
+  function voltarAoMenu() {
+    irInicio();
+    if (history.state && history.state.peluqueria) history.back();
+  }
+  window.addEventListener('popstate', function () { irInicio(); });
+  $('btInicio').addEventListener('click', voltarAoMenu);
+  $('btCasa').addEventListener('click', voltarAoMenu);
 
   function temMinhas() { return catalogo.cenarios.meus.length + catalogo.itens.meus.length > 0; }
 
@@ -75,6 +89,7 @@
     var its = catalogo.itens.jogo.concat(usar ? catalogo.itens.meus : []);
     app.rodada = P.criarRodada({ nivel: pref.nivel, cenarios: cen, itens: its, semente: TESTE ? 7 : Date.now() });
     if (app.rodada.fase === 'fim') return;
+    if (!(history.state && history.state.peluqueria)) { try { history.pushState({ peluqueria: 1 }, ''); } catch (e) {} }
     app.modo = 'contagem'; app.resto = 3 * CONTAGEM; app.pausado = false; app.resultado = null;
     $('numero').textContent = '3'; tela('contagem');
     falar('Três, dois, um, já!', 'Three, two, one, go!');
