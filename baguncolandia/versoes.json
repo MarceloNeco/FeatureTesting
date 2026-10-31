@@ -1,0 +1,93 @@
+{
+  "app": "baguncolandia",
+  "versoes": [
+    {
+      "versao": "0.6.0",
+      "data": "31/Out/2026",
+      "hora": "08:20:00",
+      "pt": [
+        "🖐️ No dedo: jogue no próprio celular ou tablet, sem câmera. O dedo corta, pega e chuta; deslizar para cima pula, para baixo abaixa; o boneco anda com o dedo. Duas pessoas no mesmo tablet, cada uma na sua metade.",
+        "Versão de bolso: sem calibração; no fim, convite para jogar com o corpo todo na TV."
+      ],
+      "en": [
+        "🖐️ By finger: play on the phone or tablet itself, no camera. Your finger slices, catches and kicks; swipe up to jump, down to duck; the avatar walks with your finger. Two people on one tablet, one half each.",
+        "Pocket version: no calibration; at the end, an invitation to play with your whole body on the TV."
+      ]
+    },
+    {
+      "versao": "0.5.0",
+      "data": "31/Out/2026",
+      "hora": "07:30:00",
+      "pt": [
+        "👗 Meu boneco: monte o seu avatar no celular (cabeça com qualquer personagem, roupa: camiseta, vestido, macacão ou capa; cor; acessório: laço, coroa, óculos, chapéu, asas, flor; pele; sapato), com prévia ao vivo. Fica guardado no celular e aparece na TV, inclusive na marionete do esqueleto.",
+        "👧 Meninas na turma: Lili Limão, Cerejinha, Uvinha e Abacatinha (mais Donatella e Alice)."
+      ],
+      "en": [
+        "👗 My avatar: build yours on the phone (any character as the head; outfit: t-shirt, dress, overalls or cape; colour; accessory: bow, crown, glasses, party hat, wings, flower; skin; shoes), with a live preview. Saved on the phone and shown on the TV, including the skeleton puppet.",
+        "👧 Girls in the crew: Lily Lemon, Cherry, Grapey and Avocadita (plus Donatella and Alice)."
+      ]
+    },
+    {
+      "versao": "0.4.0",
+      "data": "31/Out/2026",
+      "hora": "06:20:00",
+      "pt": [
+        "🦴 Esqueleto por IA (MediaPipe Pose, hospedado no próprio site, baixa ~20 MB uma vez quando a pessoa liga): o chute só vale com o pé, cada mão corta por conta própria, o boneco vira marionete e não precisa calibrar.",
+        "Funciona com uma ou duas pessoas na mesma câmera e no modo \"só o celular\"."
+      ],
+      "en": [
+        "🦴 AI skeleton (MediaPipe Pose, self-hosted, ~20 MB downloaded once when turned on): kicks only count with the foot, each hand slices on its own, the avatar becomes a puppet and no calibration is needed.",
+        "Works with one or two people on the same camera and in phone-only mode."
+      ]
+    },
+    {
+      "versao": "0.3.0",
+      "data": "31/Out/2026",
+      "hora": "05:40:00",
+      "pt": [
+        "🎤 Seguir a música da sala: o celular ouve a batida pelo microfone (Spotify, rádio, caixinha) e o jogo acelera no ritmo; as bordas pulsam na batida. O som não sai do celular.",
+        "🟢 Spotify como controle remoto (Premium): entra com a conta, escolhe o aparelho e a playlist, toca e pausa; a TV mostra a música. Só aparece quando o dono registra o Client ID em config.js."
+      ],
+      "en": [
+        "🎤 Follow the room’s music: the phone hears the beat through the microphone (Spotify, radio, speaker) and the game speeds up to it; the borders pulse on the beat. Audio never leaves the phone.",
+        "🟢 Spotify remote control (Premium): sign in, pick the device and playlist, play and pause; the TV shows the song. Appears only when the owner sets the Client ID in config.js."
+      ]
+    },
+    {
+      "versao": "0.2.0",
+      "data": "31/Out/2026",
+      "hora": "05:10:00",
+      "pt": [
+        "Ambiente Paisagem + boneco: cenas desenhadas (praia, floresta, espaço, cidade) e um personagem da turma que anda, pula, abaixa e levanta os braços seguindo a criança (sem IA).",
+        "Missão Pula e abaixa: troncos e galhos chegando, com a voz avisando \"Pula!\" e \"Abaixa!\".",
+        "Bagunça de bolas: bolas quicando pela tela; encostar vale ponto, bomba tira vida.",
+        "Bagunça total agora passa pelos cinco modos; a câmera vira uma janelinha no canto no ambiente Paisagem."
+      ],
+      "en": [
+        "Landscape + avatar: drawn scenes (beach, forest, space, city) and a crew character that walks, jumps, ducks and raises its arms following the child (no AI).",
+        "Jump and duck mission: logs and branches coming in, with the voice calling \"Jump!\" and \"Duck!\".",
+        "Ball mayhem: bouncing balls everywhere; touching scores, bombs cost a life.",
+        "Total mayhem now cycles through all five modes; the camera becomes a small corner window in Landscape."
+      ]
+    },
+    {
+      "versao": "0.1.0",
+      "data": "31/Out/2026",
+      "hora": "03:30:00",
+      "pt": [
+        "Primeira versão: Corta-corta, Pega-pega, Chuta-chuta e Bagunça total na TV, com o celular filmando.",
+        "Uma ou duas pessoas: um celular filmando os dois (tela repartida) ou dois celulares.",
+        "Calibração guiada por voz e legenda (fique parado, levante o braço, chute, pule).",
+        "Carregamento 0–100 % com música, turma própria SolverONE, personagens clássicos e suas imagens (pasta meus/).",
+        "Música do YouTube na TV; modo \"só o celular\"; funciona guardado no aparelho (sem baixar de novo)."
+      ],
+      "en": [
+        "First version: Slice, Catch, Kick and Total mayhem on the TV, with the phone filming.",
+        "One or two people: one phone filming both (split screen) or two phones.",
+        "Voice-and-caption guided calibration (stand still, raise your arm, kick, jump).",
+        "0–100 % loading with music, SolverONE crew, classic characters and your own images (meus/ folder).",
+        "YouTube music on the TV; phone-only mode; works cached on the device."
+      ]
+    }
+  ]
+}
