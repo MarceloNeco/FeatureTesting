@@ -161,3 +161,79 @@ test('validar: aceita mensagens certas e recusa lixo', () => {
   const v = B.validar({ t: 'join', id: 'abc12345', nome: '  Ana <b>  ' });
   assert.equal(v.nome, 'Ana <b>');   // texto cru é guardado; quem mostra usa textContent
 });
+
+/* ---------- v0.2: corpo, Pula e abaixa, Bagunça de bolas ---------- */
+test('corpo: a caixa calibrada vira posição; subir = pulo; encurtar = abaixado', () => {
+  const p = partida({ modo: 'pula' }); p.comecar();
+  p.calibrar(0, { x: 0.3, y: 0.1, w: 0.2, h: 0.8 });
+  p.corpo(0, { x: 0.5, y: 0.1, w: 0.2, h: 0.8 }, 1000);
+  let c = p.estado().jogadores[0].corpo;
+  assert.ok(Math.abs(c.x - 0.6) < 0.01, 'x = centro da caixa');
+  assert.equal(c.pulando, false); assert.equal(c.abaixado, false);
+  p.corpo(0, { x: 0.5, y: 0.1 - 0.15, w: 0.2, h: 0.8 }, 1100);
+  assert.equal(p.estado().jogadores[0].corpo.pulando, true, 'topo subiu 15 % da altura = pulo');
+  p.corpo(0, { x: 0.5, y: 0.45, w: 0.25, h: 0.45 }, 1200);
+  c = p.estado().jogadores[0].corpo;
+  assert.equal(c.abaixado, true, 'altura caiu para 56 % = abaixado');
+  assert.equal(c.pulando, false);
+});
+
+test('pula e abaixa: tronco baixo exige pulo; galho alto exige abaixar; passar vale 10', () => {
+  const p = partida({ modo: 'pula' }); p.comecar();
+  p.calibrar(0, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 });
+  p.corpo(0, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }, 1000);          // parado no meio
+  // tronco vindo da direita, já perto do boneco, sem pular → bate
+  p.obstaculo({ tipo: 'baixo', x: 700, vx: -400 }, 0);
+  p.avancar(100); p.avancar(100); p.avancar(100);
+  let ev = drenar(p);
+  assert.ok(ev.some(x => x.t === 'bateu' && x.tipo === 'baixo'), JSON.stringify(ev));
+  assert.equal(p.estado().jogadores[0].vidas, 2);
+  // outro tronco, agora pulando → passa
+  p.obstaculo({ tipo: 'baixo', x: 700, vx: -400 }, 0);
+  p.corpo(0, { x: 0.4, y: 0.1 - 0.2, w: 0.2, h: 0.8 }, 1500);
+  for (let i = 0; i < 6; i++) { p.corpo(0, { x: 0.4, y: 0.1 - 0.2, w: 0.2, h: 0.8 }, 1500 + i * 100); p.avancar(100); }
+  ev = drenar(p);
+  assert.ok(ev.some(x => x.t === 'desviou'), JSON.stringify(ev));
+  assert.ok(!ev.some(x => x.t === 'bateu'));
+  assert.equal(p.estado().jogadores[0].pontos, 10);
+  // galho alto: em pé bate; abaixado passa
+  p.corpo(0, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }, 2200);
+  p.obstaculo({ tipo: 'alto', x: 700, vx: -400 }, 0);
+  for (let i = 0; i < 4; i++) { p.corpo(0, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }, 2300 + i * 100); p.avancar(100); }
+  assert.ok(drenar(p).some(x => x.t === 'bateu' && x.tipo === 'alto'));
+  p.obstaculo({ tipo: 'alto', x: 700, vx: -400 }, 0);
+  for (let i = 0; i < 6; i++) { p.corpo(0, { x: 0.4, y: 0.45, w: 0.25, h: 0.45 }, 2800 + i * 100); p.avancar(100); }
+  ev = drenar(p);
+  assert.ok(ev.some(x => x.t === 'desviou') && !ev.some(x => x.t === 'bateu'), JSON.stringify(ev));
+});
+
+test('pula e abaixa: lança obstáculos sozinho e avisa antes (evento aviso)', () => {
+  const p = partida({ modo: 'pula' }); p.comecar();
+  for (let i = 0; i < 18; i++) p.avancar(100);
+  const ev = drenar(p);
+  assert.ok(ev.some(x => x.t === 'aviso' && (x.tipo === 'baixo' || x.tipo === 'alto')), JSON.stringify(ev));
+  assert.ok(p.estado().coisas.some(c => c.papel === 'obstaculo'));
+});
+
+test('bagunça de bolas: encostar numa bola vale 5 e a empurra; bomba tira vida', () => {
+  const p = partida({ modo: 'bolas' }); p.comecar();
+  p.lancar({ fig: 'bola', x: 640, y: 500, vx: 0, vy: 0, estilo: 'quica' }, 0);
+  p.movimento(0, [[0.5, 500 / 720, 80]], 1000);
+  const ev = drenar(p);
+  assert.ok(ev.some(x => x.t === 'tocou'), JSON.stringify(ev));
+  assert.equal(p.estado().jogadores[0].pontos, 5);
+  const b = p.estado().coisas.find(c => c.papel === 'bola');
+  assert.ok(!b.morta && (b.vx !== 0 || b.vy !== 0), 'a bola continua, empurrada');
+  p.lancar({ fig: 'pimentao', x: 300, y: 500, vx: 0, vy: 0, estilo: 'quica' }, 1);
+  p.movimento(0, [[300 / 1280, 500 / 720, 80]], 1400);
+  assert.equal(p.estado().jogadores[0].vidas, 2);
+});
+
+test('bagunça de bolas: as bolas quicam no chão e nas paredes', () => {
+  const p = partida({ modo: 'bolas' }); p.comecar();
+  const b = p.lancar({ fig: 'bola', x: 640, y: 600, vx: 300, vy: 0, estilo: 'quica' }, 0);
+  for (let i = 0; i < 30; i++) p.avancar(100);
+  const c = p.estado().coisas.find(x => x.id === b.id);
+  assert.ok(c, 'não some');
+  assert.ok(c.x > 0 && c.x < 1280 && c.y < 720, 'fica dentro do palco');
+});

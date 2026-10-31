@@ -2,9 +2,13 @@
    Palco lógico de 1280×720. Cada jogador tem uma "raia" (rect do palco); os pontos de movimento
    que chegam do celular vêm normalizados (0..1) dentro da raia e viram coordenadas do palco aqui.
 
-   Papéis das figuras: fruta | doce (cortar), heroi | vilao | poder (pegar), bola (chutar).
+   Papéis das figuras: fruta | doce (cortar), heroi | vilao | poder (pegar), bola (chutar / bagunça),
+   obstaculo (pula e abaixa: tipo baixo = pular, alto = abaixar; não vem do catálogo).
+   Corpo do jogador (v0.2): corpo(j, caixa) recebe a caixa da silhueta (normalizada, espelhada) e, comparando
+   com a caixa calibrada (calibrar(j, caixa)), diz posição, pulo e abaixado — é o que move o boneco.
    Eventos (drenados por eventos()): corte, pegou, chutou, gol, vilao, combo, poder, vida, lancou,
-   perdeu (fruta caiu sem corte), fim, troca (modo da Bagunça total mudou). */
+   perdeu (fruta caiu sem corte), fim, troca (modo da Bagunça total mudou), aviso (obstáculo vindo:
+   tipo baixo/alto), desviou, bateu, tocou (bola na bagunça). */
 (function (root, fabrica) {
   if (typeof module !== 'undefined' && module.exports) module.exports = fabrica();
   else root.Bagunca = fabrica();
@@ -12,10 +16,12 @@
   'use strict';
   var W = 1280, H = 720, G = 1100;   // gravidade em px/s²
 
-  var PONTOS = { fruta: 10, doce: 10, heroi: 15, mascote: 30, vilaoPega: -5, chute: 10, gol: 30, comboCada: 5 };
+  var PONTOS = { fruta: 10, doce: 10, heroi: 15, mascote: 30, vilaoPega: -5, chute: 10, gol: 30, comboCada: 5, desviou: 10, tocou: 5 };
   var DIFIC = { crianca: { intervalo: 1500, vel: 0.85 }, normal: { intervalo: 1000, vel: 1 }, maluco: { intervalo: 650, vel: 1.2 } };
   var LIMIAR = 35;   // força mínima do ponto de movimento (0..100) para contar
-  var MODOS = ['corta', 'pega', 'chuta', 'mistura'];
+  var MODOS = ['corta', 'pega', 'chuta', 'pula', 'bolas', 'mistura'];
+  var MODOS_MISTURA = ['corta', 'pega', 'chuta', 'pula', 'bolas'];
+  var AMBIENTES = ['camera', 'paisagem'], CENAS = ['aleatoria', 'praia', 'floresta', 'espaco', 'cidade'];
   var TROCA_MISTURA = 20000;
 
   function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -44,7 +50,8 @@
       case 'energia':
         o.e = clamp(+m.e || 0, 0, 100); o.p = pontosOk(m.p); return o;
       case 'dados':   // mensagens pelo canal direto (celular → TV)
-        o.e = clamp(+m.e || 0, 0, 100); o.p = pontosOk(m.p); if (m.cal) o.cal = calOk(m.cal); if (m.b) o.b = 1; if (m.bpm) o.bpm = clamp(+m.bpm || 0, 40, 220); return o;
+        o.e = clamp(+m.e || 0, 0, 100); o.p = pontosOk(m.p); if (m.cal) o.cal = calOk(m.cal); if (m.b) o.b = 1; if (m.bpm) o.bpm = clamp(+m.bpm || 0, 40, 220);
+        if (m.c) o.c = caixaOk(m.c); if (Array.isArray(m.cs)) o.cs = m.cs.slice(0, 2).map(caixaOk); return o;
       case 'cmd':
         if (typeof m.acao !== 'string' || ACOES.indexOf(m.acao) < 0) return null;
         o.acao = m.acao;
@@ -53,6 +60,9 @@
         if ('celulares' in m) o.celulares = m.celulares === 2 ? 2 : 1;
         if ('duracao' in m) o.duracao = [60, 90, 120, 0].indexOf(+m.duracao) >= 0 ? +m.duracao : 60;
         if ('dificuldade' in m) o.dificuldade = DIFIC[m.dificuldade] ? m.dificuldade : 'normal';
+        if ('ambiente' in m) o.ambiente = AMBIENTES.indexOf(m.ambiente) >= 0 ? m.ambiente : 'paisagem';
+        if ('cena' in m) o.cena = CENAS.indexOf(m.cena) >= 0 ? m.cena : 'aleatoria';
+        if ('faixa' in m) o.faixa = typeof m.faixa === 'string' ? m.faixa.slice(0, 12) : '';
         if ('turmas' in m && m.turmas && typeof m.turmas === 'object') o.turmas = { propria: !!m.turmas.propria, publica: !!m.turmas.publica, minhas: !!m.turmas.minhas };
         if ('video' in m) { if (typeof m.video !== 'string' || !/^[A-Za-z0-9_-]{11}$/.test(m.video)) return null; o.video = m.video; }
         if ('lista' in m) { if (typeof m.lista !== 'string' || !/^[A-Za-z0-9_-]{10,}$/.test(m.lista)) return null; o.lista = m.lista; }
@@ -77,10 +87,16 @@
     }
     return r;
   }
+  function caixaOk(c) {
+    if (!c) return null;
+    if (Array.isArray(c)) c = { x: c[0], y: c[1], w: c[2], h: c[3] };
+    if (typeof c !== 'object') return null;
+    return { x: clamp(+c.x || 0, -0.5, 1), y: clamp(+c.y || 0, -0.5, 1), w: clamp(+c.w || 0, 0, 1), h: clamp(+c.h || 0, 0, 1.5) };
+  }
   function calOk(c) {
     if (!c || typeof c !== 'object') return null;
     var o = { passo: String(c.passo || '').slice(0, 20), ok: !!c.ok };
-    if (c.caixa && typeof c.caixa === 'object') o.caixa = { x: clamp(+c.caixa.x || 0, 0, 1), y: clamp(+c.caixa.y || 0, 0, 1), w: clamp(+c.caixa.w || 0, 0, 1), h: clamp(+c.caixa.h || 0, 0, 1) };
+    if (c.caixa) o.caixa = caixaOk(c.caixa);
     return o;
   }
 
@@ -107,7 +123,8 @@
     var seq = 0, eventos = [], coisas = [], fase = 'pronto', tempo = 0, proximoLancamento = 0, modoAtual = modoBase === 'mistura' ? 'corta' : modoBase, proximaTroca = TROCA_MISTURA;
     var bpm = 0, ultimaBatida = 0;
     var jogadores = [];
-    for (var j = 0; j < nJog; j++) jogadores.push({ pontos: 0, vidas: 3, combo: 0, comboAte: 0, poder: null, poderAte: 0, rastro: [], zonaChute: 0.6, lento: 0 });
+    for (var j = 0; j < nJog; j++) jogadores.push({ pontos: 0, vidas: 3, combo: 0, comboAte: 0, poder: null, poderAte: 0, rastro: [], zonaChute: 0.6, lento: 0, ref: null, corpo: { x: 0.5, topo: 0.1, altura: 0.8, pulando: false, abaixado: false, ts: 0 }, invencivelAte: 0 });
+    var proximoAviso = 0;
     var trave = { x: W / 2 - 120, y: 150, w: 240, h: 130 };   // abaixo do relógio e do nome do modo
     function raia(j) { return nJog === 1 ? { x: 0, y: 0, w: W, h: H } : { x: j * W / 2, y: 0, w: W / 2, h: H }; }
     function porPapel(papel) { return figs.filter(function (f) { return f.papel === papel; }); }
@@ -118,16 +135,37 @@
     function lancar(o, j) {
       var fig = typeof o.fig === 'string' ? figs.filter(function (f) { return f.id === o.fig; })[0] : o.fig;
       if (!fig) return null;
-      var c = { id: ++seq, fig: fig.id, papel: fig.papel, raio: fig.raio || 44, x: o.x, y: o.y, vx: o.vx || 0, vy: o.vy || 0, rot: o.rot || 0, vrot: o.vrot || 0, j: o.j || 0, morta: false, chutada: !!o.chutada, nasceu: tempo, estilo: o.estilo || 'arco', fase: rnd() * 6.28 };
+      var c = { id: ++seq, fig: fig.id, papel: fig.papel, raio: fig.raio || 44, x: o.x, y: o.y, vx: o.vx || 0, vy: o.vy || 0, rot: o.rot || 0, vrot: o.vrot || 0, j: o.j || 0, morta: false, chutada: !!o.chutada, nasceu: tempo, estilo: o.estilo || 'arco', fase: rnd() * 6.28, tocadoAte: 0 };
       coisas.push(c);
       emitir({ t: 'lancou', id: c.id, fig: c.fig, papel: c.papel, j: c.j });
       return c;
     }
 
+    /* obstáculo do Pula e abaixa: tipo baixo (tronco no chão: pular) ou alto (galho: abaixar) */
+    function obstaculo(o, j) {
+      var r = raia(j), alto = o.tipo === 'alto';
+      var c = { id: ++seq, fig: alto ? 'galho' : 'tronco', papel: 'obstaculo', tipo: alto ? 'alto' : 'baixo', raio: 40, w: alto ? 150 : 90, h: alto ? 150 : 70, x: o.x != null ? o.x : r.x + r.w + 100, y: 0, vx: o.vx || -380, vy: 0, rot: 0, vrot: alto ? 0 : -4, j: j, morta: false, estilo: 'obstaculo', nasceu: tempo, passou: false, avisado: !!o.avisado };
+      coisas.push(c);
+      emitir({ t: 'lancou', id: c.id, fig: c.fig, papel: 'obstaculo', tipo: c.tipo, j: j });
+      return c;
+    }
     /* escolhe o que lançar conforme o modo e a dificuldade; posições relativas à raia do jogador */
     function lancarAuto(j) {
       var r = raia(j), m = modoAtual, fig, estilo = 'arco';
       var chanceVilao = dif === DIFIC.crianca ? 0.1 : 0.18;
+      if (m === 'pula') {
+        var tipo = rnd() < 0.5 ? 'baixo' : 'alto', vel = (340 + rnd() * 120) * dif.vel * (1 + 0.5 * Math.min(1, tempo / 90000));
+        obstaculo({ tipo: tipo, vx: -vel }, j); return;
+      }
+      if (m === 'bolas') {
+        var quantas = coisas.filter(function (c) { return c.j === j && !c.morta && c.estilo === 'quica'; }).length;
+        if (quantas >= 6 + Math.min(8, Math.floor(tempo / 10000))) return;
+        fig = rnd() < chanceVilao * 0.6 ? sortear(porPapel('vilao')) : sortear(porPapel('bola'));
+        if (!fig) return;
+        var deEsq = rnd() < 0.5;
+        lancar({ fig: fig, x: deEsq ? r.x - fig.raio : r.x + r.w + fig.raio, y: r.y + r.h * (0.2 + rnd() * 0.4), vx: (deEsq ? 1 : -1) * (200 + rnd() * 250) * dif.vel, vy: -100 - rnd() * 200, vrot: (rnd() - 0.5) * 8, j: j, estilo: 'quica' });
+        return;
+      }
       if (m === 'corta') {
         fig = rnd() < chanceVilao ? sortear(porPapel('vilao')) : sortear(porPapel('fruta').concat(porPapel('doce')));
         if (!fig) return;
@@ -168,7 +206,8 @@
       tempo += dtMs;
       if (modoBase === 'mistura' && tempo >= proximaTroca) {
         proximaTroca += TROCA_MISTURA;
-        modoAtual = ['corta', 'pega', 'chuta'][(['corta', 'pega', 'chuta'].indexOf(modoAtual) + 1) % 3];
+        modoAtual = MODOS_MISTURA[(MODOS_MISTURA.indexOf(modoAtual) + 1) % MODOS_MISTURA.length];
+        coisas = coisas.filter(function (c) { return c.estilo !== 'obstaculo'; });
         emitir({ t: 'troca', modo: modoAtual });
       }
       // lançamentos: intervalo cai até 60 % ao longo de 90 s; com batida, lança no pulso
@@ -176,13 +215,42 @@
       var lentoGeral = jogadores.some(function (jg) { return jg.lento > tempo; }) ? 0.5 : 1;
       if (tempo >= proximoLancamento) {
         for (var j = 0; j < nJog; j++) lancarAuto(j);
-        proximoLancamento = tempo + dif.intervalo * fator * (bpm ? clamp(60000 / bpm / dif.intervalo, 0.5, 1.5) : 1);
+        var base = modoAtual === 'pula' ? dif.intervalo * 2.2 : modoAtual === 'bolas' ? dif.intervalo * 1.2 : dif.intervalo;
+        proximoLancamento = tempo + base * fator * (bpm ? clamp(60000 / bpm / dif.intervalo, 0.5, 1.5) : 1);
+      }
+      // aviso de voz ~1,1 s antes de o obstáculo chegar no boneco (um por vez)
+      for (var a = 0; a < coisas.length; a++) {
+        var ob = coisas[a]; if (ob.estilo !== 'obstaculo' || ob.avisado || ob.morta) continue;
+        var alvoX = raia(ob.j).x + jogadores[ob.j].corpo.x * raia(ob.j).w, chega = (ob.x - alvoX) / Math.max(1, -ob.vx);
+        if (chega <= 1.1 && tempo >= proximoAviso) { ob.avisado = true; proximoAviso = tempo + 600; emitir({ t: 'aviso', id: ob.id, j: ob.j, tipo: ob.tipo }); }
       }
       // física
       for (var i = coisas.length - 1; i >= 0; i--) {
         var c = coisas[i], r = raia(c.j);
         if (c.morta) { c.vida = (c.vida || 0) + dtMs; if (c.vida > 900) coisas.splice(i, 1); continue; }
         var d = dt * lentoGeral;
+        if (c.estilo === 'obstaculo') {
+          c.x += c.vx * d; c.rot += c.vrot * d;
+          var jg0 = jogadores[c.j], r0 = raia(c.j), bx = r0.x + jg0.corpo.x * r0.w, meio = c.x;
+          if (!c.passou && Math.abs(meio - bx) < (c.w / 2 + 40)) {
+            var erro = c.tipo === 'baixo' ? !jg0.corpo.pulando : !jg0.corpo.abaixado;
+            if (erro && tempo >= jg0.invencivelAte) { c.passou = true; c.bateu = true; jg0.vidas = Math.max(0, jg0.vidas - 1); jg0.invencivelAte = tempo + 1200; emitir({ t: 'bateu', id: c.id, j: c.j, tipo: c.tipo, x: c.x, y: c.tipo === 'alto' ? r0.y + r0.h * 0.35 : r0.y + r0.h * 0.8 }); emitir({ t: 'vida', j: c.j, vidas: jg0.vidas }); }
+          } else if (!c.passou && ((c.vx < 0 && meio < bx - c.w / 2 - 40) || (c.vx > 0 && meio > bx + c.w / 2 + 40))) {
+            c.passou = true; jg0.pontos += mult(c.j, PONTOS.desviou); emitir({ t: 'desviou', id: c.id, j: c.j, tipo: c.tipo, pontos: PONTOS.desviou, x: bx, y: r0.y + r0.h * 0.5 });
+          }
+          if (c.x < r0.x - 200 || c.x > r0.x + r0.w + 200) coisas.splice(i, 1);
+          continue;
+        }
+        if (c.estilo === 'quica') {
+          c.vy += G * 0.6 * d; c.x += c.vx * d; c.y += c.vy * d; c.rot += c.vrot * d;
+          var chaoQ = r.y + r.h - c.raio - 10;
+          if (c.y > chaoQ) { c.y = chaoQ; c.vy = -Math.abs(c.vy) * 0.82; if (Math.abs(c.vy) < 120) c.vy = -(260 + rnd() * 200); }
+          if (c.x < r.x + c.raio) { c.x = r.x + c.raio; c.vx = Math.abs(c.vx); }
+          if (c.x > r.x + r.w - c.raio) { c.x = r.x + r.w - c.raio; c.vx = -Math.abs(c.vx); }
+          if (c.y < r.y + c.raio) { c.y = r.y + c.raio; c.vy = Math.abs(c.vy); }
+          c.vx *= (1 - 0.05 * d);
+          continue;
+        }
         if (c.estilo === 'balao') { c.x += Math.sin(tempo / 700 + c.fase) * 40 * d; c.y += c.vy * d; }
         else if (c.estilo === 'voa') { c.x += c.vx * d; c.y += Math.sin(tempo / 400 + c.fase) * 30 * d; }
         else if (c.estilo === 'rola' && !c.chutada) { c.x += c.vx * d; c.vy += G * d; c.y += c.vy * d; var chao = r.y + r.h - c.raio - 10; if (c.y > chao) { c.y = chao; c.vy = -Math.abs(c.vy) * 0.35; if (Math.abs(c.vy) < 60) c.vy = 0; } c.rot += c.vrot * d; }
@@ -225,10 +293,11 @@
           var L = lamina[k];
           if (Math.hypot(L.b.x - c.x, L.b.y - c.y) <= c.raio + 24) atingiu = true;          // folga generosa: jogo de criança
           else if (L.a && distSeg(L.a, L.b, c) <= c.raio + 18) atingiu = true;
-          if (atingiu && c.papel === 'bola' && L.b.y < r.y + r.h * jg.zonaChute) atingiu = false;   // bola só na zona de chute
+          if (atingiu && c.papel === 'bola' && c.estilo !== 'quica' && L.b.y < r.y + r.h * jg.zonaChute) atingiu = false;   // bola só na zona de chute (menos na bagunça)
+          if (atingiu && c.papel === 'obstaculo') atingiu = false;
         }
         if (!atingiu) return;
-        acertou(j, c, modo, ts);
+        acertou(j, c, modo, ts, L.b);
       });
     }
     function distSeg(a, b, p) {
@@ -236,8 +305,8 @@
       var t = l2 ? clamp(((p.x - a.x) * dx + (p.y - a.y) * dy) / l2, 0, 1) : 0;
       return Math.hypot(a.x + t * dx - p.x, a.y + t * dy - p.y);
     }
-    function acertou(j, c, modo, ts) {
-      var jg = jogadores[j];
+    function acertou(j, c, modo, ts, L0) {
+      var jg = jogadores[j]; L0 = L0 || { x: c.x, y: c.y + 1 };
       if (c.papel === 'fruta' || c.papel === 'doce') {
         c.morta = true; c.como = 'corte'; jg.pontos += mult(j, PONTOS.fruta);
         if (jg.combo && tempo > jg.comboAte) jg.combo = 0;
@@ -260,27 +329,44 @@
         else if (poder === 'chuva') { for (var n = 0; n < 8; n++) { var r = raia(j); lancar({ fig: sortear(porPapel('fruta').concat(porPapel('doce'))), x: r.x + r.w * (0.1 + rnd() * 0.8), y: r.y + r.h + 40, vx: (rnd() - 0.5) * 200, vy: -(700 + rnd() * 300), vrot: (rnd() - 0.5) * 6, j: j }); } }
         else { jg.poder = 'x2'; jg.poderAte = tempo + 10000; }
         emitir({ t: 'poder', id: c.id, j: j, fig: c.fig, x: c.x, y: c.y, poder: poder });
+      } else if (c.papel === 'bola' && c.estilo === 'quica') {
+        if (tempo < c.tocadoAte) return;
+        c.tocadoAte = tempo + 400;
+        var ux = c.x - L0.x, uy = c.y - L0.y, nn2 = Math.hypot(ux, uy) || 1;
+        c.vx = ux / nn2 * 520 + (rnd() - 0.5) * 100; c.vy = uy / nn2 * 520 - 300;
+        jg.pontos += mult(j, PONTOS.tocou); emitir({ t: 'tocou', id: c.id, j: j, fig: c.fig, x: c.x, y: c.y, pontos: PONTOS.tocou });
       } else if (c.papel === 'bola' && !c.chutada) {
         c.chutada = true; c.vy = -(900 + Math.random() * 0); c.vx = (trave.x + trave.w / 2 - c.x) / 0.9; c.estilo = 'arco'; c.vrot = 12;
         jg.pontos += mult(j, PONTOS.chute); emitir({ t: 'chutou', id: c.id, j: j, fig: c.fig, x: c.x, y: c.y, pontos: PONTOS.chute });
       }
     }
 
+    /* caixa calibrada (referência) e caixa atual da silhueta → posição, pulo e abaixado */
+    function calibrar(j, caixa) { if (jogadores[j] && caixa) { jogadores[j].ref = caixa; jogadores[j].corpo.x = caixa.x + caixa.w / 2; } }
+    function corpo(j, caixa, ts) {
+      var jg = jogadores[j]; if (!jg || !caixa || !caixa.w) return;
+      var ref = jg.ref || caixa, c = jg.corpo, alvo = clamp(caixa.x + caixa.w / 2, 0, 1);
+      // suaviza entre amostras seguidas (10×/s); amostra velha ou primeira: vai direto
+      c.x = (ts && c.ts && ts - c.ts < 250) ? c.x + (alvo - c.x) * 0.6 : alvo;
+      c.topo = caixa.y; c.altura = caixa.h; c.ts = ts || 0;
+      c.pulando = caixa.y < ref.y - ref.h * 0.12 && caixa.h > ref.h * 0.6;
+      c.abaixado = !c.pulando && caixa.h < ref.h * 0.7;
+    }
     function estado() {
       return {
         fase: fase, modo: modoAtual, modoBase: modoBase, tempo: tempo, restante: duracao ? Math.max(0, Math.ceil((duracao * 1000 - tempo) / 1000)) : null,
-        jogadores: jogadores.map(function (jg, j) { var r = raia(j); return { pontos: Math.round(jg.pontos), vidas: jg.vidas, combo: jg.combo, poder: jg.poder, poderAte: jg.poderAte, lento: jg.lento > tempo, raia: r, zonaChute: jg.zonaChute, rastro: jg.rastro.slice(-8) }; }),
+        jogadores: jogadores.map(function (jg, j) { var r = raia(j); return { pontos: Math.round(jg.pontos), vidas: jg.vidas, combo: jg.combo, poder: jg.poder, poderAte: jg.poderAte, lento: jg.lento > tempo, raia: r, zonaChute: jg.zonaChute, rastro: jg.rastro.slice(-8), corpo: jg.corpo, invencivel: jg.invencivelAte > tempo }; }),
         coisas: coisas, trave: trave, bpm: bpm
       };
     }
     function batida(novoBpm) { bpm = novoBpm ? clamp(novoBpm, 40, 220) : 0; ultimaBatida = tempo; }
     return {
-      comecar: comecar, pausar: pausar, continuar: continuar, terminar: terminar, avancar: avancar, movimento: movimento, lancar: lancar, estado: estado, batida: batida,
+      comecar: comecar, pausar: pausar, continuar: continuar, terminar: terminar, avancar: avancar, movimento: movimento, lancar: lancar, obstaculo: obstaculo, corpo: corpo, calibrar: calibrar, estado: estado, batida: batida,
       zonaChute: function (j, frac) { if (jogadores[j]) jogadores[j].zonaChute = clamp(frac, 0.2, 0.95); },
       eventos: function () { var e = eventos; eventos = []; return e; },
       W: W, H: H
     };
   }
 
-  return { criarPartida: criarPartida, validar: validar, separarJogadores: separarJogadores, MODOS: MODOS, PONTOS: PONTOS, W: W, H: H };
+  return { criarPartida: criarPartida, validar: validar, separarJogadores: separarJogadores, MODOS: MODOS, AMBIENTES: AMBIENTES, CENAS: CENAS, PONTOS: PONTOS, W: W, H: H };
 });
