@@ -185,12 +185,18 @@ o som ligado/desligado e o "Minhas imagens". **Nenhuma imagem é salva nem expor
 - Botões com no mínimo 44 px; o resultado de cada queda também vai para uma região `aria-live` (leitor de
   tela). Com `prefers-reduced-motion`: sem confete, sem pulos e sem tremida; só cor e texto.
 
-## 6. Música e sons (`som.js`)
+## 6. Música e sons (`trilhas.js` + `som.js`)
 
-- Trilha animada em laço, **sintetizada no WebAudio** (bateria, baixo e melodia simples), uma por nível:
-  Criança 120 BPM, Normal 132, Maluco 150; o andamento sobe 2 BPM a cada queda da rodada.
-- Efeitos: toque, PERFEITO (fanfarra curta), BOM, QUASE, LONGE (som engraçado tipo "fom-fom"), contagem,
-  fim com estrelas.
+- **10 músicas próprias** (v0.2.0, pedido do dono: "estilo pop animado, tipo Last Friday Night ou Hallucinate,
+  nada infantil"), em `trilhas.js` (partitura pura, testada no Node) e tocadas por `som.js` no WebAudio: pop
+  dançante de pista, 120–130 BPM, bumbo em todas as batidas com "respiro" dos acordes, palmas no 2 e 4,
+  chimbal aberto no contratempo, baixo pulsando (4 estilos), acordes cheios, melodia de refrão gerada aqui
+  (nenhuma melodia copiada) com eco. Cada música: intro, verso, subida (chiado subindo + virada de caixa),
+  refrão, pausa e refrão final (~1 min); depois a lista segue para a próxima.
+- Tocam desde a tela de início (a partir do primeiro toque) e pelo jogo todo, sem recomeçar ao entrar na
+  rodada; o andamento é o da música −6 BPM no Criança e +6 no Maluco, +1 BPM a cada queda.
+- Efeitos: PERFEITO (acorde brilhante + prato) com **torcida sintetizada** "u-huuu!" (várias vozes, plateia e
+  assobio; a voz do aparelho soava falsa), BOM, QUASE, LONGE ("fom-fom"), contagem e fim.
 - O som só começa depois do primeiro toque (regra dos navegadores). 🔊/🔇 desliga tudo.
 - **Músicas do dono**: se `musicas/musicas.json` listar arquivos (`[{ "nome": "…", "arquivo": "festa.mp3" }]`),
   o jogo toca um deles sorteado, em laço, no lugar da trilha sintetizada (os efeitos continuam). Os MP3s não
