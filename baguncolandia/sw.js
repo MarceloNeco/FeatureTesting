@@ -2,9 +2,9 @@
    baixar de novo. Código (html, js, css, json): rede primeiro com 4 s de espera, senão a cópia;
    fonte, imagens e biblioteca: cópia primeiro. Cache com o nome do app (nunca apaga o dos outros apps
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js). */
-var VERSAO = '0.3.0';
+var VERSAO = '0.4.0';
 var CACHE = 'bagunca-v' + VERSAO;
-var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'figuras.js', 'cenas.js', 'desenho.js', 'sala.js', 'voz.js', 'som.js', 'calibrar.js', 'config.js', 'batida.js', 'spotify.js', 'libs/supabase.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
+var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'figuras.js', 'cenas.js', 'desenho.js', 'sala.js', 'voz.js', 'som.js', 'calibrar.js', 'config.js', 'batida.js', 'spotify.js', 'esqueleto.js', 'libs/supabase.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return Promise.all(ARQUIVOS.map(function (a) { return c.add(a).catch(function () {}); })); }).then(function () { return self.skipWaiting(); }));
 });
@@ -15,7 +15,7 @@ self.addEventListener('fetch', function (e) {
   var req = e.request; if (req.method !== 'GET') return;
   var url = new URL(req.url);
   if (url.origin !== location.origin) return;   // YouTube, Supabase, STUN: nunca passa pelo cache
-  var pesado = /\.(woff2|png|webp|jpg|jpeg|svg)$/i.test(url.pathname) || /\/libs\//.test(url.pathname);
+  var pesado = /\.(woff2|png|webp|jpg|jpeg|svg|wasm|task|mjs)$/i.test(url.pathname) || /\/libs\//.test(url.pathname);
   if (pesado) {
     e.respondWith(caches.match(req).then(function (r) { return r || fetch(req).then(function (resp) { if (resp.ok) caches.open(CACHE).then(function (c) { c.put(req, resp.clone()); }); return resp; }); }));
     return;

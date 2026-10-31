@@ -189,6 +189,7 @@
 
   /* ---------- boneco: cabeça = figura da turma; corpo em vetor na cor do jogador ---------- */
   function boneco(ctx, jg, j, ts, dt) {
+    if (jg.esqueleto) { marionete(ctx, jg, j, ts); return; }
     var r = jg.raia, A = r.h * 0.42, chao = r.y + r.h * (root.Cenas ? root.Cenas.CHAO : 0.86), cor = CORES.j[j], corpo = jg.corpo || { x: 0.5 }, av = D.av[j] || (D.av[j] = {});
     var x = r.x + corpo.x * r.w;
     if (av.x == null) av.x = x; av.vx = (x - av.x) / Math.max(dt, 0.001); av.x = x;
@@ -240,6 +241,34 @@
     // nome em cima
     ctx.save(); ctx.font = '600 22px ' + D.fonte; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = cor; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 6;
     ctx.fillText(D.nomes[j] || '', x, chao + av.y - A * 1.02 * av.ag - 6); ctx.restore();
+  }
+
+  /* ---------- marionete: o boneco desenhado em cima do esqueleto por IA (13 pontos) ---------- */
+  function marionete(ctx, jg, j, ts) {
+    var r = jg.raia, k = jg.esqueleto, cor = CORES.j[j];
+    // pontos do esqueleto no palco; o corpo ocupa o lugar do boneco na raia (a altura segue a pessoa)
+    var P = k.map(function (q) { return { x: r.x + q[0] * r.w, y: r.y + q[1] * r.h }; });
+    var L = Math.max(10, Math.hypot(P[1].x - P[7].x, P[1].y - P[7].y) * 0.32);
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    if (jg.invencivel && Math.floor(ts / 90) % 2) ctx.globalAlpha = 0.45;
+    // pernas
+    ctx.strokeStyle = SAPATO; ctx.lineWidth = L;
+    [[7, 9, 11], [8, 10, 12]].forEach(function (seg) { ctx.beginPath(); ctx.moveTo(P[seg[0]].x, P[seg[0]].y); ctx.lineTo(P[seg[1]].x, P[seg[1]].y); ctx.lineTo(P[seg[2]].x, P[seg[2]].y); ctx.stroke(); ctx.fillStyle = SAPATO; ctx.beginPath(); ctx.ellipse(P[seg[2]].x, P[seg[2]].y + L * 0.3, L * 0.9, L * 0.55, 0, 0, 6.2832); ctx.fill(); });
+    // tronco
+    ctx.fillStyle = cor; ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(P[1].x, P[1].y); ctx.lineTo(P[2].x, P[2].y); ctx.lineTo(P[8].x + L * 0.3, P[8].y); ctx.lineTo(P[7].x - L * 0.3, P[7].y); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // braços
+    ctx.strokeStyle = cor; ctx.lineWidth = L;
+    [[1, 3, 5], [2, 4, 6]].forEach(function (seg) { ctx.beginPath(); ctx.moveTo(P[seg[0]].x, P[seg[0]].y); ctx.lineTo(P[seg[1]].x, P[seg[1]].y); ctx.lineTo(P[seg[2]].x, P[seg[2]].y); ctx.stroke(); ctx.fillStyle = PELE; ctx.beginPath(); ctx.arc(P[seg[2]].x, P[seg[2]].y, L * 0.8, 0, 6.2832); ctx.fill(); });
+    // cabeça = figura da turma, no nariz
+    var fig = root.Figuras.porId(D.avatares[j] || D.avatares[0]) || root.Figuras.lista()[0], hs = Math.max(60, L * 5.2), img = imagem(fig, hs / 2.3);
+    var ang = Math.atan2(P[2].y - P[1].y, P[2].x - P[1].x);
+    ctx.save(); ctx.translate(P[0].x, P[0].y - hs * 0.05); ctx.rotate(ang * 0.5); ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 6;
+    if (img) ctx.drawImage(img, -hs / 2, -hs / 2, hs, hs); else { ctx.fillStyle = fig.suco || '#fff'; ctx.beginPath(); ctx.arc(0, 0, hs / 2.3, 0, 6.2832); ctx.fill(); }
+    ctx.restore();
+    ctx.restore();
+    ctx.save(); ctx.font = '600 22px ' + D.fonte; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = cor; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 6;
+    ctx.fillText(D.nomes[j] || '', P[0].x, P[0].y - hs * 0.6); ctx.restore();
   }
 
   /* ---------- obstáculos do Pula e abaixa: tronco (chão) e galho (alto) ---------- */

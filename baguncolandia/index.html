@@ -205,6 +205,11 @@
       <div class="col">
         <button class="sec" id="btCamera" type="button">🔄 <span data-t="Trocar a câmera|Switch camera"></span></button>
         <button class="sec" id="btCalibrar" type="button">🧍 <span data-t="Calibrar de novo (voz e legenda)|Calibrate again (voice and captions)"></span></button>
+        <div class="bloco">
+          <button class="sec" id="btEsqueleto" type="button">🦴 <span data-t="Esqueleto por IA (mão e pé de verdade)|AI skeleton (real hands and feet)"></span></button>
+          <div class="nivel" id="esqBox" style="display:none"><i id="esqBarra"></i><span id="esqTxt"></span></div>
+          <p class="muted" data-t="Mais preciso: o chute só vale com o pé, o boneco vira marionete e não precisa calibrar. Baixa uns 20 MB uma vez (melhor no Wi-Fi) e pede mais do celular.|More precise: kicks only count with the foot, the avatar becomes a puppet and no calibration is needed. Downloads about 20 MB once (best on Wi-Fi) and asks more of the phone."></p>
+        </div>
         <div class="aviso" data-t="Dica: celular deitado, apoiado, apontando para quem joga, a uns 2 metros, com luz boa e o fundo sem gente passando. Se tiver câmera grande-angular (0.5x), ela aparece no botão Trocar a câmera.|Tip: phone in landscape, propped up, facing the players about 2 metres away, in good light, with nobody walking in the background. If the phone has a wide-angle (0.5x) camera, it shows up under Switch camera."></div>
         <button class="sec" id="btSair" type="button">🚪 <span data-t="Sair da sala|Leave the room"></span></button>
         <div class="muted" style="text-align:center;font-size:.75rem">Bagunçolândia <span class="ver2"></span></div>
@@ -225,6 +230,7 @@
 <script src="config.js"></script>
 <script src="batida.js"></script>
 <script src="spotify.js"></script>
+<script src="esqueleto.js"></script>
 <script src="../recursos.js" data-app="feature-tester"></script>
 <script src="app.js"></script>
 </body>

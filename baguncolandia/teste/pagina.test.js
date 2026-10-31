@@ -60,6 +60,16 @@ function ok(msg) { console.log('✓ ' + msg); }
   if (st.pontos > 0 && st.vidas === 3) ok('pula e abaixa: desviou dos obstáculos (' + st.pontos + ' pontos, 3 vidas)'); else falhou('pula e abaixa: pontos=' + st.pontos + ' vidas=' + st.vidas);
   await pg.screenshot({ path: '/tmp/pagina-pula.png' });
   await pg.evaluate(() => window.BaguncaApp.TVApp.comando({ acao: 'parar' })); await pg.waitForTimeout(300);
+  // v0.4: esqueleto falso (mão varrendo) no corta-corta; marionete desenhada sem erro
+  await pg.evaluate(() => window.BaguncaApp.TVApp.comando({ acao: 'config', modo: 'corta', ambiente: 'paisagem', cena: 'espaco', duracao: 60 }));
+  await pg.evaluate(() => { window.BaguncaTeste = { pontos: () => null, corpo: () => null, esqueleto: ts => { const t = ts / 1000, hx = 0.5 + 0.45 * Math.sin(t * 6), hy = 0.3 + 0.3 * Math.abs(Math.cos(t * 4)); return [[0.5, 0.2], [0.42, 0.33], [0.58, 0.33], [0.36, 0.45], [0.64, 0.45], [0.33, 0.58], [hx, hy], [0.45, 0.56], [0.55, 0.56], [0.45, 0.73], [0.55, 0.73], [0.45, 0.9], [0.55, 0.9]]; } }; });
+  await pg.evaluate(() => window.BaguncaApp.TVApp.comando({ acao: 'comecar' }));
+  await pg.waitForFunction(() => window.BaguncaApp.TVApp.tv.fase === 'jogando', null, { timeout: 15000 });
+  await pg.waitForTimeout(6000);
+  const sk = await pg.evaluate(() => { const e = window.BaguncaDebug.partida.estado(); return { pontos: e.jogadores[0].pontos, esq: !!e.jogadores[0].esqueleto }; });
+  if (sk.esq && sk.pontos > 0) ok('esqueleto: mão cortou frutas (' + sk.pontos + ' pontos), marionete desenhada'); else falhou('esqueleto: ' + JSON.stringify(sk));
+  await pg.screenshot({ path: '/tmp/pagina-esqueleto.png' });
+  await pg.evaluate(() => window.BaguncaApp.TVApp.comando({ acao: 'parar' })); await pg.waitForTimeout(300);
   // celular em 320 px
   const cel = await ctx.newPage(); await cel.setViewportSize({ width: 320, height: 640 });
   cel.on('console', m => { if (m.type() === 'error') erros.push('cel: ' + m.text() + ' @' + (m.location() && m.location().url)); }); cel.on('pageerror', e => erros.push('cel pageerror: ' + e.message));

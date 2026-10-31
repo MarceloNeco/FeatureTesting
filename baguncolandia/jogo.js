@@ -51,7 +51,9 @@
         o.e = clamp(+m.e || 0, 0, 100); o.p = pontosOk(m.p); return o;
       case 'dados':   // mensagens pelo canal direto (celular → TV)
         o.e = clamp(+m.e || 0, 0, 100); o.p = pontosOk(m.p); if (m.cal) o.cal = calOk(m.cal); if (m.b) o.b = 1; if (m.bpm) o.bpm = clamp(+m.bpm || 0, 40, 220);
-        if (m.c) o.c = caixaOk(m.c); if (Array.isArray(m.cs)) o.cs = m.cs.slice(0, 2).map(caixaOk); return o;
+        if (m.c) o.c = caixaOk(m.c); if (Array.isArray(m.cs)) o.cs = m.cs.slice(0, 2).map(caixaOk);
+        if (Array.isArray(m.k)) { var ks = m.k.slice(0, 2).map(esqueletoOk).filter(Boolean); if (ks.length) o.k = ks; }
+        return o;
       case 'cmd':
         if (typeof m.acao !== 'string' || ACOES.indexOf(m.acao) < 0) return null;
         o.acao = m.acao;
@@ -86,6 +88,13 @@
       r.push([clamp(+q[0] || 0, 0, 1), clamp(+q[1] || 0, 0, 1), clamp(+q[2] || 0, 0, 100)]);
     }
     return r;
+  }
+  /* esqueleto compacto: 13 pontos [x, y] (0..1, espelhados) */
+  function esqueletoOk(k) {
+    if (!Array.isArray(k) || k.length !== 13) return null;
+    var o = [];
+    for (var i = 0; i < 13; i++) { var q = k[i]; if (!Array.isArray(q) || q.length < 2) return null; o.push([clamp(+q[0] || 0, -0.5, 1.5), clamp(+q[1] || 0, -0.5, 1.5)]); }
+    return o;
   }
   function caixaOk(c) {
     if (!c) return null;
@@ -123,7 +132,7 @@
     var seq = 0, eventos = [], coisas = [], fase = 'pronto', tempo = 0, proximoLancamento = 0, modoAtual = modoBase === 'mistura' ? 'corta' : modoBase, proximaTroca = TROCA_MISTURA;
     var bpm = 0, ultimaBatida = 0;
     var jogadores = [];
-    for (var j = 0; j < nJog; j++) jogadores.push({ pontos: 0, vidas: 3, combo: 0, comboAte: 0, poder: null, poderAte: 0, rastro: [], zonaChute: 0.6, lento: 0, ref: null, corpo: { x: 0.5, topo: 0.1, altura: 0.8, pulando: false, abaixado: false, ts: 0 }, invencivelAte: 0 });
+    for (var j = 0; j < nJog; j++) jogadores.push({ pontos: 0, vidas: 3, combo: 0, comboAte: 0, poder: null, poderAte: 0, rastro: [], zonaChute: 0.6, lento: 0, ref: null, corpo: { x: 0.5, topo: 0.1, altura: 0.8, pulando: false, abaixado: false, ts: 0 }, invencivelAte: 0, esq: null, esqRef: [], esqAnt: null });
     var proximoAviso = 0;
     var trave = { x: W / 2 - 120, y: 150, w: 240, h: 130 };   // abaixo do relógio e do nome do modo
     function raia(j) { return nJog === 1 ? { x: 0, y: 0, w: W, h: H } : { x: j * W / 2, y: 0, w: W / 2, h: H }; }
@@ -275,13 +284,14 @@
     function movimento(j, pontos, ts) {
       if (fase !== 'jogando' || !jogadores[j]) return;
       var jg = jogadores[j], r = raia(j);
-      var fortes = (pontos || []).filter(function (p) { return p[2] >= LIMIAR; }).map(function (p) { return { x: r.x + p[0] * r.w, y: r.y + p[1] * r.h, f: p[2], ts: ts }; });
+      var fortes = (pontos || []).filter(function (p) { return p[2] >= LIMIAR; }).map(function (p) { return { x: r.x + p[0] * r.w, y: r.y + p[1] * r.h, f: p[2], ts: ts, pe: p[3] === 1, lid: p[4] }; });
       // rastro: liga cada ponto novo ao ponto recente mais próximo (até 560 px e 350 ms) = a "lâmina"; passada rápida atravessa meia tela em 100 ms
       var recentes = jg.rastro.filter(function (p) { return ts - p.ts < 350; });
       var lamina = [];
       fortes.forEach(function (p) {
         var melhor = null, dm = 560;
-        recentes.forEach(function (q) { var d = Math.hypot(q.x - p.x, q.y - p.y); if (d < dm) { dm = d; melhor = q; } });
+        if (p.lid != null) { recentes.forEach(function (q) { if (q.lid === p.lid && (!melhor || q.ts > melhor.ts)) melhor = q; }); }   // esqueleto: cada membro liga com o próprio ponto anterior
+        else recentes.forEach(function (q) { if (!!q.pe !== !!p.pe) return; var d = Math.hypot(q.x - p.x, q.y - p.y); if (d < dm) { dm = d; melhor = q; } });
         lamina.push({ a: melhor, b: p });
       });
       jg.rastro = recentes.concat(fortes).slice(-24);
@@ -293,7 +303,10 @@
           var L = lamina[k];
           if (Math.hypot(L.b.x - c.x, L.b.y - c.y) <= c.raio + 24) atingiu = true;          // folga generosa: jogo de criança
           else if (L.a && distSeg(L.a, L.b, c) <= c.raio + 18) atingiu = true;
-          if (atingiu && c.papel === 'bola' && c.estilo !== 'quica' && L.b.y < r.y + r.h * jg.zonaChute) atingiu = false;   // bola só na zona de chute (menos na bagunça)
+          if (atingiu && c.papel === 'bola' && c.estilo !== 'quica') {
+            if (jg.esq) { if (!L.b.pe) atingiu = false; }                                                 // com esqueleto: só o pé chuta
+            else if (L.b.y < r.y + r.h * jg.zonaChute) atingiu = false;                                   // sem: só a zona de chute
+          }
           if (atingiu && c.papel === 'obstaculo') atingiu = false;
         }
         if (!atingiu) return;
@@ -341,6 +354,34 @@
       }
     }
 
+    /* esqueleto por IA: 13 pontos [x,y] espelhados (0 nariz, 1-2 ombros, 3-4 cotovelos, 5-6 pulsos, 7-8 quadris,
+       9-10 joelhos, 11-12 tornozelos). Vira: pontos de movimento (pulsos = mão, tornozelos = pé, força pela
+       velocidade), caixa do corpo (nariz → tornozelos) e, sem calibração, a referência pelos primeiros 1,2 s parado. */
+    function esqueleto(j, k, ts) {
+      var jg = jogadores[j]; if (!jg || !k || k.length !== 13) return;
+      var ant = jg.esqAnt, pts = [];
+      if (ant && ts - ant.ts > 0 && ts - ant.ts < 400) {
+        var dtS = (ts - ant.ts) / 1000;
+        var r = raia(j);
+        [[5, 0], [6, 0], [11, 1], [12, 1]].forEach(function (par) {
+          var i = par[0], a = ant.k[i], b = k[i], vel = Math.hypot(b[0] - a[0], (b[1] - a[1]) * 0.5625) / dtS;   // em "larguras por segundo"
+          var f = clamp(Math.round(vel * 70), 0, 100);
+          // a posição anterior entra no rastro como ponto de partida da "lâmina" (sem testar acerto nela)
+          if (f >= LIMIAR && !jg.rastro.some(function (q) { return q.lid === i && q.ts === ant.ts; })) jg.rastro.push({ x: r.x + clamp(a[0], 0, 1) * r.w, y: r.y + clamp(a[1], 0, 1) * r.h, f: f, ts: ant.ts, pe: par[1] === 1, lid: i });
+          pts.push([clamp(b[0], 0, 1), clamp(b[1], 0, 1), f, par[1], i]);
+        });
+      }
+      jg.esqAnt = { k: k, ts: ts }; jg.esq = { k: k, ts: ts };
+      if (pts.length) movimento(j, pts, ts);
+      var xs = k.map(function (q) { return q[0]; }), topo = k[0][1] - 0.08, base = Math.max(k[11][1], k[12][1]) + 0.04;
+      var caixa = { x: Math.min.apply(null, xs), y: topo, w: Math.max.apply(null, xs) - Math.min.apply(null, xs), h: base - topo };
+      if (!jg.ref) {   // referência = média dos primeiros quadros parados (até 1,2 s)
+        jg.esqRef.push(caixa);
+        if (jg.esqRef.length >= 12) { var m = { x: 0, y: 0, w: 0, h: 0 }; jg.esqRef.forEach(function (c) { m.x += c.x; m.y += c.y; m.w += c.w; m.h += c.h; }); var n = jg.esqRef.length; jg.ref = { x: m.x / n, y: m.y / n, w: m.w / n, h: m.h / n }; }
+      }
+      corpo(j, caixa, ts);
+      jg.corpo.x = clamp((k[7][0] + k[8][0]) / 2, 0, 1);   // o quadril é um centro mais estável que a caixa
+    }
     /* caixa calibrada (referência) e caixa atual da silhueta → posição, pulo e abaixado */
     function calibrar(j, caixa) { if (jogadores[j] && caixa) { jogadores[j].ref = caixa; jogadores[j].corpo.x = caixa.x + caixa.w / 2; } }
     function corpo(j, caixa, ts) {
@@ -350,18 +391,19 @@
       c.x = (ts && c.ts && ts - c.ts < 250) ? c.x + (alvo - c.x) * 0.6 : alvo;
       c.topo = caixa.y; c.altura = caixa.h; c.ts = ts || 0;
       c.pulando = caixa.y < ref.y - ref.h * 0.12 && caixa.h > ref.h * 0.6;
+      if (jg.esq) c.pulando = caixa.y < ref.y - ref.h * 0.1;
       c.abaixado = !c.pulando && caixa.h < ref.h * 0.7;
     }
     function estado() {
       return {
         fase: fase, modo: modoAtual, modoBase: modoBase, tempo: tempo, restante: duracao ? Math.max(0, Math.ceil((duracao * 1000 - tempo) / 1000)) : null,
-        jogadores: jogadores.map(function (jg, j) { var r = raia(j); return { pontos: Math.round(jg.pontos), vidas: jg.vidas, combo: jg.combo, poder: jg.poder, poderAte: jg.poderAte, lento: jg.lento > tempo, raia: r, zonaChute: jg.zonaChute, rastro: jg.rastro.slice(-8), corpo: jg.corpo, invencivel: jg.invencivelAte > tempo }; }),
+        jogadores: jogadores.map(function (jg, j) { var r = raia(j); return { pontos: Math.round(jg.pontos), vidas: jg.vidas, combo: jg.combo, poder: jg.poder, poderAte: jg.poderAte, lento: jg.lento > tempo, raia: r, zonaChute: jg.zonaChute, rastro: jg.rastro.slice(-8), corpo: jg.corpo, invencivel: jg.invencivelAte > tempo, esqueleto: jg.esq && tempo - 0 >= 0 ? jg.esq.k : null }; }),
         coisas: coisas, trave: trave, bpm: bpm
       };
     }
     function batida(novoBpm) { bpm = novoBpm ? clamp(novoBpm, 40, 220) : 0; ultimaBatida = tempo; }
     return {
-      comecar: comecar, pausar: pausar, continuar: continuar, terminar: terminar, avancar: avancar, movimento: movimento, lancar: lancar, obstaculo: obstaculo, corpo: corpo, calibrar: calibrar, estado: estado, batida: batida,
+      comecar: comecar, pausar: pausar, continuar: continuar, terminar: terminar, avancar: avancar, movimento: movimento, esqueleto: esqueleto, lancar: lancar, obstaculo: obstaculo, corpo: corpo, calibrar: calibrar, estado: estado, batida: batida,
       zonaChute: function (j, frac) { if (jogadores[j]) jogadores[j].zonaChute = clamp(frac, 0.2, 0.95); },
       eventos: function () { var e = eventos; eventos = []; return e; },
       W: W, H: H

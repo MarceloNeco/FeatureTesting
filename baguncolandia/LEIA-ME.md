@@ -45,6 +45,10 @@ e as bordas da TV pulsam na batida. O som não sai do celular.
    tocar (o app do Spotify precisa estar aberto nele) e uma playlist. A TV mostra o nome da música e o
    jogo pausa a música no fim da rodada. Ligue também o 🎤 para seguir a batida.
 
+**Esqueleto por IA** (⚙️ Mais → 🦴): mais preciso. O chute só vale com o pé, cada mão corta por conta
+própria, o boneco vira marionete e a calibração não é necessária. Baixa uns 20 MB uma vez (o celular
+pergunta antes; melhor no Wi-Fi) e fica guardado. Pede mais do celular: em aparelho fraco, deixe desligado.
+
 **Só o celular (sem TV)**: na tela inicial, 🎧. O jogo roda no próprio celular, com a câmera frontal.
 
 **Suas imagens**: veja `meus/LEIA-ME.md` para colocar as figuras que você quiser no jogo.
@@ -74,6 +78,7 @@ e as bordas da TV pulsam na batida. O som não sai do celular.
 | `calibrar.js` | calibração guiada: fundo → silhueta → braços → chute → pulo |
 | `voz.js` / `som.js` | fala (speechSynthesis, regras SolverONE) e sons sintetizados (WebAudio) |
 | `batida.js` | microfone → batida e BPM (sem IA; `estimarBpm` é pura e testada no Node) |
+| `esqueleto.js` | esqueleto por IA (MediaPipe Pose em `libs/mediapipe/`, carregado só quando a pessoa liga); devolve 13 pontos espelhados |
 | `spotify.js` / `config.js` | Spotify como controle remoto (PKCE, sem segredo); `config.js` guarda só o Client ID público |
 | `sw.js` | cache da pasta; `VERSAO` tem de ser igual a `APP_VERSION` |
 | `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js` (Chromium) |

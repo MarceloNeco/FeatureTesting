@@ -2,6 +2,19 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.4.0",
+      "data": "31/Out/2026",
+      "hora": "06:20:00",
+      "pt": [
+        "🦴 Esqueleto por IA (MediaPipe Pose, hospedado no próprio site, baixa ~20 MB uma vez quando a pessoa liga): o chute só vale com o pé, cada mão corta por conta própria, o boneco vira marionete e não precisa calibrar.",
+        "Funciona com uma ou duas pessoas na mesma câmera e no modo \"só o celular\"."
+      ],
+      "en": [
+        "🦴 AI skeleton (MediaPipe Pose, self-hosted, ~20 MB downloaded once when turned on): kicks only count with the foot, each hand slices on its own, the avatar becomes a puppet and no calibration is needed.",
+        "Works with one or two people on the same camera and in phone-only mode."
+      ]
+    },
+    {
       "versao": "0.3.0",
       "data": "31/Out/2026",
       "hora": "05:40:00",
