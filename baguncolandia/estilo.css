@@ -134,12 +134,6 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #tvLocalBar .grupo button { flex: 0 0 auto; font-size: 1.3rem; padding: .4rem .7rem; }
 #tvLocalBar #localComecar { flex: 1; }
 #tv.jogando #localModos, #tv.jogando #localPessoas, #tv.jogando #dicaGire { display: none; }
-/* jogando: a barra some inteira (nada tampando o jogo); fica só o ⏸ pequeno no canto, embaixo do ✕ */
-#tv.jogando #tvLocalBar { background: none; padding: 0; pointer-events: none; top: 0; bottom: 0; }
-#tv.jogando #tvLocalBar > * { display: none; }
-#tv.jogando .cheia { display: none; }
-#tv.pausa #localPausa { background: var(--lima); color: #1a1740; }
-#tv.jogando #localPausa { display: block; pointer-events: auto; position: absolute; right: 1.5vh; top: calc(1.5vh + 52px); width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; font-size: 1.1rem; }
 #localBoneco { display: none; }
 #tv.toque #localBoneco { display: inline-block; }
 #localBoneco.ativo { border-color: var(--lima); box-shadow: inset 0 0 0 2px var(--lima); }   /* durante a rodada a barra encolhe para não cobrir o palco */
@@ -160,8 +154,22 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 .lobbyLista { display: flex; gap: 3vh; flex-wrap: wrap; justify-content: center; }
 .lobbyLista .jog { background: rgba(0,0,0,.45); border: .4vh solid var(--cor, #fff); border-radius: 2vh; padding: 2vh 3vh; min-width: 24vh; font-size: 3.5vh; font-weight: 700; color: var(--cor, #fff); box-shadow: 0 0 3vh var(--cor, #fff); }
 .lobbyLista .jog small { display: block; font-size: 2vh; color: #d8d2f0; font-weight: 500; }
+.lobbyLista .bonecos { display: flex; justify-content: center; gap: 1vh; margin-bottom: 1vh; }
+.lobbyLista .bonecos canvas { width: 15vh; height: 20vh; }
+#tv.local .lobbyLista .bonecos canvas { width: 24vw; height: 32vw; max-width: 150px; max-height: 200px; }
 .lobbyLista .vazio { color: var(--muted); font-size: 3vh; }
 .resumo { font-size: 3.2vh; color: #fff; background: rgba(0,0,0,.4); padding: 1.5vh 3vh; border-radius: 2vh; }
 
 @media (max-width: 420px) { .painel { flex-direction: column; } .camBox { flex: 0 0 auto; aspect-ratio: 16/9; } .linha > span { flex-basis: 100%; } }
 @media (prefers-reduced-motion: reduce) { button { transition: none; } .barra i { transition: none; } }
+/* deitado no celular: boneco ao lado do nome, menor, para caber em cima da barra (fica no fim para vencer as regras acima) */
+@media (orientation: landscape) and (max-height: 500px) { #tv.local .lobbyLista .jog { display: flex; align-items: center; gap: .8rem; padding: .3rem 1rem; } #tv.local .lobbyLista .bonecos { margin: 0; } #tv.local .lobbyLista .bonecos canvas { width: 12vh; height: 16vh; } }
+/* jogando: a barra some inteira (nada tampando o jogo); fica só o ⏸ pequeno no canto, embaixo do ✕ */
+#tv.jogando #tvLocalBar { background: none; padding: 0; pointer-events: none; top: 0; bottom: 0; }
+#tv.jogando #tvLocalBar > * { display: none; }
+#tv.jogando .cheia { display: none; }
+#tv.pausa #localPausa { background: var(--lima); color: #1a1740; }
+#tv.jogando #localPausa { display: block; pointer-events: auto; position: absolute; right: 1.5vh; top: calc(1.5vh + 52px); width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; font-size: 1.1rem; }
+/* no dedo, jogando: o 🧍 (mostrar/esconder o boneco) vai para o canto também, embaixo do ⏸ */
+#tv.toque.jogando #localBoneco { display: block; pointer-events: auto; position: absolute; right: 1.5vh; top: calc(1.5vh + 104px); width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; font-size: 1.1rem; }
+#tv.toque.jogando #localBoneco.ativo { background: rgba(198,255,61,.85); }

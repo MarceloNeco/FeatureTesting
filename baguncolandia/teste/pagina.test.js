@@ -97,6 +97,9 @@ function ok(msg) { console.log('✓ ' + msg); }
     if (sob.length) falhou('lobby local ' + nome + ': ' + sob.join(' | ')); else ok('lobby local ' + nome + ': nada sobreposto nem atrás da barra');
   }
   await solo.setViewportSize({ width: 390, height: 844 });
+  // v0.8.5: o boneco escolhido aparece no lobby, em cima do nome, e muda quando o celular manda outro
+  const lb = await solo.evaluate(async () => { const cv = document.querySelector('#tvLobby .jog canvas'); if (!cv) return { cv: false }; const pix = () => { const d = cv.getContext('2d').getImageData(0, 0, cv.width, Math.round(cv.height * 0.45)).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 40) n++; return n; }; await new Promise(r => setTimeout(r, 300)); const antes = pix(); window.BaguncaApp.TVApp.comando({ acao: 'boneco', j: 0, boneco: { cabeca: 'robo', cor: '#ff4fa3' } }); await new Promise(r => setTimeout(r, 300)); return { cv: true, antes, depois: pix(), robo: JSON.stringify(cv.getContext('2d').getImageData(0, 0, 1, 1).data) !== '' }; });
+  if (lb.cv && lb.antes > 1500 && lb.depois > 1500) ok('lobby: boneco escolhido aparece em cima do nome (' + lb.antes + ' px) e segue a escolha'); else falhou('lobby sem boneco: ' + JSON.stringify(lb));
   const barra = await solo.evaluate(() => { const b = document.getElementById('localComecar'); const r = b.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(document.getElementById('tvLocalBar')).display !== 'none'; });
   if (barra) ok('só o celular: botão ▶ visível no lobby'); else falhou('só o celular: sem botão de começar');
   const cam = await solo.evaluate(() => { const b = document.getElementById('localCamera'); const r = b.getBoundingClientRect(); return r.width >= 40 && r.height >= 40; });
@@ -138,6 +141,14 @@ function ok(msg) { console.log('✓ ' + msg); }
   await dedo.mouse.move(400, 220); await dedo.mouse.down(); await dedo.mouse.move(400, 60, { steps: 4 }); await dedo.mouse.up(); await dedo.waitForTimeout(150);
   const pul = await dedo.evaluate(() => window.BaguncaDebug.partida.estado().jogadores[0].corpo.pulando);
   if (pul) ok('no dedo: deslizar para cima = pulo'); else falhou('no dedo: não pulou');
+  // v0.8.5: no dedo, o 🧍 fica no canto (embaixo do ⏸), não tampa o jogo e responde ao toque
+  for (const [nome, vw, vh] of [['em pé', 390, 844], ['deitado', 844, 390]]) {
+    await dedo.setViewportSize({ width: vw, height: vh }); await dedo.waitForTimeout(300);
+    const antes = await dedo.evaluate(() => window.BaguncaApp.TVApp.tv.mostrarBoneco);
+    await dedo.click('#localBoneco'); await dedo.waitForTimeout(200);
+    const r = await dedo.evaluate((antes) => { const b = document.getElementById('localBoneco').getBoundingClientRect(); return { canto: b.top < innerHeight * 0.4 && b.right > innerWidth * 0.8 && b.width <= 56, mudou: window.BaguncaApp.TVApp.tv.mostrarBoneco !== antes }; }, antes);
+    if (r.canto && r.mudou) ok('no dedo ' + nome + ': 🧍 no canto e funcionando'); else falhou('no dedo ' + nome + ': 🧍 ' + JSON.stringify(r));
+  }
   await dedo.screenshot({ path: '/tmp/pagina-dedo.png' });
   // celular em 320 px
   const cel = await ctx.newPage(); await cel.setViewportSize({ width: 320, height: 640 });
