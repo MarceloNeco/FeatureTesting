@@ -107,12 +107,13 @@
     for (var i = 0; i < 13; i++) { var q = k[i]; if (!Array.isArray(q) || q.length < 2) return null; o.push([clamp(+q[0] || 0, -0.5, 1.5), clamp(+q[1] || 0, -0.5, 1.5)]); }
     return o;
   }
-  var COR = /^#[0-9a-f]{6}$/i, ROUPAS = ['camiseta', 'vestido', 'macacao', 'capa'], ACESSORIOS = ['nenhum', 'laco', 'coroa', 'oculos', 'chapeu', 'asas', 'flor'];
+  var COR = /^#[0-9a-f]{6}$/i, ROUPAS = ['camiseta', 'vestido', 'macacao', 'capa', 'armadura', 'tunica'], ACESSORIOS = ['nenhum', 'laco', 'coroa', 'oculos', 'chapeu', 'asas', 'flor', 'bone', 'tiara'], CABELOS = ['curto', 'espetado', 'franja', 'longo', 'cacheado', 'trancas', 'coque', 'maria', 'careca'];
   function bonecoOk(b) {
     if (!b || typeof b !== 'object') return null;
     var o = {};
     if (typeof b.cabeca === 'string' && /^[A-Za-z0-9]{1,24}$/.test(b.cabeca)) o.cabeca = b.cabeca;
-    ['cor', 'sapato', 'pele'].forEach(function (k) { if (typeof b[k] === 'string' && COR.test(b[k])) o[k] = b[k]; });
+    ['cor', 'sapato', 'pele', 'corCabelo'].forEach(function (k) { if (typeof b[k] === 'string' && COR.test(b[k])) o[k] = b[k]; });
+    if (CABELOS.indexOf(b.cabelo) >= 0) o.cabelo = b.cabelo;
     if (ROUPAS.indexOf(b.roupa) >= 0) o.roupa = b.roupa;
     if (ACESSORIOS.indexOf(b.acessorio) >= 0) o.acessorio = b.acessorio;
     return o;

@@ -49,10 +49,12 @@ e as bordas da TV pulsam na batida. O som não sai do celular.
 própria, o boneco vira marionete e a calibração não é necessária. Baixa uns 20 MB uma vez (o celular
 pergunta antes; melhor no Wi-Fi) e fica guardado. Pede mais do celular: em aparelho fraco, deixe desligado.
 
-**👗 Meu boneco**: na tela de entrar (ou em "Meu boneco" dentro da sala), monte o seu avatar: cabeça com
-qualquer personagem da turma (tem meninas: Lili Limão, Cerejinha, Uvinha, Abacatinha, Donatella, Alice),
-roupa (camiseta, vestido, macacão, capa), cor, acessório (laço, coroa, óculos, chapéu, asas, flor), pele e
-sapato. Boneco 1 e Boneco 2 (para duas pessoas no mesmo celular). Fica guardado no celular.
+**👗 Meu boneco**: na tela de entrar (ou em "Meu boneco" dentro da sala), monte o seu avatar, como um boneco
+de pano: cabeça (Menino, Menina, Boneco de pano, Elfo, Pequenino, Mago, Cavaleiro, Robô ou qualquer
+personagem da turma), cabelo e cor do cabelo, pele, roupa (camiseta, vestido, macacão, capa, túnica,
+armadura), cor da roupa, acessório (laço, coroa, tiara, óculos, boné, chapéu, asas, flor) e sapato. A prévia
+fica fixa no topo enquanto você escolhe. Boneco 1 e Boneco 2 (para duas pessoas no mesmo celular). Fica
+guardado no celular. O desenho do boneco mora em `boneco.js`.
 
 **Só o celular (sem TV)**: na tela inicial, 🎧. O jogo roda no próprio celular, com a câmera frontal.
 
@@ -84,6 +86,7 @@ convida a chamar a TV e jogar com o corpo todo.
 | `desenho.js` | pinta o estado no canvas da TV: figuras, cortes, suco, rastros, placar, legendas, pódio |
 | `figuras.js` | catálogo de figuras (SVG): frutas, doces, bolas, turma própria, clássicos de domínio público, `meus/` |
 | `cenas.js` | cenários vetoriais do ambiente Paisagem (praia, floresta, espaço, cidade) |
+| `boneco.js` | o boneco personalizável (corpo em pé, cabeças, cabelos, roupas, acessórios, marionete) |
 | `sala.js` | pareamento (Supabase broadcast), WebRTC, câmera, visão (diferença entre quadros) |
 | `calibrar.js` | calibração guiada: fundo → silhueta → braços → chute → pulo |
 | `voz.js` / `som.js` | fala (speechSynthesis, regras SolverONE) e sons sintetizados (WebAudio) |

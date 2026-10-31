@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.6.0', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.7.0', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -79,9 +79,9 @@
     function aplicarBonecos() {
       var lista = [];
       if (tv.local) { var b = tv.bonecos.local || {}; lista = tv.cfg.jogadores === 2 ? [b[0] || null, b[1] || null] : [b[0] || null]; }
-      else if (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2) { var b0 = tv.jog[0] ? (tv.bonecos[tv.jog[0].id] || {}) : {}; lista = [b0[0] || null, b0[1] || { cabeca: 'donatella' }]; }
+      else if (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2) { var b0 = tv.jog[0] ? (tv.bonecos[tv.jog[0].id] || {}) : {}; lista = [b0[0] || null, b0[1] || null]; }
       else lista = tv.jog.slice(0, tv.cfg.jogadores).map(function (j) { return (tv.bonecos[j.id] || {})[0] || null; });
-      Desenho.avatares(lista.map(function (b, i) { return b || { cabeca: i === 1 ? 'donatella' : 'bolinhoDeChuva' }; }));
+      Desenho.avatares(lista.map(function (b, i) { return b || Boneco.normalizar({}, i); }));
     }
     /* uma câmera, duas pessoas: o esqueleto de quem está na metade esquerda vira coordenadas da raia 1 (e vice-versa) */
     function reescalar(k, j) { return k.map(function (p) { return [j === 0 ? p[0] * 2 : (p[0] - 0.5) * 2, p[1]]; }); }
@@ -314,7 +314,8 @@
       Som.iniciar(); Voz.liberar(); tv.vozLiberada = !!opts.gesto;
       tv.toque = !!opts.toque; $('tv').classList.toggle('toque', tv.toque);
       if (tv.local) { tv.visaoLocal = opts.visao || null; tv.videoLocal = opts.video || null; tv.esqueletoLigado = !!opts.esqueleto; tv.nomes = opts.nomes || [opts.nome || T('Você', 'You')]; if (opts.video) $('tvFundo').appendChild(opts.video); }
-      if (tv.toque) ligarToque();
+      if (tv.toque) { ligarToque(); try { tv.mostrarBoneco = localStorage.getItem('bagunca:bonecoDedo') === '1'; } catch (e) { tv.mostrarBoneco = false; } } else tv.mostrarBoneco = true;   // no dedo o boneco começa escondido
+      $('localBoneco').classList.toggle('ativo', !!tv.mostrarBoneco); Desenho.mostrarBoneco(tv.mostrarBoneco);
       try { if (!tv.local && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
       if (!tv.raf) tv.raf = requestAnimationFrame(quadro);
       carregar().then(function () { if (tv.local) lobby(); else capa(); if (!tv.local) carregarYouTube(); });
@@ -322,6 +323,7 @@
       tv.teclado = true;
       $('localComecar').onclick = function () { if (tv.fase === 'lobby' || tv.fase === 'fim') comecar(); };
       $('localPausa').onclick = function () { comando({ acao: 'pausar' }); };
+      $('localBoneco').onclick = function () { tv.mostrarBoneco = !tv.mostrarBoneco; $('localBoneco').classList.toggle('ativo', tv.mostrarBoneco); Desenho.mostrarBoneco(tv.mostrarBoneco); try { localStorage.setItem('bagunca:bonecoDedo', tv.mostrarBoneco ? '1' : '0'); } catch (e) {} };
       $('localPessoas').onclick = function () { var n = tv.cfg.jogadores === 2 ? 1 : 2; $('localPessoas').textContent = n === 2 ? '👥 2' : '👤 1'; comando({ acao: 'config', jogadores: n, celulares: 1 }); };
       $('localModos').querySelectorAll('button').forEach(function (b) { b.onclick = function () { $('localModos').querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); comando({ acao: 'config', modo: b.getAttribute('data-v') }); }; });
       // teclado / controle da TV: OK (Enter) começa; Esc/Voltar nada
@@ -501,15 +503,18 @@
       buscarTitulos(ids);
     }
     /* ---- 👗 Meu boneco: monte o avatar (cabeça, roupa, cores, acessório); guardado neste celular ---- */
-    var PADRAO_BONECO = [{ cabeca: 'bolinhoDeChuva', cor: '#c6ff3d', roupa: 'camiseta', acessorio: 'nenhum', sapato: '#2b2250', pele: '#ffd9b3' }, { cabeca: 'donatella', cor: '#ff4fa3', roupa: 'vestido', acessorio: 'laco', sapato: '#2b2250', pele: '#ffd9b3' }];
+    var PADRAO_BONECO = [{ cabeca: 'menino', cabelo: 'curto', corCabelo: '#4a2c17', cor: '#c6ff3d', roupa: 'camiseta', acessorio: 'nenhum', sapato: '#2b2250', pele: '#ffd9b3' }, { cabeca: 'menina', cabelo: 'longo', corCabelo: '#2b1a0e', cor: '#ff4fa3', roupa: 'vestido', acessorio: 'laco', sapato: '#ffffff', pele: '#ffd9b3' }];
     var CORES_ROUPA = ['#c6ff3d', '#ff4fa3', '#3ee8ff', '#ffd166', '#8e5bff', '#ff7a00', '#ff5252', '#ffffff', '#2b2250', '#43a047'];
     var CORES_PELE = ['#ffd9b3', '#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#5c3a21'];
+    var CORES_CABELO = ['#2b1a0e', '#4a2c17', '#8d5524', '#f9a825', '#fff176', '#ff7a00', '#d32f2f', '#8e5bff', '#3ee8ff', '#eeeeee'];
     var CORES_SAPATO = ['#2b2250', '#ffffff', '#ff4fa3', '#ffd166', '#8d5524', '#3ee8ff'];
     cel.bonecos = PADRAO_BONECO.map(function (b) { return Object.assign({}, b); });
     try { var gb = JSON.parse(localStorage.getItem('bagunca:bonecos') || 'null'); if (Array.isArray(gb)) gb.forEach(function (b, i) { if (b && i < 2) Object.assign(cel.bonecos[i], b); }); } catch (e) {}
     cel.quem = 0;
     function guardarBonecos() { try { localStorage.setItem('bagunca:bonecos', JSON.stringify(cel.bonecos)); } catch (e) {} }
     function mandarBonecos() { comando({ acao: 'boneco', j: 0, boneco: cel.bonecos[0] }); comando({ acao: 'boneco', j: 1, boneco: cel.bonecos[1] }); }
+    var NOMES_CABECA = { menino: ['Menino', 'Boy'], menina: ['Menina', 'Girl'], pano: ['Boneco de pano', 'Rag doll'], elfo: ['Elfo', 'Elf'], hobbit: ['Pequenino', 'Halfling'], mago: ['Mago', 'Wizard'], cavaleiro: ['Cavaleiro', 'Knight'], robo: ['Robô', 'Robot'] };
+    var NOMES_CABELO = { curto: ['Curto', 'Short'], espetado: ['Espetado', 'Spiky'], franja: ['Franja', 'Fringe'], longo: ['Longo', 'Long'], cacheado: ['Cacheado', 'Curly'], trancas: ['Tranças', 'Braids'], coque: ['Coque', 'Bun'], maria: ['Maria-chiquinha', 'Pigtails'], careca: ['Sem cabelo', 'No hair'] };
     function montarPicker(container) {
       while (container.firstChild) container.removeChild(container.firstChild);
       function linha(rotulo) { var d = document.createElement('div'); d.className = 'linha'; var sp = document.createElement('span'); sp.textContent = rotulo; d.appendChild(sp); container.appendChild(d); return d; }
@@ -518,21 +523,29 @@
         itens.forEach(function (it) { var b = document.createElement('button'); b.type = 'button'; b.className = 'sec opt' + (it.v === valorAtual() ? ' ativo' : ''); if (it.cor) { b.style.background = it.cor; b.title = it.v; } else b.textContent = it.t; b.onclick = function () { g.querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); aoEscolher(it.v); }; g.appendChild(b); });
         return g;
       }
-      var prev = document.createElement('div'); prev.className = 'previa'; var cv = document.createElement('canvas'); cv.width = 280; cv.height = 360; prev.appendChild(cv); container.appendChild(prev);
+      var prev = document.createElement('div'); prev.className = 'previa'; var cv = document.createElement('canvas'); cv.width = 300; cv.height = 400; prev.appendChild(cv); container.appendChild(prev);
       var quem = linha(T('Quem', 'Who')); grupo(quem, [{ v: 0, t: T('Boneco 1', 'Avatar 1') }, { v: 1, t: T('Boneco 2', 'Avatar 2') }], function () { return cel.quem; }, function (v) { cel.quem = v; montarPicker(container); }, 'grupo quem');
       var atual = function () { return cel.bonecos[cel.quem]; };
-      function muda(k, v) { atual()[k] = v; guardarBonecos(); mandarBonecos(); }
+      function muda(k, v) { atual()[k] = v; guardarBonecos(); mandarBonecos(); if (k === 'cabeca') atualizarCabecas(); }
       var cab = linha(T('Cabeça', 'Head')); var cabs = document.createElement('div'); cabs.className = 'cabecas'; cab.appendChild(cabs);
-      Figuras.lista().filter(function (f) { return f.papel === 'heroi'; }).forEach(function (f) {
-        var b = document.createElement('button'); b.type = 'button'; b.className = 'sec opt' + (f.id === atual().cabeca ? ' ativo' : ''); b.title = T(f.nome.pt, f.nome.en) + (f.menina ? ' 👧' : '');
-        if (f.img) { var im = document.createElement('img'); im.src = f.img; im.alt = b.title; b.appendChild(im); } else { var im2 = document.createElement('img'); im2.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(f.svg); im2.alt = b.title; b.appendChild(im2); }
-        b.onclick = function () { cabs.querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); muda('cabeca', f.id); };
-        cabs.appendChild(b);
+      var cabecasHumanas = Boneco.CABECAS.map(function (id) { return { id: id, humana: true, nome: NOMES_CABECA[id] }; });
+      var cabecasTurma = Figuras.lista().filter(function (f) { return f.papel === 'heroi'; }).map(function (f) { return { id: f.id, fig: f, nome: [f.nome.pt, f.nome.en] }; });
+      var botoesCabeca = [];
+      cabecasHumanas.concat(cabecasTurma).forEach(function (c) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'sec opt' + (c.id === atual().cabeca ? ' ativo' : ''); b.title = T(c.nome[0], c.nome[1]) + (c.fig && c.fig.menina ? ' 👧' : '');
+        if (c.humana) { var mini = document.createElement('canvas'); mini.width = mini.height = 96; b.appendChild(mini); b._mini = mini; b._id = c.id; }
+        else { var im2 = document.createElement('img'); im2.src = c.fig.img || ('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(c.fig.svg)); im2.alt = b.title; b.appendChild(im2); }
+        b.onclick = function () { cabs.querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); muda('cabeca', c.id); };
+        cabs.appendChild(b); botoesCabeca.push(b);
       });
-      grupo(linha(T('Roupa', 'Outfit')), [{ v: 'camiseta', t: T('👕 Camiseta', '👕 T-shirt') }, { v: 'vestido', t: T('👗 Vestido', '👗 Dress') }, { v: 'macacao', t: T('🧥 Macacão', '🧥 Overalls') }, { v: 'capa', t: T('🦸 Capa', '🦸 Cape') }], function () { return atual().roupa; }, function (v) { muda('roupa', v); });
-      grupo(linha(T('Cor', 'Colour')), CORES_ROUPA.map(function (c) { return { v: c, cor: c }; }), function () { return atual().cor; }, function (v) { muda('cor', v); }, 'cores');
-      grupo(linha(T('Acessório', 'Accessory')), [{ v: 'nenhum', t: T('Nada', 'None') }, { v: 'laco', t: '🎀' }, { v: 'coroa', t: '👑' }, { v: 'oculos', t: '🕶️' }, { v: 'chapeu', t: '🎉' }, { v: 'asas', t: '🪽' }, { v: 'flor', t: '🌸' }], function () { return atual().acessorio; }, function (v) { muda('acessorio', v); });
-      grupo(linha(T('Pele', 'Skin')), CORES_PELE.map(function (c) { return { v: c, cor: c }; }), function () { return atual().pele; }, function (v) { muda('pele', v); }, 'cores');
+      function atualizarCabecas() { botoesCabeca.forEach(function (b) { if (b._mini) Desenho.previaCabeca(b._mini, Object.assign({}, atual(), { cabeca: b._id, acessorio: 'nenhum', cabelo: b._id === 'menino' ? 'curto' : b._id === 'menina' ? 'longo' : b._id === 'hobbit' ? 'cacheado' : b._id === 'elfo' ? 'longo' : atual().cabelo })); }); }
+      atualizarCabecas();
+      grupo(linha(T('Cabelo', 'Hair')), Boneco.CABELOS.map(function (id) { return { v: id, t: T(NOMES_CABELO[id][0], NOMES_CABELO[id][1]) }; }), function () { return atual().cabelo; }, function (v) { muda('cabelo', v); atualizarCabecas(); });
+      grupo(linha(T('Cor do cabelo', 'Hair colour')), CORES_CABELO.map(function (c) { return { v: c, cor: c }; }), function () { return atual().corCabelo; }, function (v) { muda('corCabelo', v); atualizarCabecas(); }, 'cores');
+      grupo(linha(T('Pele', 'Skin')), CORES_PELE.map(function (c) { return { v: c, cor: c }; }), function () { return atual().pele; }, function (v) { muda('pele', v); atualizarCabecas(); }, 'cores');
+      grupo(linha(T('Roupa', 'Outfit')), [{ v: 'camiseta', t: T('👕 Camiseta', '👕 T-shirt') }, { v: 'vestido', t: T('👗 Vestido', '👗 Dress') }, { v: 'macacao', t: T('🧥 Macacão', '🧥 Overalls') }, { v: 'capa', t: T('🦸 Capa', '🦸 Cape') }, { v: 'tunica', t: T('🧝 Túnica', '🧝 Tunic') }, { v: 'armadura', t: T('🛡️ Armadura', '🛡️ Armour') }], function () { return atual().roupa; }, function (v) { muda('roupa', v); });
+      grupo(linha(T('Cor da roupa', 'Outfit colour')), CORES_ROUPA.map(function (c) { return { v: c, cor: c }; }), function () { return atual().cor; }, function (v) { muda('cor', v); atualizarCabecas(); }, 'cores');
+      grupo(linha(T('Acessório', 'Accessory')), [{ v: 'nenhum', t: T('Nada', 'None') }, { v: 'laco', t: '🎀' }, { v: 'coroa', t: '👑' }, { v: 'tiara', t: '💎' }, { v: 'oculos', t: '🕶️' }, { v: 'bone', t: '🧢' }, { v: 'chapeu', t: '🎉' }, { v: 'asas', t: '🪽' }, { v: 'flor', t: '🌸' }], function () { return atual().acessorio; }, function (v) { muda('acessorio', v); });
       grupo(linha(T('Sapato', 'Shoes')), CORES_SAPATO.map(function (c) { return { v: c, cor: c }; }), function () { return atual().sapato; }, function (v) { muda('sapato', v); }, 'cores');
       var vivo = function (ts) { if (!document.body.contains(cv)) return; if (container.closest('details').open) Desenho.previa(cv, atual(), ts); requestAnimationFrame(vivo); }; requestAnimationFrame(vivo);
     }
