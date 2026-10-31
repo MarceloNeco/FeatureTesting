@@ -1,0 +1,13 @@
+{
+  "id": "br.com.solverone.kids",
+  "version": "1.0.0",
+  "vendor": "SolverONE",
+  "type": "web",
+  "main": "index.html",
+  "title": "Kids · Bolinho de Chuva",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "iconColor": "#ffd166",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": false
+}

@@ -79,6 +79,24 @@ function ok(msg) { console.log('✓ ' + msg); }
   solo.on('pageerror', e => erros.push('solo pageerror: ' + e.message));
   await solo.goto(base + '?teste'); await solo.click('#btSolo'); await solo.fill('#nome', 'Lia'); await solo.click('#btEntrar');
   await solo.waitForFunction(() => window.BaguncaApp.TVApp.tv.fase === 'lobby', null, { timeout: 20000 });
+  // nada do lobby pode ficar embaixo da barra de botões nem sobrepor outro texto, em pé e deitado
+  for (const [w, h, nome] of [[390, 844, 'em pé'], [844, 390, 'deitado'], [320, 640, '320 px']]) {
+    await solo.setViewportSize({ width: w, height: h }); await solo.waitForTimeout(250);
+    const sob = await solo.evaluate(() => {
+      const r = el => el.getBoundingClientRect();
+      const vis = el => { const b = r(el); const cs = getComputedStyle(el); return b.width > 0 && b.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none'; };
+      const cruza = (a, b) => a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1;
+      const barra = r(document.getElementById('tvLocalBar'));
+      const textos = [...document.querySelectorAll('#tvLobby h2, #tvLobby .jog, #tvLobby .resumo, #tvLobby p')].filter(vis);
+      const probs = [];
+      textos.forEach(el => { if (cruza(r(el), barra)) probs.push('atrás da barra: ' + el.textContent.trim().slice(0, 30)); });
+      for (let i = 0; i < textos.length; i++) for (let k = i + 1; k < textos.length; k++) if (!textos[i].contains(textos[k]) && !textos[k].contains(textos[i]) && cruza(r(textos[i]), r(textos[k]))) probs.push('sobrepostos: ' + textos[i].textContent.trim().slice(0, 20) + ' × ' + textos[k].textContent.trim().slice(0, 20));
+      if (document.documentElement.scrollWidth > innerWidth) probs.push('rolagem lateral');
+      return probs;
+    });
+    if (sob.length) falhou('lobby local ' + nome + ': ' + sob.join(' | ')); else ok('lobby local ' + nome + ': nada sobreposto nem atrás da barra');
+  }
+  await solo.setViewportSize({ width: 390, height: 844 });
   const barra = await solo.evaluate(() => { const b = document.getElementById('localComecar'); const r = b.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(document.getElementById('tvLocalBar')).display !== 'none'; });
   if (barra) ok('só o celular: botão ▶ visível no lobby'); else falhou('só o celular: sem botão de começar');
   await solo.click('#localComecar');
