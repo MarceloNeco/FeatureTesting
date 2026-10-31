@@ -2,6 +2,19 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.4",
+      "data": "31/Out/2026",
+      "hora": "14:26:00",
+      "pt": [
+        "Tela presa sem o ▶ corrigida: a barra de baixo e o botão do canto agora obedecem só à fase real do jogo, a cada quadro; nenhum estado antigo fica grudado.",
+        "Na pausa, o botão do canto vira ▶ (verde) para continuar; o ✕ continua sempre disponível para sair."
+      ],
+      "en": [
+        "Stuck screen without ▶ fixed: the bottom bar and the corner button now follow the real game phase every frame; no stale state sticks.",
+        "While paused, the corner button turns into a green ▶ to resume; ✕ is always available to leave."
+      ]
+    },
+    {
       "versao": "0.8.3",
       "data": "31/Out/2026",
       "hora": "13:44:00",

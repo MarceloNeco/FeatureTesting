@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.3', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.8.4', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -251,6 +251,10 @@
       if (tv.partida) { tv.partida.avancar(dt); estado = tv.partida.estado(); eventos = tv.partida.eventos(); eventos.forEach(som); }
       Desenho.quadro(estado, eventos, ts);
       $('tv').classList.toggle('leve', Desenho.estaLeve());
+      // a barra e o ⏸/▶ do canto obedecem só à fase real (nada fica preso de um estado anterior)
+      var rodando = tv.fase === 'jogando' || tv.fase === 'pausa' || tv.fase === 'contagem' || tv.fase === 'calibrando';
+      $('tv').classList.toggle('jogando', rodando); $('tv').classList.toggle('pausa', tv.fase === 'pausa');
+      if (tv.local) { var lp = $('localPausa'), txt = tv.fase === 'pausa' ? '▶' : '⏸'; if (lp.textContent !== txt) lp.textContent = txt; }
       if (tv.debug) depurar(ts);
       if (estado && estado.fase === 'fim' && tv.fase !== 'fim') { tv.fase = 'fim'; $('tv').classList.remove('jogando'); tv.podio = estado; Som.tocar('fim'); dizer('Acabou! Muito bem!', 'Time’s up! Well done!'); setTimeout(function () { Desenho.legenda(tv.toque ? T('Quer jogar com o corpo todo? Chame a TV! ▶ joga de novo', 'Want to play with your whole body? Get the TV! ▶ plays again') : T('Toque em ▶ para jogar de novo', 'Tap ▶ to play again'), '#ffd166'); }, 2500); }
       if (tv.fase === 'fim' && tv.podio) { var ordem = tv.podio.jogadores.map(function (j, i) { return { j: i, pontos: j.pontos }; }).sort(function (a, b) { return b.pontos - a.pontos; }); Desenho.podio(null, ordem, tv.nomes, ts); }

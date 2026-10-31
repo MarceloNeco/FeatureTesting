@@ -109,6 +109,16 @@ function ok(msg) { console.log('✓ ' + msg); }
     const j = await solo.evaluate(() => { const vis = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).display !== 'none'; }; const p = document.getElementById('localPausa').getBoundingClientRect(); return { comecar: vis(document.getElementById('localComecar')), boneco: vis(document.getElementById('localBoneco')), pausa: vis(document.getElementById('localPausa')), canto: p.top < innerHeight * 0.3 && p.right > innerWidth * 0.8 && p.width <= 56 }; });
     if (!j.comecar && !j.boneco && j.pausa && j.canto) ok('jogando ' + nome + ': barra sumiu, só ⏸ pequeno no canto'); else falhou('jogando ' + nome + ': ' + JSON.stringify(j));
   }
+  // v0.8.4: pausar pelo canto vira ▶, e ▶ continua; um estado velho (classe jogando com o lobby aberto) se corrige sozinho
+  await solo.click('#localPausa'); await solo.waitForTimeout(300);
+  const p1 = await solo.evaluate(() => ({ fase: window.BaguncaApp.TVApp.tv.fase, txt: document.getElementById('localPausa').textContent, lobby: getComputedStyle(document.getElementById('tvLobby')).display }));
+  await solo.click('#localPausa'); await solo.waitForTimeout(300);
+  const p2 = await solo.evaluate(() => ({ fase: window.BaguncaApp.TVApp.tv.fase, txt: document.getElementById('localPausa').textContent }));
+  if (p1.fase === 'pausa' && p1.txt === '▶' && p1.lobby === 'none' && p2.fase === 'jogando' && p2.txt === '⏸') ok('só o celular: ⏸ do canto pausa (vira ▶) e continua'); else falhou('pausa: ' + JSON.stringify([p1, p2]));
+  await solo.evaluate(() => { document.getElementById('tv').classList.add('jogando'); document.getElementById('tvLobby').classList.add('ativa'); });
+  await solo.evaluate(() => window.BaguncaApp.TVApp.comando({ acao: 'parar' })); await solo.waitForTimeout(600);
+  const p3 = await solo.evaluate(() => ({ fase: window.BaguncaApp.TVApp.tv.fase, jogando: document.getElementById('tv').classList.contains('jogando'), comecar: getComputedStyle(document.getElementById('localComecar')).display }));
+  if (p3.fase === 'fim' && !p3.jogando && p3.comecar !== 'none') ok('só o celular: depois de parar, ▶ volta mesmo com estado velho'); else falhou('estado velho: ' + JSON.stringify(p3));
   await solo.setViewportSize({ width: 390, height: 844 });
   await solo.screenshot({ path: '/tmp/pagina-solo.png' });
   // v0.6: no dedo (sem câmera): o dedo varre uma fruta e marca ponto; deslizar para cima = pulo
