@@ -1,0 +1,20 @@
+{
+  "app": "peluqueria",
+  "versoes": [
+    {
+      "versao": "0.1.0",
+      "data": "31/Out/2026",
+      "hora": "16:15:00",
+      "pt": [
+        "Primeira versão da Peluqueria: um item desce sobre a imagem e você toca para ele parar no lugar certo.",
+        "12 cenários e 12 itens desenhados, três níveis (Criança, Normal, Maluco), pontos, multiplicador, estrelas e recorde.",
+        "Música animada feita pelo próprio jogo, voz com \"UHUL!\", funciona sem internet e na TV com o controle."
+      ],
+      "en": [
+        "First Peluqueria release: an item falls over the picture and you tap to stop it in the right spot.",
+        "12 drawn scenes and 12 items, three levels (Kids, Normal, Crazy), points, multiplier, stars and record.",
+        "Upbeat music made by the game itself, \"WOOHOO!\" voice, works offline and on the TV with the remote."
+      ]
+    }
+  ]
+}
