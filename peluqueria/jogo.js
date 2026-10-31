@@ -173,7 +173,7 @@
   }
 
   /* ---------- mensagens TV ↔ celular (v0.4.0): tudo que vem do canal passa aqui antes de ser usado ---------- */
-  var IDM = /^[a-z0-9]{6,12}$/, ACOES = ['parar', 'comecar', 'nivel', 'deNovo', 'menu'], FASES = ['lobby', 'contagem', 'jogo', 'fim'];
+  var IDM = /^[a-z0-9]{6,12}$/, CHAVE = /^[a-z0-9]{12,24}$/, NOMES_NIVEL = ['crianca', 'normal', 'maluco'], ACOES = ['parar', 'comecar', 'nivel', 'deNovo', 'menu'], FASES = ['lobby', 'contagem', 'jogo', 'fim'];
   function nomeMsg(n) { if (typeof n !== 'string') return null; n = n.replace(/\s+/g, ' ').trim(); return n && n.length <= 14 ? n : null; }
   function numero(v, a, b) { return typeof v === 'number' && isFinite(v) && v >= a && v <= b; }
   function validarMensagem(m) {
@@ -181,6 +181,9 @@
     var o = { t: m.t };
     if ('id' in m) { if (typeof m.id !== 'string' || !IDM.test(m.id)) return null; o.id = m.id; }
     if ('to' in m) { if (typeof m.to !== 'string' || !IDM.test(m.to)) return null; o.to = m.to; }
+    // senha do celular (k): só o celular e a TV conhecem; a TV nunca a repete no estado
+    var comChave = m.t === 'join' || m.t === 'cmd' || m.t === 'sair' || m.t === 'ping';
+    if (comChave) { if (typeof m.k !== 'string' || !CHAVE.test(m.k)) return null; o.k = m.k; }
     switch (m.t) {
       case 'tv': return o;
       case 'join': if (!o.id) return null; o.nome = nomeMsg(m.nome); if (m.dois === true) o.dois = true; return o.nome ? o : null;
@@ -193,11 +196,11 @@
         o.acao = m.acao;
         if ('q' in m) { if (!numero(m.q, 0, 1e15)) return null; o.q = m.q; }
         if ('j' in m) o.j = m.j === 1 ? 1 : 0;
-        if (m.acao === 'nivel') { if (!NIVEIS[m.nivel]) return null; o.nivel = m.nivel; }
+        if (m.acao === 'nivel') { if (NOMES_NIVEL.indexOf(m.nivel) < 0) return null; o.nivel = m.nivel; }
         return o;
       case 'estado':
         if (FASES.indexOf(m.fase) < 0) return null;
-        o.fase = m.fase; o.nivel = NIVEIS[m.nivel] ? m.nivel : 'normal';
+        o.fase = m.fase; o.nivel = NOMES_NIVEL.indexOf(m.nivel) >= 0 ? m.nivel : 'normal';
         o.jogadores = (Array.isArray(m.jogadores) ? m.jogadores : []).slice(0, 2).map(function (j) {
           j = j || {};
           return { id: typeof j.id === 'string' && IDM.test(j.id) ? j.id : '', nome: nomeMsg(j.nome) || '?', pontos: numero(j.pontos, 0, 999999) ? Math.round(j.pontos) : (numero(j.pontos, 0, Infinity) ? 999999 : 0), j: j.j === 1 ? 1 : 0 };

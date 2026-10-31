@@ -4,7 +4,7 @@ Isto coloca o ícone **💇 Peluqueria** na barra de apps da sua LG, igual ao Ne
 O app é só uma casca: ele abre a página publicada em solverone.com.br, já no papel de TV. Por isso
 toda atualização do site chega na TV sem reinstalar nada.
 
-Funciona em LG com webOS 3 ou mais nova (a sua 65UP7750 tem webOS 6.5). Nada é "destravado" na TV:
+Pensado para LG com webOS 6 ou mais nova (a sua 65UP7750 tem webOS 6.5, onde a Bagunçolândia já conectou celular e TV). Em TV mais antiga o pareamento pode não funcionar; o controle da TV continua jogando. Nada é "destravado" na TV:
 é o Modo Desenvolvedor oficial da LG.
 
 ## O que você precisa

@@ -30,8 +30,8 @@ button:focus-visible { outline: 3px solid var(--lima); outline-offset: 3px; }
 #contagem { align-items: center; justify-content: center; }
 .numero { font-size: 9rem; font-weight: 700; color: var(--ouro); text-shadow: 0 0 30px rgba(255,209,102,.6); }
 
-#rodada { position: fixed; inset: 0; background: var(--bg); touch-action: none; user-select: none; -webkit-user-select: none; }
-#palco { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#rodada { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: var(--bg); touch-action: none; user-select: none; -webkit-user-select: none; }
+#palco { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; display: block; }
 .placar { position: absolute; top: calc(8px + env(safe-area-inset-top)); left: 10px; display: flex; gap: 10px; align-items: baseline; font-weight: 700; pointer-events: none; text-shadow: 0 2px 6px #000; }
 #pontos { font-size: 2.2rem; color: var(--ouro); }
 .mult { font-size: 1.3rem; color: var(--lima); }
@@ -54,14 +54,14 @@ html.tv button:focus { outline: 4px solid var(--lima); outline-offset: 4px; }
 #inicio { position: relative; overflow: hidden; isolation: isolate; }
 #inicio > :not(.luzes):not(.flutuantes):not(.faixa) { position: relative; z-index: 2; }
 #inicio > .faixa { z-index: 3; }
-.luzes, .flutuantes { position: absolute; inset: 0; pointer-events: none; }
+.luzes, .flutuantes { position: absolute; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; }
 .luzes { z-index: 0; }
 .flutuantes { z-index: 1; }
 .feixe { position: absolute; bottom: -8%; width: 120vmax; height: 120vmax; margin-left: -60vmax; transform-origin: 50% 100%; mix-blend-mode: screen; opacity: .9; }
 .feixe.a { left: 12%; background: conic-gradient(from 180deg at 50% 100%, transparent 0 172deg, rgba(198,255,61,.42) 178deg, rgba(198,255,61,.0) 186deg, transparent 186deg); transform: rotate(-22deg); }
 .feixe.b { left: 50%; background: conic-gradient(from 180deg at 50% 100%, transparent 0 172deg, rgba(255,79,163,.45) 178deg, rgba(255,79,163,.0) 186deg, transparent 186deg); }
 .feixe.c { left: 88%; background: conic-gradient(from 180deg at 50% 100%, transparent 0 172deg, rgba(62,232,255,.42) 178deg, rgba(62,232,255,.0) 186deg, transparent 186deg); transform: rotate(22deg); }
-.brilhos { position: absolute; inset: 0; opacity: .7;
+.brilhos { position: absolute; top: 0; right: 0; bottom: 0; left: 0; opacity: .7;
   background-image: radial-gradient(2px 2px at 12% 18%, #fff, transparent), radial-gradient(2px 2px at 78% 12%, #ffd166, transparent), radial-gradient(3px 3px at 30% 70%, #fff, transparent), radial-gradient(2px 2px at 88% 60%, #c6ff3d, transparent), radial-gradient(2px 2px at 55% 35%, #3ee8ff, transparent), radial-gradient(3px 3px at 20% 88%, #ff4fa3, transparent), radial-gradient(2px 2px at 65% 85%, #fff, transparent), radial-gradient(2px 2px at 45% 8%, #fff, transparent); }
 .flutuantes img { position: absolute; top: -18%; left: var(--x); width: var(--w); opacity: .55; filter: drop-shadow(0 6px 8px rgba(0,0,0,.4)); }
 .logo { transition: transform .12s ease-out; background: linear-gradient(90deg, #fff 0%, #ff8ccb 25%, #ffd166 45%, #3ee8ff 65%, #fff 85%); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(0 0 14px rgba(255,79,163,.8)) drop-shadow(0 4px 0 #8a1f5c); }
@@ -117,11 +117,11 @@ body.marcar { overflow-y: auto; }
 .tv-jogadores { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; min-height: 3rem; }
 .tv-jogadores span { background: var(--card); border-radius: 999px; padding: 8px 18px; font-size: 1.3rem; font-weight: 600; }
 .tv-jogadores span:nth-child(1) { color: var(--lima); } .tv-jogadores span:nth-child(2) { color: var(--rosa); }
-#tvJogo { position: fixed; inset: 0; background: var(--bg); }
-.tv-area { position: absolute; inset: 0; display: flex; }
+#tvJogo { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: var(--bg); }
+.tv-area { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; }
 .tv-lado { position: relative; flex: 1; min-width: 0; }
 .tv-lado + .tv-lado { border-left: 4px solid #000; }
-.tv-lado canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tv-lado canvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; display: block; }
 .tv-placar { position: absolute; top: 10px; left: 12px; font-weight: 700; font-size: 1.6rem; text-shadow: 0 2px 6px #000; pointer-events: none; }
 .tv-placar b { color: var(--ouro); font-size: 2.2rem; }
 #tvLado1 .tv-placar span:first-child { color: var(--rosa); } .tv-lado:first-child .tv-placar span:first-child { color: var(--lima); }
@@ -141,6 +141,6 @@ body.marcar { overflow-y: auto; }
 .ct-parar.disparou { background: radial-gradient(circle at 50% 40%, #ffd1e8, var(--rosa)); }
 .ct-corpo { display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; }
 .ct-camera { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden; background: #000; }
-.ct-camera video, .ct-camera canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ct-camera video, .ct-camera canvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
 .ct-camera video { transform: scaleX(-1); }
 .tv-podio p { flex-basis: 100%; font-size: 2rem; color: var(--ouro); font-weight: 700; }

@@ -8,8 +8,9 @@
   'use strict';
   var A = window.PeluqueriaApp, $ = function (id) { return document.getElementById(id); };
   var T = A.T, TESTE = A.TESTE, G = window.PeluqueriaGesto;
+  var PING = TESTE ? 700 : 2000, SUMIU = TESTE ? 2000 : 10000;   // sem notícia da TV há tanto tempo: avisa
   var ct = { aberto: false, canal: null, id: '', nome: '', codigo: '', conectado: false, offset: null, amostras: [], fase: '', dois: false, corpo: false,
-    gestos: [G.criar(), G.criar()], stream: null, timers: [], ultimoQuadro: 0 };
+    gestos: [G.criar(), G.criar()], pares: null, stream: null, timers: [], ultimoQuadro: 0, k: '', recusado: false, ultimaTV: 0, trava: null, ligando: 0 };
 
   function agora() { return performance.now(); }
   function mandar(m) { if (ct.canal) ct.canal.mandar(m); }
@@ -18,7 +19,12 @@
     try { var g = sessionStorage.getItem('peluqueria-id'); if (g && /^[a-z0-9]{6,12}$/.test(g)) return g; } catch (e) {}
     var n = PeluqueriaSala.idNovo(); try { sessionStorage.setItem('peluqueria-id', n); } catch (e) {} return n;
   }
-  function join() { var m = { t: 'join', id: ct.id, nome: ct.nome }; if (ct.dois) m.dois = true; mandar(m); }
+  function senha() {   // senha deste celular: vai só para a TV, que nunca a repete; ninguém se passa por ele
+    try { var g = sessionStorage.getItem('peluqueria-k'); if (g && /^[a-z0-9]{12,24}$/.test(g)) return g; } catch (e) {}
+    var n = (PeluqueriaSala.idNovo() + PeluqueriaSala.idNovo()).slice(0, 16); try { sessionStorage.setItem('peluqueria-k', n); } catch (e) {} return n;
+  }
+  function join() { if (ct.recusado) return; var m = { t: 'join', id: ct.id, k: ct.k, nome: ct.nome }; if (ct.dois) m.dois = true; mandar(m); }
+  function manterAcesa() { try { if (navigator.wakeLock && !ct.trava) navigator.wakeLock.request('screen').then(function (w) { ct.trava = w; w.addEventListener && w.addEventListener('release', function () { ct.trava = null; }); }).catch(function () {}); } catch (e) {} }
 
   /* ---------- relógio da TV: guarda as 5 últimas medidas e usa a de menor ida e volta ---------- */
   function pong(m) {
@@ -30,11 +36,15 @@
   function receber(m) {
     if (m.t === 'tv') { join(); return; }
     if (m.t === 'pong' && m.to === ct.id) { pong(m); return; }
-    if (m.t === 'cheia' && m.to === ct.id) { status(T('Esta TV já tem 2 jogadores.', 'This TV already has 2 players.')); return; }
-    if (m.t === 'estado') atualizar(m);
+    if (m.t === 'cheia' && m.to === ct.id) { ct.recusado = true; status(T('Esta TV já tem 2 jogadores.', 'This TV already has 2 players.')); return; }
+    if (m.t === 'estado') { ct.ultimaTV = agora(); atualizar(m); }
   }
   function atualizar(m) {
     var meus = m.jogadores.filter(function (j) { return j.id === ct.id; });
+    if (ct.recusado) {
+      if (meus.length || (m.fase === 'lobby' && m.jogadores.filter(function (j) { return j.id; }).length < 2)) ct.recusado = false;   // abriu vaga
+      else return;
+    }
     if (!meus.length && m.fase === 'lobby') { join(); }
     ct.conectado = meus.length > 0 || ct.conectado; ct.fase = m.fase;
     var jogando = m.fase === 'jogo' || m.fase === 'contagem';
@@ -52,9 +62,9 @@
   }
 
   /* ---------- parar ---------- */
-  function parar(j) {
-    var m = { t: 'cmd', id: ct.id, acao: 'parar' };
-    if (ct.offset != null) { var q = agora() + ct.offset; if (q >= 0) m.q = q; }
+  function parar(j, antesMs) {   // antesMs: o gesto começou um pouco antes de ser reconhecido
+    var m = { t: 'cmd', id: ct.id, k: ct.k, acao: 'parar' };
+    if (ct.offset != null) { var q = agora() - (antesMs || 0) + ct.offset; if (q >= 0) m.q = q; }
     if (ct.dois) m.j = j === 1 ? 1 : 0;
     mandar(m);
     var b = $('ctParar'); b.classList.add('disparou'); setTimeout(function () { b.classList.remove('disparou'); }, 250);
@@ -64,9 +74,13 @@
   /* ---------- corpo: câmera + esqueleto + gesto brusco ---------- */
   function processarPoses(poses, t) {
     if (!Array.isArray(poses)) return;
-    var n = ct.dois ? Math.min(2, poses.length) : Math.min(1, poses.length);
-    for (var i = 0; i < n; i++) if (ct.gestos[i].ver(poses[i], t)) parar(i);
-    desenharEsqueleto(poses.slice(0, n));
+    ct.pares = G.parear(ct.pares, poses);   // cada pessoa no seu lugar, mesmo se o detector trocar a ordem
+    var n = ct.dois ? 2 : 1, vistos = [];
+    for (var i = 0; i < n; i++) {
+      var p = ct.pares.poses[i]; if (!p) continue; vistos.push(p);
+      if (ct.gestos[i].ver(p, t)) parar(i, Math.max(0, t - ct.gestos[i].inicio()));
+    }
+    desenharEsqueleto(vistos);
   }
   function desenharEsqueleto(poses) {
     var cv = $('ctEsq'); if (!cv || cv.offsetParent === null) return;
@@ -85,22 +99,28 @@
     if (poses) processarPoses(poses, t);
   }
   function ligarCorpo() {
+    if (ct.ligando) return;
+    var vez = ct.ligando = Date.now();
+    var valendo = function () { return ct.ligando === vez && ct.aberto; };
     status(T('Ligando a câmera e a inteligência do corpo (na primeira vez baixa ~20 MB)…', 'Starting the camera and body AI (first time downloads ~20 MB)…'));
     $('ctCamera').hidden = false; $('ctDicaCorpo').hidden = false; $('ctDois').hidden = false;
     return navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false }).then(function (s) {
+      if (!valendo()) { s.getTracks().forEach(function (t) { t.stop(); }); throw new Error('cancelado'); }
       ct.stream = s; var v = $('ctVideo'); v.srcObject = s; v.play().catch(function () {});
       return PeluqueriaEsqueleto.carregar();
     }).then(function () {
-      ct.corpo = true; $('ctCorpo').setAttribute('aria-pressed', 'true');
+      if (!valendo()) throw new Error('cancelado');
+      ct.ligando = 0; ct.corpo = true; $('ctCorpo').setAttribute('aria-pressed', 'true'); manterAcesa();
       status(T('Pronto! Levante um braço ou chute de repente para parar.', 'Ready! Raise an arm or kick suddenly to stop.'));
       laco();
-    }).catch(function () {
+    }).catch(function (e) {
+      if (e && e.message === 'cancelado') return;
       desligarCorpo();
       status(T('Não deu para ligar a câmera. Use o botão PARAR.', "Couldn't start the camera. Use the STOP button."));
     });
   }
   function desligarCorpo() {
-    ct.corpo = false; $('ctCorpo').setAttribute('aria-pressed', 'false');
+    ct.corpo = false; ct.ligando = 0; ct.pares = null; ct.gestos.forEach(function (g) { g.zerar(); }); $('ctCorpo').setAttribute('aria-pressed', 'false');
     if (ct.stream) ct.stream.getTracks().forEach(function (t) { t.stop(); });
     ct.stream = null; $('ctCamera').hidden = true; $('ctDicaCorpo').hidden = true; $('ctDois').hidden = true;
   }
@@ -110,21 +130,25 @@
     var codigo = $('ctCodigo').value.trim().toUpperCase(), nome = $('ctNome').value.replace(/\s+/g, ' ').trim();
     if (!/^[A-Z]{4}$/.test(codigo)) { $('ctCodigo').focus(); return; }
     if (!nome || nome.length > 14) { $('ctNome').focus(); return; }
-    ct.codigo = codigo; ct.nome = nome; ct.id = idProprio();
+    ct.codigo = codigo; ct.nome = nome; ct.id = idProprio(); ct.k = senha(); ct.recusado = false; ct.ultimaTV = agora();
     var pref = A.pref(); pref.nome = nome; A.gravarPref();
     $('ctEntrada').hidden = true; $('ctPainel').hidden = false; $('ctParar').hidden = true;
     status(T('Procurando a TV…', 'Looking for the TV…'));
     PeluqueriaSala.abrir(codigo, receber).then(function (c) {
       ct.canal = c; join();
       ct.timers.push(setInterval(function () { if (!ct.conectado) join(); }, 2000));
-      ct.timers.push(setInterval(function () { mandar({ t: 'ping', id: ct.id, a: agora() }); }, 2000));
-      mandar({ t: 'ping', id: ct.id, a: agora() });
+      ct.timers.push(setInterval(function () { mandar({ t: 'ping', id: ct.id, k: ct.k, a: agora() }); }, PING));
+      ct.timers.push(setInterval(function () {
+        if (ct.conectado && agora() - ct.ultimaTV > SUMIU) { ct.conectado = false; status(T('TV não encontrada. Ela fechou ou mudou de código? Confira e entre de novo.', 'TV not found. Was it closed or did the code change? Check and join again.')); }
+      }, 1000));
+      mandar({ t: 'ping', id: ct.id, k: ct.k, a: agora() });
       setTimeout(function () { if (!ct.conectado) status(T('TV não encontrada. Confira o código e se a TV está na tela do código.', 'TV not found. Check the code and that the TV shows it.')); }, 8000);
     }).catch(function () { status(T('Sem internet para falar com a TV.', 'No internet to reach the TV.')); });
-    try { if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(function () {}); } catch (e) {}
+    manterAcesa();
   }
   function sair() {
-    mandar({ t: 'sair', id: ct.id });
+    mandar({ t: 'sair', id: ct.id, k: ct.k });
+    try { if (ct.trava) ct.trava.release(); } catch (e) {} ct.trava = null;
     ct.timers.forEach(clearInterval); ct.timers = [];
     if (ct.canal) ct.canal.fechar(); ct.canal = null; ct.conectado = false; ct.offset = null; ct.amostras = [];
     desligarCorpo(); ct.aberto = false;
@@ -144,14 +168,19 @@
   $('ctNome').addEventListener('keydown', function (e) { if (e.key === 'Enter') entrar(); });
   $('ctSair').addEventListener('click', sair);
   $('ctParar').addEventListener('pointerdown', function (e) { e.preventDefault(); parar(0); });
-  $('ctComecar').addEventListener('click', function () { mandar({ t: 'cmd', id: ct.id, acao: ct.fase === 'fim' ? 'deNovo' : 'comecar' }); });
-  document.querySelectorAll('[data-nivel-tv]').forEach(function (b) { b.addEventListener('click', function () { mandar({ t: 'cmd', id: ct.id, acao: 'nivel', nivel: b.getAttribute('data-nivel-tv') }); }); });
+  $('ctComecar').addEventListener('click', function () { mandar({ t: 'cmd', id: ct.id, k: ct.k, acao: ct.fase === 'fim' ? 'deNovo' : 'comecar' }); });
+  document.querySelectorAll('[data-nivel-tv]').forEach(function (b) { b.addEventListener('click', function () { mandar({ t: 'cmd', id: ct.id, k: ct.k, acao: 'nivel', nivel: b.getAttribute('data-nivel-tv') }); }); });
   $('ctCorpo').addEventListener('click', function () { if (ct.corpo) desligarCorpo(); else ligarCorpo(); });
   $('ctDois').addEventListener('click', function () {
     ct.dois = !ct.dois; $('ctDois').setAttribute('aria-pressed', String(ct.dois));
     join();   // a TV, no lobby, reserva 1 ou 2 jogadores para este celular
   });
-  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && ct.canal) { join(); } });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible' || !ct.canal) return;
+    ct.amostras = []; ct.offset = null;   // depois de dormir, o relógio do celular pode ter parado: mede de novo
+    mandar({ t: 'ping', id: ct.id, k: ct.k, a: agora() }); join(); manterAcesa();
+  });
+  window.addEventListener('pagehide', function () { if (ct.canal) mandar({ t: 'sair', id: ct.id, k: ct.k }); });   // fechou a aba: libera a vaga
 
   if (TESTE) {
     var tSim = 0;

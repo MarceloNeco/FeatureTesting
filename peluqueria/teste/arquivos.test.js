@@ -60,3 +60,9 @@ test('Peluqueria aparece no Feature Tester e obedece o interruptor', () => {
 test('documentos da pasta existem', () => {
   for (const f of ['LEIA-ME.md', 'CREDITOS.md', 'PENDENCIAS.md', 'meus/LEIA-ME.md', 'musicas/LEIA-ME.md']) assert.ok(fs.existsSync(path.join(pasta, f)), 'falta ' + f);
 });
+
+test('CSS: todo "inset" vem junto com top/right/bottom/left (TV LG antiga não entende inset)', () => {
+  const css = ler('estilo.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  const regras = css.split('}').filter(r => /(^|[;{\s])inset\s*:/.test(r));
+  for (const r of regras) assert.ok(/(^|[;{\s])top\s*:/.test(r) && /(^|[;{\s])left\s*:/.test(r) && /(^|[;{\s])right\s*:/.test(r) && /(^|[;{\s])bottom\s*:/.test(r), 'sem top/left/right/bottom: ' + r.trim().slice(0, 80));
+});

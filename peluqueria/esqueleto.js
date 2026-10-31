@@ -30,7 +30,7 @@
     var r; try { r = landmarker.detectForVideo(video, ts); } catch (e) { return null; }
     if (!r || !r.landmarks || !r.landmarks.length) return [];
     return r.landmarks.slice(0, 2).map(function (lm) {
-      return IDX.map(function (i) { var p = lm[i] || { x: 0.5, y: 0.5 }; return [+(1 - p.x).toFixed(3), +p.y.toFixed(3)]; });
+      return IDX.map(function (i) { var p = lm[i] || { x: 0.5, y: 0.5, visibility: 0 }; return [+(1 - p.x).toFixed(3), +p.y.toFixed(3), +(p.visibility != null ? p.visibility : 1).toFixed(2)]; });   // 3º valor: visibilidade (o gesto ignora ponta inventada)
     }).sort(function (a, b) { return a[7][0] - b[7][0]; });   // da esquerda para a direita da TV (pelo quadril)
   }
   function pronto() { return !!landmarker; }

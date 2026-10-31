@@ -7,6 +7,7 @@
   'use strict';
   var A = window.PeluqueriaApp, P = window.Peluqueria, $ = function (id) { return document.getElementById(id); };
   var T = A.T, TESTE = A.TESTE, CONTAGEM = 2.1;
+  var SUMIU = TESTE ? 2000 : 10000, ESTADO = TESTE ? 800 : 3000;   // celular sem sinal há tanto tempo sai do lobby
   var NIVEIS = ['crianca', 'normal', 'maluco'], NOME_NIVEL = { crianca: ['Criança', 'Kids'], normal: ['Normal', 'Normal'], maluco: ['Maluco', 'Crazy'] };
   var ROTULO = { PERFEITO: ['PERFEITO!', 'PERFECT!'], BOM: ['BOM!', 'GOOD!'], QUASE: ['QUASE!', 'ALMOST!'], LONGE: ['LONGE!', 'MISS!'] };
   var tv = { aberta: false, codigo: '', canal: null, jogadores: [], nivel: 'normal', fase: 'lobby', partida: null, desenhos: [], resto: 0 };
@@ -34,6 +35,8 @@
   }
   function receber(m) {
     var jog = tv.jogadores.filter(function (x) { return x.id === m.id; })[0];
+    if (jog && m.k !== jog.k) return;              // sem a senha deste celular: ninguém se passa por ele
+    if (jog) jog.visto = agora();
     if (m.t === 'join') {
       var quer = m.dois ? 2 : 1;
       if (jog) {
@@ -47,7 +50,7 @@
       if (tv.fase !== 'lobby') return;                                   // durante a rodada ninguém novo entra
       var livres = [0, 1].filter(function (j) { return usados().indexOf(j) < 0; });
       if (livres.length < quer) { mandar({ t: 'cheia', to: m.id }); return; }
-      tv.jogadores.push({ id: m.id, nome: m.nome, js: livres.slice(0, quer) });
+      tv.jogadores.push({ id: m.id, k: m.k, nome: m.nome, js: livres.slice(0, quer), visto: agora() });
       A.efeito('BOM'); desenharLobby(); estado(); return;
     }
     if (!jog) return;
@@ -115,6 +118,7 @@
   /* ---------- jogo ---------- */
   function parar(j, atraso) {
     if (tv.fase !== 'jogo' || !tv.partida) return;
+    tv.ultimoAtraso = atraso;
     tv.partida.parar(j, atraso);
     processar();
   }
@@ -167,6 +171,20 @@
   window.addEventListener('resize', function () { tv.desenhos.forEach(function (d) { d.redimensionar(); }); });
   $('tvComecar').addEventListener('click', function () { if (tv.fase === 'lobby') comecar(); });
 
+  function limparSumidos() {
+    if (tv.fase !== 'lobby' && tv.fase !== 'fim') return;
+    var antes = tv.jogadores.length, t = agora();
+    tv.jogadores = tv.jogadores.filter(function (x) { return t - x.visto < SUMIU; });
+    if (tv.jogadores.length !== antes) { desenharLobby(); estado(); }
+  }
+  function sair() {   // 🏠 no lobby (navegador do celular/computador): volta ao início
+    tv.aberta = false; (tv.timers || []).forEach(clearInterval);
+    if (tv.canal) tv.canal.fechar(); tv.canal = null; tv.jogadores = []; tv.partida = null;
+    if (!A.TV) document.documentElement.classList.remove('tv');
+    A.voltarInicio();
+  }
+  $('tvSair').addEventListener('click', sair);
+
   /* ---------- abrir ---------- */
   function abrir() {
     if (tv.aberta) return;
@@ -176,7 +194,7 @@
     lobby();
     PeluqueriaSala.abrir(tv.codigo, receber).then(function (c) { tv.canal = c; mandar({ t: 'tv' }); estado(); })
       .catch(function () { $('tvAviso').textContent = T('Sem conexão com os celulares agora. Dá para jogar com o controle da TV (OK).', 'No connection to phones right now. You can play with the TV remote (OK).'); });
-    setInterval(estado, 3000);
+    tv.timers = [setInterval(estado, ESTADO), setInterval(limparSumidos, 1000)];
     if (!TESTE) requestAnimationFrame(quadro);
     if (TESTE) window.PeluqueriaTVDebug.pronto = true;
   }
@@ -189,7 +207,7 @@
       ultimo: function (j) { var r = tv.partida && tv.partida.rodadas[j]; return r && r.resultados.length ? r.resultados[r.resultados.length - 1].categoria : null; },
       resultados: function (j) { var r = tv.partida && tv.partida.rodadas[j]; return r ? r.resultados.length : 0; },
       jogadores: function () { return tv.partida ? tv.partida.rodadas.length : 0; },
-      nivel: function () { return tv.nivel; }, fase: function () { return tv.fase; }
+      nivel: function () { return tv.nivel; }, fase: function () { return tv.fase; }, atraso: function () { return tv.ultimoAtraso; }
     };
   }
   window.PeluqueriaTV = { abrir: abrir };

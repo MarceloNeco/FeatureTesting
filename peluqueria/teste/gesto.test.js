@@ -71,3 +71,49 @@ test('pontos inválidos não quebram', () => {
   assert.equal(g.ver([[NaN, 1]], 10), false);
   assert.equal(g.ver(corpo(0.2, 0.5), 20), false);
 });
+
+/* revisão 0.4.0: câmera de verdade */
+const mover = (p, dx, dy) => p.map(q => [q[0] + dx, q[1] + dy].concat(q.length > 2 ? [q[2]] : []));
+test('o corpo inteiro pulando ou andando não dispara (conta o braço em relação ao tronco)', () => {
+  const g = G.criar(), q = [];
+  for (let k = 0; k < 6; k++) q.push([k * FPS, corpo(0.2, 0.4)]);
+  for (let k = 1; k <= 3; k++) q.push([(5 + k) * FPS, mover(corpo(0.2, 0.4), 0.06 * k, -0.04 * k)]);
+  assert.equal(rodar(g, q), 0);
+});
+test('pé fora do quadro (visibilidade baixa) tremendo muito não dispara; chute com pé visível dispara', () => {
+  const g = G.criar(), q = [];
+  for (let k = 0; k < 40; k++) q.push([k * FPS, corpo(0.2, 0.5, p => { p[11] = [0.43 + (k % 2 ? 0.12 : -0.12), 1.1, 0.2]; p[12] = [0.57, 1.05 + (k % 3) * 0.1, 0.1]; })]);
+  assert.equal(rodar(g, q), 0);
+  const g2 = G.criar(), q2 = [];
+  for (let k = 0; k < 6; k++) q2.push([k * FPS, corpo(0.2, 0.5, p => { p[12] = [0.57, 0.9, 0.95]; })]);
+  q2.push([6 * FPS, corpo(0.2, 0.5, p => { p[12] = [0.69, 0.84, 0.95]; })]);
+  assert.equal(rodar(g2, q2), 1);
+});
+test('pessoa sumiu por um instante e voltou com o braço em outro lugar: não dispara', () => {
+  const g = G.criar(), q = [];
+  for (let k = 0; k < 6; k++) q.push([k * FPS, corpo(0.2, 0.5)]);
+  q.push([12 * FPS, corpo(0.2, 0.5, p => { p[5] = [p[5][0], 0.36]; })]);   // 400 ms sem ver a pessoa
+  assert.equal(rodar(g, q), 0);
+});
+test('instante do gesto = começo do movimento (para não chegar sempre atrasado)', () => {
+  const g = G.criar(); let disparou = null;
+  const q = [];
+  for (let k = 0; k < 6; k++) q.push([k * FPS, corpo(0.2, 0.5)]);
+  for (let k = 1; k <= 3; k++) q.push([(5 + k) * FPS, corpo(0.2, 0.5, p => { p[5] = [p[5][0], 0.56 - 0.05 * k]; })]);
+  for (const [t, p] of q) if (g.ver(p, t) && disparou === null) disparou = t;
+  assert.ok(disparou !== null);
+  assert.ok(g.inicio() >= 5 * FPS - 1 && g.inicio() <= 6 * FPS + 1, 'início ' + g.inicio());   // o braço sai do lugar entre o quadro 5 e o 6
+});
+test('parear: cada pessoa continua no seu lugar mesmo quando a câmera perde uma ou troca a ordem', () => {
+  const esq = corpo(0.15, 0.3), dir = corpo(0.15, 0.7);
+  let pr = G.parear(null, [esq, dir]);
+  assert.equal(pr.poses[0], esq); assert.equal(pr.poses[1], dir);
+  pr = G.parear(pr, [dir]);                 // a da esquerda sumiu: a da direita NÃO vira a 1
+  assert.equal(pr.poses[0], null); assert.equal(pr.poses[1], dir);
+  pr = G.parear(pr, [dir, esq]);            // voltou, em outra ordem
+  assert.equal(pr.poses[0], esq); assert.equal(pr.poses[1], dir);
+  // e o gesto da pessoa 1 não dispara por causa da troca
+  const g = G.criar(); let n = 0, cs = null;
+  for (let k = 0; k < 12; k++) { const lista = k === 8 ? [dir] : (k % 2 ? [dir, esq] : [esq, dir]); const r = G.parear(cs, lista); cs = r; if (r.poses[0] && g.ver(r.poses[0], k * FPS)) n++; }
+  assert.equal(n, 0);
+});

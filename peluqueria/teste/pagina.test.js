@@ -208,13 +208,15 @@ async function comecar(pg, nivel) {
     confere(await D(tv, () => PeluqueriaTVDebug.ultimo(0)) === 'PERFEITO', 'tocar PARAR no celular para o item na TV');
     await D(tv, () => PeluqueriaTVDebug.passo(2100));
     // corpo: gesto brusco simulado (esqueleto falso) para o item
-    await D(tv, () => PeluqueriaTVDebug.passo(PeluqueriaTVDebug.tempoAteAlvo(0)));
+    await D(tv, () => PeluqueriaTVDebug.passo(500));
     await D(cel, () => PeluqueriaControleDebug.tremer(1500));
     await tv.waitForTimeout(200);
     confere(await D(tv, () => PeluqueriaTVDebug.resultados(0)) === 1, 'tremidinha no celular não para o item');
+    // o relógio do jogo no teste fica parado: o gesto vem logo depois de chegar na hora certa
+    await D(tv, () => PeluqueriaTVDebug.passo(PeluqueriaTVDebug.tempoAteAlvo(0)));
     await D(cel, () => PeluqueriaControleDebug.levantarBraco());
     await tv.waitForTimeout(250);
-    confere(await D(tv, () => PeluqueriaTVDebug.resultados(0)) === 2 && await D(tv, () => PeluqueriaTVDebug.ultimo(0)) === 'PERFEITO', 'levantar o braço de repente para o item');
+    confere(await D(tv, () => PeluqueriaTVDebug.resultados(0)) === 2 && await D(tv, () => PeluqueriaTVDebug.ultimo(0)) === 'PERFEITO', 'levantar o braço de repente para o item', await D(tv, () => [PeluqueriaTVDebug.resultados(0), PeluqueriaTVDebug.ultimo(0), PeluqueriaTVDebug.atraso()]));
     // mensagem estranha no canal é ignorada
     await D(tv, (c) => new BroadcastChannel('peluqueria-' + c).postMessage({ t: 'cmd', acao: 'apagar', id: 'x' }), codigo);
     // segundo celular durante a rodada não entra; no lobby entra e a tela divide
@@ -240,6 +242,34 @@ async function comecar(pg, nivel) {
     await tv.screenshot({ path: '/tmp/peluqueria-tv-fim.png' });
     await cel.waitForTimeout(300);
     confere(/Ana|venceu|empate/i.test(await cel.textContent('#ctStatus')), 'celular mostra o resultado', await cel.textContent('#ctStatus'));
+    // revisão 0.4.0: senha do celular, vaga fantasma, TV cheia, TV sumiu, sair da TV
+    await cel.click('#ctComecar'); await tv.waitForTimeout(150); await D(tv, () => PeluqueriaTVDebug.passo(2200));
+    const idAna = await D(cel, () => sessionStorage.getItem('peluqueria-id'));
+    const r0 = await D(tv, () => PeluqueriaTVDebug.resultados(0));
+    await D(tv, ([c, id]) => new BroadcastChannel('peluqueria-' + c).postMessage({ t: 'cmd', id, k: 'senhaerrada1234', acao: 'parar' }), [codigo, idAna]);
+    await tv.waitForTimeout(200);
+    confere(await D(tv, () => PeluqueriaTVDebug.resultados(0)) === r0 && await tv.isVisible('#tvJogo'), 'sem a senha do celular, ninguém se passa pelo jogador');
+    await tv.keyboard.press('Escape'); await tv.waitForTimeout(100);
+    const cel3 = await ctxTV.newPage(); await cel3.setViewportSize({ width: 390, height: 844 });
+    await cel3.goto(base + '?teste'); await cel3.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
+    await cel3.click('#btControle'); await cel3.fill('#ctCodigo', codigo); await cel3.fill('#ctNome', 'Caio'); await cel3.click('#ctEntrar');
+    await cel3.waitForTimeout(3500);
+    confere(/2 jogadores/.test(await cel3.textContent('#ctStatus')), 'terceiro celular vê "TV com 2 jogadores" (não "Conectado")', await cel3.textContent('#ctStatus'));
+    await cel2.close();   // Bia fechou a aba: sai na hora, e o Caio, que esperava, pega a vaga
+    await tv.waitForTimeout(2000);
+    confere(!/Bia/.test(await tv.textContent('#tvJogadores')), 'quem fecha a aba libera a vaga');
+    confere(/Caio/.test(await tv.textContent('#tvJogadores')), 'o celular que esperava entra na vaga livre');
+    await cel3.close(); await tv.waitForTimeout(400);
+    await D(tv, (c) => new BroadcastChannel('peluqueria-' + c).postMessage({ t: 'join', id: 'fantasma1', k: 'fantasmasenha12', nome: 'Fantasma' }), codigo);
+    await tv.waitForTimeout(300);
+    confere(/Fantasma/.test(await tv.textContent('#tvJogadores')), 'celular novo entra');
+    await tv.waitForTimeout(2500);
+    confere(!/Fantasma/.test(await tv.textContent('#tvJogadores')) && /Ana/.test(await tv.textContent('#tvJogadores')), 'celular que some (sem sinal) sai do lobby; quem está ativo fica');
+    await tv.click('#tvSair');
+    confere(await tv.isVisible('#inicio'), '🏠 no lobby da TV volta ao início');
+    await tv.close();
+    await cel.waitForTimeout(2500);
+    confere(/não encontrada|not found/i.test(await cel.textContent('#ctStatus')), 'celular percebe quando a TV some', await cel.textContent('#ctStatus'));
     confere(errosTV.length === 0 && errosCel.length === 0, 'TV e celular sem erros', errosTV.concat(errosCel));
     await ctxTV.close();
   }
