@@ -2,6 +2,21 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.7.0",
+      "data": "31/Out/2026",
+      "hora": "09:40:00",
+      "pt": [
+        "Boneco refeito do zero, estilo boneco de pano: proporção de criança, mãozinhas, costuras, roupas com forma de roupa (camiseta, vestido, macacão, capa, túnica, armadura).",
+        "Cabeças humanas: Menino e Menina com 9 cabelos e 10 cores de cabelo, mais Boneco de pano, Elfo, Pequenino, Mago, Cavaleiro e Robô; as frutas da turma continuam como opção.",
+        "Acessórios novos (boné, tiara). A prévia do boneco fica fixa no topo enquanto você escolhe."
+      ],
+      "en": [
+        "Avatar rebuilt from scratch, rag-doll style: kid proportions, little hands, stitching, outfits that look like outfits (t-shirt, dress, overalls, cape, tunic, armour).",
+        "Human heads: Boy and Girl with 9 hairstyles and 10 hair colours, plus Rag doll, Elf, Halfling, Wizard, Knight and Robot; the fruit crew remains an option.",
+        "New accessories (cap, tiara). The avatar preview stays pinned at the top while you choose."
+      ]
+    },
+    {
       "versao": "0.6.0",
       "data": "31/Out/2026",
       "hora": "08:20:00",

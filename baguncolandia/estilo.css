@@ -68,11 +68,11 @@ footer { text-align: center; color: var(--muted); font-size: .75rem; padding: 1.
 .linha > span { flex: 0 0 5.5rem; color: var(--muted); font-size: .9rem; }
 .linha .grupo { flex: 1; }
 .ctl button { font-size: 1.4rem; padding: .6rem 0; }
-.picker .previa { display: flex; justify-content: center; }
-.picker canvas { width: 140px; height: 180px; background: radial-gradient(ellipse at 50% 30%, #2b2460, var(--card)); border-radius: 14px; border: 1px solid var(--border); }
+.picker .previa { display: flex; justify-content: center; position: sticky; top: .4rem; z-index: 3; }
+.picker .previa canvas { width: 150px; height: 200px; background: radial-gradient(ellipse at 50% 30%, #2b2460, var(--card)); border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,.5); }
 .picker .cabecas { display: flex; gap: .4rem; overflow-x: auto; padding: .2rem 0; scrollbar-width: thin; }
 .picker .cabecas button { flex: 0 0 56px; width: 56px; height: 56px; padding: 4px; border-radius: 14px; }
-.picker .cabecas button svg, .picker .cabecas button img { width: 100%; height: 100%; display: block; }
+.picker .cabecas button svg, .picker .cabecas button img, .picker .cabecas button canvas { width: 100%; height: 100%; display: block; }
 .picker .cores { display: flex; gap: .4rem; flex-wrap: wrap; }
 .picker .cores button { width: 36px; height: 36px; min-height: 36px; padding: 0; border-radius: 50%; border: 3px solid transparent; }
 .picker .cores button.ativo { border-color: #fff; box-shadow: 0 0 0 2px var(--lima); }
@@ -116,7 +116,10 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #tv.toque #tvFundo { display: none; }
 #tvLocalBar .grupo button { flex: 0 0 auto; font-size: 1.3rem; padding: .4rem .7rem; }
 #tvLocalBar #localComecar { flex: 1; }
-#tv.jogando #localModos, #tv.jogando #localPessoas, #tv.jogando #dicaGire { display: none; }   /* durante a rodada a barra encolhe para não cobrir o palco */
+#tv.jogando #localModos, #tv.jogando #localPessoas, #tv.jogando #dicaGire { display: none; }
+#localBoneco { display: none; }
+#tv.toque #localBoneco { display: inline-block; }
+#localBoneco.ativo { border-color: var(--lima); box-shadow: inset 0 0 0 2px var(--lima); }   /* durante a rodada a barra encolhe para não cobrir o palco */
 .cheia { position: absolute; inset: 0; z-index: 8; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 2vh; text-align: center; padding: 4vh; background: radial-gradient(ellipse at center, #241a5e 0%, #06051a 75%); }
 .cheia.ativa { display: flex; }
 .cheia p { font-size: 3vh; color: #d8d2f0; max-width: 84vw; line-height: 1.4; }
