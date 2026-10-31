@@ -357,6 +357,99 @@ I['capacete-viking'] = { nome: { pt: 'Capacete viking', en: 'Viking helmet' }, l
     `<path d="M230 52 V205" stroke="#c98a3a" stroke-width="24"/><path d="M230 52 V205" ${st(4)} fill="none"/>` +
     `<g fill="#7b5a2a">${[130, 170, 290, 330].map(x => `<circle cx="${x}" cy="225" r="7"/>`).join('')}</g>` + brilho('M150 150 Q160 90 200 70', 12, 0.6)) };
 
+/* ------------- lugares fora do centro (v0.3.1): mão, orelha, ombro, pescoço -------------
+   Cada bicho ganha um braço com a mão aberta levantada ao lado do rosto (asa, nadadeira ou luva conforme o
+   bicho) — a pista de onde o sorvete, o balão… vão parar. Coordenadas em 1000×1000. */
+const EXTRAS = {
+  cachorro: { tipo: 'mao', cor: 'url(#pelo)', mao: [880, 590], de: [640, 860], ombro: [395, 818], pescoco: [500, 745], orelha: [240, 610] },
+  gato: { tipo: 'mao', cor: 'url(#pelo)', mao: [125, 560], de: [360, 850], ombro: [612, 806], pescoco: [500, 712], orelha: [655, 265] },
+  tubarao: { tipo: 'nadadeira', cor: 'url(#pele)', mao: [120, 520], de: [262, 640], ombro: [690, 415], pescoco: [500, 740] },
+  bebe: { tipo: 'mao', cor: 'url(#pele)', manga: 'url(#roupa)', mao: [875, 560], de: [650, 860], ombro: [385, 800], pescoco: [500, 752], orelha: [262, 525] },
+  vovo: { tipo: 'mao', cor: 'url(#pele)', manga: 'url(#blusa)', mao: [150, 540], de: [330, 860], ombro: [615, 810], pescoco: [500, 778], orelha: [708, 505] },
+  coruja: { tipo: 'asa', cor: 'url(#penas)', mao: [865, 520], de: [720, 640], ombro: [272, 560], pescoco: [500, 640], orelha: [288, 250] },
+  leao: { tipo: 'mao', cor: 'url(#pelo)', mao: [905, 655], de: [640, 880], ombro: [368, 872], pescoco: [500, 722], orelha: [660, 300] },
+  robo: { tipo: 'mao', cor: 'url(#metal)', mao: [125, 560], de: [300, 820], ombro: [645, 795], pescoco: [500, 752], orelha: [735, 500] },
+  sapo: { tipo: 'mao', cor: 'url(#pele)', mao: [885, 600], de: [700, 800], ombro: [318, 752], pescoco: [500, 742] },
+  cavalo: { tipo: 'mao', cor: 'url(#pelo)', mao: [145, 560], de: [360, 880], ombro: [648, 830], pescoco: [500, 782], orelha: [345, 215] },
+  pinguim: { tipo: 'asa', cor: 'url(#preto)', mao: [855, 520], de: [740, 620], ombro: [305, 655], pescoco: [500, 628] },
+  'boneco-de-neve': { tipo: 'luva', cor: '#ff4fa3', mao: [812, 452], ombro: [365, 488], pescoco: [500, 540] }
+};
+function bracoComMao(e) {
+  const [hx, hy] = e.mao, lado = hx < 500 ? -1 : 1;
+  if (e.tipo === 'luva') return `<g ${st(7)}><path d="M${hx - 34} ${hy + 30} Q${hx - 44} ${hy - 20} ${hx - 10} ${hy - 30} L${hx + 22} ${hy - 30} Q${hx + 46} ${hy - 10} ${hx + 30} ${hy + 30} Z" fill="${e.cor}"/><ellipse cx="${hx + 38}" cy="${hy - 6}" rx="16" ry="22" fill="${e.cor}"/><path d="M${hx - 34} ${hy + 22} H${hx + 30}" stroke="#fff" stroke-width="10"/></g>`;
+  const [sx, sy] = e.de, cx = (sx + hx) / 2 + lado * 60, cy = Math.max(hy, sy) - 40;
+  if (e.tipo === 'nadadeira') return `<path d="M${sx} ${sy} Q${cx} ${cy + 60} ${hx} ${hy} Q${hx + 70} ${hy + 30} ${sx + 10} ${sy + 70} Z" fill="${e.cor}" ${st()}/>`;
+  if (e.tipo === 'asa') return `<path d="M${sx} ${sy} Q${cx} ${cy + 40} ${hx} ${hy - 20} Q${hx + lado * 30} ${hy + 30} ${hx - lado * 10} ${hy + 50} Q${hx - lado * 40} ${hy + 90} ${sx + lado * 10} ${sy + 80} Z" fill="${e.cor}" ${st()}/>` +
+    `<path d="M${hx - lado * 30} ${hy + 20} q${-lado * 30} 25 ${-lado * 60} 40" fill="none" stroke="${K}" stroke-width="5" opacity=".5"/>`;
+  const braco = `M${sx} ${sy} Q${cx} ${cy} ${hx} ${hy + 46}`;
+  const dedos = [-27, -9, 9, 27].map((d, k) => `<rect x="${hx + d - 10}" y="${hy - 62 + (k === 0 || k === 3 ? 12 : 0)}" width="20" height="54" rx="10" fill="${e.cor}" ${st(6)}/>`).join('');
+  return `<path d="${braco}" fill="none" stroke="${K}" stroke-width="62" stroke-linecap="round"/>` +
+    `<path d="${braco}" fill="none" stroke="${e.manga || e.cor}" stroke-width="48" stroke-linecap="round"/>` + dedos +
+    `<ellipse cx="${hx - lado * 40}" cy="${hy + 8}" rx="13" ry="24" transform="rotate(${-lado * 35} ${hx - lado * 40} ${hy + 8})" fill="${e.cor}" ${st(6)}/>` +
+    `<ellipse cx="${hx}" cy="${hy + 10}" rx="40" ry="36" fill="${e.cor}" ${st(6)}/>`;
+}
+for (const [id, e] of Object.entries(EXTRAS)) {
+  const c = C[id], orig = c.svg;
+  c.svg = () => orig().replace('</svg>', bracoComMao(e) + '</svg>');
+  c.lugares.mao = { x: e.mao[0] / 1000, y: (e.mao[1] - 40) / 1000, tam: 0.13 };
+  c.lugares.ombro = { x: e.ombro[0] / 1000, y: e.ombro[1] / 1000, tam: 0.15 };
+  c.lugares.pescoco = { x: e.pescoco[0] / 1000, y: e.pescoco[1] / 1000, tam: 0.15 };
+  if (e.orelha) c.lugares.orelha = { x: e.orelha[0] / 1000, y: e.orelha[1] / 1000, tam: 0.08 };
+}
+
+I.sorvete = { nome: { pt: 'Sorvete', en: 'Ice cream' }, lugar: 'mao', encaixe: { x: 0.5, y: 0.78 }, escala: 1.1,
+  svg: () => svg(160, 300, lg('casca', '#f5c27a', '#c98a3a') + rg('m1', '#ffd1e8', '#ff6fb4') + rg('m2', '#d9fff0', '#5fdcae') + rg('m3', '#b07a4a', '#6e4320'),
+    `<path d="M30 150 L130 150 L80 292 Z" fill="url(#casca)" ${st()}/><path d="M45 170 L100 230 M70 160 L118 200 M115 170 L60 230 M90 160 L42 200" stroke="#a86a2a" stroke-width="4"/>` +
+    `<circle cx="52" cy="140" r="34" fill="url(#m2)" ${st()}/><circle cx="108" cy="140" r="34" fill="url(#m3)" ${st()}/><circle cx="80" cy="92" r="40" fill="url(#m1)" ${st()}/>` +
+    `<circle cx="80" cy="46" r="13" fill="#e11d48" ${st(5)}/><path d="M80 34 q8 -18 20 -24" fill="none" ${st(4)}/>` + brilho('M62 78 Q72 66 86 64', 7)) };
+I.balao = { nome: { pt: 'Balão', en: 'Balloon' }, lugar: 'mao', encaixe: { x: 0.5, y: 0.97 }, escala: 1.5,
+  svg: () => svg(200, 400, rg('bal', '#ff9a9a', '#e0102c'),
+    `<path d="M100 214 q-12 40 6 80 q16 40 -4 80 q-6 14 -2 24" fill="none" stroke="${K}" stroke-width="4"/>` +
+    `<ellipse cx="100" cy="112" rx="84" ry="100" fill="url(#bal)" ${st()}/><path d="M90 210 L110 210 L100 224 Z" fill="#e0102c" ${st(5)}/>` + brilho('M58 70 Q70 46 94 40', 12, 0.7)) };
+I.pirulito = { nome: { pt: 'Pirulito', en: 'Lollipop' }, lugar: 'mao', encaixe: { x: 0.5, y: 0.86 }, escala: 1.3,
+  svg: () => svg(200, 340, '',
+    `<rect x="92" y="170" width="16" height="166" rx="6" fill="#fff" ${st(5)}/>` +
+    `<circle cx="100" cy="100" r="88" fill="#ff4fa3" ${st()}/>` +
+    `<path d="M100 100 m0 -10 a10 10 0 1 1 -10 10 a20 20 0 1 1 20 20 a30 30 0 1 1 -30 -30 a40 40 0 1 1 40 40 a50 50 0 1 1 -50 -50 a60 60 0 1 1 60 60 a70 70 0 1 1 -70 -70" fill="none" stroke="#ffd166" stroke-width="12"/>` +
+    `<circle cx="100" cy="100" r="88" fill="none" ${st()}/>` + brilho('M50 52 Q70 30 100 24', 10, 0.6)) };
+I.microfone = { nome: { pt: 'Microfone', en: 'Microphone' }, lugar: 'mao', encaixe: { x: 0.5, y: 0.74 }, escala: 0.95,
+  svg: () => svg(140, 300, rg('grade', '#eef2f7', '#8f9db3') + lg('cabo', '#3a3550', '#0f0d1c'),
+    `<path d="M40 120 L100 120 L84 292 L56 292 Z" fill="url(#cabo)" ${st()}/><rect x="36" y="112" width="68" height="20" rx="6" fill="#ff4fa3" ${st(5)}/>` +
+    `<circle cx="70" cy="64" r="56" fill="url(#grade)" ${st()}/><path d="M30 44 H110 M22 64 H118 M30 84 H110 M50 16 V112 M70 10 V118 M90 16 V112" stroke="#6b7890" stroke-width="3"/>` + brilho('M38 40 Q46 26 62 22', 8, 0.7)) };
+I.flor = { nome: { pt: 'Flor', en: 'Flower' }, lugar: 'orelha', encaixe: { x: 0.5, y: 0.5 }, escala: 1.5,
+  svg: () => svg(200, 200, rg('petala', '#ffe2f1', '#ff6fb4'),
+    Array.from({ length: 6 }, (_, k) => `<ellipse cx="100" cy="48" rx="30" ry="46" fill="url(#petala)" ${st(6)} transform="rotate(${k * 60} 100 100)"/>`).join('') +
+    `<circle cx="100" cy="100" r="30" fill="#ffd166" ${st(6)}/><circle cx="92" cy="92" r="8" fill="#fff" opacity=".7"/>`) };
+I.brinco = { nome: { pt: 'Brinco', en: 'Earring' }, lugar: 'orelha', encaixe: { x: 0.5, y: 0.06 }, escala: 0.9,
+  svg: () => svg(100, 200, lg('ouro', '#fff1a8', '#e6a400'),
+    `<circle cx="50" cy="12" r="9" fill="url(#ouro)" ${st(4)}/><path d="M50 20 V54" stroke="url(#ouro)" stroke-width="8"/><path d="M50 20 V54" fill="none" ${st(3)}/>` +
+    `<path d="M50 190 C10 160 4 120 22 100 C36 84 50 92 50 106 C50 92 64 84 78 100 C96 120 90 160 50 190 Z" fill="#ff4fa3" ${st(6)}/>` +
+    `<circle cx="50" cy="66" r="14" fill="url(#ouro)" ${st(5)}/>` + brilho('M32 116 Q38 104 48 106', 6, 0.7)) };
+I.papagaio = { nome: { pt: 'Papagaio', en: 'Parrot' }, lugar: 'ombro', encaixe: { x: 0.45, y: 0.96 }, escala: 1.1,
+  svg: () => svg(260, 320, rg('verde', '#a8ff6a', '#2fae3a') + rg('cab', '#ff8a8a', '#e0102c'),
+    `<path d="M120 230 L90 316 L130 300 L150 316 Z" fill="#3ee8ff" ${st(6)}/>` +
+    `<ellipse cx="120" cy="190" rx="62" ry="80" fill="url(#verde)" ${st()}/>` +
+    `<path d="M150 170 Q210 210 170 262 Q150 230 130 214 Z" fill="#ffd166" ${st(6)}/>` +
+    `<circle cx="132" cy="96" r="58" fill="url(#cab)" ${st()}/>` +
+    `<path d="M182 92 Q238 100 206 150 Q196 128 176 122 Z" fill="#ffd166" ${st(6)}/>` + olho(150, 86, 16, '#1b1030') +
+    `<path d="M100 300 v14 M130 300 v14" stroke="#ff8a1f" stroke-width="8" stroke-linecap="round"/>`) };
+I.passarinho = { nome: { pt: 'Passarinho', en: 'Little bird' }, lugar: 'ombro', encaixe: { x: 0.5, y: 0.96 }, escala: 0.85,
+  svg: () => svg(220, 200, rg('azul', '#bff6ff', '#2f8fe8'),
+    `<path d="M40 110 L4 80 L30 130 Z" fill="#2f8fe8" ${st(6)}/>` +
+    `<ellipse cx="110" cy="120" rx="80" ry="58" fill="url(#azul)" ${st()}/><path d="M80 120 Q110 160 150 126" fill="#fff" opacity=".8"/>` +
+    `<path d="M186 104 L216 116 L186 128 Z" fill="#ffd166" ${st(5)}/>` + olho(160, 98, 14, '#1b1030') +
+    `<path d="M96 176 v20 M124 176 v20" stroke="#ff8a1f" stroke-width="7" stroke-linecap="round"/>`) };
+I['gravata-borboleta'] = { nome: { pt: 'Gravata-borboleta', en: 'Bow tie' }, lugar: 'pescoco', encaixe: { x: 0.5, y: 0.5 }, escala: 1.0,
+  svg: () => svg(260, 130, lg('cor', '#ff7cc0', '#c42a7c'),
+    `<path d="M130 65 L20 10 Q4 65 20 120 Z M130 65 L240 10 Q256 65 240 120 Z" fill="url(#cor)" ${st()}/>` +
+    `<g fill="#fff" opacity=".8"><circle cx="60" cy="50" r="8"/><circle cx="80" cy="85" r="7"/><circle cx="200" cy="50" r="8"/><circle cx="180" cy="85" r="7"/></g>` +
+    `<rect x="108" y="40" width="44" height="50" rx="12" fill="#ffd166" ${st(6)}/>`) };
+I.medalha = { nome: { pt: 'Medalha', en: 'Medal' }, lugar: 'pescoco', encaixe: { x: 0.5, y: 0.05 }, escala: 0.85,
+  svg: () => svg(160, 300, lg('ouro', '#fff1a8', '#e6a400'),
+    `<path d="M20 4 L70 170 L90 170 L140 4 L112 4 L80 120 L48 4 Z" fill="#3ee8ff" ${st(6)}/>` +
+    `<circle cx="80" cy="220" r="66" fill="url(#ouro)" ${st()}/><circle cx="80" cy="220" r="46" fill="none" stroke="#c98a00" stroke-width="5"/>` +
+    `<path d="M80 186 l10 22 24 3 -18 16 5 24 -21 -12 -21 12 5 -24 -18 -16 24 -3z" fill="#fff6c2" ${st(4)}/>`) };
+
 /* ---------------------------- gravar ---------------------------- */
 const listaC = [], listaI = [];
 for (const [id, c] of Object.entries(C)) {

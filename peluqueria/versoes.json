@@ -2,6 +2,21 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.3.1",
+      "data": "31/Out/2026",
+      "hora": "19:39:00",
+      "pt": [
+        "Lugares novos fora do meio do rosto: cada bicho levanta a mão aberta (asa, nadadeira ou luva) para segurar sorvete, balão, pirulito ou microfone; flor e brinco na orelha; papagaio e passarinho no ombro; gravata-borboleta e medalha no pescoço.",
+        "10 itens novos (22 no total) e 44 lugares novos — o lado da mão muda de bicho para bicho.",
+        "Dificuldade: Criança só com lugares do meio, Normal com metade de lado, Maluco com 8 de 10 quedas de lado."
+      ],
+      "en": [
+        "New spots off the center of the face: each animal raises an open hand (wing, fin or mitten) to hold an ice cream, balloon, lollipop or microphone; flower and earring on the ear; parrot and little bird on the shoulder; bow tie and medal on the neck.",
+        "10 new items (22 in total) and 44 new spots — the hand side changes from animal to animal.",
+        "Difficulty: Kids only center spots, Normal half on the side, Crazy 8 out of 10 drops on the side."
+      ]
+    },
+    {
       "versao": "0.3.0",
       "data": "31/Out/2026",
       "hora": "19:22:00",

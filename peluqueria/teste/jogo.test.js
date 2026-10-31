@@ -179,3 +179,32 @@ test('parar na hora certa dá PERFEITO também no Normal e no Maluco', () => {
     assert.equal(P.parar(e).categoria, 'PERFEITO', nivel);
   }
 });
+
+/* lugares fora do centro (pedido do dono, 0.3.0): mão, orelha, ombro, pescoço; dificuldade por nível */
+const LUG8 = Object.assign({}, LUG, { mao: { x: 0.88, y: 0.55, tam: 0.14, rot: 0 }, orelha: { x: 0.24, y: 0.6, tam: 0.09, rot: 0 }, ombro: { x: 0.38, y: 0.82, tam: 0.16, rot: 0 }, pescoco: { x: 0.5, y: 0.76, tam: 0.16, rot: 0 } });
+const CEN8 = Array.from({ length: 12 }, (_, i) => Object.assign(cen('c' + i), { lugares: LUG8 }));
+const IT8 = ['cabeca', 'olhos', 'nariz', 'boca', 'mao', 'orelha', 'ombro', 'pescoco', 'cabeca', 'mao', 'ombro', 'pescoco', 'olhos', 'orelha'].map((l, i) => ite('i' + i, l));
+
+test('validação aceita os lugares novos', () => {
+  assert.ok(P.validarCenario(Object.assign(cen('x'), { lugares: LUG8 })));
+  for (const l of ['mao', 'orelha', 'ombro', 'pescoco']) assert.ok(P.validarItem(ite('x', l)), l);
+  assert.deepEqual(P.LATERAIS.slice().sort(), ['mao', 'ombro', 'orelha']);
+});
+
+test('Criança só tem lugares do meio; Normal metade de lado; Maluco quase tudo de lado', () => {
+  for (const sem of [1, 2, 3, 7, 11]) {
+    const lado = nivel => P.criarRodada({ nivel, cenarios: CEN8, itens: IT8, semente: sem }).quedas.filter(q => P.LATERAIS.includes(q.lugar)).length;
+    assert.equal(lado('crianca'), 0, 'criança');
+    assert.equal(lado('normal'), 5, 'normal');
+    assert.ok(lado('maluco') >= 8, 'maluco ' + lado('maluco'));
+  }
+});
+
+test('sincronia vale também para lugar fora do centro', () => {
+  const e = P.criarRodada({ nivel: 'maluco', cenarios: CEN8, itens: IT8, semente: 5 });
+  for (let i = 0; i < 10; i++) {
+    const q = e.quedas[i], L = q.cenario.lugares[q.lugar], tAlvo = (L.y - P.TOPO) / (P.NIVEIS.maluco.vel * (1 + 0.05 * i));
+    const p = P.posicao(q, 'maluco', i, tAlvo);
+    assert.ok(Math.abs(p.x - L.x) < 1e-9 && Math.abs(p.rot - L.rot) < 1e-9, q.lugar);
+  }
+});

@@ -18,7 +18,8 @@ tela de início (o botão só aparece quando esta pasta tem alguma imagem válid
 2. Toque em **Escolher foto** e escolha a imagem. Ela fica só no seu aparelho; nada é enviado.
 3. Deixe marcado **Cenário (foto)**. Toque em **Cabeça** e arraste um quadrado sobre o alto da cabeça
    (o centro do quadrado é onde o chapéu para; a largura é o tamanho dele). Faça o mesmo com **Olhos**,
-   **Nariz** e **Boca** — basta um, mas com os quatro qualquer item serve. Se a cabeça estiver torta, use o
+   **Nariz**, **Boca**, **Mão** (onde a pessoa segura o sorvete, o balão…), **Orelha** (flor, brinco), **Ombro**
+   (papagaio) e **Pescoço** (gravata, medalha) — basta um, mas quanto mais lugares, mais itens servem. Se a cabeça estiver torta, use o
    controle **Giro**.
 4. Toque em **Copiar**. Embaixo do quadro aparece a linha; veja o nome do arquivo que ela pede
    (ex.: `"arquivo":"vovo-ze.png"`).
@@ -40,7 +41,7 @@ tela de início (o botão só aparece quando esta pasta tem alguma imagem válid
 ## Item (chapéu, peruca, óculos…)
 
 Use PNG com **fundo transparente** (ou SVG). Na mesma página, escolha a imagem, toque em **Item**, escolha onde
-ele vai (Cabeça, Olhos, Nariz ou Boca) e toque no ponto do desenho que deve cair no lugar (a base do chapéu,
+ele vai (Cabeça, Olhos, Nariz, Boca, Mão, Orelha, Ombro ou Pescoço) e toque no ponto do desenho que deve cair no lugar (a base do chapéu,
 a ponte dos óculos, o meio do bigode). Copie a linha, envie a imagem para esta pasta e cole a linha em
 `itens.json`, como acima.
 
