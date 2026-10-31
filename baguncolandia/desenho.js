@@ -104,6 +104,8 @@
   function rastroCorte(x, y, ang, raio) { D.parts.push({ x: x, y: y, ang: ang, len: raio * 2.6, vida: 220, tipo: 'corte' }); }
   function confete() { for (var i = 0; i < (D.menos ? 60 : 220); i++) D.parts.push({ x: Math.random() * W, y: -20 - Math.random() * 400, vx: (Math.random() - 0.5) * 80, vy: 80 + Math.random() * 160, g: 20, r: 5 + Math.random() * 6, cor: 'hsl(' + Math.random() * 360 + ',100%,60%)', vida: 5000, tipo: 'confete', rot: Math.random() * 6 }); }
   function pulso() { D.pulsoAte = D.ultimo + 160; }
+  /* começo de rodada: tira textos, partículas, legenda e avisos da rodada anterior */
+  function limpar() { D.parts = []; D.textos = []; D.metades = []; D.legenda = null; D.aviso = null; D.modoAviso = null; D.flash = 0; D.chuva = 0; D.pops = {}; D.av = [{}, {}]; }
   function legenda(txt, cor, pisca) { D.legenda = txt ? { t: txt, cor: cor || '#fff', pisca: !!pisca, desde: D.ultimo } : null; }
   function contagem(n) { D.contagem = n == null ? null : { n: n, desde: D.ultimo }; }
 
@@ -248,7 +250,7 @@
     var r = jg.raia, k = jg.esqueleto, cor = CORES.j[j];
     // pontos do esqueleto no palco; o corpo ocupa o lugar do boneco na raia (a altura segue a pessoa)
     var P = k.map(function (q) { return { x: r.x + q[0] * r.w, y: r.y + q[1] * r.h }; });
-    var L = Math.max(10, Math.hypot(P[1].x - P[7].x, P[1].y - P[7].y) * 0.32);
+    var L = Math.max(8, Math.min(40, Math.hypot(P[1].x - P[7].x, P[1].y - P[7].y) * 0.2));
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     if (jg.invencivel && Math.floor(ts / 90) % 2) ctx.globalAlpha = 0.45;
     // pernas
@@ -261,7 +263,7 @@
     ctx.strokeStyle = cor; ctx.lineWidth = L;
     [[1, 3, 5], [2, 4, 6]].forEach(function (seg) { ctx.beginPath(); ctx.moveTo(P[seg[0]].x, P[seg[0]].y); ctx.lineTo(P[seg[1]].x, P[seg[1]].y); ctx.lineTo(P[seg[2]].x, P[seg[2]].y); ctx.stroke(); ctx.fillStyle = PELE; ctx.beginPath(); ctx.arc(P[seg[2]].x, P[seg[2]].y, L * 0.8, 0, 6.2832); ctx.fill(); });
     // cabeça = figura da turma, no nariz
-    var fig = root.Figuras.porId(D.avatares[j] || D.avatares[0]) || root.Figuras.lista()[0], hs = Math.max(60, L * 5.2), img = imagem(fig, hs / 2.3);
+    var fig = root.Figuras.porId(D.avatares[j] || D.avatares[0]) || root.Figuras.lista()[0], hs = Math.max(60, Math.min(220, Math.hypot(P[2].x - P[1].x, P[2].y - P[1].y) * 1.3)), img = imagem(fig, hs / 2.3);
     var ang = Math.atan2(P[2].y - P[1].y, P[2].x - P[1].x);
     ctx.save(); ctx.translate(P[0].x, P[0].y - hs * 0.05); ctx.rotate(ang * 0.5); ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 6;
     if (img) ctx.drawImage(img, -hs / 2, -hs / 2, hs, hs); else { ctx.fillStyle = fig.suco || '#fff'; ctx.beginPath(); ctx.arc(0, 0, hs / 2.3, 0, 6.2832); ctx.fill(); }
@@ -386,5 +388,5 @@
     ctx.restore();
   }
 
-  root.Desenho = { iniciar: iniciar, quadro: quadro, legenda: legenda, contagem: contagem, confete: confete, podio: podio, nomes: nomes, texto: texto, ambiente: ambiente, avatares: avatares, pulso: pulso, CORES: CORES, W: W, H: H };
+  root.Desenho = { iniciar: iniciar, quadro: quadro, legenda: legenda, contagem: contagem, confete: confete, podio: podio, nomes: nomes, texto: texto, ambiente: ambiente, avatares: avatares, pulso: pulso, limpar: limpar, CORES: CORES, W: W, H: H };
 })(typeof self !== 'undefined' ? self : this);

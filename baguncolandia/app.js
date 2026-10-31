@@ -212,7 +212,7 @@
       if (!figs.some(function (f) { return f.papel === 'fruta'; })) figs = Figuras.lista();   // sem fruta nenhuma não dá para cortar
       tv.partida = Bagunca.criarPartida({ modo: tv.cfg.modo, jogadores: tv.cfg.jogadores, duracao: tv.cfg.duracao, dificuldade: tv.cfg.dificuldade, figuras: figs });
       Object.keys(tv.caixas).forEach(function (j) { var c = tv.caixas[j]; if (c) { tv.partida.zonaChute(+j, Math.min(0.95, c.y + c.h * 0.6)); tv.partida.calibrar(+j, c); } });
-      Desenho.ambiente(tv.cfg.ambiente, tv.cfg.cena);
+      Desenho.limpar(); Desenho.ambiente(tv.cfg.ambiente, tv.cfg.cena);
       $('tv').classList.toggle('paisagem', tv.cfg.ambiente === 'paisagem');
       tv.partida.comecar(); tv.fase = 'jogando'; tv.fimMusica = false;
       if (tv.cfg.duracao === 0 && tv.player && !tv.tocando) { try { tv.player.playVideo(); } catch (e) {} }
