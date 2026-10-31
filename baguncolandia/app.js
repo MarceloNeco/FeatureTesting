@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.1', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.8.2', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -32,8 +32,10 @@
     function dizer(pt, en) {
       Desenho.legenda(T(pt, en), '#fff', false);
       clearTimeout(limpaLegenda); if (tv.fase === 'jogando') limpaLegenda = setTimeout(function () { if (tv.fase === 'jogando') Desenho.legenda(null); }, 1500);
-      if (Voz.disponivel() && (tv.vozLiberada || tv.local)) { if (Voz.falar(pt, en)) return; }
-      // a TV sem voz pede para o primeiro celular falar
+      // a TV fala sempre que tiver voz; se ela abriu sem toque (atalho /kids) não dá para garantir que o som saia,
+      // então o celular fala também. TV sem voz: só o celular.
+      var tvFalou = Voz.disponivel() && Voz.falar(pt, en);
+      if (tvFalou && (tv.vozLiberada || tv.local)) return;
       if (tv.sala && tv.jog[0]) tv.sala.mandarPara(tv.jog[0].id, { t: 'cmd', acao: 'fale', texto: T(pt, en) });
     }
 
@@ -258,7 +260,7 @@
       tv.dbgN = (tv.dbgN || 0) + 1; if (ts - (tv.dbgT || 0) < 1000) return; tv.dbgFps = tv.dbgN; tv.dbgN = 0; tv.dbgT = ts;
       var b = $('tvDebug'); if (!b) { b = document.createElement('div'); b.id = 'tvDebug'; $('tv').appendChild(b); }
       var erros = Desenho.erros().concat(tv.errosJs || []);
-      b.textContent = 'v' + APP_VERSION + ' · ' + (Desenho.estaLeve() ? 'leve' : 'normal') + ' · ' + tv.dbgFps + ' fps · ' + tv.fase + '\n' + navigator.userAgent.slice(0, 90) + (erros.length ? '\nERROS:\n' + erros.join('\n') : '\nsem erros');
+      b.textContent = 'v' + APP_VERSION + ' · ' + (Desenho.estaLeve() ? 'leve' : 'normal') + ' · ' + tv.dbgFps + ' fps · ' + tv.fase + ' · voz TV: ' + (Voz.disponivel() ? (tv.vozLiberada ? 'sim' : 'sim, sem toque') : 'não') + '\n' + navigator.userAgent.slice(0, 90) + (erros.length ? '\nERROS:\n' + erros.join('\n') : '\nsem erros');
     }
     function som(ev) {
       if (ev.t === 'corte') Som.tocar('corte');
