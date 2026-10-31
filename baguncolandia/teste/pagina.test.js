@@ -49,6 +49,17 @@ function ok(msg) { console.log('✓ ' + msg); }
   const f3 = await pg.evaluate(() => window.BaguncaApp.TVApp.tv.fase);
   if (f3 === 'fim') ok('parar → pódio'); else falhou('fase depois de parar: ' + f3);
   await pg.screenshot({ path: '/tmp/pagina-podio.png' });
+  // v0.2: Pula e abaixa na paisagem, com o corpo falso pulando e abaixando no ritmo dos avisos
+  await pg.evaluate(() => window.BaguncaApp.TVApp.comando({ acao: 'config', modo: 'pula', ambiente: 'paisagem', cena: 'floresta', duracao: 60 }));
+  await pg.evaluate(() => { window.BaguncaTeste = { pontos: () => null, corpo: () => { const tv = window.BaguncaApp.TVApp.tv, ob = tv.partida && tv.partida.estado().coisas.find(c => c.papel === 'obstaculo' && !c.passou && c.x < 900); const baixo = ob && ob.tipo === 'baixo', alto = ob && ob.tipo === 'alto'; return { x: 0.4, y: baixo ? -0.1 : 0.1, w: alto ? 0.25 : 0.2, h: alto ? 0.45 : 0.8 }; } }; });
+  await pg.evaluate(() => window.BaguncaApp.TVApp.comando({ acao: 'comecar' }));
+  await pg.waitForFunction(() => window.BaguncaApp.TVApp.tv.fase === 'jogando', null, { timeout: 15000 });
+  await pg.waitForTimeout(9000);
+  const st = await pg.evaluate(() => { const e = window.BaguncaDebug.partida.estado(); return { pontos: e.jogadores[0].pontos, vidas: e.jogadores[0].vidas, paisagem: document.getElementById('tv').classList.contains('paisagem') }; });
+  if (st.paisagem) ok('ambiente paisagem ligado'); else falhou('paisagem não ligou');
+  if (st.pontos > 0 && st.vidas === 3) ok('pula e abaixa: desviou dos obstáculos (' + st.pontos + ' pontos, 3 vidas)'); else falhou('pula e abaixa: pontos=' + st.pontos + ' vidas=' + st.vidas);
+  await pg.screenshot({ path: '/tmp/pagina-pula.png' });
+  await pg.evaluate(() => window.BaguncaApp.TVApp.comando({ acao: 'parar' })); await pg.waitForTimeout(300);
   // celular em 320 px
   const cel = await ctx.newPage(); await cel.setViewportSize({ width: 320, height: 640 });
   cel.on('console', m => { if (m.type() === 'error') erros.push('cel: ' + m.text() + ' @' + (m.location() && m.location().url)); }); cel.on('pageerror', e => erros.push('cel pageerror: ' + e.message));

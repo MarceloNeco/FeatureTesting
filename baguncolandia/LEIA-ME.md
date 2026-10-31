@@ -14,8 +14,10 @@ Endereço: `https://solverone.com.br/FeatureTesting/baguncolandia/` (atalho para
 2. **No celular**: abra o mesmo endereço, aperte **📱 Este é o celular**, digite o seu nome e o código.
    Deixe a câmera ligar (o celular pergunta uma vez).
 3. **Apoie o celular** deitado, virado para quem vai jogar, a uns 2 metros, com luz boa.
-4. No celular, escolha o **modo** (🍉 Corta-corta, 🎈 Pega-pega, ⚽ Chuta-chuta, 🎪 Bagunça total),
-   quantas **pessoas** (1 ou 2), quantos **celulares** (1 filmando os dois, ou 2), o **tempo** e o **nível**.
+4. No celular, escolha o **modo** (🍉 Corta-corta, 🎈 Pega-pega, ⚽ Chuta-chuta, 🪵 Pula e abaixa,
+   🎳 Bagunça de bolas, 🎪 Bagunça total), o **ambiente** (🏞️ Paisagem + boneco, com cenário à escolha, ou
+   📷 Câmera, em que você aparece na TV), quantas **pessoas** (1 ou 2), quantos **celulares** (1 filmando
+   os dois, ou 2), o **tempo** e o **nível**.
 5. Toque em **▶ Começar** (ou OK no controle da TV). Siga a **voz e a legenda**: saia da frente da
    câmera, entre e fique parado de braços abertos, levante o braço direito, o esquerdo, chute, pule.
    A legenda fica **vermelha piscando** enquanto falta e **verde** quando a TV entendeu.
@@ -48,6 +50,7 @@ cantinho. Com tempo "🎵 a música", a rodada dura a música inteira.
 | `jogo.js` | motor puro (sem DOM): física, acertos, pontos, combos, vidas, poderes, validação de mensagens. Testável no Node. |
 | `desenho.js` | pinta o estado no canvas da TV: figuras, cortes, suco, rastros, placar, legendas, pódio |
 | `figuras.js` | catálogo de figuras (SVG): frutas, doces, bolas, turma própria, clássicos de domínio público, `meus/` |
+| `cenas.js` | cenários vetoriais do ambiente Paisagem (praia, floresta, espaço, cidade) |
 | `sala.js` | pareamento (Supabase broadcast), WebRTC, câmera, visão (diferença entre quadros) |
 | `calibrar.js` | calibração guiada: fundo → silhueta → braços → chute → pulo |
 | `voz.js` / `som.js` | fala (speechSynthesis, regras SolverONE) e sons sintetizados (WebAudio) |

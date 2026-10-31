@@ -137,7 +137,15 @@
           <button class="sec opt ativo" data-v="corta" type="button">🍉 <span data-t="Corta-corta|Slice"></span></button>
           <button class="sec opt" data-v="pega" type="button">🎈 <span data-t="Pega-pega|Catch"></span></button>
           <button class="sec opt" data-v="chuta" type="button">⚽ <span data-t="Chuta-chuta|Kick"></span></button>
+          <button class="sec opt" data-v="pula" type="button">🪵 <span data-t="Pula e abaixa|Jump and duck"></span></button>
+          <button class="sec opt" data-v="bolas" type="button">🎳 <span data-t="Bagunça de bolas|Ball mayhem"></span></button>
           <button class="sec opt" data-v="mistura" type="button">🎪 <span data-t="Bagunça total|Total mayhem"></span></button>
+        </div>
+        <div class="linha"><span data-t="Ambiente|Scene"></span>
+          <div class="grupo" data-cfg="ambiente"><button class="sec opt ativo" data-v="paisagem" type="button">🏞️ <span data-t="Paisagem + boneco|Landscape + avatar"></span></button><button class="sec opt" data-v="camera" type="button">📷 <span data-t="Câmera (eu na TV)|Camera (me on TV)"></span></button></div>
+        </div>
+        <div class="linha" id="linhaCena"><span data-t="Cenário|Backdrop"></span>
+          <div class="grupo" data-cfg="cena"><button class="sec opt ativo" data-v="aleatoria" type="button">🎲</button><button class="sec opt" data-v="praia" type="button">🏖️</button><button class="sec opt" data-v="floresta" type="button">🌳</button><button class="sec opt" data-v="espaco" type="button">🚀</button><button class="sec opt" data-v="cidade" type="button">🏙️</button></div>
         </div>
         <div class="linha"><span data-t="Pessoas|People"></span>
           <div class="grupo" data-cfg="jogadores"><button class="sec opt ativo" data-v="1" type="button">1</button><button class="sec opt" data-v="2" type="button">2</button></div>
@@ -193,6 +201,7 @@
 <script src="libs/supabase.js"></script>
 <script src="jogo.js"></script>
 <script src="figuras.js"></script>
+<script src="cenas.js"></script>
 <script src="desenho.js"></script>
 <script src="sala.js"></script>
 <script src="voz.js"></script>

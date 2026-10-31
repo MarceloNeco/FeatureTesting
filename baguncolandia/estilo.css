@@ -79,6 +79,9 @@ footer { text-align: center; color: var(--muted); font-size: .75rem; padding: 1.
 #tvFundo { position: absolute; inset: 0; display: flex; }
 #tvFundo video { flex: 1; min-width: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: saturate(1.15) brightness(.95); background: #000; }
 #tvFundo video.off { opacity: .3; }
+/* ambiente paisagem: a cena cobre tudo; a câmera vira uma janelinha no canto para a pessoa se enquadrar */
+#tv.paisagem #tvFundo { inset: auto 1.5vh auto auto; top: 1.5vh; height: 9vw; gap: 1vh; z-index: 4; }
+#tv.paisagem #tvFundo video { width: 16vw; height: 9vw; flex: 0 0 auto; border-radius: 1.5vh; border: .3vh solid rgba(255,255,255,.5); box-shadow: 0 0 2vh rgba(0,0,0,.6); }
 #tvCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 #tvYt { position: absolute; right: 1.5vh; bottom: 1.5vh; width: 26vw; aspect-ratio: 16/9; border-radius: 1.5vh; overflow: hidden; display: none; box-shadow: 0 0 2vh rgba(0,0,0,.7); z-index: 3; border: .3vh solid rgba(255,255,255,.35); }
 #tvYt.on { display: block; }

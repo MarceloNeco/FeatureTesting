@@ -2,6 +2,23 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.2.0",
+      "data": "31/Out/2026",
+      "hora": "05:10:00",
+      "pt": [
+        "Ambiente Paisagem + boneco: cenas desenhadas (praia, floresta, espaço, cidade) e um personagem da turma que anda, pula, abaixa e levanta os braços seguindo a criança (sem IA).",
+        "Missão Pula e abaixa: troncos e galhos chegando, com a voz avisando \"Pula!\" e \"Abaixa!\".",
+        "Bagunça de bolas: bolas quicando pela tela; encostar vale ponto, bomba tira vida.",
+        "Bagunça total agora passa pelos cinco modos; a câmera vira uma janelinha no canto no ambiente Paisagem."
+      ],
+      "en": [
+        "Landscape + avatar: drawn scenes (beach, forest, space, city) and a crew character that walks, jumps, ducks and raises its arms following the child (no AI).",
+        "Jump and duck mission: logs and branches coming in, with the voice calling \"Jump!\" and \"Duck!\".",
+        "Ball mayhem: bouncing balls everywhere; touching scores, bombs cost a life.",
+        "Total mayhem now cycles through all five modes; the camera becomes a small corner window in Landscape."
+      ]
+    },
+    {
       "versao": "0.1.0",
       "data": "31/Out/2026",
       "hora": "03:30:00",

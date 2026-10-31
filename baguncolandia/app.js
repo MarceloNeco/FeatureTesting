@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.0', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.2.0', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -18,7 +18,7 @@
   if (window.SolverRecursos && !SolverRecursos.ligado('baguncolandia', true)) { tela('desligado'); return; }
   try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 
-  var CFG_PADRAO = { modo: 'corta', jogadores: 1, celulares: 1, duracao: 60, dificuldade: 'normal', turmas: { propria: true, publica: true, minhas: true } };
+  var CFG_PADRAO = { modo: 'corta', jogadores: 1, celulares: 1, duracao: 60, dificuldade: 'normal', ambiente: 'paisagem', cena: 'aleatoria', turmas: { propria: true, publica: true, minhas: true } };
   function idYouTube(s) { s = (s || '').trim(); var m = s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/); if (m) return m[1]; return /^[A-Za-z0-9_-]{11}$/.test(s) ? s : ''; }
   function idPlaylist(s) { var m = (s || '').match(/[?&]list=([A-Za-z0-9_-]{10,})/); return m ? m[1] : ''; }
 
@@ -28,8 +28,10 @@
   var TVApp = (function () {
     var tv = { sala: null, cfg: Object.assign({}, CFG_PADRAO, { turmas: Object.assign({}, CFG_PADRAO.turmas) }), partida: null, fase: 'carregando', local: false, visaoLocal: null, jog: [], raias: {}, player: null, tocando: false, titulo: '', videoAtual: '', lista: [], indice: -1, calib: null, nomes: [], ultimoQuadro: 0, raf: 0, podio: null, pendente: null, caixas: {}, vozLiberada: false, fimMusica: false };
 
+    var limpaLegenda = 0;
     function dizer(pt, en) {
       Desenho.legenda(T(pt, en), '#fff', false);
+      clearTimeout(limpaLegenda); if (tv.fase === 'jogando') limpaLegenda = setTimeout(function () { if (tv.fase === 'jogando') Desenho.legenda(null); }, 1500);
       if (Voz.disponivel() && (tv.vozLiberada || tv.local)) { if (Voz.falar(pt, en)) return; }
       // a TV sem voz pede para o primeiro celular falar
       if (tv.sala && tv.jog[0]) tv.sala.mandarPara(tv.jog[0].id, { t: 'cmd', acao: 'fale', texto: T(pt, en) });
@@ -86,7 +88,8 @@
       if (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2) {
         if (ic !== 0) return;
         var s = Bagunca.separarJogadores(d.p); tv.partida.movimento(0, s[0], ts); tv.partida.movimento(1, s[1], ts);
-      } else if (ic < tv.cfg.jogadores) tv.partida.movimento(ic, d.p, ts);
+        if (d.cs) { if (d.cs[0]) tv.partida.corpo(0, { x: d.cs[0].x * 2, y: d.cs[0].y, w: d.cs[0].w * 2, h: d.cs[0].h }, ts); if (d.cs[1]) tv.partida.corpo(1, { x: (d.cs[1].x - 0.5) * 2, y: d.cs[1].y, w: d.cs[1].w * 2, h: d.cs[1].h }, ts); }
+      } else if (ic < tv.cfg.jogadores) { tv.partida.movimento(ic, d.p, ts); if (d.c) tv.partida.corpo(ic, d.c, ts); }
     }
 
     /* ---- capa e lobby ---- */
@@ -114,7 +117,8 @@
       var c = tv.cfg, m = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), mistura: T('🎪 Bagunça total', '🎪 Total mayhem') }[c.modo];
       var d = c.duracao ? (c.duracao >= 120 ? '2 min' : c.duracao + ' s') : T('🎵 a música inteira', '🎵 the whole song');
       var n = { crianca: T('Criança', 'Kids'), normal: 'Normal', maluco: T('Maluco', 'Crazy') }[c.dificuldade];
-      $('lobbyResumo').textContent = m + ' · ' + c.jogadores + (c.jogadores > 1 ? T(' pessoas', ' people') : T(' pessoa', ' person')) + (tv.local ? '' : ' · ' + c.celulares + (c.celulares > 1 ? T(' celulares', ' phones') : T(' celular', ' phone'))) + ' · ' + d + ' · ' + n;
+      var amb = c.ambiente === 'paisagem' ? T('🏞️ paisagem', '🏞️ landscape') : T('📷 câmera', '📷 camera');
+      $('lobbyResumo').textContent = m + ' · ' + amb + ' · ' + c.jogadores + (c.jogadores > 1 ? T(' pessoas', ' people') : T(' pessoa', ' person')) + (tv.local ? '' : ' · ' + c.celulares + (c.celulares > 1 ? T(' celulares', ' phones') : T(' celular', ' phone'))) + ' · ' + d + ' · ' + n;
     }
     function estadoParaCelulares() {
       if (!tv.sala) return;
@@ -125,7 +129,7 @@
     /* ---- comandos vindos do celular (ou do teclado da TV) ---- */
     function comando(m) {
       if (m.acao === 'config') {
-        ['modo', 'jogadores', 'celulares', 'duracao', 'dificuldade'].forEach(function (k) { if (k in m) tv.cfg[k] = m[k]; });
+        ['modo', 'jogadores', 'celulares', 'duracao', 'dificuldade', 'ambiente', 'cena'].forEach(function (k) { if (k in m) tv.cfg[k] = m[k]; });
         if (m.turmas) tv.cfg.turmas = m.turmas;
         if (tv.local) tv.cfg.celulares = 1;
         resumo(); return;
@@ -196,7 +200,9 @@
       var figs = Figuras.lista(tv.cfg.turmas);
       if (!figs.some(function (f) { return f.papel === 'fruta'; })) figs = Figuras.lista();   // sem fruta nenhuma não dá para cortar
       tv.partida = Bagunca.criarPartida({ modo: tv.cfg.modo, jogadores: tv.cfg.jogadores, duracao: tv.cfg.duracao, dificuldade: tv.cfg.dificuldade, figuras: figs });
-      Object.keys(tv.caixas).forEach(function (j) { var c = tv.caixas[j]; if (c) tv.partida.zonaChute(+j, Math.min(0.95, c.y + c.h * 0.6)); });
+      Object.keys(tv.caixas).forEach(function (j) { var c = tv.caixas[j]; if (c) { tv.partida.zonaChute(+j, Math.min(0.95, c.y + c.h * 0.6)); tv.partida.calibrar(+j, c); } });
+      Desenho.ambiente(tv.cfg.ambiente, tv.cfg.cena);
+      $('tv').classList.toggle('paisagem', tv.cfg.ambiente === 'paisagem');
       tv.partida.comecar(); tv.fase = 'jogando'; tv.fimMusica = false;
       if (tv.cfg.duracao === 0 && tv.player && !tv.tocando) { try { tv.player.playVideo(); } catch (e) {} }
       window.BaguncaDebug = tv;   // só para testes automáticos (nada de segredo aqui)
@@ -204,7 +210,8 @@
     function quadro(ts) {
       tv.raf = requestAnimationFrame(quadro);
       var dt = tv.ultimoQuadro ? ts - tv.ultimoQuadro : 16; tv.ultimoQuadro = ts;
-      if (tv.local && tv.visaoLocal && (tv.fase === 'jogando') && ts - (tv.ultimaMedida || 0) > 100) { tv.ultimaMedida = ts; var m = tv.visaoLocal.medir(); if (m) tv.partida.movimento(0, m.p, ts); }
+      if (tv.local && tv.visaoLocal && (tv.fase === 'jogando') && ts - (tv.ultimaMedida || 0) > 100) { tv.ultimaMedida = ts; var m = tv.visaoLocal.medir(); if (m) { tv.partida.movimento(0, m.p, ts); if (tv.visaoLocal.temFundo()) { var cx = tv.visaoLocal.silhueta(m.bruto); if (cx) tv.partida.corpo(0, cx, ts); } } }
+      if (TESTE && window.BaguncaTeste && window.BaguncaTeste.corpo && tv.partida && tv.fase === 'jogando') { var cb = window.BaguncaTeste.corpo(ts); if (cb) tv.partida.corpo(0, cb, ts); }
       if (TESTE && window.BaguncaTeste && tv.partida && tv.fase === 'jogando') { var pts = window.BaguncaTeste.pontos && window.BaguncaTeste.pontos(ts); if (pts) tv.partida.movimento(0, pts, ts); }
       var estado = null, eventos = [];
       if (tv.partida) { tv.partida.avancar(dt); estado = tv.partida.estado(); eventos = tv.partida.eventos(); eventos.forEach(som); }
@@ -221,7 +228,11 @@
       else if (ev.t === 'combo') Som.tocar('combo');
       else if (ev.t === 'poder' && ev.poder) Som.tocar('poder');
       else if (ev.t === 'perdeu') Som.tocar('perdeu');
-      else if (ev.t === 'troca') dizer({ corta: 'Agora corta!', pega: 'Agora pega!', chuta: 'Agora chuta!' }[ev.modo], { corta: 'Now slice!', pega: 'Now catch!', chuta: 'Now kick!' }[ev.modo]);
+      else if (ev.t === 'aviso') { Som.tocar('tic'); dizer(ev.tipo === 'baixo' ? 'Pula!' : 'Abaixa!', ev.tipo === 'baixo' ? 'Jump!' : 'Duck!'); }
+      else if (ev.t === 'bateu') Som.tocar('vilao');
+      else if (ev.t === 'desviou') Som.tocar('ok');
+      else if (ev.t === 'tocou') Som.tocar('chute');
+      else if (ev.t === 'troca') dizer({ corta: 'Agora corta!', pega: 'Agora pega!', chuta: 'Agora chuta!', pula: 'Agora pula e abaixa!', bolas: 'Bagunça de bolas!' }[ev.modo], { corta: 'Now slice!', pega: 'Now catch!', chuta: 'Now kick!', pula: 'Now jump and duck!', bolas: 'Ball mayhem!' }[ev.modo]);
     }
 
     /* ---- YouTube na TV (igual ao Dança) ---- */
@@ -324,7 +335,12 @@
       if (!cel.visao || cel.calib) return;
       var m = cel.visao.medir(); if (!m) return;
       $('energiaBarra').style.width = m.e + '%';
-      cel.sala.energia(m.e, m.p);
+      if (cel.visao.temFundo()) {
+        var cfg = cel.estado && cel.estado.cfg, dados = { e: m.e, p: m.p };
+        if (cfg && cfg.jogadores === 2 && cfg.celulares === 1) dados.cs = [cel.visao.silhueta(m.bruto, [0, 0.5]), cel.visao.silhueta(m.bruto, [0.5, 1])];
+        else dados.c = cel.visao.silhueta(m.bruto);
+        if (!cel.sala.enviarDados(dados)) cel.sala.energia(m.e, m.p);
+      } else cel.sala.energia(m.e, m.p);
     }
     function daTV(m) {
       if (m.t === 'estado') { cel.estado = m; mostrarEstado(m); return; }
@@ -429,6 +445,7 @@
           if (multi) { b.classList.toggle('ativo'); var t = {}; g.querySelectorAll('button').forEach(function (x) { t[x.getAttribute('data-v')] = x.classList.contains('ativo'); }); cel.cfg.turmas = t; }
           else { g.querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); var v = b.getAttribute('data-v'); cel.cfg[k] = isNaN(+v) ? v : +v; }
           $('linhaCelulares').style.display = cel.cfg.jogadores === 2 && !cel.local ? '' : 'none';
+          $('linhaCena').style.display = cel.cfg.ambiente === 'paisagem' ? '' : 'none';
           mandarConfig();
         };
       });

@@ -188,9 +188,27 @@
      ===================================================================== */
   function criarVisao(video, w, h) {
     w = w || 48; h = h || 27;
-    var cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true }), anterior = null, suave = 0;
+    var cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true }), anterior = null, suave = 0, fundo = null;
     cv.width = w; cv.height = h;
     function quadro() { if (!video.videoWidth) return null; cx.drawImage(video, 0, 0, w, h); return cx.getImageData(0, 0, w, h).data; }
+    /* silhueta: pixels que diferem do fundo gravado na calibração → caixa normalizada e ESPELHADA
+       (x cresce para a direita da TV). faixa = [x0, x1] espelhada limita a procura (2 pessoas, 1 celular). */
+    function silhueta(d, faixa) {
+      if (!fundo || !d) return null;
+      faixa = faixa || [0, 1];
+      var minX = w, maxX = -1, minY = h, maxY = -1, n = 0, cols = new Array(w), rows = new Array(h), x, y;
+      for (x = 0; x < w; x++) cols[x] = 0; for (y = 0; y < h; y++) rows[y] = 0;
+      for (var i = 0, c = 0; i < d.length; i += 4, c++) {
+        var df = Math.abs(d[i] - fundo[i]) + Math.abs(d[i + 1] - fundo[i + 1]) + Math.abs(d[i + 2] - fundo[i + 2]);
+        if (df > 75) { x = c % w; var xe = 1 - (x + 0.5) / w; if (xe < faixa[0] || xe > faixa[1]) continue; y = (c / w) | 0; cols[x]++; rows[y]++; n++; }
+      }
+      if (n < w * h * (faixa[1] - faixa[0]) * 0.03) return null;
+      for (x = 0; x < w; x++) if (cols[x] >= 2) { if (x < minX) minX = x; if (x > maxX) maxX = x; }
+      for (y = 0; y < h; y++) if (rows[y] >= 2) { if (y < minY) minY = y; if (y > maxY) maxY = y; }
+      if (maxX < 0 || maxY < 0) return null;
+      var bw = (maxX - minX + 1) / w;
+      return { x: +(1 - minX / w - bw).toFixed(3), y: +(minY / h).toFixed(3), w: +bw.toFixed(3), h: +((maxY - minY + 1) / h).toFixed(3) };
+    }
     /* devolve energia 0..100 e até 6 pontos quentes [x, y, força], com x JÁ ESPELHADO (como a TV mostra) */
     function medir(espelhar) {
       var d = quadro(); if (!d) return null;
@@ -215,7 +233,8 @@
       suave = suave * 0.6 + e * 0.4;
       return { e: Math.round(suave), p: pontos, bruto: d };
     }
-    return { quadro: quadro, medir: medir, w: w, h: h, zerar: function () { anterior = null; suave = 0; } };
+    return { quadro: quadro, medir: medir, silhueta: silhueta, w: w, h: h, zerar: function () { anterior = null; suave = 0; },
+      definirFundo: function (d) { fundo = d ? new Uint8ClampedArray(d) : null; }, temFundo: function () { return !!fundo; } };
   }
 
   root.Sala = { tv: tv, celular: celular, criarVisao: criarVisao, codigoNovo: codigoNovo, MAX_JOGADORES: MAX_JOGADORES };
