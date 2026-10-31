@@ -131,8 +131,12 @@ por segundo" e sobe 5 % a cada queda da rodada (a 10ª é 45 % mais rápida que 
 | Nível | Velocidade inicial | Balanço lateral (amplitude, período) | Giro | Tolerância |
 |---|---|---|---|---|
 | Criança | 0,22 | nenhum: desce bem na linha do lugar certo | nenhum | ×1,5 |
-| Normal | 0,32 | 0,08 da largura, 2,2 s, fase sorteada | nenhum | ×1,0 |
-| Maluco | 0,42 | 0,15 da largura, 1,6 s, fase sorteada, centro deslocado até ±0,08 | 120 °/s, oscilando entre −40° e +40° | ×0,8 |
+| Normal | 0,32 | 0,08 da largura, 2,2 s, lado sorteado | nenhum | ×1,0 |
+| Maluco | 0,42 | 0,15 da largura, 1,6 s, lado sorteado | 120 °/s, oscilando entre −40° e +40° | ×0,8 |
+
+**Sincronia (v0.1.1, pedido do dono):** o balanço e o giro são acertados com a queda. No instante em que o
+item chega na altura do lugar certo, ele passa exatamente pelo meio do alvo e reto. Acertar depende só de
+tocar na hora certa.
 
 **Parada e pontos.** No toque, o motor calcula a distância *d* entre o ponto de encaixe do item e o lugar
 certo, dividida pela tolerância do nível:
