@@ -45,7 +45,7 @@
       if (m.t === 'ice' && m.to === 'tv' && pcs[m.id]) { try { pcs[m.id].addIceCandidate(m.c).catch(function () {}); } catch (e) {} return; }
       if (m.t === 'energia' && jog[m.id]) { opts.aoDados(m.id, { e: m.e, p: m.p }); return; }
       if (m.t === 'sair' && jog[m.id]) { remover(m.id); return; }
-      if (m.t === 'cmd') { opts.aoComando && opts.aoComando(m); return; }
+      if (m.t === 'cmd') { if (m.id && jog[m.id]) opts.aoComando && opts.aoComando(m); return; }   // comando só de celular conhecido
     }
     function novoJogador(m) {
       var conhecido = !!jog[m.id];
@@ -100,7 +100,7 @@
      CELULAR
      ===================================================================== */
   function celular(opts) {
-    var id = idNovo(), nome = opts.nome, codigo = opts.codigo, canal = null, pc = null, dc = null, tvViu = false, iceFila = [], stream = null, cams = [], camIdx = -1, frente = false, wake = null, fechado = false;
+    var id = (function () { try { var g = sessionStorage.getItem('bagunca:id'); if (g && /^[a-z0-9]{6,12}$/i.test(g)) return g; } catch (e) {} var n = idNovo(); try { sessionStorage.setItem('bagunca:id', n); } catch (e) {} return n; })(), nome = opts.nome, ultimoJoin = 0, codigo = opts.codigo, canal = null, pc = null, dc = null, tvViu = false, iceFila = [], stream = null, cams = [], camIdx = -1, frente = false, wake = null, fechado = false;
     var video = opts.video;
     function status(txt, tipo) { opts.aoStatus && opts.aoStatus(txt, tipo); }
     function receber(m) {
@@ -166,7 +166,8 @@
       id: id, pronto: pronto,
       enviarDados: enviarDados,
       energia: function (e, p) { if (!enviarDados({ e: e, p: p })) mandar(canal, { t: 'energia', id: id, e: e, p: p.slice(0, 3) }); },
-      comando: function (obj) { mandar(canal, Object.assign({ t: 'cmd' }, obj)); },
+      comando: function (obj) { mandar(canal, Object.assign({ t: 'cmd', id: id }, obj)); },
+      reentrar: function () { if (fechado || Date.now() - ultimoJoin < 5000) return; ultimoJoin = Date.now(); mandar(canal, { t: 'join', id: id, nome: nome }); },
       trocarCamera: function () { if (cams.length < 2) return Promise.resolve(); var i = (camIdx + 1) % cams.length; return ligarCamera(cams[i].deviceId); },
       cameras: function () { return { lista: cams, atual: camIdx }; },
       frente: function () { return frente; },

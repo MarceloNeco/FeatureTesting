@@ -20,11 +20,13 @@ self.addEventListener('fetch', function (e) {
     e.respondWith(caches.match(req).then(function (r) { return r || fetch(req).then(function (resp) { if (resp.ok) caches.open(CACHE).then(function (c) { c.put(req, resp.clone()); }); return resp; }); }));
     return;
   }
+  var nav = req.mode === 'navigate', guardar = !/[?&]code=/.test(url.search);
   e.respondWith(new Promise(function (ok) {
-    var feito = false, t = setTimeout(function () { if (!feito) { feito = true; caches.match(req).then(function (r) { ok(r || fetch(req)); }); } }, 4000);
-    fetch(req, { cache: 'no-cache' }).then(function (resp) {
-      if (resp.ok) caches.open(CACHE).then(function (c) { c.put(req, resp.clone()); });
+    var feito = false, pedido = fetch(req, { cache: 'no-cache' });
+    var t = setTimeout(function () { if (!feito) { feito = true; caches.match(req, { ignoreSearch: nav }).then(function (r) { ok(r || pedido); }); } }, 4000);
+    pedido.then(function (resp) {
+      if (resp.ok && guardar) caches.open(CACHE).then(function (c) { c.put(req, resp.clone()); });
       if (!feito) { feito = true; clearTimeout(t); ok(resp); }
-    }).catch(function () { if (!feito) { feito = true; clearTimeout(t); caches.match(req).then(function (r) { ok(r || Response.error()); }); } });
+    }).catch(function () { if (!feito) { feito = true; clearTimeout(t); caches.match(req, { ignoreSearch: nav }).then(function (r) { ok(r || Response.error()); }); } });
   }));
 });

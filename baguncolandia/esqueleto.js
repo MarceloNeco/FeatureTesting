@@ -13,7 +13,7 @@
     opts = opts || {};
     if (landmarker) return Promise.resolve(landmarker);
     if (carregando) return carregando;
-    carregando = import(BASE + 'vision_bundle.mjs').then(function (mod) {
+    carregando = import('./' + BASE + 'vision_bundle.mjs').then(function (mod) {
       opts.aoProgresso && opts.aoProgresso(0.2);
       return mod.FilesetResolver.forVisionTasks(BASE).then(function (fs) {
         opts.aoProgresso && opts.aoProgresso(0.6);

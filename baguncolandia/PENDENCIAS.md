@@ -14,3 +14,4 @@ Situação: 🟡 aberta · 🔵 em andamento · ⏸ aguardando o dono · ✅ fei
 | 8 | Juntar o motor de pareamento com o Dança na Sala num `sala-tv.js` comum (depois que os dois estiverem estáveis). | espec. §2 | 🟡 |
 | 9 | Teste real na TV LG do dono (casca `tv-lg-baguncolandia/`): voz existe no navegador da LG? música de carregamento toca sem toque? | entrega v0.1 | ⏸ dono |
 | 10 | Mais brincadeiras da família Bolinho de Chuva (cada uma na sua pasta, mesmo motor). | dono | 🟡 |
+| 11 | Revisão final (31/Out/2026), menores deixados: nome repetido no lobby expulsa o anterior; comandos e calibração num canal que pode perder pacote (rede de segurança de 75 s); "a música inteira" sem vídeo não termina sozinho; ⏹ durante a calibração não cancela; a fala pedida ao celular vai só no idioma da TV; `title`/`aria-label` de alguns botões só em PT; `frente` em `sala.js` sem uso; o estado mínimo ainda vai pelo servidor a cada 3 s. | revisão | 🟡 |

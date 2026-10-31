@@ -67,7 +67,7 @@
         if ('faixa' in m) o.faixa = typeof m.faixa === 'string' ? m.faixa.slice(0, 12) : '';
         if ('turmas' in m && m.turmas && typeof m.turmas === 'object') o.turmas = { propria: !!m.turmas.propria, publica: !!m.turmas.publica, minhas: !!m.turmas.minhas };
         if ('video' in m) { if (typeof m.video !== 'string' || !/^[A-Za-z0-9_-]{11}$/.test(m.video)) return null; o.video = m.video; }
-        if ('lista' in m) { if (typeof m.lista !== 'string' || !/^[A-Za-z0-9_-]{10,}$/.test(m.lista)) return null; o.lista = m.lista; }
+        if ('lista' in m) { if (typeof m.lista !== 'string' || !/^[A-Za-z0-9_-]{10,64}$/.test(m.lista)) return null; o.lista = m.lista; }
         if ('titulo' in m) o.titulo = String(m.titulo).slice(0, 120);
         if ('i' in m) o.i = clamp(+m.i || 0, 0, 500);
         if ('texto' in m) o.texto = String(m.texto).slice(0, 200);
@@ -75,8 +75,18 @@
         if ('ok' in m) o.ok = !!m.ok;
         if ('bpm' in m) o.bpm = clamp(+m.bpm || 0, 0, 220);
         return o;
-      case 'estado':
-        return m;   // sai da TV para o celular; a TV é quem monta
+      case 'estado': {   // da TV para os celulares: também conferido, porque qualquer um no canal pode mandar
+        var FASES = ['carregando', 'capa', 'lobby', 'calibrando', 'contagem', 'jogando', 'pausa', 'fim'];
+        o.fase = FASES.indexOf(m.fase) >= 0 ? m.fase : 'lobby';
+        if (m.cfg && typeof m.cfg === 'object') { var c = validar({ t: 'cmd', acao: 'config', modo: m.cfg.modo, jogadores: m.cfg.jogadores, celulares: m.cfg.celulares, duracao: m.cfg.duracao, dificuldade: m.cfg.dificuldade, ambiente: m.cfg.ambiente, cena: m.cfg.cena }); if (c) { delete c.t; delete c.acao; o.cfg = c; } }
+        o.tocando = !!m.tocando; o.titulo = String(m.titulo || '').slice(0, 120); o.versao = String(m.versao || '').slice(0, 12);
+        if ('eu' in m) o.eu = clamp(+m.eu || 0, 0, 3);
+        if ('indice' in m) o.indice = clamp(+m.indice || 0, -1, 500);
+        if (typeof m.video === 'string' && /^[A-Za-z0-9_-]{11}$/.test(m.video)) o.video = m.video;
+        o.lista = Array.isArray(m.lista) ? m.lista.slice(0, 200).filter(function (v) { return typeof v === 'string' && /^[A-Za-z0-9_-]{11}$/.test(v); }) : [];
+        o.pontos = Array.isArray(m.pontos) ? m.pontos.slice(0, 4).map(function (p) { return { nome: String(p && p.nome || '').replace(/\s+/g, ' ').slice(0, 14), pontos: typeof (p && p.pontos) === 'string' ? p.pontos.slice(0, 20) : clamp(+(p && p.pontos) || 0, 0, 999999) }; }) : [];
+        return o;
+      }
       default: return null;
     }
   }

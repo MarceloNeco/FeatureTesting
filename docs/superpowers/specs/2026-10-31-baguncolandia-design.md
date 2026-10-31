@@ -139,7 +139,8 @@ números que pulam; combo em letreiro; pódio com confete. Celular: compacto, se
   de id desconhecido); toda mensagem passa por um validador (tipo da lista, nome ≤ 14 letras,
   números limitados, SDP/ICE só do tipo esperado); nome e textos sempre por `textContent` (nunca
   `innerHTML` com dado de fora); limite de 4 celulares por sala; `eventsPerSecond` 20.
-- **CSP** por `<meta>`: `default-src 'self'`; `script-src 'self' https://www.youtube.com`;
+- **CSP** por `<meta>` (a página tem a versão exata, com `'wasm-unsafe-eval'` para o MediaPipe, `style-src 'unsafe-inline'`,
+  `youtube-nocookie` e `mediastream:`): `default-src 'self'`; `script-src 'self' 'wasm-unsafe-eval' https://www.youtube.com`;
   `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.youtube.com
   https://accounts.spotify.com https://api.spotify.com`; `frame-src https://www.youtube.com`;
   `img-src 'self' data: blob: https://i.ytimg.com https://i.scdn.co`; `media-src 'self' blob:`;

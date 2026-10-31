@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Instala o Dança na Sala como app numa TV LG (webOS) em Modo Desenvolvedor, pelo Wi-Fi.
+"""Instala o Bagunçolândia como app numa TV LG (webOS) em Modo Desenvolvedor, pelo Wi-Fi.
 
     python instalar-lg.py 192.168.0.50                 # empacota, instala (ou atualiza) e abre na TV
     python instalar-lg.py 192.168.0.50 --desinstalar   # remove da TV
@@ -178,7 +178,7 @@ def main():
         sys.exit('A TV não terminou de instalar. Ela disse:\n' + out.strip())
     ssh(ip, chave, 'rm -f ' + TEMP)
     luna(ip, chave, 'luna://com.webos.applicationManager/launch', {'id': APP_ID})
-    print('Instalado e aberto na TV. O ícone "Dança na Sala" fica na barra de apps da LG.')
+    print('Instalado e aberto na TV. O ícone "Bagunçolândia" fica na barra de apps da LG.')
     print('Dica: com o app aberto, segure um número no controle para abri-lo por esse número.')
     print('O Modo Desenvolvedor dura uns 40 dias: de vez em quando abra o app Developer Mode e aperte EXTEND.')
 

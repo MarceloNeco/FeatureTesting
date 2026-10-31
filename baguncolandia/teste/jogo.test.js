@@ -160,6 +160,10 @@ test('validar: aceita mensagens certas e recusa lixo', () => {
   assert.equal(B.validar({ t: 'cmd', acao: 'config', ambiente: 'matrix' }).ambiente, 'paisagem');
   assert.equal(B.validar({ t: 'dados', bpm: 999 }).bpm, 220);
   assert.deepEqual(B.validar({ t: 'dados', c: [0.1, 0.2, 0.3, 0.4] }).c, { x: 0.1, y: 0.2, w: 0.3, h: 0.4 });
+  // estado (da TV para os celulares) também é conferido: fase de lista fechada, lista só de ids, pontos até 4
+  const es = B.validar({ t: 'estado', fase: 'hack', lista: 'x', pontos: [{ nome: 'Ana', pontos: 10 }, {}, {}, {}, {}, {}], eu: 9 });
+  assert.equal(es.fase, 'lobby'); assert.deepEqual(es.lista, []); assert.equal(es.pontos.length, 4); assert.equal(es.eu, 3);
+  assert.equal(B.validar({ t: 'estado', fase: 'fim', lista: ['abcdefghijk', 'ruim'] }).lista.length, 1);
   assert.equal(B.validar('string'), null);
   assert.equal(B.validar({ t: 'join', id: '<script>', nome: 'Ana' }), null);
   const v = B.validar({ t: 'join', id: 'abc12345', nome: '  Ana <b>  ' });

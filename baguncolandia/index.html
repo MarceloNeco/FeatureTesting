@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.youtube.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.youtube.com https://accounts.spotify.com https://api.spotify.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com; img-src 'self' data: blob: https://i.ytimg.com https://i.scdn.co; media-src 'self' blob: mediastream:; font-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://www.youtube.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.youtube.com https://accounts.spotify.com https://api.spotify.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com; img-src 'self' data: blob: https://i.ytimg.com https://i.scdn.co; media-src 'self' blob: mediastream:; font-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'none'; object-src 'none'">
 <title>Bagunçolândia — Bolinho de Chuva · SolverONE</title>
 <link rel="icon" href="icone-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -62,7 +62,14 @@
     <div id="tvYt"><div id="yt"></div></div>
   </div>
   <div id="tvRodape"><div id="tvCanto"></div><div id="tvTitulo"></div></div>
-  <button id="tvSair" type="button" aria-label="Sair">✕</button>
+  <button id="tvSair" type="button" aria-label="Sair / Exit">✕</button>
+  <div id="tvLocalBar">
+    <div class="grupo" id="localModos">
+      <button class="sec opt ativo" data-v="corta" type="button">🍉</button><button class="sec opt" data-v="pega" type="button">🎈</button><button class="sec opt" data-v="chuta" type="button">⚽</button><button class="sec opt" data-v="pula" type="button">🪵</button><button class="sec opt" data-v="bolas" type="button">🎳</button><button class="sec opt" data-v="mistura" type="button">🎪</button>
+    </div>
+    <button id="localComecar" type="button">▶ <span data-t="Começar|Start"></span></button>
+    <button class="sec" id="localPausa" type="button" title="Pausar / Pause">⏸</button>
+  </div>
 
   <div id="tvCarregando" class="cheia">
     <div class="melancia" aria-hidden="true">

@@ -88,7 +88,7 @@
       if (d.b) Desenho.pulso();
       if (d.k && tv.partida && tv.fase === 'jogando') {
         var icK = indiceCelular(id), tsK = performance.now();
-        if (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2) { if (icK === 0) { if (d.k[0]) tv.partida.esqueleto(0, reescalar(d.k[0], 0), tsK); if (d.k[1]) tv.partida.esqueleto(1, reescalar(d.k[1], 1), tsK); } }
+        if (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2) { if (icK === 0) d.k.forEach(function (k) { var lane = k[7][0] < 0.5 ? 0 : 1; tv.partida.esqueleto(lane, reescalar(k, lane), tsK); }); }   // a raia é a metade onde está o quadril
         else if (icK < tv.cfg.jogadores && d.k[0]) tv.partida.esqueleto(icK, d.k[0], tsK);
         return;
       }
@@ -108,7 +108,7 @@
       if (tv.jog.length) lobby();
     }
     function lobby() {
-      if (tv.fase === 'jogando' || tv.fase === 'calibrando' || tv.fase === 'contagem') return;
+      if (tv.fase === 'jogando' || tv.fase === 'calibrando' || tv.fase === 'contagem' || tv.fase === 'pausa') return;
       if (!tv.jog.length && !tv.local) { if (tv.fase !== 'carregando') capa(); return; }
       tv.fase = 'lobby'; cheia('tvLobby');
       var L = $('lobbyJogadores'); while (L.firstChild) L.removeChild(L.firstChild);
@@ -129,10 +129,16 @@
       var amb = c.ambiente === 'paisagem' ? T('🏞️ paisagem', '🏞️ landscape') : T('📷 câmera', '📷 camera');
       $('lobbyResumo').textContent = m + ' · ' + amb + ' · ' + c.jogadores + (c.jogadores > 1 ? T(' pessoas', ' people') : T(' pessoa', ' person')) + (tv.local ? '' : ' · ' + c.celulares + (c.celulares > 1 ? T(' celulares', ' phones') : T(' celular', ' phone'))) + ' · ' + d + ' · ' + n;
     }
+    var estadoBroadcastEm = 0;
     function estadoParaCelulares() {
       if (!tv.sala) return;
-      var pontos = {}; tv.jog.forEach(function (j, i) { var e = tv.partida && tv.partida.estado(); var lane = (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2) ? null : i; pontos[j.id] = { nome: j.nome, pontos: e && lane != null && e.jogadores[lane] ? e.jogadores[lane].pontos : (e && lane == null && i === 0 ? e.jogadores.map(function (x) { return x.pontos; }).join(' · ') : 0) }; });
-      tv.sala.estado({ fase: tv.fase, cfg: tv.cfg, tocando: tv.tocando, titulo: tv.titulo, pontos: pontos, lista: tv.lista, indice: tv.indice, video: tv.videoAtual, versao: APP_VERSION });
+      var e = tv.partida && tv.partida.estado(), umCel2 = tv.cfg.celulares === 1 && tv.cfg.jogadores === 2;
+      var pontos = tv.jog.map(function (j, i) { return { nome: j.nome, pontos: e ? (umCel2 ? (i === 0 ? e.jogadores.map(function (x) { return x.pontos; }).join(' · ') : 0) : (e.jogadores[i] ? e.jogadores[i].pontos : 0)) : 0 }; });
+      var cheio = { t: 'estado', fase: tv.fase, cfg: tv.cfg, tocando: tv.tocando, titulo: tv.titulo, pontos: pontos, lista: tv.lista, indice: tv.indice, video: tv.videoAtual, versao: APP_VERSION };
+      // completo, só pelo canal direto de cada celular (com "eu" = a posição dele); sem id de ninguém
+      tv.jog.forEach(function (j, i) { tv.sala.mandarPara(j.id, Object.assign({ eu: i }, cheio)); });
+      // pelo servidor, só o mínimo e só a cada 3 s (para quem ainda não tem o canal direto)
+      if (Date.now() - estadoBroadcastEm > 3000) { estadoBroadcastEm = Date.now(); tv.sala.estado({ fase: tv.fase, cfg: tv.cfg, versao: APP_VERSION }); }
     }
 
     /* ---- comandos vindos do celular (ou do teclado da TV) ---- */
@@ -298,6 +304,11 @@
       try { if (!tv.local && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
       if (!tv.raf) tv.raf = requestAnimationFrame(quadro);
       carregar().then(function () { if (tv.local) lobby(); else capa(); if (!tv.local) carregarYouTube(); });
+      if (tv.teclado) return;
+      tv.teclado = true;
+      $('localComecar').onclick = function () { if (tv.fase === 'lobby' || tv.fase === 'fim') comecar(); };
+      $('localPausa').onclick = function () { comando({ acao: 'pausar' }); };
+      $('localModos').querySelectorAll('button').forEach(function (b) { b.onclick = function () { $('localModos').querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); comando({ acao: 'config', modo: b.getAttribute('data-v') }); }; });
       // teclado / controle da TV: OK (Enter) começa; Esc/Voltar nada
       document.addEventListener('keydown', function (e) {
         if (!$('tv').classList.contains('ativa')) return;
@@ -327,7 +338,7 @@
       try { localStorage.setItem('bagunca:nome', nome); if (!cel.local) localStorage.setItem('bagunca:codigo', cod); } catch (e) {}
       $('btEntrar').disabled = true; Som.iniciar(); Voz.liberar();
       if (cel.local) { entrarLocal(nome, erro); return; }
-      cel.sala = Sala.celular({ nome: nome, codigo: cod, video: $('cam'), T: T, aoStatus: status, aoTV: daTV, aoConectado: function () { Som.tocar('ok'); }, aoCamera: function (c) { $('cam').style.transform = 'scaleX(-1)'; }, aoCameras: cameras });
+      cel.sala = Sala.celular({ nome: nome, codigo: cod, video: $('cam'), T: T, aoStatus: status, aoTV: daTV, aoConectado: function () { Som.tocar('ok'); mandarConfig(); }, aoCamera: function (c) { $('cam').style.transform = 'scaleX(-1)'; }, aoCameras: cameras });
       cel.sala.pronto.then(function () {
         tela('jogo'); $('jogoNome').textContent = nome; $('jogoCodigo').textContent = cod; status(T('Procurando a TV…', 'Looking for the TV…'));
         cel.visao = Sala.criarVisao($('cam')); cel.timer = setInterval(medir, 100);
@@ -372,7 +383,7 @@
       } else cel.sala.energia(m.e, m.p);
     }
     function daTV(m) {
-      if (m.t === 'estado') { cel.estado = m; mostrarEstado(m); return; }
+      if (m.t === 'estado') { cel.estado = m; mostrarEstado(m); if ((m.fase === 'lobby' || m.fase === 'fim' || m.fase === 'capa') && cel.sala && !cel.sala.conectado()) cel.sala.reentrar(); return; }
       if (m.t !== 'cmd') return;
       if (m.acao === 'fale') { Voz.falar(m.texto, m.texto); return; }
       if (m.acao === 'calibrar') { calibrar(m.faixa); return; }
@@ -398,7 +409,7 @@
 
     function mostrarEstado(m) {
       var p = $('placar'); while (p.firstChild) p.removeChild(p.firstChild);
-      Object.keys(m.pontos || {}).forEach(function (k) { var d = document.createElement('div'), s = document.createElement('span'), b = document.createElement('b'); s.textContent = (cel.sala && k === cel.sala.id ? '⭐ ' : '') + (m.pontos[k].nome || ''); b.textContent = String(m.pontos[k].pontos); d.appendChild(s); d.appendChild(b); p.appendChild(d); });
+      (m.pontos || []).forEach(function (pt, i) { var d = document.createElement('div'), s = document.createElement('span'), b = document.createElement('b'); s.textContent = (m.eu === i ? '⭐ ' : '') + (pt.nome || ''); b.textContent = String(pt.pontos); d.appendChild(s); d.appendChild(b); p.appendChild(d); });
       desenharLista(m);
       var f = m.fase;
       if (f === 'fim' && cel.faseAnterior === 'jogando' && Spotify.ativo() && Spotify.entrou()) Spotify.pausar().catch(function () {});
