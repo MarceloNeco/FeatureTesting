@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ArchONE — mapa vivo (protótipo)</title>
+<meta name="description" content="ArchONE, o mapa vivo da SolverONE (protótipo F0 no Feature Testing): nível 0 (plataforma) e nível 1 (um app), lidos dos manifestos arquitetura.json.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'">
+<meta name="color-scheme" content="dark light">
+<link rel="stylesheet" href="mapa.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="g-servico" viewBox="0 0 20 20"><path d="M10 2l7 4v8l-7 4-7-4V6z" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="g-app" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="g-modulo" viewBox="0 0 20 20"><rect x="2.5" y="5" width="15" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="g-dado" viewBox="0 0 20 20"><ellipse cx="10" cy="5.5" rx="6.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 5.5v9c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5v-9" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="g-integracao" viewBox="0 0 20 20"><path d="M10 2.5l7.5 7.5-7.5 7.5L2.5 10z" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="g-robo" viewBox="0 0 20 20"><path d="M10 3l7.5 13.5h-15z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="g-fluxo" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 2.2"/></symbol>
+  <symbol id="g-busca" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="g-fechar" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="g-tema" viewBox="0 0 20 20"><path d="M10 3a7 7 0 1 0 0 14 5.5 5.5 0 0 1 0-14z" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+</svg>
+
+<header class="topo">
+  <div class="marca">
+    <span class="marca-ponto" aria-hidden="true"></span>
+    <h1 class="marca-nome" data-pt="ArchONE" data-en="ArchONE">ArchONE</h1>
+    <span class="marca-sub" data-pt="mapa vivo · protótipo F0 · lido dos manifestos" data-en="living map · F0 prototype · read from the manifests">mapa vivo · protótipo F0 · lido dos manifestos</span>
+  </div>
+  <nav class="trilha" aria-label="Nível"><ol id="trilha"></ol></nav>
+  <form class="busca" role="search" id="busca-form">
+    <svg class="g" aria-hidden="true"><use href="#g-busca"/></svg>
+    <input id="busca" type="search" autocomplete="off" aria-label="Buscar um nó" placeholder="Buscar app, tabela, serviço…" data-ph-pt="Buscar app, tabela, serviço…" data-ph-en="Search app, table, service…">
+    <output id="busca-n" aria-live="polite"></output>
+  </form>
+  <div class="acoes">
+    <div class="camadas" role="group" aria-label="Camadas">
+      <button type="button" class="chip" data-camada="nenhuma" aria-pressed="true" data-pt="Sem camada" data-en="No overlay">Sem camada</button>
+      <button type="button" class="chip" data-camada="seguranca" aria-pressed="false" data-pt="Segurança" data-en="Security">Segurança</button>
+      <button type="button" class="chip" data-camada="dados" aria-pressed="false" data-pt="Dados e LGPD" data-en="Data and LGPD">Dados e LGPD</button>
+      <button type="button" class="chip" data-camada="estado" aria-pressed="false" data-pt="Estado" data-en="Status">Estado</button>
+    </div>
+    <button type="button" class="botao-icone" id="idioma" aria-label="Trocar o idioma">EN</button>
+    <button type="button" class="botao-icone" id="tema" aria-label="Trocar o tema"><svg class="g" aria-hidden="true"><use href="#g-tema"/></svg></button>
+  </div>
+</header>
+
+<main class="palco" data-recurso="arch-one">
+  <div id="grafo" role="img" aria-label="Mapa da plataforma SolverONE; use a busca ou a lista da ficha para navegar pelo teclado" tabindex="0"></div>
+  <div class="dica" id="dica" data-pt="Toque num app para abrir o que tem dentro. Toque de novo no nome para fechar." data-en="Tap an app to open what is inside. Tap its name again to close it.">Toque num app para abrir o que tem dentro. Toque de novo no nome para fechar.</div>
+  <aside class="ficha" id="ficha" aria-live="polite" hidden>
+    <div class="ficha-topo">
+      <span class="ficha-tipo" id="ficha-tipo"></span>
+      <button type="button" class="botao-icone" id="ficha-fechar" aria-label="Fechar a ficha"><svg class="g" aria-hidden="true"><use href="#g-fechar"/></svg></button>
+    </div>
+    <h2 class="ficha-nome" id="ficha-nome"></h2>
+    <p class="ficha-resumo" id="ficha-resumo"></p>
+    <dl class="fatos" id="ficha-fatos"></dl>
+    <section class="ficha-bloco" id="ficha-estado-bloco">
+      <h3 data-pt="Estado vivo" data-en="Live status">Estado vivo</h3>
+      <p class="vazio" id="ficha-estado"></p>
+    </section>
+    <section class="ficha-bloco">
+      <h3 id="ficha-ligacoes-titulo"></h3>
+      <ul class="ligacoes" id="ficha-ligacoes"></ul>
+    </section>
+    <div class="ficha-acoes"><button type="button" class="botao" id="ficha-abrir"></button></div>
+  </aside>
+</main>
+
+<footer class="legenda" aria-label="Legenda">
+  <span><svg class="g" aria-hidden="true"><use href="#g-servico"/></svg><b data-pt="serviço" data-en="service">serviço</b></span>
+  <span><svg class="g" aria-hidden="true"><use href="#g-app"/></svg><b data-pt="app" data-en="app">app</b></span>
+  <span><svg class="g" aria-hidden="true"><use href="#g-modulo"/></svg><b data-pt="módulo" data-en="module">módulo</b></span>
+  <span><svg class="g" aria-hidden="true"><use href="#g-dado"/></svg><b data-pt="dado" data-en="data">dado</b></span>
+  <span><svg class="g" aria-hidden="true"><use href="#g-integracao"/></svg><b data-pt="integração" data-en="integration">integração</b></span>
+  <span><svg class="g" aria-hidden="true"><use href="#g-robo"/></svg><b data-pt="robô" data-en="robot">robô</b></span>
+  <span><svg class="g" aria-hidden="true"><use href="#g-fluxo"/></svg><b data-pt="fluxo" data-en="flow">fluxo</b></span>
+  <span class="legenda-camada" id="legenda-camada" hidden></span>
+</footer>
+
+<script src="../recursos.js" data-app="feature-tester"></script>
+<script src="lib/layout-base-2.0.1.js"></script>
+<script src="lib/cose-base-2.2.0.js"></script>
+<script src="lib/cytoscape-3.34.4.min.js"></script>
+<script src="lib/cytoscape-fcose-2.2.0.js"></script>
+<script src="lib/dagre-0.8.5.min.js"></script>
+<script src="lib/cytoscape-dagre-4.0.1.min.js"></script>
+<script src="lib/cytoscape-expand-collapse-4.1.1.js"></script>
+<script src="mapa-modelo.js"></script>
+<script src="mapa.js"></script>
+</body>
+</html>

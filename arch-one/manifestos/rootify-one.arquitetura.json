@@ -1,0 +1,88 @@
+{
+  "contrato": 1,
+  "app": "rootify-one",
+  "nivel": 1,
+  "nome": { "pt": "RootifyONE", "en": "RootifyONE" },
+  "descricao": {
+    "pt": "Administração central da SolverONE: apps, planos, serviços por plano, Controle dos apps (interruptores e ⚡ Modo DEUS), usuários (CRM), suporte, feedback, termos, recados, anúncios, versões, Publicar (arquivos mestre no solverone-dados), papéis, equipe, LGPD, auditoria, e-mails, integrações, financeiro. Também é a casa dos arquivos mestre da plataforma. Manifesto da F0 feito à mão pelo chat Arquitetura.",
+    "en": "SolverONE central administration: apps, plans, services per plan, App control (switches and ⚡ GOD mode), users (CRM), support, feedback, terms, notices, ads, versions, Publish (master files to solverone-dados), roles, team, LGPD, audit, e-mails, integrations, finance. Also home of the platform's master files. F0 manifest written by hand by the Architecture chat."
+  },
+  "versao": "0.18.4",
+  "atualizado": "2026-10-23",
+  "repositorio": { "github": "MarceloNeco/rootify-one", "visibilidade": "privado", "branch": "main" },
+  "hospedagem": { "tipo": "cloudflare-pages", "url": "https://rootify-one.pages.dev/", "protegido_por": ["cloudflare-access"] },
+  "estado": "alpha",
+  "linguagens": ["html", "css", "js", "sql", "python"],
+  "interruptores": null,
+  "modulos": [
+    { "id": "painel", "nome": { "pt": "Painel", "en": "Dashboard" }, "arquivos": ["rootify-telas-1.js"], "descricao": { "pt": "Visão geral, inclusive o quadro Banco de dados (pulso do Supabase).", "en": "Overview, including the Database card (Supabase heartbeat)." } },
+    { "id": "apps", "nome": { "pt": "Apps", "en": "Apps" }, "arquivos": ["rootify-telas-1.js"], "descricao": { "pt": "Catálogo dos apps (vira apps.json).", "en": "App catalog (becomes apps.json)." } },
+    { "id": "planos", "nome": { "pt": "Planos", "en": "Plans" }, "arquivos": ["rootify-telas-1.js"] },
+    { "id": "servicos", "nome": { "pt": "Serviços por plano", "en": "Services per plan" }, "arquivos": ["rootify-telas-1.js", "rootify-acesso.js", "acesso-planos.js"] },
+    { "id": "recursos", "nome": { "pt": "Controle dos apps (interruptores, ⚡ Modo DEUS, conteúdo)", "en": "App control (switches, ⚡ GOD mode, content)" }, "arquivos": ["rootify-recursos.js", "rootify-conteudo.js"], "descricao": { "pt": "Gera recursos/<app>.json e conteudo/<app>.json; lê o recursos-do-app.json de cada app (Quem obedece).", "en": "Generates recursos/<app>.json and conteudo/<app>.json; reads each app's recursos-do-app.json (Who obeys)." } },
+    { "id": "usuarios", "nome": { "pt": "Usuários (CRM) e Plataforma (Supabase)", "en": "Users (CRM) and Platform (Supabase)" }, "arquivos": ["rootify-telas-1.js", "rootify-supabase.js"], "descricao": { "pt": "Ficha 360°, importação do Lab, liberações, famílias/grupos, integrações, armazenamento, registro de acessos.", "en": "360° record, Lab import, approvals, families/groups, integrations, storage, access log." } },
+    { "id": "suporte", "nome": { "pt": "Suporte (CS)", "en": "Support (CS)" }, "arquivos": ["rootify-telas-1.js"] },
+    { "id": "feedback", "nome": { "pt": "Central de feedback", "en": "Feedback centre" }, "arquivos": ["rootify-feedback.js"] },
+    { "id": "kb", "nome": { "pt": "Base de conhecimento (ajuda do AssistONE)", "en": "Knowledge base (AssistONE help)" }, "arquivos": ["rootify-telas-1.js"] },
+    { "id": "termos", "nome": { "pt": "Termos e políticas (com IA e agente de políticas)", "en": "Terms and policies (with AI and the policy agent)" }, "arquivos": ["rootify-telas-2.js", "rootify-ia-termos.js"] },
+    { "id": "recados", "nome": { "pt": "Recados", "en": "Notices" }, "arquivos": ["rootify-telas-2.js"] },
+    { "id": "anuncios", "nome": { "pt": "Anúncios", "en": "Ads" }, "arquivos": ["rootify-telas-2.js"] },
+    { "id": "versoes", "nome": { "pt": "Versões e novidades dos apps", "en": "App versions and what's new" }, "arquivos": ["rootify-telas-2.js"] },
+    { "id": "publicar", "nome": { "pt": "🚀 Publicar", "en": "🚀 Publish" }, "arquivos": ["rootify-publicar.js", "rootify-dados.js"], "descricao": { "pt": "Um conceito, um botão: o que vai mudar, item por item, e a publicação no solverone-dados pela API do GitHub.", "en": "One concept, one button: what will change, item by item, and publishing to solverone-dados through the GitHub API." } },
+    { "id": "papeis", "nome": { "pt": "Papéis e permissões", "en": "Roles and permissions" }, "arquivos": ["rootify-telas-2.js", "rootify-catalogo.js"] },
+    { "id": "equipe", "nome": { "pt": "Equipe", "en": "Team" }, "arquivos": ["rootify-telas-2.js"] },
+    { "id": "privacidade", "nome": { "pt": "Privacidade (LGPD)", "en": "Privacy (LGPD)" }, "arquivos": ["rootify-telas-2.js"] },
+    { "id": "auditoria", "nome": { "pt": "Auditoria (log encadeado)", "en": "Audit (chained log)" }, "arquivos": ["rootify-telas-2.js", "rootify-base.js"] },
+    { "id": "emails", "nome": { "pt": "E-mails (remetentes, modelos, caixa de saída)", "en": "E-mails (senders, templates, outbox)" }, "arquivos": ["rootify-email.js"] },
+    { "id": "integracoes", "nome": { "pt": "Integrações e chaves", "en": "Integrations and keys" }, "arquivos": ["rootify-telas-2.js"] },
+    { "id": "automacoes", "nome": { "pt": "Automações", "en": "Automations" }, "arquivos": ["rootify-telas-2.js", "rootify-dados.js"] },
+    { "id": "financeiro", "nome": { "pt": "Financeiro dos clientes", "en": "Customer finance" }, "arquivos": ["rootify-financeiro.js"] },
+    { "id": "telemetria", "nome": { "pt": "Telemetria", "en": "Telemetry" }, "arquivos": ["rootify-telas-2.js"] },
+    { "id": "armazenamento", "nome": { "pt": "Armazenamento", "en": "Storage" }, "arquivos": ["rootify-telas-2.js"] },
+    { "id": "mapa", "nome": { "pt": "O que falta especificar", "en": "What still needs a spec" }, "arquivos": ["rootify-telas-2.js"] },
+    { "id": "configuracoes", "nome": { "pt": "Configurações", "en": "Settings" }, "arquivos": ["rootify-telas-2.js"] },
+    { "id": "inbox", "nome": { "pt": "📥 Caixa de entrada", "en": "📥 Inbox" }, "arquivos": ["rootify-app.js"] },
+    { "id": "assistone", "nome": { "pt": "AssistONE do admin", "en": "Admin AssistONE" }, "arquivos": ["rootify-assist.js"] },
+    { "id": "acesso", "nome": { "pt": "Acesso ao admin (cofre cifrado, PIN, digital, bloqueio)", "en": "Admin access (encrypted vault, PIN, fingerprint, lock)" }, "arquivos": ["rootify-app.js", "rootify-base.js", "matrix-fundo.js"] },
+    { "id": "planejados", "nome": { "pt": "Módulos planejados (em cinza): contratos, marketing, metas, BI, proteção, infra, agentes, insights", "en": "Planned modules (greyed): contracts, marketing, goals, BI, protection, infra, agents, insights" }, "arquivos": ["rootify-catalogo.js", "BACKLOG-ESTRATEGICO.md"] }
+  ],
+  "dados": [
+    { "id": "cofre-do-admin", "nome": { "pt": "Coleções do admin neste aparelho (apps, planos, serviços, clientes, chamados, termos, log…)", "en": "Admin collections on this device (apps, plans, services, customers, tickets, terms, log…)" }, "onde": "aparelho", "pessoal": true, "sensivel": true, "cifrado_no_aparelho": true, "retencao": { "pt": "Cofre AES-GCM embrulhado por senha, PIN, código de recuperação e chave do aparelho; log encadeado por hash. Fase 2 leva as coleções para o Supabase.", "en": "AES-GCM vault wrapped by password, PIN, recovery code and device key; hash-chained log. Phase 2 moves the collections to Supabase." } },
+    { "id": "token-github", "nome": { "pt": "Token fine-grained do GitHub do administrador (só solverone-dados)", "en": "Administrator's fine-grained GitHub token (solverone-dados only)" }, "onde": "aparelho", "pessoal": true, "sensivel": true, "cifrado_no_aparelho": true },
+    { "id": "arquivos-mestre-publicados", "nome": { "pt": "Arquivos mestre publicados no solverone-dados", "en": "Master files published to solverone-dados" }, "onde": "arquivo-publico", "pessoal": false, "sensivel": false, "retencao": { "pt": "Repositório público solverone-dados; o histórico de commits é o log. Nunca dado de pessoa.", "en": "Public repository solverone-dados; the commit history is the log. Never personal data." } },
+    { "id": "plataforma-supabase", "nome": { "pt": "Leituras e ações da equipe no Supabase (contas do Lab, apps, grupos, uso, feedback, acessos, pulso)", "en": "Team reads and actions in Supabase (Lab accounts, apps, groups, usage, feedback, access log, heartbeat)" }, "onde": "supabase", "tabelas": ["equipe", "sol_apps", "sol_app_uso", "sol_grupos", "sol_grupo_membros", "sol_feedback", "sol_feedback_perguntas", "sol_feedback_arquivos", "registro_acessos", "sol_pulso"], "pessoal": true, "sensivel": false, "retencao": { "pt": "Só por funções admin_* que exigem eh_admin_equipe(); nenhum conteúdo de pessoa fica no RootifyONE além do CRM cifrado.", "en": "Only through admin_* functions requiring eh_admin_equipe(); no personal content stays in RootifyONE beyond the encrypted CRM." } }
+  ],
+  "integracoes": [
+    { "id": "github-api", "nome": "API do GitHub (contents do solverone-dados)", "tipo": "github", "host": "api.github.com", "chave": "da-pessoa", "onde_chave": "cofre", "plano": "gratuito" },
+    { "id": "supabase", "nome": "Supabase (projeto solverone-app): login da equipe e funções admin_*", "tipo": "supabase", "host": "qvdvkqydhnadhewcidia.supabase.co", "chave": "publica", "onde_chave": "nao-se-aplica", "contrato": "PLATAFORMA-DADOS.md", "plano": "gratuito" },
+    { "id": "edge-solverone-admin", "nome": "Edge Function solverone-admin (ações de conta com a chave secreta no servidor)", "tipo": "supabase", "host": "qvdvkqydhnadhewcidia.supabase.co", "chave": "do-servidor", "onde_chave": "secrets-edge-function", "contrato": "entrega/solverone-app/supabase/functions/solverone-admin/index.ts" },
+    { "id": "cloudflare-access", "nome": "Cloudflare Access (porta do rootify-one.pages.dev)", "tipo": "cloudflare", "host": "rootify-one.pages.dev", "chave": "nenhuma", "onde_chave": "nao-se-aplica", "plano": "gratuito (até 50 pessoas)" },
+    { "id": "formspree", "nome": "Formspree (importar chamados por CSV)", "tipo": "api-externa", "host": "formspree.io", "chave": "nenhuma", "onde_chave": "nao-se-aplica", "plano": "gratuito" },
+    { "id": "ia-da-equipe", "nome": "IA pelo módulo comum (OpenAI, Anthropic, Gemini, OpenRouter, Groq, Mistral) para termos e sugestões de suporte", "tipo": "ia", "chave": "da-pessoa", "onde_chave": "cofre" },
+    { "id": "voz-da-equipe", "nome": "Voz pelo módulo comum (ElevenLabs, Deepgram, AssemblyAI)", "tipo": "voz", "chave": "da-pessoa", "onde_chave": "cofre" }
+  ],
+  "fluxos": [
+    { "id": "publicar", "nome": { "pt": "Publicar para os apps", "en": "Publish to the apps" }, "gatilho": { "pt": "botão 🚀 Publicar N alterações", "en": "🚀 Publish N changes button" }, "passos": [ { "pt": "RF.Publicar.estado() lista o que vai mudar, arquivo por arquivo", "en": "RF.Publicar.estado() lists what will change, file by file" }, { "pt": "roda no Fundo: grava cada JSON no solverone-dados pela API do GitHub com o token do cofre", "en": "runs in the background: writes each JSON to solverone-dados through the GitHub API with the vault token" }, { "pt": "os apps leem ao abrir (mesma origem, sem CORS)", "en": "the apps read on open (same origin, no CORS)" } ], "modulos": ["publicar"], "dados": ["cofre-do-admin", "token-github", "arquivos-mestre-publicados"], "integracoes": ["github-api"] },
+    { "id": "interruptores", "nome": { "pt": "Ligar e desligar funções dos apps", "en": "Switch app features on and off" }, "gatilho": { "pt": "Controle dos apps ou ⚡ Modo DEUS", "en": "App control or ⚡ GOD mode" }, "passos": [ { "pt": "lê o recursos-do-app.json de cada app (Quem obedece)", "en": "reads each app's recursos-do-app.json (Who obeys)" }, { "pt": "grava recursos/<app>.json e recursos/global.json ao publicar", "en": "writes recursos/<app>.json and recursos/global.json on publish" }, { "pt": "o app esconde o que está desligado; 'app' desligado = manutenção", "en": "the app hides what is off; 'app' off = maintenance" } ], "modulos": ["recursos", "publicar"], "dados": ["arquivos-mestre-publicados"], "integracoes": ["github-api"] },
+    { "id": "pulso", "nome": { "pt": "Manter o banco acordado", "en": "Keep the database awake" }, "gatilho": { "pt": "robô a cada 3 dias; ao entrar (1×/dia/aparelho); botão Dar sinal agora", "en": "robot every 3 days; on sign-in (once a day per device); Send a signal now button" }, "passos": [ { "pt": "POST /rest/v1/rpc/sol_dar_pulso com a chave pública", "en": "POST /rest/v1/rpc/sol_dar_pulso with the public key" }, { "pt": "Painel mostra ✓ acordado ou ⚠ sem resposta", "en": "Dashboard shows ✓ awake or ⚠ no answer" } ], "modulos": ["painel", "usuarios"], "dados": ["plataforma-supabase"], "integracoes": ["supabase"], "robos": ["manter-banco-acordado"] },
+    { "id": "central-de-feedback", "nome": { "pt": "Central de feedback", "en": "Feedback centre" }, "gatilho": { "pt": "abrir Clientes → Feedback", "en": "open Customers → Feedback" }, "passos": [ { "pt": "admin_* lista, filtra e abre a ficha (anexo por URL assinada)", "en": "admin_* lists, filters and opens the record (attachment by signed URL)" }, { "pt": "mudar situação, responder, virar chamado (RF.mudar)", "en": "change status, reply, turn into a ticket (RF.mudar)" } ], "modulos": ["feedback", "suporte"], "dados": ["plataforma-supabase", "cofre-do-admin"], "integracoes": ["supabase"] },
+    { "id": "contas-do-lab", "nome": { "pt": "Equipe entra no Supabase e cuida das contas", "en": "Team signs in to Supabase and manages accounts" }, "gatilho": { "pt": "Usuários → Plataforma (Supabase) → Entrar", "en": "Users → Platform (Supabase) → Sign in" }, "passos": [ { "pt": "login com a chave pública; token só em memória; papel pelo meu_papel_equipe()", "en": "sign-in with the public key; token only in memory; role from meu_papel_equipe()" }, { "pt": "listar contas, liberar acesso, encerrar/anonimizar pela Edge Function solverone-admin", "en": "list accounts, grant access, close/anonymise through the solverone-admin Edge Function" } ], "modulos": ["usuarios"], "dados": ["plataforma-supabase"], "integracoes": ["supabase", "edge-solverone-admin"] }
+  ],
+  "robos": [
+    { "id": "manter-banco-acordado", "workflow": ".github/workflows/manter-banco-acordado.yml", "cadencia": "a cada 3 dias, 08:17 em Brasília (cron 17 11 */3 * *) e manual", "faz": { "pt": "Chama sol_dar_pulso com a chave pública para o Supabase Free não pausar o projeto; falha = e-mail do GitHub.", "en": "Calls sol_dar_pulso with the public key so Supabase Free does not pause the project; failure = GitHub e-mail." } }
+  ],
+  "arquivos_mestre": [
+    { "arquivo": "janela.js", "origem": "rootify-one", "versao": "1.0.2" },
+    { "arquivo": "cofre.js", "origem": "rootify-one", "versao": "1.5.0" },
+    { "arquivo": "diretrizes.js", "origem": "rootify-one", "versao": "1.13.0" },
+    { "arquivo": "assistone.js", "origem": "rootify-one" },
+    { "arquivo": "recursos.js", "origem": "rootify-one" },
+    { "arquivo": "acesso-planos.js", "origem": "rootify-one" },
+    { "arquivo": "teste/sql-grants.js", "origem": "rootify-one", "versao": "1.0.1" },
+    { "arquivo": "teste/arquitetura.js", "origem": "rootify-one", "versao": "1.0.0" }
+  ],
+  "dependencias": [],
+  "testes": { "comando": "node teste/rodar.js", "arquivos": ["teste/rodar.js", "teste/README.md", "teste/sql-grants.js", "teste/publicar.js", "teste/modo-deus.js", "teste/interruptores.js", "teste/pulso.js", "teste/feedback.js", "teste/plataforma.js"] },
+  "documentos": { "arquitetura": "ARQUITETURA.md", "pendencias": "PENDENCIAS.md", "versoes": "versoes.json", "contrato_de_dados": "PLATAFORMA-DADOS.md", "backlog_estrategico": "BACKLOG-ESTRATEGICO.md", "sql": "entrega/solverone-app/supabase" },
+  "liga_com": ["solverone-dados", "solverone-app"]
+}
