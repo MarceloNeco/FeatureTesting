@@ -5,7 +5,7 @@
    Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
 var VERSAO = '0.1.0';
 var CACHE = 'peluqueria-v' + VERSAO;
-var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
+var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return Promise.all(ARQUIVOS.map(function (a) { return c.add(a).catch(function () {}); })); }).then(function () { return self.skipWaiting(); }));
 });
