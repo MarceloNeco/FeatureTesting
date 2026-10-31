@@ -15,8 +15,10 @@ reaproveitados). Criada em 31/Out/2026, com autorização do dono.
 | 6 | Dança na Sala: a chave da YouTube Data API da pessoa fica em texto aberto no `localStorage` (`danca:ytkey`); a diretriz manda chaves para o cofre comum (`cofre.js`) | Revisão do código (31/Out/2026) | ⏸ aguardando o dono |
 | 7 | Dança na Sala: `supabase-js` vem do jsDelivr sem `integrity`; a diretriz pede hospedar no repositório ou fixar a versão com `integrity` | Revisão do código (31/Out/2026) | ⏸ aguardando o dono |
 | 8 | ArchONE (mapa vivo) publicado aqui como protótipo F0 por decisão do dono (31/Out/2026); sai daqui quando o portal próprio `arch-one` nascer (F1 do mapa vivo, `rootify-one/docs/specs/mapa-vivo-plano-f1.md`). Até lá, mudanças são feitas no original (`rootify-one/docs/specs/mapa-vivo/prototipo/`) e copiadas para `arch-one/` | Dono, 31/Out/2026 | 🔵 em andamento · protótipo no ar; portal próprio aguarda o "pode criar" |
+| 9 | Peluqueria: fases 2 a 5 (TV com dois jogadores, palma e braços, minha foto + Gemini, Spotify) e fotos realistas — detalhe em `peluqueria/PENDENCIAS.md` | Dono, 31/Out/2026 | 🔵 em andamento · fase 1 (v0.1.0) entregue |
 
 ## Histórico das entregas
 
 - **31/Out/2026:** lista criada com o registro da Dança na Sala (no `main` já na 1.1.0). Fechou o #5 (RootifyONE 0.18.5).
 - **31/Out/2026:** 1.4.0 — card e pasta `arch-one/` (ArchONE, mapa vivo, protótipo F0, lido dos manifestos); interruptor `arch-one` no `recursos-do-app.json`. Aberto o #8.
+- **31/Out/2026:** card e pasta `peluqueria/` (Peluqueria 0.1.0, fase 1); interruptor `peluqueria` no `recursos-do-app.json`. Aberto o #9.

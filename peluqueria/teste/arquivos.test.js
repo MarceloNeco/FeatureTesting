@@ -46,3 +46,17 @@ for (const pagina of ['index.html'].concat(fs.existsSync(path.join(pasta, 'marca
     assert.ok(!/\son[a-z]+="/i.test(h), 'evento inline');
   });
 }
+
+test('Peluqueria aparece no Feature Tester e obedece o interruptor', () => {
+  const rec = JSON.parse(fs.readFileSync(path.join(pasta, '..', 'recursos-do-app.json'), 'utf8'));
+  const r = rec.recursos.find(x => x.id === 'peluqueria');
+  assert.ok(r, 'sem entrada em recursos-do-app.json');
+  assert.equal(r.pagina, 'peluqueria/');
+  assert.ok(r.nome.pt && r.nome.en);
+  assert.ok(fs.readFileSync(path.join(pasta, '..', 'index.html'), 'utf8').includes('url: "peluqueria/"'));
+  assert.ok(ler('index.html').includes('data-recurso="peluqueria"'));
+});
+
+test('documentos da pasta existem', () => {
+  for (const f of ['LEIA-ME.md', 'CREDITOS.md', 'PENDENCIAS.md', 'meus/LEIA-ME.md', 'musicas/LEIA-ME.md']) assert.ok(fs.existsSync(path.join(pasta, f)), 'falta ' + f);
+});

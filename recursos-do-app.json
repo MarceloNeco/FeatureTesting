@@ -19,6 +19,14 @@
       "pagina": "baguncolandia/"
     },
     {
+      "id": "peluqueria",
+      "nome": {
+        "pt": "Peluqueria (Bolinho de Chuva)",
+        "en": "Peluqueria (Rain Dumpling)"
+      },
+      "pagina": "peluqueria/"
+    },
+    {
       "id": "arch-one",
       "nome": {
         "pt": "ArchONE (mapa vivo, protótipo)",
