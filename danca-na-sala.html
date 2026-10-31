@@ -55,15 +55,18 @@ a{color:var(--accent)}
 #tv.baixo .tile{flex:0 1 50vh;max-height:none;height:100%}
 #tv.grande #tvJogadores{width:44vw}
 .tile{position:relative;flex:1;min-height:0;max-height:46vh;border-radius:2vh;overflow:hidden;background:#000;border:.5vh solid #fff;box-shadow:0 0 3vh .5vh var(--neon,#ff2bd6);transition:box-shadow .25s}
-.tile video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);filter:brightness(var(--luz,1.3)) contrast(var(--contraste,1.3)) saturate(var(--sat,2.4)) hue-rotate(var(--hue,0deg)) invert(var(--inv,0))}
+.tile video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);filter:brightness(var(--luz,1.15)) contrast(var(--contraste,1.15)) saturate(var(--sat,1.9)) hue-rotate(var(--hue,0deg)) invert(var(--inv,0))}
 .tile .brilho{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(ellipse at 50% 60%,var(--neon,#ff2bd6) 0%,transparent 70%);opacity:0}
-.tile .disco{position:absolute;inset:0;pointer-events:none;mix-blend-mode:color-dodge;background:linear-gradient(var(--ang,0deg),var(--c1,#f0f) 0%,transparent 50%,var(--c2,#0ff) 100%);opacity:0}
+.tile .disco{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(ellipse at 50% 50%,transparent 38%,var(--c1,#f0f) 100%),linear-gradient(var(--ang,0deg),var(--c1,#f0f) 0%,transparent 35%,transparent 65%,var(--c2,#0ff) 100%);opacity:0}
 .tile .mais{position:absolute;font-size:5vh;font-weight:900;color:#fff;text-shadow:0 0 1.5vh var(--neon,#ff2bd6),0 0 .4vh #000;animation:sobe 1.1s ease-out forwards;pointer-events:none}
 @keyframes sobe{0%{opacity:1;transform:translateY(0) scale(.8)}100%{opacity:0;transform:translateY(-14vh) scale(1.4)}}
 .tile .combo{position:absolute;left:0;right:0;top:1.5vh;text-align:center;font-size:4vh;font-weight:900;color:#fff;text-shadow:0 0 2vh var(--neon,#ff2bd6),0 0 .5vh #000;opacity:0;transition:opacity .3s}
 .tile.quente .combo{opacity:1}
-#tvFx{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
-#tvFlash{position:absolute;inset:0;z-index:6;pointer-events:none;background:#fff;opacity:0;transition:opacity .18s}
+#tvFx{position:absolute;right:0;top:0;bottom:0;width:calc(30vw + 10vh);z-index:5;pointer-events:none}
+#tv.esq #tvFx{right:auto;left:0}
+#tv.baixo #tvFx{left:0;right:0;top:auto;bottom:0;width:auto;height:44vh}
+#tv.grande #tvFx{width:calc(44vw + 10vh)}
+#tvFlash{position:absolute;inset:0;z-index:6;pointer-events:none;background:#fff;opacity:0;transition:opacity .18s;display:none}
 .tile .nome{position:absolute;left:0;right:0;bottom:0;padding:1.2vh 1.6vh;background:linear-gradient(transparent,rgba(0,0,0,.85));font-size:3vh;font-weight:800;display:flex;justify-content:space-between;align-items:flex-end}
 .tile .pontos{font-size:4.5vh;color:#ffd66e}
 .tile .barra{position:absolute;left:0;top:0;bottom:0;width:1.2vh;background:#222}
@@ -81,6 +84,24 @@ a{color:var(--accent)}
 #tv.baixo #tvRodape{bottom:auto;top:2vh}
 #tvFim{position:absolute;inset:0;z-index:9;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2vh;background:rgba(0,0,0,.88);text-align:center}
 #tvFim.ativa{display:flex}
+#tvCarga{position:absolute;inset:0;z-index:8;display:none;align-items:center;justify-content:center;flex-direction:column;gap:2vh;overflow:hidden;background:#000}
+#tvCarga.ativa{display:flex}
+#tvCarga .fundo{position:absolute;inset:-20%;background:conic-gradient(from 0deg,#ff2bd6,#ffd60a,#2bff88,#2bb5ff,#b52bff,#ff2bd6);animation:gira 6s linear infinite;opacity:.55;filter:blur(6vh)}
+#tvCarga .pisca{position:absolute;inset:0;background:radial-gradient(circle at 30% 40%,#fff 0,transparent 30%),radial-gradient(circle at 70% 60%,#fff 0,transparent 25%);mix-blend-mode:overlay;animation:piscaFundo .5s steps(2) infinite;opacity:.35}
+#tvCarga .anel{position:relative;width:34vh;height:34vh}
+#tvCarga .anel svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+#tvCarga .anel circle{fill:none;stroke-width:3.2;stroke-linecap:round}
+#tvCarga .anel .trilho{stroke:rgba(255,255,255,.18)}
+#tvCarga .anel .barra{stroke:#fff;stroke-dasharray:100 100;stroke-dashoffset:100;transition:stroke-dashoffset .25s;filter:drop-shadow(0 0 1.5vh #fff)}
+#tvCarga .dancante{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15vh;animation:danca .6s ease-in-out infinite alternate}
+#tvCarga .pct{position:relative;font-size:8vh;font-weight:900;color:#fff;text-shadow:0 0 2vh #000}
+#tvCarga .msg{position:relative;font-size:3.2vh;color:#fff;text-shadow:0 0 1vh #000;max-width:80vw;text-align:center}
+#tvCarga .emojis{position:absolute;inset:0;pointer-events:none;font-size:6vh}
+#tvCarga .emojis span{position:absolute;animation:sobeEmoji 2.6s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+@keyframes piscaFundo{to{opacity:.12}}
+@keyframes danca{0%{transform:rotate(-12deg) scale(.95) translateY(1vh)}100%{transform:rotate(12deg) scale(1.1) translateY(-1vh)}}
+@keyframes sobeEmoji{0%{transform:translateY(0) rotate(0);opacity:0}15%{opacity:1}100%{transform:translateY(-80vh) rotate(60deg);opacity:0}}
 #tvFim h2{font-size:9vh;color:#ffd66e}
 #tvFim .lista{font-size:4.5vh;line-height:1.6}
 
@@ -118,6 +139,10 @@ details .col{margin-top:0;padding-bottom:12px}
 .status.ok{color:#7ee2a0}
 button.fx.ativo,button.pos.ativo,#btGrande.ativo{border-color:var(--accent);background:#1a2c4e}
 .hist button.atual{border-color:#ffd66e;color:#ffd66e}
+.resultado{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;cursor:pointer}
+.resultado img{width:96px;height:54px;object-fit:cover;border-radius:8px;flex:0 0 auto;background:#000}
+.resultado div{font-size:.85rem;line-height:1.3;overflow:hidden}
+.resultado small{color:var(--muted)}
 .hist button{text-align:left;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;width:100%}
 footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 </style>
@@ -159,6 +184,12 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
     <p id="tvEspera" class="muted" style="font-size:2.4vh" data-t="Esperando os celulares…|Waiting for phones…"></p>
   </div>
   <div id="tvFim"><h2>🏆</h2><div class="lista" id="tvRanking"></div></div>
+  <div id="tvCarga">
+    <div class="fundo"></div><div class="pisca"></div><div class="emojis" id="cargaEmojis"></div>
+    <div class="anel"><svg viewBox="0 0 36 36"><circle class="trilho" cx="18" cy="18" r="15.9"/><circle class="barra" id="cargaBarra" cx="18" cy="18" r="15.9" pathLength="100"/></svg><div class="dancante" id="cargaDancante">💃</div></div>
+    <div class="pct" id="cargaPct">0%</div>
+    <div class="msg" id="cargaMsg"></div>
+  </div>
 </div>
 
 <!-- ===== Celular: entrar ===== -->
@@ -201,9 +232,21 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
     <details open>
       <summary data-t="🎵 Músicas|🎵 Songs"></summary>
       <div class="col">
+        <div class="row">
+          <input id="busca" data-ph="🔎 Procurar música (ex.: Katy Perry)|🔎 Search a song (e.g. Katy Perry)">
+          <button id="btBuscarApp" style="flex:0 0 auto" data-t="Buscar|Search"></button>
+        </div>
+        <div class="col" id="buscaResultados" style="gap:6px;margin-top:0"></div>
+        <div id="chaveBox" class="col" style="gap:6px;margin-top:0;display:none">
+          <div class="aviso" data-t="Para buscar aqui dentro, o YouTube exige uma chave sua (grátis, 100 buscas por dia). Ela fica só neste celular. Como criar: 1) abra console.cloud.google.com e entre com sua conta Google; 2) crie um projeto; 3) menu “APIs e serviços” → “Biblioteca” → procure “YouTube Data API v3” → Ativar; 4) “Credenciais” → “Criar credenciais” → “Chave de API” → copiar; 5) cole aqui.|Searching inside the app needs your own YouTube key (free, 100 searches a day). It stays on this phone only. How: 1) open console.cloud.google.com and sign in; 2) create a project; 3) “APIs & Services” → “Library” → search “YouTube Data API v3” → Enable; 4) “Credentials” → “Create credentials” → “API key” → copy; 5) paste it here."></div>
+          <div class="row"><input id="chaveYT" autocomplete="off" data-ph="Cole a chave AIza…|Paste the AIza… key"><button class="sec" id="btChaveYT" style="flex:0 0 auto" data-t="Guardar|Save"></button></div>
+          <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener" class="muted" data-t="Abrir a página da YouTube Data API no Google Cloud ↗|Open the YouTube Data API page on Google Cloud ↗"></a>
+        </div>
+        <div class="muted" data-t="📚 Playlists prontas (toque para tocar)|📚 Ready-made playlists (tap to play)"></div>
+        <div class="hist col" id="sugestoes" style="gap:6px;margin-top:0"></div>
         <div class="hist col" id="plLista" style="gap:6px;margin-top:0;display:none"></div>
         <div class="hist col" id="hist" style="gap:6px;margin-top:0"></div>
-        <button class="sec" id="btBuscar" data-t="🔎 Procurar no YouTube|🔎 Search YouTube"></button>
+        <button class="sec" id="btBuscar" data-t="↗ Abrir a busca no app do YouTube (depois use Compartilhar)|↗ Open the search in the YouTube app (then use Share)"></button>
       </div>
     </details>
     <details>
@@ -246,7 +289,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '0.9.0', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '1.1.0', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -405,13 +448,24 @@ function carregarYouTube() {
 function tvYouTubeEstado(ev) {
   var p = tv.player;
   tv.tocando = (ev.data === YT.PlayerState.PLAYING);
+  // pausou sem ninguém pedir (o navegador da TV faz isso quando engasga): retoma sozinho, até 5x por música
+  if (ev.data === YT.PlayerState.PAUSED && tv.preCarregado && Date.now() - (tv.pausaPedida || 0) > 3000 && Date.now() >= (tv.podioAte || 0) && (tv.retomadas || 0) < 5) {
+    tv.retomadas = (tv.retomadas || 0) + 1;
+    setTimeout(function () { try { if (p.getPlayerState() === YT.PlayerState.PAUSED && Date.now() - (tv.pausaPedida || 0) > 3000) p.playVideo(); } catch (e) {} }, 1200);
+  }
+  if (ev.data === YT.PlayerState.PLAYING) tv.retomadas = Math.max(0, (tv.retomadas || 0) - 0);
   try { tv.lista = p.getPlaylist() || []; tv.indice = p.getPlaylistIndex(); } catch (e) { tv.lista = []; tv.indice = -1; }
+  if (ev.data === YT.PlayerState.BUFFERING && tv.preCarregado && !carga.ativa && Date.now() - (tv.ultimoPlaying || 0) > 1500) cargaMostrar(T('O YouTube parou para carregar…', 'YouTube stopped to load…'));
   if (ev.data === YT.PlayerState.PLAYING) {
+    tv.ultimoPlaying = Date.now();
+    if (!tv.preCarregado) { var fr = 0; try { fr = p.getVideoLoadedFraction() || 0; } catch (e0) {} if (fr < carga.meta) { tv.pausaPedida = Date.now(); p.pauseVideo(); cargaMostrar(); } else { tv.preCarregado = true; cargaEsconder(); } }
+    else if (carga.ativa) cargaEsconder();
     var d = p.getVideoData ? p.getVideoData() : null, id = d && d.video_id;
     if (id && id !== tv.videoAtual) {
       // música nova (numa playlist o YouTube emenda sozinho): zera o placar e, se o pódio
       // acabou de aparecer, segura 8 s para todo mundo ver antes de continuar
-      tv.videoAtual = id; tv.titulo = (d.title || id);
+      tv.videoAtual = id; tv.titulo = (d.title || id); tv.retomadas = 0;
+      if (tv.preCarregado && tv.lista.length > 1) { tv.preCarregado = false; tv.pausaPedida = Date.now(); p.pauseVideo(); cargaMostrar(T('Próxima música…', 'Next song…')); }
       $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '🎵 ' + tv.titulo;
       tvZerar();
       if (Date.now() < tv.podioAte) {
@@ -433,6 +487,42 @@ function tvYouTubeErro(ev) {
   tv.titulo = msg; $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '⚠️ ' + msg;
   try { if (tv.player.getPlaylist && (tv.player.getPlaylist() || []).length > 1) setTimeout(function () { tv.player.nextVideo(); }, 1500); } catch (e) {}
 }
+/* Tela de carregamento: anel com a porcentagem REAL do que o YouTube já baixou, dançarina pulando,
+   fundo girando e piscando, emojis subindo. Antes de começar, segura até ter ~12% baixado (uns
+   30-60 s de música), para não engasgar no meio. Também aparece quando o YouTube para para carregar. */
+var carga = { ativa: false, timer: 0, meta: 0.12, inicio: 0, emojiTimer: 0 };
+function cargaMostrar(msg) {
+  var el = $('tvCarga'); el.classList.add('ativa'); carga.ativa = true; carga.inicio = carga.inicio || Date.now();
+  if (msg) $('cargaMsg').textContent = msg;
+  if (!carga.emojiTimer) carga.emojiTimer = setInterval(function () {
+    var e = document.createElement('span'); e.textContent = ['🎵', '✨', '💃', '🕺', '🎉', '⭐', '🌈', '💥', '🎶', '💖'][Math.floor(Math.random() * 10)];
+    e.style.left = Math.random() * 95 + '%'; e.style.bottom = '-8vh'; $('cargaEmojis').appendChild(e); setTimeout(function () { e.remove(); }, 2700);
+    $('cargaDancante').textContent = Math.random() < 0.5 ? '💃' : '🕺';
+  }, 180);
+  if (!carga.timer) carga.timer = setInterval(cargaAtualizar, 250);
+}
+function cargaPct(p) { p = Math.max(0, Math.min(100, Math.round(p))); $('cargaPct').textContent = p + '%'; $('cargaBarra').style.strokeDashoffset = 100 - p; }
+function cargaEsconder() {
+  $('tvCarga').classList.remove('ativa'); carga.ativa = false; carga.inicio = 0; carga.ultimaF = -1; carga.parouEm = 0;
+  clearInterval(carga.timer); carga.timer = 0; clearInterval(carga.emojiTimer); carga.emojiTimer = 0; $('cargaEmojis').innerHTML = '';
+}
+function cargaAtualizar() {
+  var p = tv.player; if (!p || !p.getVideoLoadedFraction) return;
+  var f = 0; try { f = p.getVideoLoadedFraction() || 0; } catch (e) {}
+  var st = -1; try { st = p.getPlayerState(); } catch (e2) {}
+  if (!tv.preCarregado) {
+    cargaPct(f / carga.meta * 100);
+    // segura pausado até a meta (ou 20 s): depois libera
+    // o YouTube para de baixar quando está pausado e já tem uma reserva: se a barra não anda por 3 s, libera
+    if (f !== carga.ultimaF) { carga.ultimaF = f; carga.parouEm = Date.now(); }
+    var parado = f > 0.03 && Date.now() - (carga.parouEm || Date.now()) > 3000;
+    if (f >= carga.meta || parado || Date.now() - carga.inicio > 20000) { tv.preCarregado = true; tv.pausaPedida = 0; cargaEsconder(); try { p.playVideo(); } catch (e3) {} }
+    else if (st === YT.PlayerState.PLAYING) { tv.pausaPedida = Date.now(); try { p.pauseVideo(); } catch (e4) {} }
+  } else {
+    cargaPct(f * 100);
+    if (st === YT.PlayerState.PLAYING) cargaEsconder();
+  }
+}
 function tvZerar() {
   Object.keys(tv.pontos).forEach(function (k) { tv.pontos[k].pontos = 0; tv.tiles[k] && (tv.tiles[k].querySelector('.pontos').textContent = '0'); });
 }
@@ -440,11 +530,11 @@ function tvComando(m) {
   var p = tv.player;
   tv.ultimoCmd = m.acao + (p && p.loadVideoById ? '' : ' (tocador ainda não pronto)');
   if (!p || !p.loadVideoById) { if (m.acao === 'carregar' || m.acao === 'playlist') tv.pendente = m; return; }   // chegou antes do tocador: toca assim que ele ficar pronto
-  function comecar() { tv.fimMostrado = false; tv.podioAte = 0; clearTimeout(tv.timerPodio); $('tvFim').classList.remove('ativa'); $('tvCapa').style.display = 'none'; tvZerar(); }
+  function comecar() { tv.fimMostrado = false; tv.podioAte = 0; clearTimeout(tv.timerPodio); $('tvFim').classList.remove('ativa'); $('tvCapa').style.display = 'none'; tvZerar(); tv.preCarregado = false; cargaMostrar(T('Carregando a música…', 'Loading the song…')); }
   if (m.acao === 'carregar' && m.video) {
     comecar(); tv.titulo = m.titulo || m.video; tv.videoAtual = m.video; tv.lista = []; tv.indice = -1;
     $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '🎵 ' + tv.titulo;
-    p.loadVideoById(m.video); p.playVideo();
+    p.loadVideoById({ videoId: m.video, suggestedQuality: 'hd720' }); p.playVideo();
   } else if (m.acao === 'playlist' && m.lista) {
     comecar(); tv.videoAtual = ''; tv.titulo = T('Playlist…', 'Playlist…');
     p.loadPlaylist({ list: m.lista, listType: 'playlist', index: m.indice || 0 }); p.playVideo();
@@ -456,9 +546,11 @@ function tvComando(m) {
     comecar(); p.previousVideo();
   } else if (m.acao === 'posicao') {
     $('tv').className = 'ativa ' + (m.pos === 'esq' || m.pos === 'baixo' ? m.pos : '') + (m.grande ? ' grande' : '');
+    setTimeout(fxMedir, 50);
   } else if (m.acao === 'efeitos') {
     fxModo(m.modo);
   } else if (m.acao === 'pausa') {
+    tv.pausaPedida = Date.now();
     if (p.getPlayerState && p.getPlayerState() === YT.PlayerState.PLAYING) p.pauseVideo(); else p.playVideo();
   } else if (m.acao === 'reiniciar') {
     comecar(); p.seekTo(0, true); p.playVideo();
@@ -475,9 +567,13 @@ function tvFim() {
 /* --- Efeitos: neon nas câmeras, fogos e clarões, tudo puxado pela energia de quem dança.
    Canvas em 960x540 esticado para a tela (leve para o navegador da TV). Modos: off | suave | forte.
    "forte" pisca a tela inteira (no máximo ~3 vezes por segundo): aviso de fotossensibilidade no celular. --- */
-var fx = { modo: 'suave', parts: [], ctx: null, hue: 0, ultimoFlash: 0, ultimoQuadro: 0, frases: null };
+var fx = { modo: 'suave', parts: [], ctx: null, hue: 0, ultimoFlash: 0, ultimoQuadro: 0, frases: null, rect: null, esc: 0.5, leve: false, lento: 0, rapido: 0 };
+/* O canvas de efeitos cobre só a zona das câmeras (não o vídeo do YouTube), em meia resolução: leve para a TV. */
+function fxMedir() { var c = $('tvFx'), r = c.getBoundingClientRect(); fx.rect = r; c.width = Math.max(2, Math.round(r.width * fx.esc)); c.height = Math.max(2, Math.round(r.height * fx.esc)); }
+function fxXY(x, y) { return [(x - fx.rect.left) * fx.esc, (y - fx.rect.top) * fx.esc]; }   // da tela para o canvas
 function fxIniciar() {
-  var c = $('tvFx'); c.width = 960; c.height = 540; fx.ctx = c.getContext('2d');
+  var c = $('tvFx'); fx.ctx = c.getContext('2d'); fxMedir();
+  window.addEventListener('resize', fxMedir);
   fx.frases = EN ? ['🔥 ON FIRE!', '⭐ AMAZING!', '💃 GO GO GO!', '🎉 WOW!'] : ['🔥 PEGANDO FOGO!', '⭐ ARRASOU!', '💃 VAI VAI VAI!', '🎉 UAU!'];
   requestAnimationFrame(fxQuadro);
 }
@@ -490,74 +586,77 @@ function fxModo(m) {
 }
 function fxQuadro(ts) {
   requestAnimationFrame(fxQuadro);
-  var dt = Math.min(50, ts - fx.ultimoQuadro) / 16.7; fx.ultimoQuadro = ts;   // em "quadros de 60 fps"
-  var ids = Object.keys(tv.tiles), ctx = fx.ctx, W = 960, H = 540;
+  var bruto = ts - fx.ultimoQuadro, dt = Math.min(50, bruto) / 16.7; fx.ultimoQuadro = ts;   // em "quadros de 60 fps"
+  // modo leve automático: se a TV não dá conta (quadros > 45 ms por 2 s), reduz; volta quando folga por 8 s
+  if (bruto > 45) { fx.lento += bruto; fx.rapido = 0; if (fx.lento > 2000 && !fx.leve) { fx.leve = true; fx.parts.length = Math.min(fx.parts.length, 200); } }
+  else { fx.rapido += bruto; fx.lento = 0; if (fx.rapido > 8000 && fx.leve) fx.leve = false; }
+  var ids = Object.keys(tv.tiles), ctx = fx.ctx, W = ctx.canvas.width, H = ctx.canvas.height, leve = fx.leve ? 0.45 : 1, teto = fx.leve ? 350 : 1200;
+  if (!fx.rect) fxMedir();
   var soma = 0; ids.forEach(function (k) { soma += tv.energia[k] || 0; });
   if (fx.modo === 'off') { ctx.clearRect(0, 0, W, H); return; }
   var forte = fx.modo === 'forte';
-  fx.hue = (fx.hue + dt * (0.4 + soma / 150)) % 360;
-  var maior = 0;
+  fx.hue = (fx.hue + dt * (0.6 + soma / 120)) % 360;
+  var maior = 0, batida = Math.pow(Math.abs(Math.sin(ts * Math.PI / 500)), 6);   // 0..1, pico a cada 500 ms
   ids.forEach(function (k, i) {
     var t = tv.tiles[k], e = tv.energia[k] || 0; if (e > maior) maior = e;
-    var h = (fx.hue + i * 120) % 360;
-    t.style.setProperty('--neon', 'hsl(' + h + ',100%,60%)');
-    if (tv.composto[k]) { t.style.boxShadow = '0 0 ' + (2 + e / 8) + 'vh ' + (0.3 + e / 40) + 'vh hsl(' + h + ',100%,60%)'; return; }   // o celular já desenhou tudo
-    // a imagem em si: cor girando o arco-íris inteiro (mais rápido quanto mais energia), luz pulsando
-    // a 120 bpm mesmo sem música, saturação forte; no Forte, clarões invertidos e lavagens de cor
-    var batida = Math.pow(Math.abs(Math.sin(ts * Math.PI / 500)), 6);           // 0..1, pico a cada 500 ms
-    t.hueGiro = (t.hueGiro || 0) + dt * (forte ? 2.5 : 1.2) * (0.5 + e / 60);
-    t.style.setProperty('--hue', Math.round(t.hueGiro + i * 90) % 360 + 'deg');
-    t.style.setProperty('--luz', (1.25 + batida * (0.5 + e / 120) * (forte ? 1.4 : 1)).toFixed(2));
-    t.style.setProperty('--sat', forte ? 3.2 : 2.4);
-    t.style.setProperty('--contraste', forte ? 1.5 : 1.3);
+    var h = (fx.hue + i * 120) % 360, neon = 'hsl(' + h + ',100%,60%)';
+    t.style.setProperty('--neon', neon);
+    t.style.boxShadow = '0 0 ' + (1.5 + e / 12) + 'vh ' + (0.3 + e / 50) + 'vh ' + neon;
+    if (tv.composto[k]) return;   // o celular já desenhou tudo
+    // a imagem: cores VIVAS mas pele natural (sem girar a matiz; só um tremor de ±6°), luz pulsando a 120 bpm
+    t.style.setProperty('--hue', Math.round(Math.sin(ts / 700 + i) * 6 * (e / 100)) + 'deg');
+    t.style.setProperty('--luz', (1.08 + batida * (0.18 + e / 300) * (forte ? 1.5 : 1)).toFixed(2));
+    t.style.setProperty('--sat', forte ? 2.3 : 1.9);
+    t.style.setProperty('--contraste', forte ? 1.25 : 1.15);
+    // as cores fortes ficam nas BORDAS da imagem (vinheta de luz) e no brilho neon, não em cima do rosto
     var disco = t.querySelector('.disco');
     disco.style.setProperty('--c1', 'hsl(' + h + ',100%,55%)'); disco.style.setProperty('--c2', 'hsl(' + ((h + 180) % 360) + ',100%,55%)');
     disco.style.setProperty('--ang', Math.round(ts / 12 + i * 60) % 360 + 'deg');
-    disco.style.opacity = (forte ? 0.7 : 0.32) * (0.4 + 0.6 * batida) * (0.5 + e / 200);
+    disco.style.opacity = (forte ? 0.85 : 0.6) * (0.5 + 0.5 * batida) * (0.5 + e / 150);
+    t.querySelector('.brilho').style.opacity = (forte ? 0.35 : 0.22) * Math.min(1, e / 70) * (0.6 + 0.4 * batida);
     if (forte) {
       // clarão invertido curto quando se mexe (no máximo ~3 por segundo)
       if (e > 50 && ts - (t.ultimoInv || 0) > 330 && Math.random() < 0.6) { t.ultimoInv = ts; t.style.setProperty('--inv', '1'); setTimeout(function () { t.style.setProperty('--inv', '0'); }, 45); }
     } else t.style.setProperty('--inv', '0');
-    t.style.boxShadow = '0 0 ' + (2 + e / 8) + 'vh ' + (0.3 + e / 40) + 'vh hsl(' + h + ',100%,60%)';
-    t.querySelector('.brilho').style.opacity = (forte ? 0.6 : 0.4) * Math.min(1, 0.3 + e / 70) * (0.6 + 0.4 * batida);
     // pontinhos subindo quando se mexe (com música valem pontos de verdade)
     if (e > 45 && ts - (t.ultimoMais || 0) > (forte ? 350 : 600)) { t.ultimoMais = ts; fxMais(t, tv.tocando ? '+' + Math.round(e / 10) : ['✨', '💥', '⭐', '🔥'][Math.floor(Math.random() * 4)]); }
     // combo: energia alta por 1,5 s acende a frase
     if (e > 65) { tv.quente[k] = (tv.quente[k] || ts); if (ts - tv.quente[k] > 1500 && !t.classList.contains('quente')) { t.querySelector('.combo').textContent = fx.frases[Math.floor(Math.random() * fx.frases.length)]; t.classList.add('quente'); } }
     else if (e < 40) { delete tv.quente[k]; t.classList.remove('quente'); }
     // fogos: quanto mais energia, mais explosões perto da câmera
-    if (Math.random() < Math.pow(e / 100, 2) * (forte ? 0.32 : 0.16) * (tv.tocando ? 1 : 0.4) * dt && fx.parts.length < 900) {
-      var r = t.getBoundingClientRect(), sx = W / innerWidth, sy = H / innerHeight;
-      fxFogo((r.left - 30 + Math.random() * (r.width + 60)) * sx, (r.top - 30 + Math.random() * (r.height + 60)) * sy, h);
+    if (Math.random() < Math.pow(e / 100, 2) * (forte ? 0.4 : 0.2) * (tv.tocando ? 1 : 0.4) * leve * dt && fx.parts.length < teto) {
+      var r = t.getBoundingClientRect(), xy = fxXY(r.left - 30 + Math.random() * (r.width + 60), r.top - 30 + Math.random() * (r.height + 60));
+      fxFogo(xy[0], xy[1], h);
     }
   });
-  // clarão (só no modo forte, no máximo a cada 350 ms)
+  // clarão de tela (só no modo forte, no máximo a cada 350 ms)
   if (forte && tv.tocando && maior > 60 && ts - fx.ultimoFlash > 350 && Math.random() < 0.5) {
     fx.ultimoFlash = ts; var f = $('tvFlash');
-    f.style.background = 'hsl(' + fx.hue + ',100%,70%)'; f.style.transition = 'none'; f.style.opacity = '.3';
-    setTimeout(function () { f.style.transition = 'opacity .18s'; f.style.opacity = '0'; }, 60);
+    f.style.display = 'block'; f.style.background = 'hsl(' + fx.hue + ',100%,70%)'; f.style.transition = 'none'; f.style.opacity = '.3';
+    setTimeout(function () { f.style.transition = 'opacity .18s'; f.style.opacity = '0'; setTimeout(function () { f.style.display = 'none'; }, 200); }, 60);
   }
-  // faíscas e rastros de luz ONDE a pessoa se mexeu (pontos que o celular manda)
+  // faíscas, rastros e EXPLOSÕES onde a pessoa se mexeu (pontos que o celular manda)
   ids.forEach(function (k, i) {
     var pts = tv.mov[k]; if (!pts || !pts.length || tv.composto[k]) return;
-    var t = tv.tiles[k], v = t.querySelector('video'), r = t.getBoundingClientRect(), sx = W / innerWidth, sy = H / innerHeight;
+    var t = tv.tiles[k], v = t.querySelector('video'), r = t.getBoundingClientRect();
     var vw = v.videoWidth || 16, vh = v.videoHeight || 9, esc = Math.max(r.width / vw, r.height / vh), dw = vw * esc, dh = vh * esc;
     var ox = r.left + (r.width - dw) / 2, oy = r.top + (r.height - dh) / 2, h = (fx.hue + i * 120) % 360, forte = fx.modo === 'forte';
-    pts.forEach(function (p) {
-      var x = ox + (1 - p[0]) * dw, y = oy + p[1] * dh;                       // (1 - x): a imagem na TV é espelhada
-      if (x < r.left || x > r.right || y < r.top || y > r.bottom) return;
-      x *= sx; y *= sy;
-      var f = p[2] / 100;
-      // rastro: bolinha de luz que fica alguns quadros
-      if (fx.parts.length < 1200) fx.parts.push({ x: x, y: y, vx: 0, vy: 0, g: 0, vida: 14, tam: 10 + f * 16, cor: 'hsla(' + h + ',100%,70%,.55)' });
+    pts.forEach(function (p, pi) {
+      var cx0 = ox + (1 - p[0]) * dw, cy0 = oy + p[1] * dh;                   // (1 - x): a imagem na TV é espelhada
+      if (cx0 < r.left || cx0 > r.right || cy0 < r.top || cy0 > r.bottom) return;
+      var xy = fxXY(cx0, cy0), x = xy[0], y = xy[1], f = p[2] / 100, hp = (h + pi * 40) % 360;
+      // rastro: bola de luz colorida que fica alguns quadros
+      if (fx.parts.length < teto) fx.parts.push({ x: x, y: y, vx: 0, vy: 0, g: 0, vida: 16, tam: (14 + f * 22) * fx.esc * 2, cor: 'hsla(' + hp + ',100%,65%,.6)' });
       // faíscas saindo do ponto
-      var n = Math.round(f * (forte ? 7 : 4));
-      for (var j = 0; j < n && fx.parts.length < 1200; j++) {
-        var a = Math.random() * Math.PI * 2, vel = 0.8 + Math.random() * 2.5;
-        fx.parts.push({ x: x, y: y, vx: Math.cos(a) * vel, vy: Math.sin(a) * vel - 0.8, g: 0.03, vida: 18 + Math.random() * 18, tam: 2 + Math.random() * 3, cor: 'hsl(' + (h + Math.random() * 60) + ',100%,' + (65 + Math.random() * 25) + '%)' });
+      var n = Math.round(f * (forte ? 12 : 7) * leve);
+      for (var j = 0; j < n && fx.parts.length < teto; j++) {
+        var a = Math.random() * Math.PI * 2, vel = 1 + Math.random() * 3;
+        fx.parts.push({ x: x, y: y, vx: Math.cos(a) * vel, vy: Math.sin(a) * vel - 1, g: 0.03, vida: 20 + Math.random() * 22, tam: 2.5 + Math.random() * 3.5, cor: 'hsl(' + (hp + Math.random() * 60) + ',100%,' + (60 + Math.random() * 30) + '%)' });
       }
+      // mexeu forte: EXPLODE
+      if (f > 0.7 && Math.random() < (forte ? 0.12 : 0.07) * leve * dt && fx.parts.length < teto) fxFogo(x, y, hp);
       // de vez em quando um símbolo no lugar
-      if (f > 0.5 && Math.random() < 0.025 * dt) { var d = document.createElement('div'); d.className = 'mais'; d.textContent = ['✨', '💫', '⚡', '🎵', '💖', '🌈'][Math.floor(Math.random() * 6)]; d.style.left = ((x / sx - r.left) / r.width * 100) + '%'; d.style.top = ((y / sy - r.top) / r.height * 100) + '%'; t.appendChild(d); setTimeout(function () { d.remove(); }, 1200); }
+      if (f > 0.5 && Math.random() < 0.04 * dt) { var d = document.createElement('div'); d.className = 'mais'; d.textContent = ['✨', '💫', '⚡', '🎵', '💖', '🌈', '💥', '⭐'][Math.floor(Math.random() * 8)]; d.style.left = ((cx0 - r.left) / r.width * 100) + '%'; d.style.top = ((cy0 - r.top) / r.height * 100) + '%'; t.appendChild(d); setTimeout(function () { d.remove(); }, 1200); }
     });
   });
   // partículas
@@ -565,7 +664,7 @@ function fxQuadro(ts) {
   for (var i = fx.parts.length - 1; i >= 0; i--) {
     var p = fx.parts[i];
     p.x += p.vx * dt; p.y += p.vy * dt; p.vy += p.g * dt; p.vx *= 0.985; p.vida -= dt;
-    if (p.vida <= 0 || p.y > H + 10) { fx.parts.splice(i, 1); continue; }
+    if (p.vida <= 0 || p.y > H + 10 || p.x < -20 || p.x > W + 20) { fx.parts.splice(i, 1); continue; }
     ctx.globalAlpha = Math.max(0, Math.min(1, p.vida / 25));
     ctx.fillStyle = p.cor;
     if (p.tam > 6) { ctx.beginPath(); ctx.arc(p.x, p.y, p.tam / 2, 0, 6.2832); ctx.fill(); } else ctx.fillRect(p.x, p.y, p.tam, p.tam);
@@ -586,7 +685,8 @@ function fxMais(tile, texto) {
 }
 function fxConfete() {
   if (fx.modo === 'off') return;
-  for (var i = 0; i < 220; i++) fx.parts.push({ x: Math.random() * 960, y: -20 - Math.random() * 300, vx: Math.random() * 2 - 1, vy: 1 + Math.random() * 2, g: 0.01, vida: 300, tam: 4 + Math.random() * 5, cor: 'hsl(' + Math.random() * 360 + ',100%,60%)' });
+  var W = fx.ctx.canvas.width;
+  for (var i = 0; i < 220; i++) fx.parts.push({ x: Math.random() * W, y: -20 - Math.random() * 300, vx: Math.random() * 2 - 1, vy: 1 + Math.random() * 2, g: 0.01, vida: 300, tam: 4 + Math.random() * 5, cor: 'hsl(' + Math.random() * 360 + ',100%,60%)' });
 }
 
 function escapar(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -698,7 +798,12 @@ function oferecer() {
   if (cel.pc) { try { cel.pc.close(); } catch (e) {} }
   var pc = new RTCPeerConnection(ICE); cel.pc = pc;
   var fonte = (modo.comp && comp.stream) ? comp.stream : cel.stream;
-  fonte.getVideoTracks().forEach(function (t) { pc.addTrack(t, fonte); });
+  fonte.getVideoTracks().forEach(function (t) {
+    try { t.contentHint = 'motion'; } catch (e) {}
+    var sd = pc.addTrack(t, fonte);
+    // mais bits (cor e nitidez) e sem cair a resolução quando a rede aperta
+    try { var pr = sd.getParameters(); if (!pr.encodings || !pr.encodings.length) pr.encodings = [{}]; pr.encodings[0].maxBitrate = 2500000; pr.degradationPreference = 'maintain-resolution'; sd.setParameters(pr).catch(function () {}); } catch (e2) {}
+  });
   try { cel.dc = pc.createDataChannel('mov', { ordered: false, maxRetransmits: 0 }); } catch (e) { cel.dc = null; }
   pc.onicecandidate = function (ev) { if (ev.candidate) enviar({ t: 'ice', id: cel.id, to: 'tv', c: ev.candidate.toJSON() }); };
   pc.onconnectionstatechange = function () {
@@ -901,15 +1006,15 @@ function compQuadro(ts) {
   var dt = Math.min(50, ts - comp.ultimo) / 16.7; comp.ultimo = ts;
   var e = suave, forte = comp.modo === 'forte', off = comp.modo === 'off';
   var batida = Math.pow(Math.abs(Math.sin(ts * Math.PI / 500)), 6);
-  comp.hue = (comp.hue + dt * (forte ? 2.5 : 1.2) * (0.5 + e / 60)) % 360;
+  comp.hue = (comp.hue + dt * (0.6 + e / 120)) % 360;
   var h = comp.hue, neon = 'hsl(' + h + ',100%,60%)';
   // 1) a câmera, espelhada, cobrindo o quadro, com as cores tratadas
   var esc = Math.max(W / v.videoWidth, H / v.videoHeight), dw = v.videoWidth * esc, dh = v.videoHeight * esc;
   ctx.save();
   if (!off) {
-    var luz = 1.2 + batida * (0.5 + e / 120) * (forte ? 1.4 : 1);
+    var luz = 1.08 + batida * (0.18 + e / 300) * (forte ? 1.5 : 1);
     if (forte && e > 50 && ts - comp.ultimoInv > 330 && Math.random() < 0.6) { comp.ultimoInv = ts; comp.inv = 1; setTimeout(function () { comp.inv = 0; }, 45); }
-    try { ctx.filter = 'brightness(' + luz.toFixed(2) + ') contrast(' + (forte ? 1.5 : 1.3) + ') saturate(' + (forte ? 3.2 : 2.4) + ') hue-rotate(' + Math.round(h) + 'deg)' + (comp.inv ? ' invert(1)' : ''); } catch (e2) {}
+    try { ctx.filter = 'brightness(' + luz.toFixed(2) + ') contrast(' + (forte ? 1.25 : 1.15) + ') saturate(' + (forte ? 2.3 : 1.9) + ') hue-rotate(' + Math.round(Math.sin(ts / 700) * 6 * (e / 100)) + 'deg)' + (comp.inv ? ' invert(1)' : ''); } catch (e2) {}
   }
   ctx.translate(W, 0); ctx.scale(-1, 1);
   ctx.drawImage(v, (W - dw) / 2, (H - dh) / 2, dw, dh);
@@ -918,7 +1023,10 @@ function compQuadro(ts) {
     // 2) lavagem de cor e brilho neon
     var ang = (ts / 12) % 360 * Math.PI / 180, g = ctx.createLinearGradient(W / 2 - Math.cos(ang) * W, H / 2 - Math.sin(ang) * H, W / 2 + Math.cos(ang) * W, H / 2 + Math.sin(ang) * H);
     g.addColorStop(0, 'hsl(' + h + ',100%,55%)'); g.addColorStop(0.5, 'transparent'); g.addColorStop(1, 'hsl(' + ((h + 180) % 360) + ',100%,55%)');
-    ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = (forte ? 0.7 : 0.32) * (0.4 + 0.6 * batida) * (0.5 + e / 200); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    // cores fortes nas bordas (vinheta de luz), pele natural no meio
+    ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = (forte ? 0.5 : 0.3) * (0.5 + 0.5 * batida) * (0.5 + e / 150); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    var vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, W * 0.62); vg.addColorStop(0, 'transparent'); vg.addColorStop(1, 'hsl(' + h + ',100%,55%)');
+    ctx.globalAlpha = (forte ? 0.85 : 0.6) * (0.5 + 0.5 * batida); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
     var rg = ctx.createRadialGradient(W / 2, H * 0.6, 10, W / 2, H * 0.6, W * 0.6); rg.addColorStop(0, neon); rg.addColorStop(1, 'transparent');
     ctx.globalAlpha = (forte ? 0.6 : 0.4) * Math.min(1, 0.3 + e / 70) * (0.6 + 0.4 * batida); ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
     ctx.globalAlpha = 1;
@@ -927,7 +1035,8 @@ function compQuadro(ts) {
     comp.mov.forEach(function (p) {
       var x = (1 - p[0]) * W, y = p[1] * H, f = p[2] / 100;
       if (comp.parts.length < 900) comp.parts.push({ x: x, y: y, vx: 0, vy: 0, g: 0, vida: 14, tam: 10 + f * 16, cor: 'hsla(' + h + ',100%,70%,.55)' });
-      for (var j = 0, n = Math.round(f * (forte ? 7 : 4)); j < n && comp.parts.length < 900; j++) {
+      if (f > 0.7 && Math.random() < (forte ? 0.12 : 0.07) * dt) { for (var q = 0, nq = 30; q < nq && comp.parts.length < 900; q++) { var aq = Math.random() * Math.PI * 2, vq = 1.5 + Math.random() * 4.5; comp.parts.push({ x: x, y: y, vx: Math.cos(aq) * vq, vy: Math.sin(aq) * vq, g: 0.06, vida: 40 + Math.random() * 35, tam: 2 + Math.random() * 3, cor: 'hsl(' + (h + Math.random() * 60) + ',100%,' + (55 + Math.random() * 30) + '%)' }); } }
+      for (var j = 0, n = Math.round(f * (forte ? 12 : 7)); j < n && comp.parts.length < 900; j++) {
         var a = Math.random() * Math.PI * 2, vel = 0.8 + Math.random() * 2.5;
         comp.parts.push({ x: x, y: y, vx: Math.cos(a) * vel, vy: Math.sin(a) * vel - 0.8, g: 0.03, vida: 18 + Math.random() * 18, tam: 2 + Math.random() * 3, cor: 'hsl(' + (h + Math.random() * 60) + ',100%,' + (65 + Math.random() * 25) + '%)' });
       }
@@ -1012,7 +1121,7 @@ $('btCamera').onclick = function () { if (cel.cams.length < 2) return; var i = (
 $('btSair').onclick = sair;
 $('btTocarLink').onclick = function () { tocarLink(); };
 $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') tocarLink(); });
-$('btBuscar').onclick = function () { window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(T('just dance kids', 'just dance kids')), '_blank'); };
+$('btBuscar').onclick = function () { window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent($('busca').value.trim() || 'just dance kids'), '_blank'); };
 $('btPausa').onclick = function () { comando({ acao: 'pausa' }); };
 $('btReiniciar').onclick = function () { comando({ acao: 'reiniciar' }); };
 $('btProxima').onclick = function () { comando({ acao: 'proxima' }); };
@@ -1026,6 +1135,52 @@ $('btComp').onclick = function () { ligarComp(!modo.comp); };
 $('btSolo').onclick = function () { modo.solo = true; $('btCel').click(); $('codigo').style.display = 'none'; $('btEntrar').textContent = T('Começar', 'Start'); };
 window.addEventListener('pagehide', function () { if (cel.pc) enviar({ t: 'sair', id: cel.id }); });
 desenharHist();
+/* Playlists públicas prontas (conferidas em 31/10/2026). Toque toca na TV e guarda em "Suas músicas". */
+var SUGESTOES = [
+  ['PLz485Fbsk1B46Jl7_qCH9J6Omod2JUU7S', '🧒 Just Dance Kid Friendly'],
+  ['PLBA7nqyBa-vzKaQUl5O1Yrlsa797OtDG8', '🧒 Just Dance Kids'],
+  ['PLBA7nqyBa-vx5HSaORK0MN6tsE--tN3tq', '🕹️ Just Dance 2025 Edition'],
+  ['PL83On1siwog7ORpx3c0Ym1AWnA_nOu9ui', '🇰🇷 Just Dance: K-pop'],
+  ['PLz68cPKdtIOxcO2jNfWrKN-4qY6QyDvw_', '🎤 Katy Perry – clipes oficiais'],
+  ['PL7hyetLZlkc7LhzfUBQ768INNd8r3YmKY', '🇰🇷 K-pop (BLACKPINK, BTS, NewJeans…)']
+];
+SUGESTOES.forEach(function (sg) { var b = document.createElement('button'); b.className = 'sec'; b.textContent = '📜 ' + sg[1]; b.onclick = function () { tocarLink('https://www.youtube.com/playlist?list=' + sg[0]); }; $('sugestoes').appendChild(b); });
+
+/* Busca dentro do app: usa a YouTube Data API com a chave da própria pessoa, guardada só neste
+   celular (localStorage). Nenhuma chave entra no código nem sai para outro lugar além do Google. */
+function chaveYT() { try { return localStorage.getItem('danca:ytkey') || ''; } catch (e) { return ''; } }
+$('btChaveYT').onclick = function () { var k = $('chaveYT').value.trim(); if (!/^AIza[0-9A-Za-z_-]{20,}$/.test(k)) { alert(T('Essa não parece uma chave do Google (começa com AIza).', 'That does not look like a Google key (starts with AIza).')); return; } try { localStorage.setItem('danca:ytkey', k); } catch (e) {} $('chaveYT').value = ''; $('chaveBox').style.display = 'none'; buscarNoApp(); };
+function buscarNoApp() {
+  var q = $('busca').value.trim(), out = $('buscaResultados');
+  if (!q) return;
+  var k = chaveYT();
+  if (!k) { $('chaveBox').style.display = ''; return; }
+  out.innerHTML = '<div class="muted">' + T('Buscando…', 'Searching…') + '</div>';
+  var base = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&safeSearch=strict&key=' + encodeURIComponent(k) + '&q=' + encodeURIComponent(q);
+  Promise.all([
+    fetch(base + '&type=video&videoEmbeddable=true').then(function (r) { return r.json(); }),
+    fetch(base + '&type=playlist&maxResults=4').then(function (r) { return r.json(); }).catch(function () { return {}; })
+  ]).then(function (rs) {
+    var v = rs[0], pl = rs[1];
+    if (v.error) { out.innerHTML = '<div class="erro">' + T('O Google recusou a chave (', 'Google refused the key (') + escapar(v.error.message || v.error.code) + ').' + T(' Confira se a YouTube Data API v3 está ativada, ou se acabou a cota do dia.', ' Check that YouTube Data API v3 is enabled, or the daily quota ran out.') + '</div>'; if (v.error.code === 400 || v.error.code === 403) { try { localStorage.removeItem('danca:ytkey'); } catch (e) {} $('chaveBox').style.display = ''; } return; }
+    out.innerHTML = '';
+    var itens = (pl.items || []).concat(v.items || []);
+    if (!itens.length) { out.innerHTML = '<div class="muted">' + T('Nada encontrado.', 'Nothing found.') + '</div>'; return; }
+    itens.forEach(function (it) {
+      var ehPl = it.id.kind === 'youtube#playlist', id = ehPl ? it.id.playlistId : it.id.videoId, sn = it.snippet || {};
+      var d = document.createElement('div'); d.className = 'resultado';
+      d.innerHTML = '<img alt=""><div><b></b><br><small></small></div>';
+      d.querySelector('img').src = (sn.thumbnails && (sn.thumbnails.medium || sn.thumbnails.default) || {}).url || '';
+      d.querySelector('b').textContent = (ehPl ? '📜 ' : '🎵 ') + decodificar(sn.title || id);
+      d.querySelector('small').textContent = decodificar(sn.channelTitle || '');
+      d.onclick = function () { tocarLink(ehPl ? 'https://www.youtube.com/playlist?list=' + id : id); window.scrollTo(0, 0); };
+      out.appendChild(d);
+    });
+  }).catch(function (e) { out.innerHTML = '<div class="erro">' + T('Não deu para buscar: ', 'Search failed: ') + escapar(e.message || e) + '</div>'; });
+}
+function decodificar(t) { var x = document.createElement('textarea'); x.innerHTML = t; return x.value; }
+$('btBuscarApp').onclick = buscarNoApp;
+$('busca').addEventListener('keydown', function (e) { if (e.key === 'Enter') buscarNoApp(); });
 try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 
 /* Atalho: ?tv abre direto a tela de escolha com foco no botão da TV (para apertar OK no controle). */
