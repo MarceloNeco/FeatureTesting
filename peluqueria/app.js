@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.1', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.2.0', APP_UPDATED = '31/10/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -34,6 +34,14 @@
 
   var som = window.PeluqueriaSom || null, voz = window.PeluqueriaVoz || null;
   function efeito(n) { if (som) som.efeito(n); }
+  /* a música começa no primeiro toque (regra dos navegadores) e segue desde a tela de início */
+  var musicaLigada = false;
+  function ligarMusica() {
+    if (!som || musicaLigada) return;
+    musicaLigada = true; som.ligar(); som.musica('inicio');
+  }
+  document.addEventListener('pointerdown', ligarMusica, true);
+  document.addEventListener('keydown', ligarMusica, true);
   function falar(pt, en) { if (voz) voz.falar(pt, en); }
 
   var desenho = PeluqueriaDesenho.criar($('palco'), { leve: TV });
@@ -56,12 +64,12 @@
   $('btMinhas').addEventListener('click', function () { pref.minhas = !pref.minhas; gravar(CHAVE_PREF, pref); marcarMinhas(); });
   $('btJogar').addEventListener('click', jogar);
   $('btDeNovo').addEventListener('click', jogar);
-  $('btInicio').addEventListener('click', function () { app.modo = 'inicio'; tela('inicio'); $('btJogar').focus(); });
+  $('btInicio').addEventListener('click', function () { app.modo = 'inicio'; tela('inicio'); $('btJogar').focus(); if (som) som.musica('inicio'); });
 
   function temMinhas() { return catalogo.cenarios.meus.length + catalogo.itens.meus.length > 0; }
 
   function jogar() {
-    if (som) som.ligar();
+    if (som) { musicaLigada = true; som.ligar(); }
     var usar = pref.minhas && temMinhas();
     var cen = catalogo.cenarios.jogo.concat(usar ? catalogo.cenarios.meus : []);
     var its = catalogo.itens.jogo.concat(usar ? catalogo.itens.meus : []);
@@ -89,7 +97,7 @@
     var rot = ROTULO[res.categoria];
     $('aviso').textContent = T(rot[0], rot[1]) + ' +' + res.pontos;
     efeito(res.categoria);
-    if (res.categoria === 'PERFEITO') falar('UHUL!', 'WOOHOO!');
+    if (res.categoria === 'PERFEITO') efeito('uhul');   // torcida sintetizada (a voz do aparelho soava falsa)
     placar();
   }
   function parar() {
@@ -119,7 +127,10 @@
   $('btPausa').addEventListener('click', pausar);
   $('btSeguir').addEventListener('click', continuar);
   $('palco').addEventListener('pointerdown', function (ev) { ev.preventDefault(); parar(); });
-  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') pausar(); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') { pausar(); if (som) som.parar(); }
+    else if (som && musicaLigada && app.modo !== 'jogo') { som.ligar(); som.musica(app.modo === 'contagem' ? pref.nivel : 'inicio'); }
+  });
 
   /* setas andam entre os botões visíveis (controle da TV, teclado) */
   function mover(passo) {
@@ -146,7 +157,7 @@
 
   function fim() {
     app.modo = 'fim'; manterAcesa(false);
-    if (som) { som.parar(); som.efeito('fim'); }
+    if (som) { som.musica('inicio'); som.efeito('fim'); }   // a música continua na tela de fim
     var r = app.rodada, n = P.estrelas(r);
     $('estrelas').textContent = '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n);
     $('total').textContent = String(r.pontos);

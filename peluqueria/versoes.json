@@ -2,6 +2,21 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.2.0",
+      "data": "31/Out/2026",
+      "hora": "19:00:00",
+      "pt": [
+        "10 músicas novas de pop dançante de pista (bumbo forte, palmas, baixo pulsando, refrão com melodia própria), tocando em sequência desde a tela de início e pelo jogo todo.",
+        "Cada música tem intro, subida com chiado e virada de caixa, refrão e pausa; o andamento acompanha o nível.",
+        "O \"UHUL!\" agora é uma torcida de verdade (várias vozes, plateia e assobio), no lugar da voz robótica."
+      ],
+      "en": [
+        "10 new dance-floor pop tracks (punchy kick, claps, pumping bass, original chorus melodies), playing back to back from the start screen through the whole game.",
+        "Each track has an intro, a build with riser and snare roll, a chorus and a breakdown; tempo follows the level.",
+        "The \"WOOHOO!\" is now a real crowd cheer (several voices, audience and whistle) instead of the robotic voice."
+      ]
+    },
+    {
       "versao": "0.1.1",
       "data": "31/Out/2026",
       "hora": "18:37:00",

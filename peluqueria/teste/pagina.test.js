@@ -132,7 +132,7 @@ async function comecar(pg, nivel) {
   await ateAlvo(ps); await tocar(ps);
   const reg = await D(ps, () => window.PeluqueriaSom && PeluqueriaSom.registro);
   confere(Array.isArray(reg) && reg.includes('PERFEITO') && reg.includes('conta'), 'som registra contagem e PERFEITO', reg);
-  confere(await D(ps, () => PeluqueriaVoz.ultimo === 'UHUL!'), 'voz diz UHUL! no PERFEITO');
+  confere(reg.includes('uhul') && await D(ps, () => PeluqueriaVoz.ultimo !== 'UHUL!'), 'PERFEITO toca a torcida "u-huuu!" (e não a voz robótica)', reg);
   await ps.click('#btPausa'); await ps.click('#btSeguir');
   confere(ps.erros().length === 0, 'som: sem erros', ps.erros());
 
@@ -189,7 +189,7 @@ async function comecar(pg, nivel) {
 
   const pdb = await abrir(browser, base + '?debug&teste');
   await passo(pdb, 500);
-  confere(/v0\.1\.1/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(/v0\.2\.0/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
 
   /* ---------- revisão final ---------- */
@@ -229,16 +229,16 @@ async function comecar(pg, nivel) {
   // 5 e 6) música: sem rajada de notas atrasadas; ▶ religa o áudio (iPhone)
   {
     const pa = await abrir(browser, base + '?teste', { antes: () => {
-      const par = () => ({ value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {} });
-      const no = () => ({ connect() {}, start() { window.__notas++; }, stop() {}, gain: par(), frequency: par(), type: '', buffer: null });
+      const par = () => ({ value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {}, cancelScheduledValues() {} });
+      const no = () => ({ connect() {}, start() { window.__notas++; }, stop() {}, gain: par(), frequency: par(), detune: par(), Q: par(), delayTime: par(), type: '', buffer: null });
       window.__notas = 0; window.__ligou = 0;
       window.AudioContext = function () { this.currentTime = 0; this.state = 'running'; this.sampleRate = 8000; this.destination = {}; };
-      Object.assign(window.AudioContext.prototype, { createGain: no, createOscillator: no, createBiquadFilter: no, createBufferSource: no, resume() { window.__ligou++; return Promise.resolve(); }, createBuffer: () => ({ getChannelData: () => new Float32Array(8000) }) });
+      Object.assign(window.AudioContext.prototype, { createGain: no, createOscillator: no, createBiquadFilter: no, createBufferSource: no, createDelay: no, createDynamicsCompressor: () => Object.assign(no(), { threshold: par(), ratio: par(), knee: par(), attack: par(), release: par() }), resume() { window.__ligou++; return Promise.resolve(); }, createBuffer: () => ({ getChannelData: () => new Float32Array(8000) }) });
     } });
     await D(pa, () => PeluqueriaDebug.novaRodada('normal'));
     await pa.waitForTimeout(200);
-    const notas = await D(pa, async () => { const c = PeluqueriaSom._ctx(); window.__notas = 0; c.currentTime += 20; await new Promise(r => setTimeout(r, 120)); return window.__notas; });
-    confere(notas < 40, 'atraso de 20 s não dispara rajada de notas', notas);
+    const passos = await D(pa, async () => { const c = PeluqueriaSom._ctx(), p0 = PeluqueriaSom._passos(); c.currentTime += 20; await new Promise(r => setTimeout(r, 120)); return PeluqueriaSom._passos() - p0; });
+    confere(passos <= 3, 'atraso de 20 s não dispara rajada de notas', passos);
     await pa.click('#btPausa'); await D(pa, () => { PeluqueriaSom._ctx().state = 'suspended'; window.__ligou = 0; });
     await pa.click('#btSeguir');
     confere(await D(pa, () => window.__ligou) >= 1, '▶ religa o áudio suspenso');
@@ -252,6 +252,28 @@ async function comecar(pg, nivel) {
     await pmp.goto(base + '?teste'); await pmp.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
     await pmp.click('#btJogar'); await pmp.waitForTimeout(1500);
     confere(await D(pmp, () => PeluqueriaSom.fonte()) === 'jogo', 'MP3 que falha cai na trilha do jogo', await D(pmp, () => PeluqueriaSom.fonte()));
+  }
+
+  // música desde a tela de início, sem recomeçar ao entrar no jogo, e tocando na tela de fim
+  {
+    const pi = await abrir(browser, base + '?teste');
+    confere(await D(pi, () => PeluqueriaSom.fonte()) === '', 'sem som antes do primeiro toque');
+    await pi.click('#btMaluco');
+    confere(await D(pi, () => PeluqueriaSom.fonte()) === 'jogo', 'primeiro toque na tela de início liga a música');
+    await pi.waitForTimeout(2500);
+    const antes = await D(pi, () => PeluqueriaSom.posicao());
+    await pi.click('#btJogar'); await pi.waitForTimeout(300);
+    const depois = await D(pi, () => PeluqueriaSom.posicao());
+    confere(depois.faixa === antes.faixa && depois.compasso >= antes.compasso, 'entrar no jogo não recomeça a música', [antes, depois]);
+    confere((await D(pi, () => PeluqueriaTrilhas.FAIXAS.length)) === 10, '10 músicas carregadas');
+    await D(pi, () => { PeluqueriaDebug.passo(2200); for (let k = 0; k < 10; k++) { PeluqueriaDebug.passo(PeluqueriaDebug.tempoAteAlvo()); document.getElementById('palco').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); PeluqueriaDebug.passo(2100); } });
+    confere(await pi.isVisible('#fim') && await D(pi, () => PeluqueriaSom.fonte()) === 'jogo', 'música segue tocando na tela de fim');
+    confere(pi.erros().length === 0, 'música: sem erros', pi.erros());
+  }
+  {
+    const ptk = await abrir(browser, base + '?tv=auto&teste', { ctx: { viewport: { width: 1280, height: 720 } } });
+    await ptk.keyboard.press('ArrowRight');
+    confere(await D(ptk, () => PeluqueriaSom.fonte()) === 'jogo', 'TV: primeira tecla do controle liga a música');
   }
 
   /* ---------- 320 px ---------- */
