@@ -290,7 +290,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '1.3.2', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '1.3.3', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -1303,6 +1303,18 @@ if (compartilhado && (idYouTube(compartilhado) || idPlaylist(compartilhado))) {
   $('link').value = compartilhado;
   if ($('nome').value && $('codigo').value) { entrar(); var esperaTV = setInterval(function () { if (cel.tvViu && $('jogo').classList.contains('ativa')) { clearInterval(esperaTV); tocarLink(compartilhado); } }, 500); setTimeout(function () { clearInterval(esperaTV); }, 20000); }
 }
+/* Controle remoto: setas para cima/baixo (ou esquerda/direita) trocam o botão selecionado na tela
+   ativa, OK (Enter) aciona. O navegador da LG nem sempre faz isso sozinho quando o cursor some. */
+document.addEventListener('keydown', function (e) {
+  var k = e.key, dir = (k === 'ArrowDown' || k === 'ArrowRight') ? 1 : (k === 'ArrowUp' || k === 'ArrowLeft') ? -1 : 0;
+  if (!dir) return;
+  var tela0 = document.querySelector('.tela.ativa'); if (!tela0) return;
+  var focaveis = Array.prototype.filter.call(tela0.querySelectorAll('button, input, [tabindex]'), function (el) { return !el.disabled && el.offsetParent !== null; });
+  if (!focaveis.length) return;
+  var i = focaveis.indexOf(document.activeElement), prox = focaveis[(i + dir + focaveis.length) % focaveis.length];
+  if (prox && !(document.activeElement && document.activeElement.tagName === 'INPUT' && dir && k !== 'ArrowUp' && k !== 'ArrowDown')) { e.preventDefault(); prox.focus(); }
+});
+
 /* Detecta TV: o navegador das smart TVs se identifica (LG = "Web0S"/"webOS", Samsung = "Tizen"/"SMART-TV").
    Primeira vez: foca o botão da TV (um OK no controle basta). Depois que a TV entrou uma vez, entra sozinha. */
 var pareceTV = /Web0S|webOS|SMART-TV|SmartTV|Tizen|NetCast|BRAVIA|AFT[A-Z]|CrKey|Android TV|GoogleTV|HbbTV|Roku|VIDAA|Philips.*TV/i.test(navigator.userAgent);
