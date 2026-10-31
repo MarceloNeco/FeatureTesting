@@ -154,6 +154,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
   <h1>💃 <span data-t="Dança na Sala|Living Room Dance"></span></h1>
   <p class="muted" data-t="A TV toca a música do YouTube e mostra quem está dançando. O celular filma, mede a energia e comanda tudo. Nada para instalar.|The TV plays the YouTube song and shows who is dancing. The phone films, measures energy and runs the show. Nothing to install."></p>
   <div class="col">
+    <p id="detectouTV" class="aviso" style="display:none" data-t="📺 Parece que isto é uma TV. Aperte OK no controle para começar (da próxima vez entra sozinho).|📺 This looks like a TV. Press OK on the remote to start (next time it starts by itself)."></p>
     <button class="big" id="btTV">📺 <span data-t="Esta é a TV|This is the TV"></span></button>
     <button class="big sec" id="btCel">📱 <span data-t="Este é o celular|This is the phone"></span></button>
     <button class="big sec" id="btSolo">🎧 <span data-t="Só o celular (sem TV)|Phone only (no TV)"></span></button>
@@ -289,7 +290,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '1.2.1', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '1.3.0', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -351,8 +352,10 @@ function iniciarTV() {
   $('tvCodigo').textContent = c;
   $('tvCanto').textContent = T('Código: ', 'Code: ') + c;
   $('tvUrl').textContent = /solverone\.com\.br$/.test(location.host) ? 'solverone.com.br/tv' : location.host + location.pathname.replace(/index\.html$/, '');
-  try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch (e) {}
+  try { var pf = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); if (pf && pf.catch) pf.catch(function () {}); } catch (e) {}   // sem toque (entrada automática) o navegador recusa: tudo bem
   jingleLigar();
+  try { localStorage.setItem('danca:papel', 'tv'); } catch (e) {}
+  ['keydown', 'click', 'touchstart'].forEach(function (ev) { document.addEventListener(ev, function () { try { if (jingle.ac && jingle.ac.state === 'suspended') jingle.ac.resume(); } catch (e) {} }, { passive: true }); });
 
   abrirCanal(c, tvReceber).then(function () {
     enviar({ t: 'tv' });
@@ -1272,7 +1275,12 @@ if (compartilhado && (idYouTube(compartilhado) || idPlaylist(compartilhado))) {
   $('link').value = compartilhado;
   if ($('nome').value && $('codigo').value) { entrar(); var esperaTV = setInterval(function () { if (cel.tvViu && $('jogo').classList.contains('ativa')) { clearInterval(esperaTV); tocarLink(compartilhado); } }, 500); setTimeout(function () { clearInterval(esperaTV); }, 20000); }
 }
-if (/[?&]tv=auto\b/.test(location.search)) iniciarTV();   // aberto pelo app da LG: já entra como TV
+/* Detecta TV: o navegador das smart TVs se identifica (LG = "Web0S"/"webOS", Samsung = "Tizen"/"SMART-TV").
+   Primeira vez: foca o botão da TV (um OK no controle basta). Depois que a TV entrou uma vez, entra sozinha. */
+var pareceTV = /Web0S|webOS|SMART-TV|SmartTV|Tizen|NetCast|BRAVIA|AFT[A-Z]|CrKey|Android TV|GoogleTV|HbbTV|Roku|VIDAA|Philips.*TV/i.test(navigator.userAgent);
+var papelSalvo = ''; try { papelSalvo = localStorage.getItem('danca:papel') || ''; } catch (e) {}
+if (/[?&]tv=auto\b/.test(location.search) || (pareceTV && papelSalvo === 'tv' && !/[?&]escolher\b/.test(location.search))) iniciarTV();
+else if (pareceTV) { $('detectouTV').style.display = 'block'; $('btTV').focus(); }   // aberto pelo app da LG: já entra como TV
 else if (/[?&]tv\b/.test(location.search)) $('btTV').focus();
 })();
 </script>
