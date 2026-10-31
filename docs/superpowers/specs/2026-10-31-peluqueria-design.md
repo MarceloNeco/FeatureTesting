@@ -330,3 +330,37 @@ explica a regra para fotos futuras (licença limpa, listada ali).
 Pareamento com a TV, dois jogadores, palma e braços, foto pessoal e IA, Spotify, YouTube (não pedido),
 fotos realistas (entram depois pela pasta `meus/`, enviadas pelo dono ou geradas por ele no Google AI
 Studio), salvar ou compartilhar a imagem engraçada.
+
+## 14. Fases 2 e 3 juntas (v0.4.0): TV, celular como controle, corpo e dois jogadores
+
+Pedido do dono (31/Out/2026): "versão para a TV em que um movimento brusco — levantar o braço esquerdo ou
+direito, chutar — para o item; tremidinha não". Decisões (o dono pediu "faça na ordem e nas melhores práticas,
+sem me consultar"):
+
+- **Papéis na mesma página.** No Início, um botão **📺 Jogar na TV** abre a TV (ou `?tv=auto`, usado pelo
+  `/kids`, por `/tv/peluqueria` e pela casca `tv-lg-peluqueria/`). A TV mostra um **código de 4 letras** e o
+  endereço; o celular toca em **📱 Sou o controle**, digita o código e o nome. O controle da TV continua valendo:
+  OK começa e OK para o item do jogador 1.
+- **Só mensagens, sem vídeo.** Diferente da Bagunçolândia, a TV não precisa ver a câmera: o celular manda só
+  avisos ("parar", "começar", nível). Canal: Supabase Realtime *broadcast* (`peluqueria-<código>`), com a mesma
+  URL e chave **publishable** (pública por desenho) da Bagunçolândia; nada de WebRTC. Toda mensagem passa por
+  `Peluqueria.validarMensagem` (tipos da lista, nome ≤ 14 letras, números limitados); nomes por `textContent`.
+  No máximo 2 celulares por sala; durante a rodada ninguém novo entra.
+- **Atraso compensado.** O celular acerta o relógio com a TV (ping a cada 2 s, guarda o de menor ida e volta)
+  e manda o **instante** do gesto no relógio da TV. A TV para o item onde ele estava naquele instante
+  (`Peluqueria.parar(estado, atraso)`, atraso limitado a 0,5 s). Quem acerta a hora ganha o PERFEITO mesmo com
+  a internet lenta.
+- **Corpo (no celular).** Botão **📷 Usar o corpo** liga a câmera do celular e o esqueleto por IA da
+  Bagunçolândia (MediaPipe Pose, reaproveitado de `../baguncolandia/libs/mediapipe/`, ~20 MB baixados uma vez,
+  com aviso). `gesto.js` (puro, testado) acompanha pulsos e tornozelos: vale um **movimento brusco** — a ponta do
+  membro anda pelo menos 0,45 "largura de ombros" em até 0,25 s, a pelo menos 2,2 larguras/s; tremida e
+  balanço lento não valem. Depois de um gatilho, 0,7 s de espera. O vídeo nunca sai do celular. O toque na tela
+  do celular continua valendo.
+- **Dois jogadores.** Com 2 celulares (ou 1 celular filmando 2 pessoas: a da esquerda é o jogador 1), a TV
+  divide a tela ao meio: a mesma sequência de quedas para os dois, cada um com o seu item, pontos e
+  multiplicador; a próxima queda vem quando os dois pararam (ou o item passou). No fim, pódio com o vencedor.
+  `partida.js` (puro, testado) coordena 1 ou 2 jogadores.
+- **Testes sem internet.** Com `?teste`, o canal é um `BroadcastChannel` do próprio navegador: o teste abre a TV
+  e o celular em duas abas e joga de verdade, com esqueleto falso injetado.
+- **TV LG.** Casca `tv-lg-peluqueria/` (como a da Bagunçolândia), modo leve na TV.
+- Fora: vídeo do jogador na TV, mais de 2 jogadores, palma pelo microfone (o movimento brusco já cobre o pedido).
