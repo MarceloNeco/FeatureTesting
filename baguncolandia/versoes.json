@@ -2,6 +2,19 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.2",
+      "data": "31/Out/2026",
+      "hora": "12:01:00",
+      "pt": [
+        "Voz da calibração (\"fique parado\", \"levante o braço\"…) sai na TV sempre que ela tiver voz. Se a TV abriu pelo atalho /kids (sem toque no controle), o celular fala junto, para garantir. TV sem voz: só o celular.",
+        "A caixa ?debug mostra se a TV tem voz."
+      ],
+      "en": [
+        "Calibration voice now plays on the TV whenever it has speech. If the TV opened via the /kids shortcut (no remote press), the phone speaks too. TV without speech: phone only.",
+        "The ?debug box shows whether the TV has speech."
+      ]
+    },
+    {
       "versao": "0.8.1",
       "data": "31/Out/2026",
       "hora": "11:51:00",
