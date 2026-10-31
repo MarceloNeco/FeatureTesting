@@ -289,7 +289,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '1.1.0', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '1.2.0', APP_UPDATED = '30/10/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -352,6 +352,7 @@ function iniciarTV() {
   $('tvCanto').textContent = T('Código: ', 'Code: ') + c;
   $('tvUrl').textContent = /solverone\.com\.br$/.test(location.host) ? 'solverone.com.br/tv' : location.host + location.pathname.replace(/index\.html$/, '');
   try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch (e) {}
+  jingleLigar();
 
   abrirCanal(c, tvReceber).then(function () {
     enviar({ t: 'tv' });
@@ -361,7 +362,7 @@ function iniciarTV() {
   });
   carregarYouTube();
   fxIniciar();
-  window.DancaDebug = tv;   // só para testes automáticos (nada de segredo aqui)
+  tv.jingle = jingle; window.DancaDebug = tv;   // só para testes automáticos (nada de segredo aqui)
 }
 
 function tvReceber(m) {
@@ -500,11 +501,13 @@ function cargaMostrar(msg) {
     $('cargaDancante').textContent = Math.random() < 0.5 ? '💃' : '🕺';
   }, 180);
   if (!carga.timer) carga.timer = setInterval(cargaAtualizar, 250);
+  jingleTocar(true);
 }
 function cargaPct(p) { p = Math.max(0, Math.min(100, Math.round(p))); $('cargaPct').textContent = p + '%'; $('cargaBarra').style.strokeDashoffset = 100 - p; }
 function cargaEsconder() {
   $('tvCarga').classList.remove('ativa'); carga.ativa = false; carga.inicio = 0; carga.ultimaF = -1; carga.parouEm = 0;
   clearInterval(carga.timer); carga.timer = 0; clearInterval(carga.emojiTimer); carga.emojiTimer = 0; $('cargaEmojis').innerHTML = '';
+  jingleTocar(false);
 }
 function cargaAtualizar() {
   var p = tv.player; if (!p || !p.getVideoLoadedFraction) return;
@@ -522,6 +525,57 @@ function cargaAtualizar() {
     cargaPct(f * 100);
     if (st === YT.PlayerState.PLAYING) cargaEsconder();
   }
+}
+/* Música de espera gerada pelo próprio app (Web Audio): bateria, baixo e arpejo estilo videogame,
+   124 bpm, instrumental, sem direitos de ninguém. Toca só enquanto a tela de carregamento aparece,
+   com entrada e saída suaves. Nenhum arquivo de áudio é baixado. */
+var jingle = { ac: null, master: null, timer: 0, passo: 0, proximo: 0, bpm: 124, ligado: false };
+function jingleLigar() {
+  try {
+    var AC = window.AudioContext || window.webkitAudioContext; if (!AC || jingle.ac) return;
+    jingle.ac = new AC(); jingle.master = jingle.ac.createGain(); jingle.master.gain.value = 0;
+    var lp = jingle.ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6500;
+    jingle.master.connect(lp); lp.connect(jingle.ac.destination);
+    if (jingle.ac.state === 'suspended') jingle.ac.resume();
+  } catch (e) { jingle.ac = null; }
+}
+function jingleTocar(on) {
+  if (!jingle.ac || on === jingle.ligado) return;
+  jingle.ligado = on;
+  var g = jingle.master.gain, t = jingle.ac.currentTime;
+  if (jingle.ac.state === 'suspended') jingle.ac.resume();
+  g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(on ? 0.28 : 0, t + (on ? 0.6 : 0.8));
+  if (on && !jingle.timer) { jingle.passo = 0; jingle.proximo = t + 0.05; jingle.timer = setInterval(jingleAgendar, 25); }
+  if (!on && jingle.timer) { setTimeout(function () { if (!jingle.ligado) { clearInterval(jingle.timer); jingle.timer = 0; } }, 900); }
+}
+function jingleAgendar() {
+  var ac = jingle.ac, dur16 = 60 / jingle.bpm / 4;
+  while (jingle.proximo < ac.currentTime + 0.12) { jingleNota(jingle.passo, jingle.proximo, dur16); jingle.passo = (jingle.passo + 1) % 128; jingle.proximo += dur16; }
+}
+function jingleNota(passo, t, d) {
+  var ac = jingle.ac, out = jingle.master, p16 = passo % 16, compasso = Math.floor(passo / 16) % 8;
+  // acordes: C  G  Am F | C G F G  (tom alegre); frequências em Hz
+  var acordes = [[261.6, 329.6, 392.0], [392.0, 493.9, 587.3], [440.0, 523.3, 659.3], [349.2, 440.0, 523.3], [261.6, 329.6, 392.0], [392.0, 493.9, 587.3], [349.2, 440.0, 523.3], [392.0, 493.9, 587.3]];
+  var ac0 = acordes[compasso], raiz = ac0[0] / 2;
+  function osc(tipo, f, t0, dur, vol, para) {
+    var o = ac.createOscillator(), g = ac.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t0);
+    if (para) o.frequency.exponentialRampToValueAtTime(para, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(out); o.start(t0); o.stop(t0 + dur + 0.02);
+  }
+  function ruido(t0, dur, vol, hp) {
+    var n = Math.floor(ac.sampleRate * dur), b = ac.createBuffer(1, n, ac.sampleRate), x = b.getChannelData(0);
+    for (var i = 0; i < n; i++) x[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    var src = ac.createBufferSource(), g = ac.createGain(), f = ac.createBiquadFilter(); src.buffer = b; f.type = 'highpass'; f.frequency.value = hp;
+    g.gain.value = vol; src.connect(f); f.connect(g); g.connect(out); src.start(t0);
+  }
+  if (p16 % 4 === 0) osc('sine', 150, t, 0.16, 0.9, 45);                       // bumbo
+  if (p16 === 4 || p16 === 12) { ruido(t, 0.14, 0.5, 1800); osc('triangle', 190, t, 0.08, 0.3); }   // caixa
+  if (p16 % 2 === 0) ruido(t, p16 % 4 === 2 ? 0.07 : 0.03, 0.18, 7000);         // chimbal
+  if (p16 % 2 === 0) osc('square', p16 % 8 === 6 ? raiz * 2 : raiz, t, d * 1.6, 0.16);   // baixo
+  var arp = [0, 1, 2, 1, 0, 2, 1, 2][p16 % 8];                                   // arpejo
+  osc('triangle', ac0[arp] * 2, t, d * 0.9, 0.12);
+  if (compasso % 2 === 1 && (p16 === 0 || p16 === 6 || p16 === 10)) osc('square', ac0[(p16 / 2) % 3] * 4, t, d * 2.5, 0.07);   // melodia
 }
 function tvZerar() {
   Object.keys(tv.pontos).forEach(function (k) { tv.pontos[k].pontos = 0; tv.tiles[k] && (tv.tiles[k].querySelector('.pontos').textContent = '0'); });
