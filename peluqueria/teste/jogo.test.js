@@ -157,3 +157,25 @@ test('item aceita escala opcional entre 0,3 e 3', () => {
   assert.equal(P.validarItem(Object.assign(ite('peruca'), { escala: 0.1 })), null);
   assert.equal(P.validarItem(ite('peruca')).escala, undefined);
 });
+
+test('zigue-zague sincronizado: na altura certa o item está no meio do alvo e reto', () => {
+  for (const nivel of ['normal', 'maluco']) {
+    const e = rodada(nivel);
+    for (let i = 0; i < 10; i++) {
+      const q = e.quedas[i], L = q.cenario.lugares[q.lugar], n = P.NIVEIS[nivel];
+      const tAlvo = (L.y - P.TOPO) / (n.vel * (1 + 0.05 * i));
+      const p = P.posicao(q, nivel, i, tAlvo);
+      assert.ok(Math.abs(p.x - L.x) < 1e-9, nivel + ' queda ' + i + ': x=' + p.x + ' alvo=' + L.x);
+      assert.ok(Math.abs(p.rot - (L.rot || 0)) < 1e-9, nivel + ' queda ' + i + ': rot=' + p.rot);
+      assert.ok(Math.abs(p.y - L.y) < 1e-9);
+    }
+  }
+});
+
+test('parar na hora certa dá PERFEITO também no Normal e no Maluco', () => {
+  for (const nivel of ['normal', 'maluco']) {
+    const e = rodada(nivel);
+    P.avancar(e, ateAlvo(e));
+    assert.equal(P.parar(e).categoria, 'PERFEITO', nivel);
+  }
+});

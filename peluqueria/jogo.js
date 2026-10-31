@@ -11,7 +11,7 @@
   var NIVEIS = {
     crianca: { vel: 0.22, amp: 0, per: 0, desloc: 0, giro: false, tol: 1.5 },
     normal: { vel: 0.32, amp: 0.08, per: 2.2, desloc: 0, giro: false, tol: 1.0 },
-    maluco: { vel: 0.42, amp: 0.15, per: 1.6, desloc: 0.08, giro: true, tol: 0.8 }
+    maluco: { vel: 0.42, amp: 0.15, per: 1.6, desloc: 0, giro: true, tol: 0.8 }
   };
   var GIRO = { amp: 40, per: 4 / 3 };          // ≈ 120 °/s em média
   var LIMITES = { PERFEITO: 0.03, BOM: 0.08, QUASE: 0.15 };
@@ -55,12 +55,15 @@
     return lista;
   }
 
+  /* O balanço e o giro são SINCRONIZADOS com a queda: no instante em que o item chega na altura do lugar
+     certo (tAlvo), ele passa exatamente pelo meio do alvo e reto. Acertar depende só de tocar na hora certa;
+     o zigue-zague é enfeite e desafio de leitura. O lado para onde ele balança é sorteado (queda.d). */
   function posicao(queda, nivel, i, t) {
     var n = NIVEIS[nivel], L = queda.cenario.lugares[queda.lugar];
-    var y = TOPO + n.vel * (1 + ACELERA * i) * t;
-    var x = L.x;
-    if (n.amp) x = L.x + n.desloc * (queda.d || 0) + n.amp * Math.sin(2 * Math.PI * t / n.per + (queda.fase || 0));
-    var rot = n.giro ? GIRO.amp * Math.sin(2 * Math.PI * t / GIRO.per + (queda.fase || 0)) : (L.rot || 0);
+    var vel = n.vel * (1 + ACELERA * i), y = TOPO + vel * t, tAlvo = (L.y - TOPO) / vel;
+    var lado = (queda.d || 0) < 0 ? -1 : 1, x = L.x;
+    if (n.amp) x = L.x + lado * n.amp * Math.sin(2 * Math.PI * (t - tAlvo) / n.per);
+    var rot = (L.rot || 0) + (n.giro ? lado * GIRO.amp * Math.sin(2 * Math.PI * (t - tAlvo) / GIRO.per) : 0);
     return { x: x, y: y, rot: rot };
   }
 
