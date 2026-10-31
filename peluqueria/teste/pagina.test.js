@@ -141,6 +141,35 @@ async function comecar(pg, nivel) {
   await ateAlvo(mudo); await tocar(mudo);
   confere(/PERFEITO/.test(await mudo.textContent('#aviso')) && mudo.erros().length === 0, 'sem voz e sem WebAudio: joga com legenda e sem erro', mudo.erros());
 
+  /* ---------- marcar.html ---------- */
+  {
+    const ctxM = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'pt-BR' });
+    const pmk = await ctxM.newPage(); const errosM = [];
+    await pmk.addInitScript(() => { window.__csp = []; document.addEventListener('securitypolicyviolation', e => window.__csp.push(e.violatedDirective)); });
+    pmk.on('console', m => { if (m.type() === 'error') errosM.push(m.text()); }); pmk.on('pageerror', e => errosM.push(e.message));
+    await pmk.goto(base + 'marcar.html');
+    const png = Buffer.from(await pmk.evaluate(() => { const c = document.createElement('canvas'); c.width = 800; c.height = 600; const g = c.getContext('2d'); g.fillStyle = '#c6ff3d'; g.fillRect(0, 0, 800, 600); return c.toDataURL('image/png').split(',')[1]; }), 'base64');
+    await pmk.setInputFiles('#foto', { name: 'Minha Foto Ção.png', mimeType: 'image/png', buffer: png });
+    await pmk.waitForFunction(() => document.getElementById('imagem').naturalWidth === 800);
+    await pmk.click('[data-lugar="olhos"]');
+    const bx = await pmk.locator('#imagem').boundingBox();
+    await pmk.mouse.move(bx.x + bx.width * 0.3, bx.y + bx.height * 0.3); await pmk.mouse.down();
+    await pmk.mouse.move(bx.x + bx.width * 0.5, bx.y + bx.height * 0.4, { steps: 4 });
+    await pmk.mouse.move(bx.x + bx.width * 0.7, bx.y + bx.height * 0.5, { steps: 4 }); await pmk.mouse.up();
+    const linha = JSON.parse(await pmk.textContent('#linha'));
+    const L = linha.lugares && linha.lugares.olhos;
+    confere(linha.largura === 800 && linha.altura === 600 && L && Math.abs(L.x - 0.5) < 0.02 && Math.abs(L.y - 0.4) < 0.02 && Math.abs(L.tam - 0.4) < 0.02, 'marcar: quadrado vira o lugar dos olhos', linha);
+    confere(linha.id === 'minha-foto-cao' && linha.arquivo === 'minha-foto-cao.png', 'marcar: nome do arquivo vira id e arquivo simples', [linha.id, linha.arquivo]);
+    confere(await pmk.evaluate(l => !!Peluqueria.validarCenario(l), linha), 'marcar: linha passa na validação do jogo', linha);
+    await pmk.click('#modoItem');
+    const bx2 = await pmk.locator('#imagem').boundingBox();   // o controle de giro some e a foto sobe
+    await pmk.mouse.click(bx2.x + bx2.width * 0.25, bx2.y + bx2.height * 0.75);
+    const item = JSON.parse(await pmk.textContent('#linha'));
+    confere(Math.abs(item.encaixe.x - 0.25) < 0.02 && Math.abs(item.encaixe.y - 0.75) < 0.02 && await pmk.evaluate(l => !!Peluqueria.validarItem(l), item), 'marcar: modo item marca o encaixe', item);
+    confere(errosM.length === 0 && (await pmk.evaluate(() => window.__csp)).length === 0, 'marcar: sem erros nem CSP', errosM);
+    await pmk.screenshot({ path: '/tmp/peluqueria-marcar.png' });
+  }
+
   /* ---------- 320 px ---------- */
   const p320 = await abrir(browser, base + '?teste', { ctx: { viewport: { width: 320, height: 640 } } });
   confere(await D(p320, () => document.documentElement.scrollWidth <= 320), '320 px sem rolagem lateral (início)');
