@@ -103,6 +103,7 @@
   }
   function rastroCorte(x, y, ang, raio) { D.parts.push({ x: x, y: y, ang: ang, len: raio * 2.6, vida: 220, tipo: 'corte' }); }
   function confete() { for (var i = 0; i < (D.menos ? 60 : 220); i++) D.parts.push({ x: Math.random() * W, y: -20 - Math.random() * 400, vx: (Math.random() - 0.5) * 80, vy: 80 + Math.random() * 160, g: 20, r: 5 + Math.random() * 6, cor: 'hsl(' + Math.random() * 360 + ',100%,60%)', vida: 5000, tipo: 'confete', rot: Math.random() * 6 }); }
+  function pulso() { D.pulsoAte = D.ultimo + 160; }
   function legenda(txt, cor, pisca) { D.legenda = txt ? { t: txt, cor: cor || '#fff', pisca: !!pisca, desde: D.ultimo } : null; }
   function contagem(n) { D.contagem = n == null ? null : { n: n, desde: D.ultimo }; }
 
@@ -131,7 +132,7 @@
     var jogs = estado.jogadores, dois = jogs.length === 2, modo = estado.modo;
     // raias dos jogadores: borda neon na cor de cada um e divisória luminosa
     jogs.forEach(function (jg, j) {
-      var r = jg.raia; ctx.save(); ctx.strokeStyle = CORES.j[j]; ctx.lineWidth = paisagem ? 4 : 6; ctx.shadowColor = CORES.j[j]; ctx.shadowBlur = 24; ctx.globalAlpha = paisagem ? 0.6 : 0.9;
+      var r = jg.raia, pulsando = D.pulsoAte && ts < D.pulsoAte; ctx.save(); ctx.strokeStyle = pulsando ? '#fff' : CORES.j[j]; ctx.lineWidth = (paisagem ? 4 : 6) + (pulsando ? 6 : 0); ctx.shadowColor = CORES.j[j]; ctx.shadowBlur = pulsando ? 40 : 24; ctx.globalAlpha = paisagem ? 0.6 : 0.9;
       ctx.strokeRect(r.x + 4, r.y + 4, r.w - 8, r.h - 8); ctx.restore();
     });
     // zona de chute
@@ -356,5 +357,5 @@
     ctx.restore();
   }
 
-  root.Desenho = { iniciar: iniciar, quadro: quadro, legenda: legenda, contagem: contagem, confete: confete, podio: podio, nomes: nomes, texto: texto, ambiente: ambiente, avatares: avatares, CORES: CORES, W: W, H: H };
+  root.Desenho = { iniciar: iniciar, quadro: quadro, legenda: legenda, contagem: contagem, confete: confete, podio: podio, nomes: nomes, texto: texto, ambiente: ambiente, avatares: avatares, pulso: pulso, CORES: CORES, W: W, H: H };
 })(typeof self !== 'undefined' ? self : this);

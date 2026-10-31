@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.2.0', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.3.0', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -82,7 +82,8 @@
       var j = porId(id); if (!j) return;
       j.energia = d.e;
       if (d.cal) { calRecebida(id, d.cal); return; }
-      if (d.bpm && tv.partida) tv.partida.batida(d.bpm);
+      if (d.bpm && tv.partida) { tv.partida.batida(d.bpm); tv.bpm = d.bpm; }
+      if (d.b) Desenho.pulso();
       if (!tv.partida || tv.fase !== 'jogando') return;
       var ic = indiceCelular(id), ts = performance.now();
       if (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2) {
@@ -139,7 +140,8 @@
       if (m.acao === 'parar') { if (tv.partida && tv.fase !== 'fim') tv.partida.terminar(); return; }
       if (m.acao === 'calibrar') { if (tv.fase === 'lobby' || tv.fase === 'fim') comecar(true); return; }
       if (m.acao === 'pularCalibracao') { if (tv.calib) tv.calib.pular(); return; }
-      if (m.acao === 'bpm') { if (tv.partida) tv.partida.batida(m.bpm); return; }
+      if (m.acao === 'bpm') { if (tv.partida) tv.partida.batida(m.bpm); tv.bpm = m.bpm; return; }
+      if (m.acao === 'musica') { tv.titulo = m.texto || ''; $('tvTitulo').style.display = tv.titulo ? 'block' : 'none'; $('tvTitulo').textContent = '🎵 ' + tv.titulo; return; }
       youtubeComando(m);
     }
 
@@ -371,6 +373,8 @@
       Object.keys(m.pontos || {}).forEach(function (k) { var d = document.createElement('div'), s = document.createElement('span'), b = document.createElement('b'); s.textContent = (cel.sala && k === cel.sala.id ? '⭐ ' : '') + (m.pontos[k].nome || ''); b.textContent = String(m.pontos[k].pontos); d.appendChild(s); d.appendChild(b); p.appendChild(d); });
       desenharLista(m);
       var f = m.fase;
+      if (f === 'fim' && cel.faseAnterior === 'jogando' && Spotify.ativo() && Spotify.entrou()) Spotify.pausar().catch(function () {});
+      cel.faseAnterior = f;
       $('btComecar').disabled = !(f === 'lobby' || f === 'fim' || f === 'capa');
       $('btPausa').disabled = !(f === 'jogando' || f === 'pausa'); $('btParar').disabled = !(f === 'jogando' || f === 'pausa');
       if (m.tocando) status('🎵 ' + (m.titulo || ''), 'ok');
@@ -415,8 +419,45 @@
       ids.forEach(function (id, i) { var b = document.createElement('button'); b.type = 'button'; b.className = 'sec' + (i === m.indice ? ' atual' : ''); b.textContent = (i === m.indice ? '▶️ ' : (i + 1) + '. ') + (titulos[id] || '…'); b.onclick = function () { comando({ acao: 'indice', i: i }); }; d.appendChild(b); });
       buscarTitulos(ids);
     }
+    /* ---- batida pelo microfone ---- */
+    function alternarBatida() {
+      if (cel.batida) { cel.batida.parar(); cel.batida = null; $('btBatida').classList.remove('ativo'); $('nivelBox').style.display = 'none'; comando({ acao: 'bpm', bpm: 0 }); return; }
+      $('btBatida').disabled = true;
+      Batida.iniciar({
+        aoBatida: function () { if (cel.sala) cel.sala.enviarDados({ e: 0, p: [], b: 1 }); else if (cel.local) Desenho.pulso(); },
+        aoBpm: function (bpm) { $('bpmTxt').textContent = bpm + ' bpm'; if (cel.sala && cel.sala.enviarDados({ e: 0, p: [], bpm: bpm })) return; comando({ acao: 'bpm', bpm: bpm }); },
+        aoNivel: function (n) { $('nivel').style.width = Math.round(n * 100) + '%'; }
+      }).then(function (b) { cel.batida = b; $('btBatida').classList.add('ativo'); $('nivelBox').style.display = ''; $('bpmTxt').textContent = T('ouvindo…', 'listening…'); })
+        .catch(function (e) { status((e && e.name === 'NotAllowedError') ? T('Você precisa permitir o microfone.', 'You need to allow the microphone.') : T('Microfone não deu: ', 'Microphone failed: ') + (e && e.message || e), 'erro'); })
+        .then(function () { $('btBatida').disabled = false; });
+    }
+    /* ---- Spotify (controle remoto) ---- */
+    function spotifyUI() {
+      if (!Spotify.ativo()) return;
+      $('spotifyBox').style.display = '';
+      var dentro = Spotify.entrou(); $('spotifyDentro').style.display = dentro ? '' : 'none'; $('btSpotify').style.display = dentro ? 'none' : '';
+      if (dentro) spotifyCarregar();
+    }
+    function spotifyCarregar() {
+      Spotify.aparelhos().then(function (ds) { var sel = $('spAparelho'); while (sel.firstChild) sel.removeChild(sel.firstChild); ds.forEach(function (d) { var o = document.createElement('option'); o.value = d.id; o.textContent = (d.is_active ? '▶ ' : '') + d.name + ' (' + d.type + ')'; if (d.is_active) o.selected = true; sel.appendChild(o); }); if (!ds.length) { var o2 = document.createElement('option'); o2.value = ''; o2.textContent = T('Abra o Spotify em algum aparelho', 'Open Spotify on some device'); sel.appendChild(o2); } }).catch(spotifyErro);
+      Spotify.playlists().then(function (ps) { var d = $('spPlaylists'); while (d.firstChild) d.removeChild(d.firstChild); ps.forEach(function (p) { var b = document.createElement('button'); b.type = 'button'; b.className = 'sec'; b.textContent = '📜 ' + p.nome; b.onclick = function () { Spotify.tocar(p.uri, $('spAparelho').value).then(function () { setTimeout(spotifyTocando, 1200); }).catch(spotifyErro); }; d.appendChild(b); }); }).catch(spotifyErro);
+      spotifyTocando();
+    }
+    function spotifyTocando() {
+      Spotify.tocando().then(function (t) { var txt = t ? (t.tocando ? '🎵 ' : '⏸ ') + t.nome + ' — ' + t.artista : T('Nada tocando', 'Nothing playing'); $('spTocando').textContent = txt; comando({ acao: 'musica', texto: t ? t.nome + ' — ' + t.artista : '' }); }).catch(spotifyErro);
+    }
+    function spotifyErro(e) { var m = (e && e.message) || ''; status(m === 'premium' ? T('O Spotify só deixa controlar com conta Premium.', 'Spotify only allows remote control with a Premium account.') : m === 'não entrou' ? T('Entre no Spotify de novo.', 'Sign in to Spotify again.') : T('Spotify: ', 'Spotify: ') + m, 'erro'); if (m === 'não entrou') spotifyUI(); }
+    $('btBatida').onclick = alternarBatida;
+    $('btSpotify').onclick = function () { $('btSpotify').disabled = true; Spotify.entrar().then(spotifyUI).catch(spotifyErro).then(function () { $('btSpotify').disabled = false; }); };
+    $('btSpotifySair').onclick = function () { Spotify.sair(); spotifyUI(); };
+    $('spPausa').onclick = function () { Spotify.tocando().then(function (t) { return t && t.tocando ? Spotify.pausar() : Spotify.tocar(null, $('spAparelho').value); }).then(function () { setTimeout(spotifyTocando, 800); }).catch(spotifyErro); };
+    $('spProxima').onclick = function () { Spotify.proxima().then(function () { setTimeout(spotifyTocando, 800); }).catch(spotifyErro); };
+    $('spAnterior').onclick = function () { Spotify.anterior().then(function () { setTimeout(spotifyTocando, 800); }).catch(spotifyErro); };
+    Spotify.aoCarregar().then(function () { spotifyUI(); });
+
     function sair() {
       clearInterval(cel.timer); if (cel.calib) cel.calib.parar(); cel.calib = null;
+      if (cel.batida) alternarBatida();
       if (cel.sala) cel.sala.sair(); cel.sala = null; cel.visao = null;
       $('btEntrar').disabled = false; tela('entrar');
     }

@@ -28,7 +28,7 @@
 
   /* ---------- validação das mensagens do canal (segurança: nada de fora entra sem passar aqui) ---------- */
   var ID = /^[a-z0-9]{6,12}$/i;
-  var ACOES = ['comecar', 'pausar', 'continuar', 'parar', 'config', 'carregar', 'playlist', 'indice', 'proxima', 'anterior', 'pausa', 'reiniciar', 'calibrar', 'pularCalibracao', 'fale', 'batida'];
+  var ACOES = ['comecar', 'pausar', 'continuar', 'parar', 'config', 'carregar', 'playlist', 'indice', 'proxima', 'anterior', 'pausa', 'reiniciar', 'calibrar', 'pularCalibracao', 'fale', 'batida', 'bpm', 'musica'];
   function validar(m) {
     if (!m || typeof m !== 'object' || Array.isArray(m)) return null;
     var t = m.t, o = { t: t };

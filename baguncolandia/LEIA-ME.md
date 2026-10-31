@@ -26,6 +26,25 @@ Endereço: `https://solverone.com.br/FeatureTesting/baguncolandia/` (atalho para
 **Música**: em 🎵 Música no celular, cole um link do YouTube (vídeo ou playlist); a TV toca num
 cantinho. Com tempo "🎵 a música", a rodada dura a música inteira.
 
+**Música da sala pelo microfone**: em 🎵 Música, toque em **🎤 Seguir a música da sala** e deixe o celular
+ouvir (ele pede o microfone uma vez). Toque qualquer música em qualquer aparelho: o jogo acelera no ritmo
+e as bordas da TV pulsam na batida. O som não sai do celular.
+
+**Spotify como controle remoto** (precisa de Spotify Premium e de um cadastro seu, uma vez só):
+
+1. Entre em https://developer.spotify.com/dashboard com a sua conta do Spotify e clique em **Create app**.
+2. Preencha: *App name* = `Bagunçolândia`; *App description* = `Controle remoto do jogo de sala`;
+   *Redirect URIs* = `https://solverone.com.br/FeatureTesting/baguncolandia/` (exatamente assim, com a
+   barra no fim) e clique em **Add**; em *Which API/SDKs are you planning to use?* marque **Web API**;
+   aceite os termos e clique em **Save**.
+3. Na tela do app, clique em **Settings** e copie o **Client ID** (uma sequência de letras e números).
+   **Não** use o *Client secret*: o jogo não precisa dele e ele nunca deve ir para o código.
+4. No GitHub, abra o arquivo `baguncolandia/config.js`, clique no lápis ✏️ e cole o Client ID entre as
+   aspas de `spotifyClientId: ''`. Salve (Commit changes).
+5. Pronto: no celular, em 🎵 Música, aparece **🟢 Entrar no Spotify**. Entre, escolha em que aparelho
+   tocar (o app do Spotify precisa estar aberto nele) e uma playlist. A TV mostra o nome da música e o
+   jogo pausa a música no fim da rodada. Ligue também o 🎤 para seguir a batida.
+
 **Só o celular (sem TV)**: na tela inicial, 🎧. O jogo roda no próprio celular, com a câmera frontal.
 
 **Suas imagens**: veja `meus/LEIA-ME.md` para colocar as figuras que você quiser no jogo.
@@ -54,8 +73,10 @@ cantinho. Com tempo "🎵 a música", a rodada dura a música inteira.
 | `sala.js` | pareamento (Supabase broadcast), WebRTC, câmera, visão (diferença entre quadros) |
 | `calibrar.js` | calibração guiada: fundo → silhueta → braços → chute → pulo |
 | `voz.js` / `som.js` | fala (speechSynthesis, regras SolverONE) e sons sintetizados (WebAudio) |
+| `batida.js` | microfone → batida e BPM (sem IA; `estimarBpm` é pura e testada no Node) |
+| `spotify.js` / `config.js` | Spotify como controle remoto (PKCE, sem segredo); `config.js` guarda só o Client ID público |
 | `sw.js` | cache da pasta; `VERSAO` tem de ser igual a `APP_VERSION` |
-| `teste/` | `jogo.test.js` e `figuras.test.js` (Node), `pagina.test.js` (Chromium) |
+| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js` (Chromium) |
 
 Rodar os testes: `node --test baguncolandia/teste/*.test.js` e `node baguncolandia/teste/pagina.test.js`.
 

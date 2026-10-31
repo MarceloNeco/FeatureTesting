@@ -2,6 +2,19 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.3.0",
+      "data": "31/Out/2026",
+      "hora": "05:40:00",
+      "pt": [
+        "🎤 Seguir a música da sala: o celular ouve a batida pelo microfone (Spotify, rádio, caixinha) e o jogo acelera no ritmo; as bordas pulsam na batida. O som não sai do celular.",
+        "🟢 Spotify como controle remoto (Premium): entra com a conta, escolhe o aparelho e a playlist, toca e pausa; a TV mostra a música. Só aparece quando o dono registra o Client ID em config.js."
+      ],
+      "en": [
+        "🎤 Follow the room’s music: the phone hears the beat through the microphone (Spotify, radio, speaker) and the game speeds up to it; the borders pulse on the beat. Audio never leaves the phone.",
+        "🟢 Spotify remote control (Premium): sign in, pick the device and playlist, play and pause; the TV shows the song. Appears only when the owner sets the Client ID in config.js."
+      ]
+    },
+    {
       "versao": "0.2.0",
       "data": "31/Out/2026",
       "hora": "05:10:00",

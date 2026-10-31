@@ -181,7 +181,22 @@
         <div class="hist col" id="plLista" style="gap:6px;margin-top:0;display:none"></div>
         <div class="hist col" id="hist" style="gap:6px;margin-top:0"></div>
         <button class="sec" id="btBuscar" type="button" data-t="🔎 Procurar no YouTube|🔎 Search YouTube"></button>
-        <p class="muted" data-t="Também dá para tocar música em qualquer outro aparelho (Spotify, rádio, caixinha): o jogo segue a batida pelo microfone deste celular (em breve).|You can also play music on any other device (Spotify, radio, speaker): the game follows the beat through this phone’s microphone (soon)."></p>
+        <div class="bloco">
+          <button class="sec" id="btBatida" type="button">🎤 <span data-t="Seguir a música da sala (microfone)|Follow the room’s music (microphone)"></span></button>
+          <div class="nivel" id="nivelBox" style="display:none"><i id="nivel"></i><span id="bpmTxt"></span></div>
+          <p class="muted" data-t="Toque música em qualquer aparelho (Spotify, rádio, caixinha): o celular ouve a batida e o jogo acelera no ritmo. O som não sai daqui.|Play music on any device (Spotify, radio, speaker): the phone hears the beat and the game speeds up to it. The audio never leaves this phone."></p>
+        </div>
+        <div class="bloco" id="spotifyBox" style="display:none">
+          <button class="sec" id="btSpotify" type="button">🟢 <span data-t="Entrar no Spotify (controle remoto)|Sign in to Spotify (remote control)"></span></button>
+          <div id="spotifyDentro" style="display:none" class="col">
+            <div class="linha"><span data-t="Tocar em|Play on"></span><select id="spAparelho"></select></div>
+            <div class="hist col" id="spPlaylists" style="gap:6px;margin-top:0"></div>
+            <div class="row ctl"><button class="sec" id="spAnterior" type="button">⏪</button><button class="sec" id="spPausa" type="button">⏯️</button><button class="sec" id="spProxima" type="button">⏩</button></div>
+            <div class="status" id="spTocando"></div>
+            <button class="sec" id="btSpotifySair" type="button" data-t="Sair do Spotify|Sign out of Spotify"></button>
+          </div>
+          <p class="muted" data-t="Precisa de Spotify Premium. O jogo manda tocar no aparelho que você escolher (celular, caixinha, app da TV) e segue a batida pelo microfone.|Requires Spotify Premium. The game plays on the device you choose (phone, speaker, TV app) and follows the beat through the microphone."></p>
+        </div>
       </div>
     </details>
 
@@ -207,6 +222,9 @@
 <script src="voz.js"></script>
 <script src="som.js"></script>
 <script src="calibrar.js"></script>
+<script src="config.js"></script>
+<script src="batida.js"></script>
+<script src="spotify.js"></script>
 <script src="../recursos.js" data-app="feature-tester"></script>
 <script src="app.js"></script>
 </body>

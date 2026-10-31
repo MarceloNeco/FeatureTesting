@@ -156,6 +156,10 @@ test('validar: aceita mensagens certas e recusa lixo', () => {
   assert.equal(B.validar({ t: 'offer', id: 'abc12345', nome: 'Ana', sdp: { type: 'rollback', sdp: 'v=0' } }), null);
   assert.equal(B.validar({ t: 'cmd', acao: 'apagar-tudo' }), null);
   assert.ok(B.validar({ t: 'cmd', acao: 'comecar', modo: 'corta' }));
+  assert.equal(B.validar({ t: 'cmd', acao: 'musica', texto: 'x'.repeat(500) }).texto.length, 200);
+  assert.equal(B.validar({ t: 'cmd', acao: 'config', ambiente: 'matrix' }).ambiente, 'paisagem');
+  assert.equal(B.validar({ t: 'dados', bpm: 999 }).bpm, 220);
+  assert.deepEqual(B.validar({ t: 'dados', c: [0.1, 0.2, 0.3, 0.4] }).c, { x: 0.1, y: 0.2, w: 0.3, h: 0.4 });
   assert.equal(B.validar('string'), null);
   assert.equal(B.validar({ t: 'join', id: '<script>', nome: 'Ana' }), null);
   const v = B.validar({ t: 'join', id: 'abc12345', nome: '  Ana <b>  ' });

@@ -7,8 +7,8 @@ Situação: 🟡 aberta · 🔵 em andamento · ⏸ aguardando o dono · ✅ fei
 | 1 | Ambiente **Paisagem + boneco**: cenas em SVG (praia, floresta, espaço, cidade) e um personagem da turma que anda, pula, abaixa e levanta os braços seguindo a silhueta da criança (sem IA: caixa do corpo contra o fundo calibrado). Opção "Ambiente: Câmera / Paisagem" no celular. | dono, 31/Out/2026 | ✅ v0.2.0 |
 | 2 | Missão **Pula e abaixa**: obstáculos chegando pelo lado (tronco baixo = pular, galho alto = abaixar), com voz avisando. | dono, 31/Out/2026 | ✅ v0.2.0 |
 | 3 | **Bagunça de bolas**: muitas bolas quicando; encostar vale ponto, bomba tira. | dono, 31/Out/2026 | ✅ v0.2.0 |
-| 4 | Batida pela música da sala (microfone do celular → BPM → velocidade do jogo). | espec. v0.3 | 🟡 |
-| 5 | Spotify como controle remoto (PKCE, Premium; precisa do Client ID do dono em `config.js`). | espec. v0.3 | ⏸ Client ID |
+| 4 | Batida pela música da sala (microfone do celular → BPM → velocidade do jogo). | espec. v0.3 | ✅ v0.3.0 |
+| 5 | Spotify como controle remoto (PKCE, Premium). Código pronto na v0.3.0; só liga quando o dono colar o Client ID em `config.js` (passo a passo no LEIA-ME). | espec. v0.3 | ⏸ Client ID do dono |
 | 6 | Esqueleto por IA (MediaPipe Pose hospedado; baixa só quando a pessoa liga): chute só com o pé, mão esquerda/direita, boneco marionete completo. | espec. v0.4 | 🟡 |
 | 7 | Pareamento 100 % sem internet (hoje o "me acha" inicial usa o Supabase por ~2 s). Ideia: QR na TV com a oferta WebRTC + resposta digitada/QR no celular. | espec. §9 | 🟡 |
 | 8 | Juntar o motor de pareamento com o Dança na Sala num `sala-tv.js` comum (depois que os dois estiverem estáveis). | espec. §2 | 🟡 |
