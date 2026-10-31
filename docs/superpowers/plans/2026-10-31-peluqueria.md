@@ -143,7 +143,7 @@
   - rodada inteira (10 quedas) → `#fim` visível, estrelas e "Jogar de novo";
   - PT→EN troca o texto do `#btJogar` para "Play";
   - em 320×640, `document.documentElement.scrollWidth <= 320`;
-  - **meus/ inválido**: com `page.route('**/meus/cenarios.json', …)` devolvendo `{{{`, a página abre sem erro e `#btMinhas` fica escondido.
+  - **meus/ inválido**: com `page.route('**/meus/cenarios.json', …)` devolvendo um JSON quebrado (três chaves abrindo), a página abre sem erro e `#btMinhas` fica escondido.
   Capturas em `/tmp/peluqueria-*.png` para olhar.
 - [ ] **Step 2: Run** `node peluqueria/teste/pagina.test.js` — Expected: FAIL.
 - [ ] **Step 3: Implement** `desenho.js`, as telas em `app.js`, o CSS (Início com logo em Fredoka com brilho rosa, botões de nível com as três cores, placar no topo, `#btPausa` 44 px no canto, `#btSeguir` 120 px no meio; confete e pulos dentro de `@media (prefers-reduced-motion: no-preference)`).
