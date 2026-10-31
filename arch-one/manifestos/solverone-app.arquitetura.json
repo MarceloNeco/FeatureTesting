@@ -1,0 +1,58 @@
+{
+  "contrato": 1,
+  "app": "solverone-app",
+  "nivel": 1,
+  "nome": { "pt": "SolverONE Lab (conta SolverONE)", "en": "SolverONE Lab (SolverONE account)" },
+  "descricao": {
+    "pt": "Piloto seguro da conta SolverONE: criar conta, entrar (e-mail/senha ou Google), sair, configurações pessoais no Supabase, política de privacidade pública e a Edge Function solverone-ia (voz premium e IA com a chave do dono no servidor). Também guarda os scripts SQL da equipe, acesso e assinaturas. Manifesto da F0 feito à mão.",
+    "en": "Secure pilot of the SolverONE account: sign up, sign in (e-mail/password or Google), sign out, personal settings in Supabase, public privacy policy and the solverone-ia Edge Function (premium voice and AI with the owner's key on the server). Also keeps the team, access and subscription SQL scripts. F0 manifest written by hand."
+  },
+  "versao": "0.1.8",
+  "atualizado": "2026-10-23",
+  "repositorio": { "github": "MarceloNeco/solverone-app", "visibilidade": "privado", "branch": "main" },
+  "hospedagem": { "tipo": "cloudflare-pages", "url": "https://solverone-app.pages.dev/", "protegido_por": ["login-supabase"] },
+  "estado": "alpha",
+  "linguagens": ["html", "css", "js", "sql", "ts"],
+  "interruptores": null,
+  "modulos": [
+    { "id": "conta", "nome": { "pt": "Conta (entrar, criar, sair, Google)", "en": "Account (sign in, sign up, sign out, Google)" }, "arquivos": ["app.js", "index.html", "lab-conta-encerrada.js"], "descricao": { "pt": "Supabase Auth com PKCE; conta encerrada é avisada e sai; encerrar conta / pedir exclusão (LGPD); registro de acessos no login e na saída.", "en": "Supabase Auth with PKCE; closed account is told and signed out; close account / request deletion (LGPD); access log on sign-in and sign-out." } },
+    { "id": "configuracoes", "nome": { "pt": "Configurações pessoais (nome, idioma, tema)", "en": "Personal settings (name, language, theme)" }, "arquivos": ["app.js"] },
+    { "id": "privacidade", "nome": { "pt": "Política de privacidade (página pública)", "en": "Privacy policy (public page)" }, "arquivos": ["privacidade.html", "privacidade.js"] },
+    { "id": "acesso-por-funcao", "nome": { "pt": "Acesso por função e plano (SolverAcesso)", "en": "Access per function and plan (SolverAcesso)" }, "arquivos": ["acesso-planos.js", "servicos.json"], "descricao": { "pt": "Lê servicos/solverone-app.json do RootifyONE; liberado / degustação / bloqueado com ⓘ.", "en": "Reads servicos/solverone-app.json from RootifyONE; allowed / trial / blocked with ⓘ." } },
+    { "id": "voz-e-ia-da-plataforma", "nome": { "pt": "Voz premium e IA da plataforma (Edge Function solverone-ia)", "en": "Premium voice and platform AI (solverone-ia Edge Function)" }, "arquivos": ["supabase/functions/solverone-ia/index.ts"], "descricao": { "pt": "Confere o plano no banco (reservar_uso_servico) antes de gastar a chave corporativa.", "en": "Checks the plan in the database (reservar_uso_servico) before spending the corporate key." } }
+  ],
+  "dados": [
+    { "id": "configuracoes", "nome": { "pt": "Configurações da pessoa", "en": "Person's settings" }, "onde": "supabase", "tabelas": ["user_settings"], "pessoal": true, "sensivel": false, "retencao": { "pt": "RLS: só a própria linha ((select auth.uid()) = user_id); GRANT só para authenticated.", "en": "RLS: own row only ((select auth.uid()) = user_id); GRANT only to authenticated." } },
+    { "id": "equipe-e-acesso", "nome": { "pt": "Equipe, acesso por plano, assinaturas e uso de serviços pagos", "en": "Team, plan access, subscriptions and paid-service usage" }, "onde": "supabase", "tabelas": ["equipe", "pre_liberacoes", "assinaturas", "config_acesso", "acesso_log", "servicos_plataforma", "uso_servicos"], "pessoal": true, "sensivel": false, "retencao": { "pt": "Só funções admin_* (eh_admin_equipe) e funções da própria pessoa (meu_acesso, tem_plano).", "en": "Only admin_* functions (eh_admin_equipe) and the person's own functions (meu_acesso, tem_plano)." } },
+    { "id": "sessao", "nome": { "pt": "Sessão da conta (supabase-js, PKCE)", "en": "Account session (supabase-js, PKCE)" }, "onde": "aparelho", "pessoal": true, "sensivel": false, "retencao": { "pt": "localStorage do navegador; sair apaga; rota de volta em sessionStorage por 30 min.", "en": "browser localStorage; signing out clears it; return route in sessionStorage for 30 min." } }
+  ],
+  "integracoes": [
+    { "id": "supabase-auth", "nome": "Supabase Auth e Data API (publishable key)", "tipo": "supabase", "host": "qvdvkqydhnadhewcidia.supabase.co", "chave": "publica", "onde_chave": "nao-se-aplica", "plano": "gratuito" },
+    { "id": "google-login", "nome": "Login com Google (OAuth pelo Supabase; segredo do cliente só no painel do Supabase)", "tipo": "auth", "chave": "do-servidor", "onde_chave": "secrets-edge-function" },
+    { "id": "edge-solverone-ia", "nome": "Edge Function solverone-ia (SOLVERONE_CHAVE_SERVIDOR, SUPABASE_SERVICE_ROLE_KEY, ORIGENS_EXTRAS nos Secrets)", "tipo": "supabase", "host": "qvdvkqydhnadhewcidia.supabase.co", "chave": "do-servidor", "onde_chave": "secrets-edge-function", "contrato": "PASSO-A-PASSO-VOZ-E-IA-DA-PLATAFORMA.md" },
+    { "id": "elevenlabs", "nome": "ElevenLabs (voz premium, chamada pela Edge Function)", "tipo": "voz", "host": "api.elevenlabs.io", "chave": "do-servidor", "onde_chave": "secrets-edge-function" },
+    { "id": "openai", "nome": "OpenAI (IA da plataforma, chamada pela Edge Function)", "tipo": "ia", "host": "api.openai.com", "chave": "do-servidor", "onde_chave": "secrets-edge-function" },
+    { "id": "gemini", "nome": "Google Gemini (IA da plataforma, chamada pela Edge Function)", "tipo": "ia", "host": "generativelanguage.googleapis.com", "chave": "do-servidor", "onde_chave": "secrets-edge-function" },
+    { "id": "edge-solverone-admin", "nome": "Edge Function solverone-admin (registro de acessos, conta encerrada; código no rootify-one/entrega)", "tipo": "supabase", "host": "qvdvkqydhnadhewcidia.supabase.co", "chave": "do-servidor", "onde_chave": "secrets-edge-function" },
+    { "id": "rootify-dados", "nome": "servicos/solverone-app.json do solverone-dados", "tipo": "plataforma", "host": "solverone.com.br", "chave": "nenhuma", "onde_chave": "nao-se-aplica" },
+    { "id": "cloudflare-pages", "nome": "Cloudflare Pages (deploy a cada push)", "tipo": "cloudflare", "host": "solverone-app.pages.dev", "chave": "nenhuma", "onde_chave": "nao-se-aplica", "plano": "gratuito" }
+  ],
+  "fluxos": [
+    { "id": "entrar", "nome": { "pt": "Entrar na conta", "en": "Sign in" }, "gatilho": { "pt": "tela Entrar (e-mail/senha ou Google)", "en": "Sign-in screen (e-mail/password or Google)" }, "passos": [ { "pt": "supabase-js com PKCE; onAuthStateChange é o ponto único", "en": "supabase-js with PKCE; onAuthStateChange is the single hook" }, { "pt": "LabConta.verificar: conta encerrada avisa e sai", "en": "LabConta.verificar: closed account is told and signed out" }, { "pt": "registrarAcesso pela Edge Function solverone-admin", "en": "registrarAcesso through the solverone-admin Edge Function" }, { "pt": "volta para a tela guardada (Continuando de onde estava)", "en": "returns to the saved screen (Continuing where you were)" } ], "modulos": ["conta"], "dados": ["sessao", "equipe-e-acesso"], "integracoes": ["supabase-auth", "google-login", "edge-solverone-admin"] },
+    { "id": "salvar-configuracoes", "nome": { "pt": "Salvar configurações", "en": "Save settings" }, "gatilho": { "pt": "mudar nome, idioma ou tema", "en": "change name, language or theme" }, "passos": [ { "pt": "upsert em user_settings com user_id da sessão", "en": "upsert into user_settings with the session's user_id" } ], "modulos": ["configuracoes"], "dados": ["configuracoes"], "integracoes": ["supabase-auth"] },
+    { "id": "voz-premium", "nome": { "pt": "Usar voz premium ou IA da plataforma", "en": "Use premium voice or platform AI" }, "gatilho": { "pt": "pedido de um app com a sessão da pessoa", "en": "request from an app with the person's session" }, "passos": [ { "pt": "Edge Function confere origem e sessão", "en": "Edge Function checks origin and session" }, { "pt": "reservar_uso_servico confere plano e cota", "en": "reservar_uso_servico checks plan and quota" }, { "pt": "chama ElevenLabs/OpenAI/Gemini com a chave do servidor; estorna se falhar", "en": "calls ElevenLabs/OpenAI/Gemini with the server key; refunds on failure" } ], "modulos": ["voz-e-ia-da-plataforma"], "dados": ["equipe-e-acesso"], "integracoes": ["edge-solverone-ia", "elevenlabs", "openai", "gemini"] }
+  ],
+  "robos": [],
+  "arquivos_mestre": [
+    { "arquivo": "diretrizes.js", "origem": "rootify-one" },
+    { "arquivo": "acesso-planos.js", "origem": "rootify-one" },
+    { "arquivo": "matrix-fundo.js", "origem": "rootify-one" },
+    { "arquivo": "teste/sql-grants.js", "origem": "rootify-one", "versao": "1.0.1" }
+  ],
+  "dependencias": [
+    { "nome": "@supabase/supabase-js", "versao": "2 (sem versão fixa)", "licenca": "MIT", "como": "cdn" }
+  ],
+  "testes": { "comando": "node teste/sql-grants.js supabase", "arquivos": ["teste/sql-grants.js", "teste/sql-grants-legado.json"] },
+  "documentos": { "arquitetura": "ARQUITETURA.md", "versoes": "versoes.json", "integracao_rootify": "INTEGRACAO-ROOTIFYONE.md", "voz_e_ia": "PASSO-A-PASSO-VOZ-E-IA-DA-PLATAFORMA.md", "sql": "supabase" },
+  "liga_com": ["rootify-one", "solverone-dados"]
+}

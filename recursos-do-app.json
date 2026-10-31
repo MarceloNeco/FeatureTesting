@@ -2,7 +2,29 @@
   "app": "feature-tester",
   "nota": "Interruptores do RootifyONE que este app obedece (data-recurso nas páginas). Nada de segredo aqui.",
   "recursos": [
-    { "id": "danca-na-sala", "nome": { "pt": "Dança na Sala", "en": "Living Room Dance" }, "pagina": "danca-na-sala.html" },
-    { "id": "baguncolandia", "nome": { "pt": "Bagunçolândia (Bolinho de Chuva)", "en": "Mayhemland (Rain Dumpling)" }, "pagina": "baguncolandia/" }
+    {
+      "id": "danca-na-sala",
+      "nome": {
+        "pt": "Dança na Sala",
+        "en": "Living Room Dance"
+      },
+      "pagina": "danca-na-sala.html"
+    },
+    {
+      "id": "baguncolandia",
+      "nome": {
+        "pt": "Bagunçolândia (Bolinho de Chuva)",
+        "en": "Mayhemland (Rain Dumpling)"
+      },
+      "pagina": "baguncolandia/"
+    },
+    {
+      "id": "arch-one",
+      "nome": {
+        "pt": "ArchONE (mapa vivo, protótipo)",
+        "en": "ArchONE (living map, prototype)"
+      },
+      "pagina": "arch-one/"
+    }
   ]
 }

@@ -1,0 +1,720 @@
+{
+  "contrato": 1,
+  "app": "plataforma",
+  "nivel": 0,
+  "nome": {
+    "pt": "Plataforma SolverONE",
+    "en": "SolverONE platform"
+  },
+  "descricao": {
+    "pt": "Nível 0 do mapa vivo: os serviços de nuvem, os repositórios e os apps da SolverONE (solverone.com.br) e como se ligam. Tudo no plano gratuito, salvo o domínio. Este manifesto mora no solverone-dados (F1); na F0 é feito à mão pelo chat Arquitetura.",
+    "en": "Level 0 of the living map: the cloud services, repositories and apps of SolverONE (solverone.com.br) and how they connect. Everything on free plans except the domain. This manifest lives in solverone-dados (F1); in F0 it is written by hand by the Architecture chat."
+  },
+  "versao": "1.0",
+  "atualizado": "2026-10-23",
+  "linguagens": [
+    "html",
+    "css",
+    "js",
+    "sql",
+    "ts",
+    "python",
+    "yaml"
+  ],
+  "servicos": [
+    {
+      "id": "registro-br",
+      "nome": {
+        "pt": "Domínio solverone.com.br (registro.br)",
+        "en": "solverone.com.br domain (registro.br)"
+      },
+      "tipo": "dominio",
+      "fornecedor": "Registro.br (NIC.br)",
+      "plano": "anual pago (domínio .com.br)",
+      "chave": "nenhuma",
+      "onde_chave": "nao-se-aplica",
+      "estado_vivo": {
+        "fonte": "RDAP público (rdap.registro.br/domain/solverone.com.br): expiração, status, servidores de nome"
+      },
+      "limites": {
+        "pt": "Sem API para o titular; só RDAP/WHOIS públicos. Renovação e DNS pelo painel do registro.br.",
+        "en": "No API for the holder; only public RDAP/WHOIS. Renewal and DNS through the registro.br panel."
+      }
+    },
+    {
+      "id": "cloudflare-dns",
+      "nome": {
+        "pt": "DNS e proxy (Cloudflare)",
+        "en": "DNS and proxy (Cloudflare)"
+      },
+      "tipo": "dns",
+      "fornecedor": "Cloudflare",
+      "plano": "gratuito",
+      "chave": "do-servidor",
+      "onde_chave": "secrets-edge-function",
+      "estado_vivo": {
+        "fonte": "API v4: zones/{zone}/dns_records (token com Zone.DNS:Read)"
+      }
+    },
+    {
+      "id": "cloudflare-pages",
+      "nome": {
+        "pt": "Cloudflare Pages (repositórios privados)",
+        "en": "Cloudflare Pages (private repositories)"
+      },
+      "tipo": "hospedagem",
+      "fornecedor": "Cloudflare",
+      "plano": "gratuito",
+      "chave": "do-servidor",
+      "onde_chave": "secrets-edge-function",
+      "estado_vivo": {
+        "fonte": "API v4: accounts/{conta}/pages/projects/{nome}/deployments (último deploy, estado, branch)"
+      }
+    },
+    {
+      "id": "cloudflare-access",
+      "nome": {
+        "pt": "Cloudflare Access (Zero Trust)",
+        "en": "Cloudflare Access (Zero Trust)"
+      },
+      "tipo": "auth",
+      "fornecedor": "Cloudflare",
+      "plano": "gratuito até 50 pessoas",
+      "chave": "do-servidor",
+      "onde_chave": "secrets-edge-function",
+      "estado_vivo": {
+        "fonte": "API v4: accounts/{conta}/access/apps e access/logs/access_requests (24 h de retenção no Free)"
+      }
+    },
+    {
+      "id": "cloudflare-web-analytics",
+      "nome": {
+        "pt": "Cloudflare Web Analytics",
+        "en": "Cloudflare Web Analytics"
+      },
+      "tipo": "monitoramento",
+      "fornecedor": "Cloudflare",
+      "plano": "gratuito",
+      "chave": "do-servidor",
+      "onde_chave": "secrets-edge-function",
+      "estado_vivo": {
+        "fonte": "GraphQL Analytics API (rumPageloadEventsAdaptiveGroups): visitas e tempo de carga por site"
+      }
+    },
+    {
+      "id": "github",
+      "nome": {
+        "pt": "GitHub (repositórios, PRs, Actions)",
+        "en": "GitHub (repositories, PRs, Actions)"
+      },
+      "tipo": "repositorios",
+      "fornecedor": "GitHub",
+      "plano": "gratuito (GitHub Free)",
+      "chave": "do-servidor",
+      "onde_chave": "secrets-edge-function",
+      "estado_vivo": {
+        "fonte": "REST API: commits, pulls, actions/runs, releases, pages, dependabot/alerts (token fine-grained só de leitura)"
+      }
+    },
+    {
+      "id": "github-pages",
+      "nome": {
+        "pt": "GitHub Pages (repositórios públicos, solverone.com.br)",
+        "en": "GitHub Pages (public repositories, solverone.com.br)"
+      },
+      "tipo": "hospedagem",
+      "fornecedor": "GitHub",
+      "plano": "gratuito (só repositório público)",
+      "chave": "nenhuma",
+      "onde_chave": "nao-se-aplica",
+      "estado_vivo": {
+        "fonte": "REST API: repos/{dono}/{repo}/pages e pages/builds/latest; robô de disponibilidade (HTTP e tempo)"
+      }
+    },
+    {
+      "id": "github-actions",
+      "nome": {
+        "pt": "GitHub Actions (robôs)",
+        "en": "GitHub Actions (robots)"
+      },
+      "tipo": "robos",
+      "fornecedor": "GitHub",
+      "plano": "gratuito (ilimitado em público; 2.000 min/mês em privado)",
+      "chave": "do-servidor",
+      "onde_chave": "secrets-actions",
+      "estado_vivo": {
+        "fonte": "REST API: actions/workflows e actions/runs (último resultado de cada robô)"
+      }
+    },
+    {
+      "id": "supabase",
+      "nome": {
+        "pt": "Supabase: banco Postgres (projeto solverone-app, São Paulo)",
+        "en": "Supabase: Postgres database (solverone-app project, São Paulo)"
+      },
+      "tipo": "banco",
+      "fornecedor": "Supabase",
+      "plano": "gratuito (Free)",
+      "chave": "do-servidor",
+      "onde_chave": "secrets-edge-function",
+      "estado_vivo": {
+        "fonte": "Management API (token pessoal com escopo de leitura nos Secrets; 120 req/min): projects/{ref} (status, INACTIVE = pausado), /health, /database/query/read-only nos catálogos (tabelas, RLS, grants, tamanho por pg_total_relation_size), /functions, /config/auth"
+      },
+      "limites": {
+        "pt": "500 MB de banco, pausa após 7 dias sem uso (robô Manter o banco acordado), 2 projetos ativos.",
+        "en": "500 MB database, pause after 7 idle days (Keep the database awake robot), 2 active projects."
+      }
+    },
+    {
+      "id": "supabase-auth",
+      "nome": {
+        "pt": "Supabase Auth (conta SolverONE, e-mail/senha e Google)",
+        "en": "Supabase Auth (SolverONE account, e-mail/password and Google)"
+      },
+      "tipo": "auth",
+      "fornecedor": "Supabase",
+      "plano": "gratuito (50.000 usuários ativos/mês)",
+      "chave": "publica",
+      "onde_chave": "nao-se-aplica",
+      "estado_vivo": {
+        "fonte": "Management API: config/auth (provedores ligados, URLs de retorno)"
+      }
+    },
+    {
+      "id": "supabase-storage",
+      "nome": {
+        "pt": "Supabase Storage (anexos de feedback, arquivos dos apps)",
+        "en": "Supabase Storage (feedback attachments, app files)"
+      },
+      "tipo": "storage",
+      "fornecedor": "Supabase",
+      "plano": "gratuito (1 GB)",
+      "chave": "publica",
+      "onde_chave": "nao-se-aplica",
+      "estado_vivo": {
+        "fonte": "Management API: database/query em storage.objects (tamanho por bucket)"
+      }
+    },
+    {
+      "id": "supabase-funcoes",
+      "nome": {
+        "pt": "Supabase Edge Functions (solverone-ia, solverone-admin e, na F2, sol_mapa)",
+        "en": "Supabase Edge Functions (solverone-ia, solverone-admin and, in F2, sol_mapa)"
+      },
+      "tipo": "funcoes",
+      "fornecedor": "Supabase",
+      "plano": "gratuito (500.000 chamadas/mês)",
+      "chave": "do-servidor",
+      "onde_chave": "secrets-edge-function",
+      "estado_vivo": {
+        "fonte": "Management API: projects/{ref}/functions (lista, versão, status) e secrets (só nomes)"
+      }
+    },
+    {
+      "id": "improvmx",
+      "nome": {
+        "pt": "ImprovMX (recebe e encaminha e-mail @solverone.com.br)",
+        "en": "ImprovMX (receives and forwards @solverone.com.br e-mail)"
+      },
+      "tipo": "email-recebimento",
+      "fornecedor": "ImprovMX",
+      "plano": "gratuito",
+      "chave": "do-servidor",
+      "onde_chave": "secrets-edge-function",
+      "estado_vivo": {
+        "fonte": "API v4 (incluída no Free, chave Basic api:CHAVE nos Secrets): /domains/:d (forwarding_ready), /domains/:d/verify (MX, SPF, DKIM, DMARC), /aliases, /logs (7 dias)"
+      },
+      "limites": {
+        "pt": "Free: 1 domínio, 25 apelidos, 500 encaminhamentos/dia, logs de 7 dias, 30 requisições/min por endpoint; envio e lote só nos planos pagos.",
+        "en": "Free: 1 domain, 25 aliases, 500 forwards/day, 7-day logs, 30 requests/min per endpoint; sending and batch only on paid plans."
+      }
+    },
+    {
+      "id": "resend",
+      "nome": {
+        "pt": "Resend (envia e-mail @solverone.com.br)",
+        "en": "Resend (sends @solverone.com.br e-mail)"
+      },
+      "tipo": "email-envio",
+      "fornecedor": "Resend",
+      "plano": "gratuito (3.000 e-mails/mês, 100/dia, 3 domínios, 30 dias de retenção)",
+      "chave": "do-servidor",
+      "onde_chave": "secrets-edge-function",
+      "estado_vivo": {
+        "fonte": "API (chave full_access nos Secrets, User-Agent obrigatório): /domains e /domains/{id} (status e registros DNS), /emails (enviados), /emails/{id} (last_event); webhooks de entrega e devolução (1 no Free)"
+      },
+      "limites": {
+        "pt": "10 requisições/s por time; leitura exige chave full_access (a sending_access só envia).",
+        "en": "10 requests/s per team; reading requires a full_access key (sending_access only sends)."
+      }
+    },
+    {
+      "id": "solverone-dados",
+      "nome": {
+        "pt": "solverone-dados (arquivos mestre publicados pelo RootifyONE; manifestos na F1)",
+        "en": "solverone-dados (master files published by RootifyONE; manifests in F1)"
+      },
+      "tipo": "dados-publicados",
+      "fornecedor": "GitHub Pages",
+      "plano": "gratuito",
+      "chave": "nenhuma",
+      "onde_chave": "nao-se-aplica",
+      "estado_vivo": {
+        "fonte": "os próprios JSON (apps.json, recursos/, arquitetura/<app>.json) e o histórico de commits"
+      }
+    },
+    {
+      "id": "ia-externa",
+      "nome": {
+        "pt": "Provedores de IA (Gemini, OpenAI, Anthropic, OpenRouter, Groq, Mistral) com a chave da pessoa",
+        "en": "AI providers (Gemini, OpenAI, Anthropic, OpenRouter, Groq, Mistral) with the person's key"
+      },
+      "tipo": "ia",
+      "fornecedor": "vários",
+      "plano": "da pessoa (grátis ou pago, conta dela)",
+      "chave": "da-pessoa",
+      "onde_chave": "cofre",
+      "limites": {
+        "pt": "A plataforma não vê a chave nem o consumo; o que dá para contar, com consentimento, é número de chamadas por app (sol_app_uso).",
+        "en": "The platform sees neither the key nor the usage; what can be counted, with consent, is calls per app (sol_app_uso)."
+      }
+    },
+    {
+      "id": "voz-externa",
+      "nome": {
+        "pt": "Voz (ElevenLabs, Deepgram, AssemblyAI) com a chave da pessoa",
+        "en": "Voice (ElevenLabs, Deepgram, AssemblyAI) with the person's key"
+      },
+      "tipo": "api-externa",
+      "fornecedor": "vários",
+      "plano": "da pessoa",
+      "chave": "da-pessoa",
+      "onde_chave": "cofre"
+    },
+    {
+      "id": "dados-abertos",
+      "nome": {
+        "pt": "APIs públicas sem chave (Câmara e Senado, Open Food Facts, OpenStreetMap, ViaCEP)",
+        "en": "Public APIs without key (Chamber and Senate, Open Food Facts, OpenStreetMap, ViaCEP)"
+      },
+      "tipo": "api-externa",
+      "fornecedor": "vários",
+      "plano": "gratuito",
+      "chave": "nenhuma",
+      "onde_chave": "nao-se-aplica"
+    }
+  ],
+  "apps": [
+    {
+      "app": "portal",
+      "repositorio": "MarceloNeco/marceloneco.github.io",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/",
+      "manifesto": null,
+      "estado": "beta",
+      "nome": {
+        "pt": "Portal de Projetos",
+        "en": "Projects Portal"
+      }
+    },
+    {
+      "app": "rootify-one",
+      "repositorio": "MarceloNeco/rootify-one",
+      "visibilidade": "privado",
+      "hospedagem": "cloudflare-pages",
+      "url": "https://rootify-one.pages.dev/",
+      "manifesto": "arquitetura.json",
+      "estado": "alpha",
+      "nome": {
+        "pt": "RootifyONE",
+        "en": "RootifyONE"
+      }
+    },
+    {
+      "app": "solverone-app",
+      "repositorio": "MarceloNeco/solverone-app",
+      "visibilidade": "privado",
+      "hospedagem": "cloudflare-pages",
+      "url": "https://solverone-app.pages.dev/",
+      "manifesto": "arquitetura.json",
+      "estado": "alpha",
+      "nome": {
+        "pt": "SolverONE Lab",
+        "en": "SolverONE Lab"
+      }
+    },
+    {
+      "app": "solverone-dados",
+      "repositorio": "MarceloNeco/solverone-dados",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/solverone-dados/",
+      "manifesto": null,
+      "estado": "producao",
+      "nome": {
+        "pt": "solverone-dados",
+        "en": "solverone-dados"
+      }
+    },
+    {
+      "app": "omnilife-one",
+      "repositorio": "MarceloNeco/omnilife-one",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/omnilife-one/",
+      "manifesto": "arquitetura.json",
+      "estado": "beta",
+      "nome": {
+        "pt": "OmniLifeONE",
+        "en": "OmniLifeONE"
+      }
+    },
+    {
+      "app": "moneytrio",
+      "repositorio": "MarceloNeco/investify-me",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/investify-me/",
+      "manifesto": null,
+      "estado": "beta",
+      "nome": {
+        "pt": "MoneyTRIO",
+        "en": "MoneyTRIO"
+      }
+    },
+    {
+      "app": "rise-one",
+      "repositorio": "MarceloNeco/rise-one",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/rise-one/",
+      "manifesto": null,
+      "estado": "beta",
+      "nome": {
+        "pt": "RiseONE",
+        "en": "RiseONE"
+      }
+    },
+    {
+      "app": "eleicoes-2026",
+      "repositorio": "MarceloNeco/planos-candidatos-2026",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/planos-candidatos-2026/",
+      "manifesto": null,
+      "estado": "beta",
+      "nome": {
+        "pt": "Eleições 2026",
+        "en": "Elections 2026"
+      }
+    },
+    {
+      "app": "contador-de-historias",
+      "repositorio": "MarceloNeco/contador-de-historias",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/contador-de-historias/",
+      "manifesto": null,
+      "estado": "beta",
+      "nome": {
+        "pt": "Contador de Histórias",
+        "en": "Story Teller"
+      }
+    },
+    {
+      "app": "cifras-violao",
+      "repositorio": "MarceloNeco/cifras-violao",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/cifras-violao/",
+      "manifesto": null,
+      "estado": "beta",
+      "nome": {
+        "pt": "CifrasONE",
+        "en": "CifrasONE"
+      }
+    },
+    {
+      "app": "hypernutry",
+      "repositorio": "MarceloNeco/hypernutry",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/hypernutry/",
+      "manifesto": null,
+      "estado": "alpha",
+      "nome": {
+        "pt": "HyperNutry",
+        "en": "HyperNutry"
+      }
+    },
+    {
+      "app": "leitor-ocr",
+      "repositorio": "MarceloNeco/leitor-ocr",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/leitor-ocr/",
+      "manifesto": null,
+      "estado": "beta",
+      "nome": {
+        "pt": "Leitor OCR",
+        "en": "OCR Reader"
+      }
+    },
+    {
+      "app": "feature-tester",
+      "repositorio": "MarceloNeco/FeatureTesting",
+      "visibilidade": "publico",
+      "hospedagem": "github-pages",
+      "url": "https://solverone.com.br/FeatureTesting/",
+      "manifesto": null,
+      "estado": "beta",
+      "nome": {
+        "pt": "Feature Tester",
+        "en": "Feature Tester"
+      }
+    }
+  ],
+  "ligacoes": [
+    {
+      "de": "registro-br",
+      "para": "cloudflare-dns",
+      "tipo": "resolve"
+    },
+    {
+      "de": "cloudflare-dns",
+      "para": "github-pages",
+      "tipo": "resolve"
+    },
+    {
+      "de": "cloudflare-dns",
+      "para": "improvmx",
+      "tipo": "resolve"
+    },
+    {
+      "de": "cloudflare-dns",
+      "para": "resend",
+      "tipo": "resolve"
+    },
+    {
+      "de": "cloudflare-access",
+      "para": "cloudflare-pages",
+      "tipo": "autentica"
+    },
+    {
+      "de": "cloudflare-pages",
+      "para": "rootify-one",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "cloudflare-pages",
+      "para": "solverone-app",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "portal",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "solverone-dados",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "omnilife-one",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "moneytrio",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "rise-one",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "eleicoes-2026",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "contador-de-historias",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "cifras-violao",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "hypernutry",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "leitor-ocr",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github-pages",
+      "para": "feature-tester",
+      "tipo": "hospeda"
+    },
+    {
+      "de": "github",
+      "para": "github-pages",
+      "tipo": "publica-em"
+    },
+    {
+      "de": "github",
+      "para": "cloudflare-pages",
+      "tipo": "publica-em"
+    },
+    {
+      "de": "github-actions",
+      "para": "supabase",
+      "tipo": "chama"
+    },
+    {
+      "de": "github-actions",
+      "para": "eleicoes-2026",
+      "tipo": "escreve"
+    },
+    {
+      "de": "rootify-one",
+      "para": "solverone-dados",
+      "tipo": "escreve"
+    },
+    {
+      "de": "rootify-one",
+      "para": "supabase",
+      "tipo": "le"
+    },
+    {
+      "de": "rootify-one",
+      "para": "supabase-funcoes",
+      "tipo": "chama"
+    },
+    {
+      "de": "solverone-app",
+      "para": "supabase-auth",
+      "tipo": "autentica"
+    },
+    {
+      "de": "solverone-app",
+      "para": "supabase",
+      "tipo": "escreve"
+    },
+    {
+      "de": "solverone-app",
+      "para": "supabase-funcoes",
+      "tipo": "chama"
+    },
+    {
+      "de": "supabase-funcoes",
+      "para": "ia-externa",
+      "tipo": "chama"
+    },
+    {
+      "de": "supabase-funcoes",
+      "para": "voz-externa",
+      "tipo": "chama"
+    },
+    {
+      "de": "omnilife-one",
+      "para": "supabase",
+      "tipo": "escreve"
+    },
+    {
+      "de": "omnilife-one",
+      "para": "supabase-auth",
+      "tipo": "autentica"
+    },
+    {
+      "de": "omnilife-one",
+      "para": "solverone-dados",
+      "tipo": "le"
+    },
+    {
+      "de": "omnilife-one",
+      "para": "ia-externa",
+      "tipo": "chama"
+    },
+    {
+      "de": "omnilife-one",
+      "para": "voz-externa",
+      "tipo": "chama"
+    },
+    {
+      "de": "omnilife-one",
+      "para": "dados-abertos",
+      "tipo": "le"
+    },
+    {
+      "de": "contador-de-historias",
+      "para": "solverone-dados",
+      "tipo": "le"
+    },
+    {
+      "de": "contador-de-historias",
+      "para": "ia-externa",
+      "tipo": "chama"
+    },
+    {
+      "de": "rise-one",
+      "para": "solverone-dados",
+      "tipo": "le"
+    },
+    {
+      "de": "moneytrio",
+      "para": "solverone-dados",
+      "tipo": "le"
+    },
+    {
+      "de": "cifras-violao",
+      "para": "solverone-dados",
+      "tipo": "le"
+    },
+    {
+      "de": "eleicoes-2026",
+      "para": "solverone-dados",
+      "tipo": "le"
+    },
+    {
+      "de": "eleicoes-2026",
+      "para": "dados-abertos",
+      "tipo": "le"
+    },
+    {
+      "de": "hypernutry",
+      "para": "solverone-dados",
+      "tipo": "le"
+    },
+    {
+      "de": "hypernutry",
+      "para": "dados-abertos",
+      "tipo": "le"
+    },
+    {
+      "de": "portal",
+      "para": "solverone-dados",
+      "tipo": "le"
+    },
+    {
+      "de": "rootify-one",
+      "para": "resend",
+      "tipo": "envia"
+    },
+    {
+      "de": "cloudflare-web-analytics",
+      "para": "github-pages",
+      "tipo": "depende"
+    }
+  ]
+}
