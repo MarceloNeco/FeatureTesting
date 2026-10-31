@@ -2,6 +2,23 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.3",
+      "data": "31/Out/2026",
+      "hora": "13:44:00",
+      "pt": [
+        "Boneco sem cabeça corrigido: quando a cabeça escolhida era um personagem da turma (Lili Limão, Bolinho de Chuva…), o desenho dava erro e a prévia do celular morria, parando de seguir qualquer escolha (roupa, cor, cabelo). Mesmo erro deixava o boneco sem cabeça na TV.",
+        "Prévia do boneco nunca mais trava: se algo falhar, mostra o erro em vermelho dentro do quadro e continua.",
+        "Modo \"só o celular\": ao começar, a barra de baixo some inteira (nada tampando o jogo); fica só um ⏸ pequeno no canto, embaixo do ✕, em pé ou deitado.",
+        "Teste novo que desenha todas as cabeças (turma incluída) com todas as roupas, acessórios e cabelos."
+      ],
+      "en": [
+        "Headless avatar fixed: a crew-character head (Lili Limão, Bolinho de Chuva…) crashed the drawing, killing the phone preview so it ignored every choice. The same bug left the TV avatar headless.",
+        "The avatar preview never dies again: on failure it shows the error in red inside the frame and keeps going.",
+        "Phone-only mode: on start the bottom bar disappears entirely; only a small ⏸ stays in the corner under ✕, portrait or landscape.",
+        "New test drawing every head (crew included) with every outfit, accessory and hairstyle."
+      ]
+    },
+    {
       "versao": "0.8.2",
       "data": "31/Out/2026",
       "hora": "12:01:00",
