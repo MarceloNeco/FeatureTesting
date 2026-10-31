@@ -160,13 +160,18 @@
       ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex - s * R * 0.03, ey - R * 0.05, R * 0.05, 0, 6.2832); ctx.fill();
       if (menina || tipo === 'elfo') { ctx.strokeStyle = ESCURO; ctx.lineWidth = R * 0.03; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(ex + s * R * 0.16, ey - R * 0.18); ctx.lineTo(ex + s * R * 0.26, ey - R * 0.26); ctx.moveTo(ex + s * R * 0.06, ey - R * 0.22); ctx.lineTo(ex + s * R * 0.1, ey - R * 0.32); ctx.stroke(); }
     });
-    // sobrancelhas
-    ctx.strokeStyle = tom(cfg.corCabelo, 0.85); ctx.lineWidth = R * 0.05; ctx.lineCap = 'round';
+    // sobrancelhas: finas e arqueadas na menina, grossas e retas no menino
+    ctx.strokeStyle = tom(cfg.corCabelo, 0.85); ctx.lineWidth = menina ? R * 0.035 : (tipo === 'menino' ? R * 0.085 : R * 0.05); ctx.lineCap = 'round';
     [-1, 1].forEach(function (s) { ctx.beginPath(); ctx.moveTo(s * R * 0.2, -R * 0.3); ctx.quadraticCurveTo(s * R * 0.38, -R * 0.38, s * R * 0.52, -R * 0.3); ctx.stroke(); });
     // nariz e boca
     ctx.strokeStyle = tom(cfg.pele, 0.7); ctx.lineWidth = R * 0.04; ctx.beginPath(); ctx.moveTo(0, R * 0.2); ctx.quadraticCurveTo(R * 0.06, R * 0.3, -R * 0.02, R * 0.32); ctx.stroke();
-    ctx.strokeStyle = '#8b3a4a'; ctx.lineWidth = R * 0.05; ctx.beginPath(); ctx.moveTo(-R * 0.22, R * 0.52); ctx.quadraticCurveTo(0, R * 0.72, R * 0.22, R * 0.52); ctx.stroke();
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-R * 0.14, R * 0.56); ctx.quadraticCurveTo(0, R * 0.66, R * 0.14, R * 0.56); ctx.closePath(); ctx.fill();
+    if (menina) {   // boquinha rosa em coração
+      ctx.fillStyle = '#ff5c8a'; ctx.beginPath(); ctx.moveTo(-R * 0.2, R * 0.5); ctx.quadraticCurveTo(-R * 0.1, R * 0.42, 0, R * 0.5); ctx.quadraticCurveTo(R * 0.1, R * 0.42, R * 0.2, R * 0.5); ctx.quadraticCurveTo(0, R * 0.78, -R * 0.2, R * 0.5); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-R * 0.1, R * 0.52); ctx.quadraticCurveTo(0, R * 0.6, R * 0.1, R * 0.52); ctx.closePath(); ctx.fill();
+    } else {   // sorriso aberto com dentinhos
+      ctx.strokeStyle = '#8b3a4a'; ctx.lineWidth = R * 0.05; ctx.beginPath(); ctx.moveTo(-R * 0.22, R * 0.52); ctx.quadraticCurveTo(0, R * 0.72, R * 0.22, R * 0.52); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-R * 0.14, R * 0.56); ctx.quadraticCurveTo(0, R * 0.66, R * 0.14, R * 0.56); ctx.closePath(); ctx.fill();
+    }
     // sardas no hobbit, barba no mago
     if (tipo === 'hobbit') { ctx.fillStyle = tom(cfg.pele, 0.75); [[-0.55, 0.32], [-0.45, 0.4], [-0.62, 0.42], [0.55, 0.32], [0.45, 0.4], [0.62, 0.42]].forEach(function (p) { ctx.beginPath(); ctx.arc(p[0] * R, p[1] * R, R * 0.025, 0, 6.2832); ctx.fill(); }); }
     if (tipo === 'mago') { ctx.fillStyle = '#eceff1'; ctx.beginPath(); ctx.moveTo(-R * 0.6, R * 0.35); ctx.quadraticCurveTo(-R * 0.5, R * 1.3, 0, R * 1.55); ctx.quadraticCurveTo(R * 0.5, R * 1.3, R * 0.6, R * 0.35); ctx.quadraticCurveTo(0, R * 0.75, -R * 0.6, R * 0.35); ctx.fill(); ctx.fillStyle = '#cfd8dc'; ctx.beginPath(); ctx.ellipse(0, R * 0.46, R * 0.3, R * 0.1, 0, 0, 6.2832); ctx.fill(); }

@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.5', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.8.6', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -562,7 +562,15 @@
       var prev = document.createElement('div'); prev.className = 'previa'; var cv = document.createElement('canvas'); cv.width = 300; cv.height = 400; prev.appendChild(cv); container.appendChild(prev);
       var quem = linha(T('Quem', 'Who')); grupo(quem, [{ v: 0, t: T('Boneco 1', 'Avatar 1') }, { v: 1, t: T('Boneco 2', 'Avatar 2') }], function () { return cel.quem; }, function (v) { cel.quem = v; montarPicker(container); }, 'grupo quem');
       var atual = function () { return cel.bonecos[cel.quem]; };
-      function muda(k, v) { atual()[k] = v; guardarBonecos(); mandarBonecos(); if (k === 'cabeca') atualizarCabecas(); }
+      function muda(k, v) {
+        atual()[k] = v;
+        // escolher Menina/Menino troca o cabelo para um que combine (dá para mudar depois)
+        var cb = atual().cabelo, feminino = ['longo', 'trancas', 'coque', 'maria', 'cacheado'];
+        if (k === 'cabeca' && v === 'menina' && feminino.indexOf(cb) < 0) atual().cabelo = 'longo';
+        if (k === 'cabeca' && v === 'menino' && feminino.indexOf(cb) >= 0) atual().cabelo = 'curto';
+        guardarBonecos(); mandarBonecos();
+        if (k === 'cabeca') { var y = window.scrollY; montarPicker(container); window.scrollTo(0, y); }
+      }
       var cab = linha(T('Cabeça', 'Head')); var cabs = document.createElement('div'); cabs.className = 'cabecas'; cab.appendChild(cabs);
       var cabecasHumanas = Boneco.CABECAS.map(function (id) { return { id: id, humana: true, nome: NOMES_CABECA[id] }; });
       var cabecasTurma = Figuras.lista().filter(function (f) { return f.papel === 'heroi'; }).map(function (f) { return { id: f.id, fig: f, nome: [f.nome.pt, f.nome.en] }; });
@@ -673,5 +681,5 @@
   $('tvSair').onclick = function () { TVApp.sairLocal(); if (CelApp.cel.streamLocal) CelApp.cel.streamLocal.getTracks().forEach(function (t) { t.stop(); }); tela('inicio'); };
   if (/[?&]tv=auto\b/.test(location.search)) TVApp.iniciar({ gesto: false });   // casca da LG: já entra como TV
   else if (/[?&]tv\b/.test(location.search)) $('btTV').focus();
-  if (TESTE) { window.BaguncaApp = { TVApp: TVApp, CelApp: CelApp, Bagunca: Bagunca, Figuras: Figuras }; }
+  if (TESTE) { window.BaguncaApp = { TVApp: TVApp, CelApp: CelApp, Bagunca: Bagunca, Figuras: Figuras, Boneco: Boneco }; }
 })();

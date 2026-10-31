@@ -161,11 +161,18 @@ function ok(msg) { console.log('✓ ' + msg); }
   if (picker.cabecas >= 15 && picker.meninas >= 5 && picker.largura <= 320) ok('👗 Meu boneco: ' + picker.cabecas + ' cabeças (' + picker.meninas + ' meninas), sem rolagem lateral'); else falhou('picker: ' + JSON.stringify(picker));
   // v0.8.3: a prévia tem que seguir a escolha, inclusive cabeça da turma (antes dava erro e a prévia morria sem cabeça)
   const pixelsCabeca = async () => cel.evaluate(() => { const cv = document.querySelector('#bonecoEntrar canvas'); const d = cv.getContext('2d').getImageData(0, 0, cv.width, Math.round(cv.height * 0.45)).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 40) n++; return n; });
-  const botoesCabeca = await cel.$$('#bonecoEntrar .cabecas button'); await botoesCabeca[botoesCabeca.length - 1].click(); await cel.waitForTimeout(400);
+  await cel.click('#bonecoEntrar .cabecas button:last-child'); await cel.waitForTimeout(400);   // o picker se remonta ao trocar a cabeça: buscar de novo a cada clique
   const n1 = await pixelsCabeca();
-  await botoesCabeca[0].click(); await cel.waitForTimeout(400);
+  await cel.click('#bonecoEntrar .cabecas button:first-child'); await cel.waitForTimeout(400);
   const n2 = await pixelsCabeca();
   if (n1 > 2000 && n2 > 2000) ok('prévia do boneco com cabeça (turma e menino), e muda ao escolher'); else falhou('prévia sem cabeça: ' + n1 + ' / ' + n2);
+  // v0.8.6: Menino e Menina são rostos diferentes mesmo com o mesmo cabelo; escolher Menina põe cabelo longo
+  const dif = await cel.evaluate(() => { const B = window.BaguncaApp.Boneco; const desenha = (cab) => { const c = document.createElement('canvas'); c.width = c.height = 200; const x = c.getContext('2d'); x.translate(100, 110); B.cabeca(x, { cabeca: cab, cabelo: 'espetado', corCabelo: '#4fc3f7', pele: '#8d5524' }, 120, 0); return x.getImageData(0, 0, 200, 200).data; }; const a = desenha('menino'), b = desenha('menina'); let n = 0; for (let i = 0; i < a.length; i += 4) if (Math.abs(a[i] - b[i]) + Math.abs(a[i + 1] - b[i + 1]) + Math.abs(a[i + 2] - b[i + 2]) > 60) n++; return n; });
+  if (dif > 300) ok('menino e menina têm rostos diferentes (' + dif + ' px)'); else falhou('menino e menina iguais: ' + dif + ' px');
+  await cel.evaluate(() => { window.BaguncaApp.CelApp.cel.bonecos[0].cabelo = 'espetado'; });
+  await cel.click('#bonecoEntrar .cabecas button:nth-child(2)'); await cel.waitForTimeout(300);
+  const cabeloMenina = await cel.evaluate(() => window.BaguncaApp.CelApp.cel.bonecos[0].cabelo);
+  if (cabeloMenina === 'longo') ok('escolher Menina troca o cabelo para longo'); else falhou('cabelo depois de Menina: ' + cabeloMenina);
   await cel.click('#bonecoEntrar .grupo button:nth-child(2)'); await cel.waitForTimeout(300);   // vestido
   await cel.screenshot({ path: '/tmp/pagina-cel-entrar.png', fullPage: true });
   await cel.evaluate(() => { document.getElementById('entrar').classList.remove('ativa'); document.getElementById('jogo').classList.add('ativa'); });
