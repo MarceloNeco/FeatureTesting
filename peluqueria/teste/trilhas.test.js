@@ -121,3 +121,30 @@ test('virada a cada 4 compassos e subida de tom no último refrão', () => {
     assert.equal(M.partitura(f, r).tom, f.tom);
   }
 });
+
+/* abertura especial (pedido do dono, 0.2.1): rock elétrico rápido, guitarra de semicolcheias com nota pedal */
+const A = M.ABERTURA;
+const abSecao = nome => { let n = 0; for (const [s, q] of M.ESTRUTURA_ABERTURA) { if (s === nome) return n; n += q; } };
+test('abertura: rápida, com riff de guitarra em todas as semicolcheias', () => {
+  assert.ok(A && A.bpm >= 132, 'bpm');
+  const g = M.abertura(abSecao('riff')).eventos.filter(e => e.tipo === 'guitarra');
+  assert.equal(new Set(g.map(e => e.t)).size, 16);
+});
+test('abertura: riff com várias notas diferentes e na escala', () => {
+  const notas = new Set(), esc = M.escala(A);
+  for (let c = 0; c < M.compassosAbertura(); c++) { const p = M.abertura(c); for (const e of p.eventos) if (e.tipo === 'guitarra' || e.tipo === 'lead') { assert.ok(esc.includes(((e.nota - p.tom) % 12 + 12) % 12), 'fora da escala ' + e.nota); notas.add(e.nota); } }
+  assert.ok(notas.size >= 10, 'só ' + notas.size + ' notas');
+  const r = abSecao('riff'), barras = [0, 1, 2, 3].map(k => M.abertura(r + k).eventos.filter(e => e.tipo === 'guitarra').map(e => e.nota).join(','));
+  assert.equal(new Set(barras).size, 4, 'os 4 compassos do riff são iguais');
+});
+test('abertura: começa só com a guitarra e explode com bateria de rock, acordes e melodia', () => {
+  const t0 = new Set(M.abertura(abSecao('riff')).eventos.map(e => e.tipo));
+  assert.ok(!t0.has('bumbo') && t0.has('riser'));
+  const tudo = new Set(M.abertura(abSecao('tudo')).eventos.map(e => e.tipo));
+  for (const k of ['bumbo', 'caixa', 'crash', 'guitarra', 'power', 'lead', 'baixo']) assert.ok(tudo.has(k), 'tudo sem ' + k);
+  assert.ok(M.abertura(abSecao('entrada') + 3).eventos.some(e => e.tipo === 'tom'), 'sem virada de tons');
+});
+test('abertura toca em laço', () => {
+  assert.equal(M.proximaAbertura(M.compassosAbertura() - 1), 0);
+  assert.equal(M.proximaAbertura(0), 1);
+});

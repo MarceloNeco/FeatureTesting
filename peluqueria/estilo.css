@@ -13,7 +13,7 @@ button:focus-visible { outline: 3px solid var(--lima); outline-offset: 3px; }
 
 #inicio, #fim, #desligado { flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 16px calc(24px + env(safe-area-inset-bottom)); text-align: center; }
 .faixa { position: absolute; top: calc(8px + env(safe-area-inset-top)); right: 8px; display: flex; gap: 6px; }
-.mini { background: rgba(255,255,255,.08); border-radius: 12px; font-size: 1.1rem; padding: 0 10px; }
+.mini { background: rgba(26,20,70,.85); border-radius: 12px; font-size: 1.1rem; padding: 0 10px; }
 .logo { font-size: clamp(2.6rem, 13vw, 5rem); font-weight: 700; letter-spacing: .5px; color: #fff; text-shadow: 0 0 18px var(--rosa), 0 4px 0 #8a1f5c; }
 .sub { color: var(--muted); font-size: 1.05rem; margin-top: -8px; }
 .ajuda { max-width: 420px; background: var(--card); border-radius: 16px; padding: 14px; color: var(--text); line-height: 1.45; }
@@ -49,6 +49,42 @@ button:focus-visible { outline: 3px solid var(--lima); outline-offset: 3px; }
 
 html.tv { font-size: 150%; }
 html.tv button:focus { outline: 4px solid var(--lima); outline-offset: 4px; }
+
+/* ---------- abertura com luz e movimento (v0.3.0) ---------- */
+#inicio { position: relative; overflow: hidden; isolation: isolate; }
+#inicio > :not(.luzes):not(.flutuantes):not(.faixa) { position: relative; z-index: 2; }
+#inicio > .faixa { z-index: 3; }
+.luzes, .flutuantes { position: absolute; inset: 0; pointer-events: none; }
+.luzes { z-index: 0; }
+.flutuantes { z-index: 1; }
+.feixe { position: absolute; bottom: -8%; width: 120vmax; height: 120vmax; margin-left: -60vmax; transform-origin: 50% 100%; mix-blend-mode: screen; opacity: .9; }
+.feixe.a { left: 12%; background: conic-gradient(from 180deg at 50% 100%, transparent 0 172deg, rgba(198,255,61,.42) 178deg, rgba(198,255,61,.0) 186deg, transparent 186deg); transform: rotate(-22deg); }
+.feixe.b { left: 50%; background: conic-gradient(from 180deg at 50% 100%, transparent 0 172deg, rgba(255,79,163,.45) 178deg, rgba(255,79,163,.0) 186deg, transparent 186deg); }
+.feixe.c { left: 88%; background: conic-gradient(from 180deg at 50% 100%, transparent 0 172deg, rgba(62,232,255,.42) 178deg, rgba(62,232,255,.0) 186deg, transparent 186deg); transform: rotate(22deg); }
+.brilhos { position: absolute; inset: 0; opacity: .7;
+  background-image: radial-gradient(2px 2px at 12% 18%, #fff, transparent), radial-gradient(2px 2px at 78% 12%, #ffd166, transparent), radial-gradient(3px 3px at 30% 70%, #fff, transparent), radial-gradient(2px 2px at 88% 60%, #c6ff3d, transparent), radial-gradient(2px 2px at 55% 35%, #3ee8ff, transparent), radial-gradient(3px 3px at 20% 88%, #ff4fa3, transparent), radial-gradient(2px 2px at 65% 85%, #fff, transparent), radial-gradient(2px 2px at 45% 8%, #fff, transparent); }
+.flutuantes img { position: absolute; top: -18%; left: var(--x); width: var(--w); opacity: .55; filter: drop-shadow(0 6px 8px rgba(0,0,0,.4)); }
+.logo { transition: transform .12s ease-out; background: linear-gradient(90deg, #fff 0%, #ff8ccb 25%, #ffd166 45%, #3ee8ff 65%, #fff 85%); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; filter: drop-shadow(0 0 14px rgba(255,79,163,.8)) drop-shadow(0 4px 0 #8a1f5c); }
+.logo.bate { transform: scale(1.08); }
+html.tv .brilhos { display: none; }
+html.tv .feixe { mix-blend-mode: normal; opacity: .6; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .feixe.a { animation: varreA 5.5s ease-in-out infinite alternate; }
+  .feixe.b { animation: varreB 4.2s ease-in-out infinite alternate; }
+  .feixe.c { animation: varreC 6.3s ease-in-out infinite alternate; }
+  .brilhos { animation: pisca 1.6s steps(2) infinite; }
+  .flutuantes img { animation: flutua var(--d) linear var(--atraso) infinite; }
+  .logo { animation: brilho 5s linear infinite; }
+  #inicio .grande { animation: pulsa 1.3s ease-in-out infinite; }
+}
+@keyframes varreA { from { transform: rotate(-38deg); } to { transform: rotate(18deg); } }
+@keyframes varreB { from { transform: rotate(-26deg); } to { transform: rotate(26deg); } }
+@keyframes varreC { from { transform: rotate(38deg); } to { transform: rotate(-18deg); } }
+@keyframes pisca { 50% { opacity: .25; } }
+@keyframes flutua { to { transform: translateY(135vh) rotate(var(--giro)); } }
+@keyframes brilho { to { background-position: 300% 0; } }
+@keyframes pulsa { 50% { box-shadow: 0 6px 0 #a3226a, 0 0 46px rgba(255,79,163,.95); } }
 
 @media (prefers-reduced-motion: no-preference) {
   .grande:active { transform: translateY(3px); }
