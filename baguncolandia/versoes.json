@@ -2,6 +2,19 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.5",
+      "data": "31/Out/2026",
+      "hora": "14:41:00",
+      "pt": [
+        "O boneco escolhido aparece no lobby \"Quem vai jogar\", em cima do nome, mexendo (os dois quando uma câmera filma duas pessoas). Muda na hora quando o celular manda outro.",
+        "No dedo: o botão 🧍 (mostrar/esconder o boneco) vai para o canto, embaixo do ⏸, e volta a funcionar durante a rodada (antes tampava o jogo e não respondia ao toque)."
+      ],
+      "en": [
+        "The chosen avatar shows in the \"Who's playing\" lobby above the name, animated (both when one camera films two people). Updates instantly when the phone sends another.",
+        "Touch mode: the 🧍 button (show/hide avatar) moves to the corner under ⏸ and works again during the round (it used to cover the game and ignore taps)."
+      ]
+    },
+    {
       "versao": "0.8.4",
       "data": "31/Out/2026",
       "hora": "14:26:00",

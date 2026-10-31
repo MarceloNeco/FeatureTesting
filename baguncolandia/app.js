@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.4', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.8.5', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -123,14 +123,22 @@
       tv.fase = 'lobby'; cheia('tvLobby');
       var L = $('lobbyJogadores'); while (L.firstChild) L.removeChild(L.firstChild);
       var cores = Desenho.CORES.j;
-      if (tv.local) { var d0 = document.createElement('div'); d0.className = 'jog'; d0.style.setProperty('--cor', cores[0]); d0.textContent = tv.nomes[0] || T('Você', 'You'); L.appendChild(d0); }
+      // o boneco escolhido aparece em cima do nome (os dois, quando uma câmera filma duas pessoas)
+      function bonecoDe(chave, k) { return function () { return (tv.bonecos[chave] || {})[k] || Boneco.normalizar({}, k); }; }
+      function comBonecos(d, chave) { var w = document.createElement('div'); w.className = 'bonecos'; var n = tv.cfg.jogadores === 2 && (tv.local || tv.cfg.celulares === 1) ? 2 : 1; for (var k = 0; k < n; k++) { var cv = document.createElement('canvas'); cv.width = 120; cv.height = 160; cv.setAttribute('data-boneco', chave + ':' + k); w.appendChild(cv); animarBoneco(cv, bonecoDe(chave, k)); } d.appendChild(w); }
+      if (tv.local) { var d0 = document.createElement('div'); d0.className = 'jog'; d0.style.setProperty('--cor', cores[0]); comBonecos(d0, 'local'); d0.appendChild(document.createTextNode(tv.nomes[0] || T('Você', 'You'))); L.appendChild(d0); }
       tv.jog.forEach(function (j, i) {
         var d = document.createElement('div'); d.className = 'jog'; d.style.setProperty('--cor', cores[i] || '#fff');
-        d.textContent = j.nome; var s = document.createElement('small'); s.textContent = j.ligado ? T('📱 conectado', '📱 connected') : T('⏳ conectando…', '⏳ connecting…'); d.appendChild(s); L.appendChild(d);
+        if (!(tv.cfg.celulares === 1 && i > 0)) comBonecos(d, j.id); d.appendChild(document.createTextNode(j.nome)); var s = document.createElement('small'); s.textContent = j.ligado ? T('📱 conectado', '📱 connected') : T('⏳ conectando…', '⏳ connecting…'); d.appendChild(s); L.appendChild(d);
       });
       if (!tv.local && tv.cfg.celulares === 2 && tv.jog.length < 2) { var v = document.createElement('div'); v.className = 'vazio'; v.textContent = T('Esperando o 2º celular (mesmo código)…', 'Waiting for the 2nd phone (same code)…'); L.appendChild(v); }
       resumo();
       Som.musica(true);
+    }
+    /* prévia viva do boneco no lobby: redesenha enquanto o canvas estiver na tela e o lobby aberto; nunca morre por erro */
+    function animarBoneco(cv, cfg) {
+      var vivo = function (ts) { if (!document.body.contains(cv)) return; if (tv.fase === 'lobby') { try { Desenho.previa(cv, cfg(), ts); } catch (e) {} } requestAnimationFrame(vivo); };
+      requestAnimationFrame(vivo);
     }
     function resumo() {
       var c = tv.cfg, m = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), mistura: T('🎪 Bagunça total', '🎪 Total mayhem') }[c.modo];

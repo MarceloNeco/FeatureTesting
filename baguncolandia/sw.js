@@ -2,7 +2,7 @@
    baixar de novo. Código (html, js, css, json): rede primeiro com 4 s de espera, senão a cópia;
    fonte, imagens e biblioteca: cópia primeiro. Cache com o nome do app (nunca apaga o dos outros apps
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js). */
-var VERSAO = '0.8.4';
+var VERSAO = '0.8.5';
 var CACHE = 'bagunca-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'figuras.js', 'cenas.js', 'boneco.js', 'desenho.js', 'sala.js', 'voz.js', 'som.js', 'calibrar.js', 'config.js', 'batida.js', 'spotify.js', 'esqueleto.js', 'libs/supabase.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 self.addEventListener('install', function (e) {
