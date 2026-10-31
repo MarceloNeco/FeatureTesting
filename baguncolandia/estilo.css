@@ -107,6 +107,18 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #tvSair { position: absolute; right: 1.5vh; top: 1.5vh; z-index: 9; display: none; background: rgba(0,0,0,.5); color: #fff; width: 44px; height: 44px; padding: 0; border-radius: 50%; font-size: 1.3rem; }
 #tv.local #tvSair { display: block; }
 #tv.local #tvRodape { display: none; }
+/* modo local (só o celular / no dedo): o lobby cabe acima da barra de botões, em pé e deitado */
+#tv.local .cheia { justify-content: flex-start; padding: 3.5rem 1rem 11rem; gap: .8rem; overflow: auto; }
+#tv.local .cheia h2 { font-size: 1.5rem; }
+#tv.local .cheia p { font-size: .95rem; }
+#tv.local #tvLobby .muted { display: none; }
+#tv.local .lobbyLista .jog { font-size: 1.1rem; padding: .5rem 1.2rem; min-width: 0; border-width: 2px; box-shadow: 0 0 1rem var(--cor, #fff); }
+#tv.local .lobbyLista .jog small { font-size: .8rem; }
+#tv.local .resumo { font-size: .95rem; padding: .5rem .9rem; }
+#tv.local #tvCarregando { padding-bottom: 3rem; }
+#tv.local .melancia { width: 24vh; height: 24vh; }
+#tv.local .pct { font-size: 7vh; }
+@media (orientation: landscape) and (max-height: 500px) { #tv.local .cheia { padding-top: 1rem; padding-bottom: 8.5rem; gap: .4rem; } #tv.local .cheia h2 { font-size: 1.2rem; } #tv.local .cheia .marca { display: none; } }
 #tvLocalBar { display: none; position: absolute; left: 0; right: 0; bottom: 0; z-index: 9; padding: .5rem .6rem calc(.5rem + env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgba(6,5,26,.9)); gap: .5rem; align-items: center; flex-wrap: wrap; }
 #tv.local #tvLocalBar { display: flex; }
 #tvLocalBar .grupo { flex: 1 1 100%; justify-content: center; }

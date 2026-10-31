@@ -2,6 +2,13 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.7.1",
+      "data": "31/Out/2026",
+      "hora": "10:40:00",
+      "pt": ["Modo só o celular / no dedo: o lobby não fica mais atrás da barra de botões nem repete textos da TV (em pé e deitado)."],
+      "en": ["Phone-only / by-finger mode: the lobby no longer sits behind the button bar or repeats TV texts (portrait and landscape)."]
+    },
+    {
       "versao": "0.7.0",
       "data": "31/Out/2026",
       "hora": "09:40:00",
