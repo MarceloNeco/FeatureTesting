@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.2', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.8.3', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -571,7 +571,7 @@
       grupo(linha(T('Cor da roupa', 'Outfit colour')), CORES_ROUPA.map(function (c) { return { v: c, cor: c }; }), function () { return atual().cor; }, function (v) { muda('cor', v); atualizarCabecas(); }, 'cores');
       grupo(linha(T('Acessório', 'Accessory')), [{ v: 'nenhum', t: T('Nada', 'None') }, { v: 'laco', t: '🎀' }, { v: 'coroa', t: '👑' }, { v: 'tiara', t: '💎' }, { v: 'oculos', t: '🕶️' }, { v: 'bone', t: '🧢' }, { v: 'chapeu', t: '🎉' }, { v: 'asas', t: '🪽' }, { v: 'flor', t: '🌸' }], function () { return atual().acessorio; }, function (v) { muda('acessorio', v); });
       grupo(linha(T('Sapato', 'Shoes')), CORES_SAPATO.map(function (c) { return { v: c, cor: c }; }), function () { return atual().sapato; }, function (v) { muda('sapato', v); }, 'cores');
-      var vivo = function (ts) { if (!document.body.contains(cv)) return; if (container.closest('details').open) Desenho.previa(cv, atual(), ts); requestAnimationFrame(vivo); }; requestAnimationFrame(vivo);
+      var vivo = function (ts) { if (!document.body.contains(cv)) return; if (container.closest('details').open) { try { Desenho.previa(cv, atual(), ts); } catch (e) { var cx = cv.getContext('2d'); cx.fillStyle = '#ff5252'; cx.font = '14px sans-serif'; cx.fillText('Erro: ' + (e && e.message || e), 8, 20); } } requestAnimationFrame(vivo); }; requestAnimationFrame(vivo);
     }
     document.querySelectorAll('details.boneco .picker').forEach(montarPicker);
     document.querySelectorAll('details.boneco').forEach(function (d) { d.addEventListener('toggle', function () { if (d.open) montarPicker(d.querySelector('.picker')); }); });

@@ -104,6 +104,12 @@ function ok(msg) { console.log('✓ ' + msg); }
   await solo.click('#localComecar');
   await solo.waitForFunction(() => window.BaguncaApp.TVApp.tv.fase === 'jogando', null, { timeout: 30000 });
   ok('só o celular: rodada começou pelo ▶ da barra');
+  for (const [nome, vw, vh] of [['em pé', 390, 844], ['deitado', 844, 390]]) {
+    await solo.setViewportSize({ width: vw, height: vh }); await solo.waitForTimeout(300);
+    const j = await solo.evaluate(() => { const vis = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).display !== 'none'; }; const p = document.getElementById('localPausa').getBoundingClientRect(); return { comecar: vis(document.getElementById('localComecar')), boneco: vis(document.getElementById('localBoneco')), pausa: vis(document.getElementById('localPausa')), canto: p.top < innerHeight * 0.3 && p.right > innerWidth * 0.8 && p.width <= 56 }; });
+    if (!j.comecar && !j.boneco && j.pausa && j.canto) ok('jogando ' + nome + ': barra sumiu, só ⏸ pequeno no canto'); else falhou('jogando ' + nome + ': ' + JSON.stringify(j));
+  }
+  await solo.setViewportSize({ width: 390, height: 844 });
   await solo.screenshot({ path: '/tmp/pagina-solo.png' });
   // v0.6: no dedo (sem câmera): o dedo varre uma fruta e marca ponto; deslizar para cima = pulo
   const dedo = await ctx.newPage(); await dedo.setViewportSize({ width: 844, height: 390 });
@@ -132,6 +138,13 @@ function ok(msg) { console.log('✓ ' + msg); }
   await cel.click('#bonecoEntrar summary'); await cel.waitForTimeout(600);
   const picker = await cel.evaluate(() => ({ cabecas: document.querySelectorAll('#bonecoEntrar .cabecas button').length, meninas: window.BaguncaApp.Figuras.lista().filter(f => f.menina).length, largura: document.documentElement.scrollWidth }));
   if (picker.cabecas >= 15 && picker.meninas >= 5 && picker.largura <= 320) ok('👗 Meu boneco: ' + picker.cabecas + ' cabeças (' + picker.meninas + ' meninas), sem rolagem lateral'); else falhou('picker: ' + JSON.stringify(picker));
+  // v0.8.3: a prévia tem que seguir a escolha, inclusive cabeça da turma (antes dava erro e a prévia morria sem cabeça)
+  const pixelsCabeca = async () => cel.evaluate(() => { const cv = document.querySelector('#bonecoEntrar canvas'); const d = cv.getContext('2d').getImageData(0, 0, cv.width, Math.round(cv.height * 0.45)).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 40) n++; return n; });
+  const botoesCabeca = await cel.$$('#bonecoEntrar .cabecas button'); await botoesCabeca[botoesCabeca.length - 1].click(); await cel.waitForTimeout(400);
+  const n1 = await pixelsCabeca();
+  await botoesCabeca[0].click(); await cel.waitForTimeout(400);
+  const n2 = await pixelsCabeca();
+  if (n1 > 2000 && n2 > 2000) ok('prévia do boneco com cabeça (turma e menino), e muda ao escolher'); else falhou('prévia sem cabeça: ' + n1 + ' / ' + n2);
   await cel.click('#bonecoEntrar .grupo button:nth-child(2)'); await cel.waitForTimeout(300);   // vestido
   await cel.screenshot({ path: '/tmp/pagina-cel-entrar.png', fullPage: true });
   await cel.evaluate(() => { document.getElementById('entrar').classList.remove('ativa'); document.getElementById('jogo').classList.add('ativa'); });

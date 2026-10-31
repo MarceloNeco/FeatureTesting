@@ -134,6 +134,10 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #tvLocalBar .grupo button { flex: 0 0 auto; font-size: 1.3rem; padding: .4rem .7rem; }
 #tvLocalBar #localComecar { flex: 1; }
 #tv.jogando #localModos, #tv.jogando #localPessoas, #tv.jogando #dicaGire { display: none; }
+/* jogando: a barra some inteira (nada tampando o jogo); fica só o ⏸ pequeno no canto, embaixo do ✕ */
+#tv.jogando #tvLocalBar { background: none; padding: 0; pointer-events: none; top: 0; bottom: 0; }
+#tv.jogando #tvLocalBar > * { display: none; }
+#tv.jogando #localPausa { display: block; pointer-events: auto; position: absolute; right: 1.5vh; top: calc(1.5vh + 52px); width: 44px; height: 44px; padding: 0; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; font-size: 1.1rem; }
 #localBoneco { display: none; }
 #tv.toque #localBoneco { display: inline-block; }
 #localBoneco.ativo { border-color: var(--lima); box-shadow: inset 0 0 0 2px var(--lima); }   /* durante a rodada a barra encolhe para não cobrir o palco */

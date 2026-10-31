@@ -12,6 +12,8 @@
   else root.Boneco = fabrica();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
+  // o global de verdade (self no navegador, globalThis no Node): as cabeças da turma buscam Figuras e Desenho aqui
+  var root = typeof self !== 'undefined' ? self : (typeof globalThis !== 'undefined' ? globalThis : {});
   var CABECAS = ['menino', 'menina', 'pano', 'elfo', 'hobbit', 'mago', 'cavaleiro', 'robo'];
   var CABELOS = ['curto', 'espetado', 'franja', 'longo', 'cacheado', 'trancas', 'coque', 'maria', 'careca'];
   var ROUPAS = ['camiseta', 'vestido', 'macacao', 'capa', 'armadura', 'tunica'];
