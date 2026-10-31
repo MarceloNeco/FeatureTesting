@@ -1,0 +1,154 @@
+// Teste da página inteira no Chromium (Playwright): node peluqueria/teste/pagina.test.js (de FeatureTesting/)
+// Com ?teste o relógio é do teste (PeluqueriaDebug.passo(ms)) e a semente é fixa.
+const { chromium } = require('playwright');
+const path = require('path');
+const http = require('http');
+const fs = require('fs');
+const raiz = path.resolve(__dirname, '..', '..');
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.woff2': 'font/woff2', '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json', '.mp3': 'audio/mpeg' };
+const server = http.createServer((req, res) => {
+  let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';
+  const f = path.join(raiz, p);
+  if (!f.startsWith(raiz) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); res.end(); return; }
+  res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
+});
+let falhas = 0;
+function falhou(msg) { console.error('✗ ' + msg); falhas++; process.exitCode = 1; }
+function ok(msg) { console.log('✓ ' + msg); }
+function confere(cond, msg, extra) { if (cond) ok(msg); else falhou(msg + (extra !== undefined ? ' → ' + JSON.stringify(extra) : '')); }
+const IGNORAR = /favicon|solverone-dados|ERR_NAME_NOT_RESOLVED|ERR_INTERNET|net::ERR/i;
+
+async function abrir(browser, url, opcoes = {}) {
+  const ctx = await browser.newContext(Object.assign({ viewport: { width: 390, height: 844 }, locale: 'pt-BR', hasTouch: false }, opcoes.ctx || {}));
+  const pg = await ctx.newPage(); const erros = [];
+  await pg.addInitScript(() => { window.__csp = []; document.addEventListener('securitypolicyviolation', e => window.__csp.push(e.violatedDirective + ' ' + e.blockedURI)); });
+  if (opcoes.antes) await pg.addInitScript(opcoes.antes);
+  if (opcoes.rotas) for (const [padrao, corpo] of opcoes.rotas) await pg.route(padrao, r => r.fulfill({ status: 200, contentType: 'application/json', body: corpo }));
+  pg.on('console', m => { if (m.type() === 'error') erros.push(m.text() + ' @' + (m.location() && m.location().url)); });
+  pg.on('pageerror', e => erros.push('pageerror: ' + e.message));
+  await pg.goto(url);
+  await pg.waitForFunction(() => window.PeluqueriaDebug && window.PeluqueriaDebug.pronto, null, { timeout: 15000 });
+  pg.erros = () => erros.filter(e => !IGNORAR.test(e));
+  return pg;
+}
+const D = (pg, f, a) => pg.evaluate(f, a);
+const est = pg => D(pg, () => { const e = PeluqueriaDebug.estado(); return { i: e.i, fase: e.fase, pontos: e.pontos, res: e.resultados.map(r => r.categoria), pausado: PeluqueriaDebug.pausado }; });
+const passo = (pg, ms) => D(pg, m => PeluqueriaDebug.passo(m), ms);
+const ateAlvo = pg => D(pg, () => PeluqueriaDebug.passo(PeluqueriaDebug.tempoAteAlvo()));
+const tocar = (pg) => pg.mouse.click(195, 600);
+async function comecar(pg, nivel) {
+  await pg.click('#bt' + nivel);
+  await pg.click('#btJogar');
+  await passo(pg, 2200);   // contagem 3-2-1
+}
+
+(async () => {
+  await new Promise(r => server.listen(0, r));
+  const base = 'http://127.0.0.1:' + server.address().port + '/peluqueria/';
+  const browser = await chromium.launch();
+
+  /* ---------- página normal ---------- */
+  const pg = await abrir(browser, base + '?teste');
+  ok('abriu e carregou os catálogos');
+  await pg.screenshot({ path: '/tmp/peluqueria-inicio.png' });
+  await comecar(pg, 'Normal');
+  let e = await est(pg);
+  confere(e.fase === 'caindo' && await pg.isVisible('#rodada'), 'Normal → Jogar → contagem → caindo', e);
+  await passo(pg, 600); await pg.screenshot({ path: '/tmp/peluqueria-queda.png' });
+  await tocar(pg);
+  e = await est(pg);
+  confere(e.res.length === 1, 'toque para o item na Normal', e);
+  await passo(pg, 2100);
+
+  // nova rodada na Criança para os acertos exatos
+  await D(pg, () => PeluqueriaDebug.novaRodada('crianca'));
+  await ateAlvo(pg); await tocar(pg);
+  e = await est(pg);
+  const aviso = await pg.textContent('#aviso');
+  confere(e.res[0] === 'PERFEITO' && /PERFEITO/.test(aviso), 'Criança na hora certa → PERFEITO', { e, aviso });
+  await passo(pg, 300); await pg.screenshot({ path: '/tmp/peluqueria-perfeito.png' });
+  confere(+(await pg.textContent('#pontos')) === 100, 'placar mostra 100');
+
+  // toque duplo não pula queda
+  const i0 = (await est(pg)).i;
+  await tocar(pg); await pg.waitForTimeout(100); await tocar(pg);
+  confere((await est(pg)).i === i0, 'toque duplo não pula queda');
+  await passo(pg, 2100);
+  confere((await est(pg)).i === i0 + 1, 'segue sozinho depois de 2 s');
+
+  // Espaço para, Enter segue
+  await passo(pg, 300);
+  await pg.keyboard.press('Space');
+  e = await est(pg);
+  confere(e.fase === 'parado' && e.res.length === 2, 'Espaço para o item', e);
+  await passo(pg, 500); await pg.keyboard.press('Enter');
+  confere((await est(pg)).i === i0 + 2, 'Enter segue');
+
+  // pausa
+  await pg.click('#btPausa');
+  confere(await pg.isVisible('#btSeguir') && (await est(pg)).pausado, '⏸ pausa e mostra ▶');
+  await tocar(pg);
+  confere((await est(pg)).fase === 'caindo', 'toque com o jogo pausado não para o item');
+  await pg.click('#btSeguir');
+  confere(!(await est(pg)).pausado && !(await pg.isVisible('#btSeguir')), '▶ continua');
+
+  // visibilidade escondida pausa
+  await D(pg, () => { Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  await passo(pg, 60000);
+  e = await est(pg);
+  confere(e.pausado && e.fase === 'caindo' && e.i === i0 + 2, 'app escondido pausa e não conta LONGE', e);
+  await D(pg, () => { Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true }); });
+  await pg.click('#btSeguir');
+
+  // girar o celular no meio da queda
+  await ateAlvo(pg);
+  await pg.setViewportSize({ width: 844, height: 390 }); await pg.waitForTimeout(100);
+  await pg.mouse.click(420, 300);
+  e = await est(pg);
+  confere(e.res[e.res.length - 1] === 'PERFEITO', 'girou no meio da queda e ainda deu PERFEITO', e);
+  await passo(pg, 300); await pg.screenshot({ path: '/tmp/peluqueria-deitado.png' });
+  await pg.setViewportSize({ width: 390, height: 844 });
+  await passo(pg, 2100);
+
+  // termina a rodada
+  for (let k = 0; k < 12 && (await est(pg)).fase !== 'fim'; k++) { await ateAlvo(pg); await tocar(pg); await passo(pg, 2100); }
+  confere(await pg.isVisible('#fim') && /★/.test(await pg.textContent('#estrelas')) && await pg.isVisible('#btDeNovo'), 'fim com estrelas e Jogar de novo');
+  confere(await pg.isVisible('#novoRecorde'), 'primeira rodada é recorde');
+  await pg.screenshot({ path: '/tmp/peluqueria-fim.png' });
+  await pg.click('#btInicio');
+
+  // língua
+  await pg.click('#btLingua');
+  confere((await pg.textContent('#btJogar')) === 'Play', 'PT → EN troca os textos');
+  await pg.click('#btLingua');
+
+  confere(pg.erros().length === 0, 'sem erros no console', pg.erros());
+  confere((await D(pg, () => window.__csp)).length === 0, 'sem violação de CSP', await D(pg, () => window.__csp));
+
+  /* ---------- 320 px ---------- */
+  const p320 = await abrir(browser, base + '?teste', { ctx: { viewport: { width: 320, height: 640 } } });
+  confere(await D(p320, () => document.documentElement.scrollWidth <= 320), '320 px sem rolagem lateral (início)');
+  await p320.screenshot({ path: '/tmp/peluqueria-320.png' });
+
+  /* ---------- meus/ inválido ---------- */
+  const pm = await abrir(browser, base + '?teste', { rotas: [['**/meus/cenarios.json', '{{{']] });
+  confere(!(await pm.isVisible('#btMinhas')) && pm.erros().length === 0, 'meus/ inválido: abre sem erro e sem "Minhas imagens"', pm.erros());
+
+  /* ---------- meus/ com uma imagem ---------- */
+  const pm2 = await abrir(browser, base + '?teste', { rotas: [['**/meus/cenarios.json', JSON.stringify([{ id: 'teste', nome: 'Teste', arquivo: '../cenarios/gato.svg', largura: 1000, altura: 1000, lugares: { cabeca: { x: 0.5, y: 0.2, tam: 0.4 } } }, { id: 'teste2', nome: 'Teste', arquivo: 'nao-existe.png', largura: 1000, altura: 1000, lugares: { cabeca: { x: 0.5, y: 0.2, tam: 0.4 } } }])]] });
+  confere(!(await pm2.isVisible('#btMinhas')), 'meus/ só com entradas ruins não liga "Minhas imagens"');
+
+  /* ---------- meus/ com uma imagem boa ---------- */
+  const gato = fs.readFileSync(path.join(raiz, 'peluqueria/cenarios/gato.svg'), 'utf8');
+  const ctx3 = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'pt-BR' });
+  const p3 = await ctx3.newPage();
+  await p3.route('**/meus/cenarios.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'foto', nome: 'Foto', arquivo: 'foto.svg', largura: 1000, altura: 1000, lugares: { cabeca: { x: 0.5, y: 0.27, tam: 0.4 } } }]) }));
+  await p3.route('**/meus/foto.svg', r => r.fulfill({ status: 200, contentType: 'image/svg+xml', body: gato }));
+  await p3.goto(base + '?teste'); await p3.waitForFunction(() => window.PeluqueriaDebug && window.PeluqueriaDebug.pronto);
+  confere(await p3.isVisible('#btMinhas'), 'meus/ com imagem boa mostra "Minhas imagens"');
+  await p3.click('#btMinhas');
+  confere((await p3.getAttribute('#btMinhas', 'aria-pressed')) === 'true', '"Minhas imagens" liga');
+
+  await browser.close(); server.close();
+  console.log(falhas ? falhas + ' falha(s)' : 'tudo certo');
+})().catch(e => { console.error(e); process.exit(1); });

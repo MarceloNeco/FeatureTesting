@@ -1,23 +1,217 @@
 /* Peluqueria — o aplicativo: telas, toques e teclado, ligando o motor (jogo.js) ao desenho, ao som e à voz.
-   Nada de innerHTML com dado de fora; textos por textContent. */
+   Um relógio só (tick) move contagem, queda e resultado; com ?teste quem anda o relógio é o teste
+   (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
   var APP_VERSION = '0.1.0', APP_UPDATED = '31/10/2026';
   var $ = function (id) { return document.getElementById(id); };
-  var lingua = /^en/i.test(navigator.language || '') ? 'en' : 'pt';
-  function T(pt, en) { return lingua === 'en' ? en : pt; }
+  var P = window.Peluqueria;
+  var TESTE = /[?&]teste\b/.test(location.search);
+  var CHAVE_PREF = 'peluqueria-pref', CHAVE_RECORDE = 'peluqueria-recorde';
+  var CONTAGEM = 0.7, ESPERA = 2, GUARDA = 0.4;
+  var ROTULO = { PERFEITO: ['PERFEITO!', 'PERFECT!'], BOM: ['BOM!', 'GOOD!'], QUASE: ['QUASE!', 'ALMOST!'], LONGE: ['LONGE!', 'MISS!'] };
+
+  function ler(k, padrao) { try { var v = JSON.parse(localStorage.getItem(k)); return v && typeof v === 'object' ? v : padrao; } catch (e) { return padrao; } }
+  function gravar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  var pref = Object.assign({ nivel: 'normal', lingua: /^en/i.test(navigator.language || '') ? 'en' : 'pt', som: true, minhas: false }, ler(CHAVE_PREF, {}));
+  if (!P.NIVEIS[pref.nivel]) pref.nivel = 'normal';
+  if (pref.lingua !== 'en') pref.lingua = 'pt';
+
+  function T(pt, en) { return pref.lingua === 'en' ? en : pt; }
   function traduzir() {
-    document.documentElement.lang = lingua === 'en' ? 'en' : 'pt-BR';
+    document.documentElement.lang = pref.lingua === 'en' ? 'en' : 'pt-BR';
     document.querySelectorAll('[data-t]').forEach(function (el) { var p = el.getAttribute('data-t').split('|'); el.textContent = T(p[0], p[1] || p[0]); });
-    $('btLingua').textContent = lingua === 'en' ? 'PT' : 'EN';
+    $('btLingua').textContent = pref.lingua === 'en' ? 'PT' : 'EN';
   }
   function tela(id) { document.querySelectorAll('.tela').forEach(function (s) { s.classList.toggle('ativa', s.id === id); }); }
 
-  window.PeluqueriaApp = { tela: tela, T: T, get lingua() { return lingua; } };
+  window.PeluqueriaApp = { tela: tela, T: T, get lingua() { return pref.lingua; } };
   if (window.SolverRecursos && !SolverRecursos.ligado('peluqueria', true)) { tela('desligado'); traduzir(); return; }
   try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 
+  var som = window.PeluqueriaSom || null, voz = window.PeluqueriaVoz || null;
+  function efeito(n) { if (som) som.efeito(n); }
+  function falar(pt, en) { if (voz) voz.falar(pt, en); }
+
+  var desenho = PeluqueriaDesenho.criar($('palco'), { leve: false });
+  var catalogo = { cenarios: { jogo: [], meus: [] }, itens: { jogo: [], meus: [] } };
+  // modo: inicio | contagem | jogo | fim
+  var app = { modo: 'inicio', rodada: null, pausado: false, resto: 0, espera: 0, resultado: null, trava: null };
+
+  /* ---------- Início ---------- */
+  function marcarNivel() {
+    ['crianca', 'normal', 'maluco'].forEach(function (n) { var b = document.querySelector('[data-nivel="' + n + '"]'); b.classList.toggle('marcado', n === pref.nivel); b.setAttribute('aria-pressed', String(n === pref.nivel)); });
+  }
+  document.querySelectorAll('[data-nivel]').forEach(function (b) {
+    b.addEventListener('click', function () { pref.nivel = b.getAttribute('data-nivel'); gravar(CHAVE_PREF, pref); marcarNivel(); });
+  });
+  $('btLingua').addEventListener('click', function () { pref.lingua = pref.lingua === 'en' ? 'pt' : 'en'; gravar(CHAVE_PREF, pref); traduzir(); });
+  function marcarSom() { $('btSom').textContent = pref.som ? '🔊' : '🔇'; if (som) som.mudo(!pref.som); }
+  $('btSom').addEventListener('click', function () { pref.som = !pref.som; gravar(CHAVE_PREF, pref); marcarSom(); });
+  $('btAjuda').addEventListener('click', function () { $('ajuda').hidden = !$('ajuda').hidden; });
+  $('ajuda').addEventListener('click', function () { $('ajuda').hidden = true; });
+  function marcarMinhas() { $('btMinhas').setAttribute('aria-pressed', String(!!pref.minhas)); }
+  $('btMinhas').addEventListener('click', function () { pref.minhas = !pref.minhas; gravar(CHAVE_PREF, pref); marcarMinhas(); });
+  $('btJogar').addEventListener('click', jogar);
+  $('btDeNovo').addEventListener('click', jogar);
+  $('btInicio').addEventListener('click', function () { app.modo = 'inicio'; tela('inicio'); $('btJogar').focus(); });
+
+  function temMinhas() { return catalogo.cenarios.meus.length + catalogo.itens.meus.length > 0; }
+
+  function jogar() {
+    if (som) som.ligar();
+    var usar = pref.minhas && temMinhas();
+    var cen = catalogo.cenarios.jogo.concat(usar ? catalogo.cenarios.meus : []);
+    var its = catalogo.itens.jogo.concat(usar ? catalogo.itens.meus : []);
+    app.rodada = P.criarRodada({ nivel: pref.nivel, cenarios: cen, itens: its, semente: TESTE ? 7 : Date.now() });
+    if (app.rodada.fase === 'fim') return;
+    app.modo = 'contagem'; app.resto = 3 * CONTAGEM; app.pausado = false; app.resultado = null;
+    $('numero').textContent = '3'; tela('contagem');
+    falar('Três, dois, um, já!', 'Three, two, one, go!');
+    efeito('conta');
+    if (som) { som.musica(pref.nivel); som.andamento(0); }
+  }
+
+  /* ---------- rodada ---------- */
+  function placar() {
+    var r = app.rodada;
+    $('pontos').textContent = String(r.pontos);
+    $('mult').hidden = r.mult <= 1; $('mult').textContent = '×' + r.mult;
+    $('queda').textContent = Math.min(r.i + 1, r.quedas.length) + '/' + r.quedas.length;
+  }
+  function comecarRodada() {
+    app.modo = 'jogo'; tela('rodada'); desenho.redimensionar(); placar(); manterAcesa(true);
+  }
+  function aoResultado(res) {
+    app.resultado = res; app.espera = 0;
+    var rot = ROTULO[res.categoria];
+    $('aviso').textContent = T(rot[0], rot[1]) + ' +' + res.pontos;
+    efeito(res.categoria);
+    if (res.categoria === 'PERFEITO') falar('UHUL!', 'WOOHOO!');
+    placar();
+  }
+  function parar() {
+    var r = app.rodada;
+    if (app.modo !== 'jogo' || app.pausado) return;
+    if (r.fase === 'caindo') { var res = P.parar(r); if (res) aoResultado(res); }
+    else if (r.fase === 'parado' && app.espera >= GUARDA) seguir();
+  }
+  function seguir() {
+    var r = app.rodada;
+    P.proxima(r); app.resultado = null;
+    if (r.fase === 'fim') return fim();
+    if (som) som.andamento(r.i);
+    placar();
+  }
+  function pausar() {
+    if (app.modo !== 'jogo' || app.pausado) return;
+    app.pausado = true; $('btSeguir').hidden = false; manterAcesa(false);
+    if (som) som.parar();
+    $('btSeguir').focus();
+  }
+  function continuar() {
+    if (!app.pausado) return;
+    app.pausado = false; $('btSeguir').hidden = true; manterAcesa(true);
+    if (som) som.musica(pref.nivel);
+  }
+  $('btPausa').addEventListener('click', pausar);
+  $('btSeguir').addEventListener('click', continuar);
+  $('palco').addEventListener('pointerdown', function (ev) { ev.preventDefault(); parar(); });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') pausar(); });
+
+  document.addEventListener('keydown', function (ev) {
+    if (app.modo !== 'jogo') return;
+    var k = ev.key;
+    if (k === 'Escape' || k === 'p' || k === 'P') { ev.preventDefault(); if (app.pausado) continuar(); else pausar(); return; }
+    if (k === ' ' || k === 'Enter') {
+      ev.preventDefault();
+      if (app.pausado) continuar(); else parar();
+    }
+  }, true);
+
+  function fim() {
+    app.modo = 'fim'; manterAcesa(false);
+    if (som) { som.parar(); som.efeito('fim'); }
+    var r = app.rodada, n = P.estrelas(r);
+    $('estrelas').textContent = '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n);
+    $('total').textContent = String(r.pontos);
+    $('perfeitos').textContent = String(r.resultados.filter(function (x) { return x.categoria === 'PERFEITO'; }).length);
+    var rec = ler(CHAVE_RECORDE, {}), antes = typeof rec[r.nivel] === 'number' ? rec[r.nivel] : 0;
+    var novo = r.pontos > antes;
+    if (novo) { rec[r.nivel] = r.pontos; gravar(CHAVE_RECORDE, rec); }
+    $('recorde').textContent = String(Math.max(antes, r.pontos));
+    $('novoRecorde').hidden = !novo;
+    tela('fim'); $('btDeNovo').focus();
+    falar(novo ? 'Novo recorde!' : 'Fim da rodada!', novo ? 'New record!' : 'Round over!');
+  }
+
+  /* ---------- relógio ---------- */
+  function tick(dt) {
+    if (app.pausado) return;
+    if (app.modo === 'contagem') {
+      app.resto -= dt;
+      var n = Math.ceil(app.resto / CONTAGEM);
+      if (n >= 1 && $('numero').textContent !== String(n)) { $('numero').textContent = String(n); efeito('conta'); }
+      if (app.resto <= 0) comecarRodada();
+      return;
+    }
+    if (app.modo !== 'jogo') return;
+    var r = app.rodada;
+    if (r.fase === 'caindo') {
+      P.avancar(r, dt);
+      if (r.fase === 'parado') aoResultado(r.resultados[r.resultados.length - 1]);
+    } else if (r.fase === 'parado') {
+      app.espera += dt;
+      if (app.espera >= ESPERA) seguir();
+    }
+  }
+  function pintar(dt) {
+    if (app.modo !== 'jogo' || !app.rodada || app.rodada.fase === 'fim') return;
+    var r = app.rodada, q = r.quedas[r.i];
+    var pos = r.fase === 'caindo' || r.fase === 'parado' ? P.posicao(q, r.nivel, r.i, r.t) : null;
+    var res = r.fase === 'parado' ? app.resultado : null, rot = res ? ROTULO[res.categoria] : null;
+    desenho.pintar(r, { pos: pos, resultado: res, rotulo: rot ? T(rot[0], rot[1]) : '', uhul: res && res.categoria === 'PERFEITO' ? T('UHUL!', 'WOOHOO!') : '', pausado: app.pausado, dt: app.pausado ? 0 : dt });
+  }
+  var ultimo = 0;
+  function quadro(ts) {
+    var dt = ultimo ? Math.min(0.1, (ts - ultimo) / 1000) : 0; ultimo = ts;
+    tick(dt); pintar(dt);
+    requestAnimationFrame(quadro);
+  }
+  function redimensionar() { if (app.modo === 'jogo') { desenho.redimensionar(); pintar(0); } }
+  window.addEventListener('resize', redimensionar);
+  window.addEventListener('orientationchange', redimensionar);
+
+  /* ---------- tela acesa durante a rodada ---------- */
+  function manterAcesa(sim) {
+    try {
+      if (sim && !app.trava && navigator.wakeLock) navigator.wakeLock.request('screen').then(function (t) { app.trava = t; }).catch(function () {});
+      if (!sim && app.trava) { app.trava.release().catch(function () {}); app.trava = null; }
+    } catch (e) {}
+  }
+
+  /* ---------- começo ---------- */
   $('ver').textContent = 'v' + APP_VERSION + ' · ' + APP_UPDATED;
-  $('btLingua').addEventListener('click', function () { lingua = lingua === 'en' ? 'pt' : 'en'; traduzir(); });
-  traduzir();
+  traduzir(); marcarNivel(); marcarSom(); marcarMinhas();
+  $('btJogar').disabled = true;
+  Promise.all([PeluqueriaCenarios.carregar(), PeluqueriaItens.carregar()]).then(function (v) {
+    catalogo.cenarios = v[0]; catalogo.itens = v[1];
+    $('btMinhas').hidden = !temMinhas();
+    $('btJogar').disabled = false;
+    if (TESTE) window.PeluqueriaDebug.pronto = true;
+  });
+
+  if (TESTE) {
+    window.PeluqueriaDebug = {
+      pronto: false,
+      estado: function () { return app.rodada; },
+      get pausado() { return app.pausado; },
+      passo: function (ms) { var s = ms / 1000; while (s > 1e-9) { var d = Math.min(0.05, s); tick(d); pintar(d); s -= d; } },
+      tempoAteAlvo: function () {
+        var r = app.rodada, q = r.quedas[r.i], n = P.NIVEIS[r.nivel];
+        return ((q.cenario.lugares[q.lugar].y - P.TOPO) / (n.vel * (1 + 0.05 * r.i)) - r.t) * 1000;
+      },
+      novaRodada: function (nivel) { pref.nivel = nivel; jogar(); this.passo(3 * CONTAGEM * 1000 + 50); }
+    };
+  } else requestAnimationFrame(quadro);
 })();

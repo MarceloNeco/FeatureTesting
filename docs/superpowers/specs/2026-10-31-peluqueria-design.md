@@ -219,9 +219,10 @@ o som ligado/desligado e o "Minhas imagens". **Nenhuma imagem é salva nem expor
 
 - Só arquivos estáticos. Sem login, conta, banco, cookie ou telemetria. Nada sai do aparelho.
 - **CSP** por `<meta>` em `index.html` e `marcar.html`: `default-src 'self'; script-src 'self';
-  style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self';
+  style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self';
   connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none';
-  form-action 'none'`. Nenhum script inline, nenhum `style=""` no HTML.
+  form-action 'none'`. Nenhum script inline, nenhum `style=""` no HTML. O `'unsafe-inline'` de estilo existe só porque o
+  `recursos.js` comum (interruptores do RootifyONE) injeta um `<style>` para esconder o que o dono desliga.
 - Nada de texto de fora vira HTML: nomes e textos sempre por `textContent`.
 - **Validação dos catálogos** (`validarCenario`/`validarItem`): `id` só com letras minúsculas, números e
   hífen (até 30); `arquivo` só nome simples terminando em `.svg`, `.png`, `.jpg`, `.jpeg` ou `.webp` (sem `/`,
