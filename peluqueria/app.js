@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.3.2', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.4.0', APP_UPDATED = '31/10/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -28,7 +28,13 @@
   function tela(id) { document.querySelectorAll('.tela').forEach(function (s) { s.classList.toggle('ativa', s.id === id); }); }
 
   var app = { modo: 'inicio', rodada: null, pausado: false, resto: 0, espera: 0, resultado: null, trava: null };
-  window.PeluqueriaApp = { tela: tela, T: T, get lingua() { return pref.lingua; }, estado: function () { return app.rodada; } };
+  window.PeluqueriaApp = { tela: tela, T: T, get lingua() { return pref.lingua; }, estado: function () { return app.rodada; },
+    /* para tv.js e controle.js (v0.4.0) */
+    catalogo: function () { var u = pref.minhas && temMinhas(); return { cenarios: catalogo.cenarios.jogo.concat(u ? catalogo.cenarios.meus : []), itens: catalogo.itens.jogo.concat(u ? catalogo.itens.meus : []) }; },
+    pref: function () { return pref; }, gravarPref: function () { gravar(CHAVE_PREF, pref); },
+    definirModo: function (m) { app.modo = m; }, modo: function () { return app.modo; },
+    efeito: function (n) { efeito(n); }, falar: function (pt, en) { falar(pt, en); },
+    voltarInicio: function () { app.modo = 'tv-saindo'; irInicio(); }, TV: TV, TESTE: TESTE };
   if (window.SolverRecursos && !SolverRecursos.ligado('peluqueria', true)) { tela('desligado'); traduzir(); return; }
   try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 
@@ -67,7 +73,7 @@
   /* menu (🏠, "Início" e o botão Voltar do celular): a rodada ganha uma entrada no histórico, assim o Voltar
      volta para o menu em vez de sair do jogo; no menu, o Voltar sai normalmente */
   function irInicio() {
-    if (app.modo === 'inicio') return;
+    if (app.modo === 'inicio' || app.modo === 'tv' || app.modo === 'controle') return;   // TV e controle cuidam do próprio Voltar
     app.modo = 'inicio'; app.pausado = false; $('btSeguir').hidden = true; manterAcesa(false);
     tela('inicio'); $('btJogar').focus();
     if (som && musicaLigada) { som.ligar(); som.musica('inicio'); }
@@ -156,6 +162,7 @@
     bts[(k < 0 ? 0 : k + passo + bts.length) % bts.length].focus();
   }
   document.addEventListener('keydown', function (ev) {
+    if (app.modo === 'tv' || app.modo === 'controle') return;   // tv.js / controle.js cuidam das teclas
     if (app.modo !== 'jogo') {
       if (ev.key === 'ArrowLeft' || ev.key === 'ArrowUp') { ev.preventDefault(); mover(-1); }
       else if (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') { ev.preventDefault(); mover(1); }
@@ -255,13 +262,17 @@
   /* ---------- começo ---------- */
   $('ver').textContent = 'v' + APP_VERSION + ' · ' + APP_UPDATED;
   traduzir(); marcarNivel(); marcarSom(); marcarMinhas();
-  $('btJogar').disabled = true;
+  $('btJogar').disabled = true; $('btTV').disabled = true; $('btControle').disabled = true;
+  $('btTV').addEventListener('click', function () { if (window.PeluqueriaTV) PeluqueriaTV.abrir(); });
+  $('btControle').addEventListener('click', function () { if (window.PeluqueriaControle) PeluqueriaControle.abrir(); });
   Promise.all([PeluqueriaCenarios.carregar(), PeluqueriaItens.carregar()]).then(function (v) {
     catalogo.cenarios = v[0]; catalogo.itens = v[1];
     $('btMinhas').hidden = !temMinhas();
     flutuantes(catalogo.itens.jogo);
     $('btJogar').disabled = false;
     if (app.modo === 'inicio') $('btJogar').focus();
+    $('btTV').disabled = false; $('btControle').disabled = false;
+    if (TV && window.PeluqueriaTV) PeluqueriaTV.abrir();   // ?tv=auto (/kids, /tv/peluqueria, app da LG): abre a TV
     if (TESTE) window.PeluqueriaDebug.pronto = true;
   });
 

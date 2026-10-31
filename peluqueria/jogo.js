@@ -109,9 +109,12 @@
     if (atual(e).y > FUNDO) registrar(e, 'LONGE', Infinity);
   }
 
-  function parar(e) {
+  /* atraso (s): na TV, o gesto chega pela internet um pouco depois; o item para onde estava no instante do
+     gesto (limitado a 0,5 s, nunca negativo) */
+  function parar(e, atraso) {
     if (e.fase !== 'caindo') return null;
-    var q = e.quedas[e.i], L = q.cenario.lugares[q.lugar], pos = atual(e);
+    var a = Math.max(0, Math.min(0.5, +atraso || 0));
+    var q = e.quedas[e.i], L = q.cenario.lugares[q.lugar], pos = posicao(q, e.nivel, e.i, Math.max(0, e.t - a));
     var d = distancia(pos, L, q.cenario);
     return registrar(e, pontuar(d, pos.rot - (L.rot || 0), e.nivel), d);
   }
@@ -169,7 +172,44 @@
     return it;
   }
 
+  /* ---------- mensagens TV ↔ celular (v0.4.0): tudo que vem do canal passa aqui antes de ser usado ---------- */
+  var IDM = /^[a-z0-9]{6,12}$/, ACOES = ['parar', 'comecar', 'nivel', 'deNovo', 'menu'], FASES = ['lobby', 'contagem', 'jogo', 'fim'];
+  function nomeMsg(n) { if (typeof n !== 'string') return null; n = n.replace(/\s+/g, ' ').trim(); return n && n.length <= 14 ? n : null; }
+  function numero(v, a, b) { return typeof v === 'number' && isFinite(v) && v >= a && v <= b; }
+  function validarMensagem(m) {
+    if (!m || typeof m !== 'object' || Array.isArray(m) || typeof m.t !== 'string') return null;
+    var o = { t: m.t };
+    if ('id' in m) { if (typeof m.id !== 'string' || !IDM.test(m.id)) return null; o.id = m.id; }
+    if ('to' in m) { if (typeof m.to !== 'string' || !IDM.test(m.to)) return null; o.to = m.to; }
+    switch (m.t) {
+      case 'tv': return o;
+      case 'join': if (!o.id) return null; o.nome = nomeMsg(m.nome); if (m.dois === true) o.dois = true; return o.nome ? o : null;
+      case 'sair': return o.id ? o : null;
+      case 'cheia': return o.to ? o : null;
+      case 'ping': if (!o.id || !numero(m.a, 0, 1e15)) return null; o.a = m.a; return o;
+      case 'pong': if (!o.to || !numero(m.a, 0, 1e15) || !numero(m.b, 0, 1e15)) return null; o.a = m.a; o.b = m.b; return o;
+      case 'cmd':
+        if (!o.id || ACOES.indexOf(m.acao) < 0) return null;
+        o.acao = m.acao;
+        if ('q' in m) { if (!numero(m.q, 0, 1e15)) return null; o.q = m.q; }
+        if ('j' in m) o.j = m.j === 1 ? 1 : 0;
+        if (m.acao === 'nivel') { if (!NIVEIS[m.nivel]) return null; o.nivel = m.nivel; }
+        return o;
+      case 'estado':
+        if (FASES.indexOf(m.fase) < 0) return null;
+        o.fase = m.fase; o.nivel = NIVEIS[m.nivel] ? m.nivel : 'normal';
+        o.jogadores = (Array.isArray(m.jogadores) ? m.jogadores : []).slice(0, 2).map(function (j) {
+          j = j || {};
+          return { id: typeof j.id === 'string' && IDM.test(j.id) ? j.id : '', nome: nomeMsg(j.nome) || '?', pontos: numero(j.pontos, 0, 999999) ? Math.round(j.pontos) : (numero(j.pontos, 0, Infinity) ? 999999 : 0), j: j.j === 1 ? 1 : 0 };
+        });
+        if ('vencedor' in m) o.vencedor = m.vencedor === 0 || m.vencedor === 1 ? m.vencedor : -1;
+        return o;
+      default: return null;
+    }
+  }
+
   return {
+    validarMensagem: validarMensagem,
     NIVEIS: NIVEIS, GIRO: GIRO, LIMITES: LIMITES, BASE: BASE, MULTS: MULTS, QUEDAS: QUEDAS, TOPO: TOPO, FUNDO: FUNDO, LUGARES: LUGARES, LATERAIS: LATERAIS,
     aleatorio: aleatorio, sortear: sortear, posicao: posicao, distancia: distancia, pontuar: pontuar,
     criarRodada: criarRodada, avancar: avancar, parar: parar, proxima: proxima, estrelas: estrelas,

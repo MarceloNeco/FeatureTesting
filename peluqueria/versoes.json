@@ -2,6 +2,23 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.4.0",
+      "data": "31/Out/2026",
+      "hora": "19:56:00",
+      "pt": [
+        "Jogar na TV: a TV mostra um código; o celular toca em 📱 Sou o controle, digita o código e vira controle (botão PARAR, nível e começar).",
+        "Corpo: 📷 Usar o corpo liga a câmera do celular e para o item com um movimento brusco — levantar um braço ou chutar. Tremidinha não conta. O vídeo não sai do celular.",
+        "Dois jogadores: com 2 celulares (ou 2 pessoas filmadas por 1 celular) a tela da TV divide ao meio, com pódio no fim.",
+        "O atraso da internet é compensado: vale o instante do gesto. Sem celular, o controle da TV joga sozinho (OK). App para TV LG em tv-lg-peluqueria."
+      ],
+      "en": [
+        "Play on the TV: the TV shows a code; the phone taps 📱 I'm the controller, types the code and becomes the controller (STOP button, level and start).",
+        "Body: 📷 Use your body turns on the phone camera and stops the item with a sudden move — raising an arm or kicking. Small wiggles don't count. Video never leaves the phone.",
+        "Two players: with 2 phones (or 2 people filmed by 1 phone) the TV splits in half, with a podium at the end.",
+        "Internet lag is compensated: the moment of the gesture counts. Without a phone, the TV remote plays alone (OK). LG TV app in tv-lg-peluqueria."
+      ]
+    },
+    {
       "versao": "0.3.2",
       "data": "31/Out/2026",
       "hora": "19:45:00",

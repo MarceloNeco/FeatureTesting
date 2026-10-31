@@ -107,3 +107,40 @@ body.marcar { overflow-y: auto; }
 .quadro { position: absolute; border: 3px dashed var(--lima); border-radius: 8px; box-shadow: 0 0 0 9999px rgba(11,10,31,.35); pointer-events: none; }
 .ponto { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 4px solid var(--rosa); background: rgba(255,255,255,.6); pointer-events: none; }
 .linha { width: 100%; white-space: pre-wrap; word-break: break-all; text-align: left; background: #120f33; border-radius: 12px; padding: 10px; font-size: .8rem; line-height: 1.35; color: #e6e2ff; }
+
+/* ---------- TV e controle (v0.4.0) ---------- */
+.modos-tv { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+#tvLobby, #tvFim, #controle { flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 16px; text-align: center; position: relative; }
+.tv-passo { color: var(--muted); max-width: 760px; line-height: 1.4; font-size: 1.15rem; }
+.tv-passo.pequeno { font-size: .95rem; }
+.codigo { font-size: clamp(3rem, 12vw, 7rem); font-weight: 700; letter-spacing: .3em; color: var(--lima); text-shadow: 0 0 24px rgba(198,255,61,.6); padding-left: .3em; }
+.tv-jogadores { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; min-height: 3rem; }
+.tv-jogadores span { background: var(--card); border-radius: 999px; padding: 8px 18px; font-size: 1.3rem; font-weight: 600; }
+.tv-jogadores span:nth-child(1) { color: var(--lima); } .tv-jogadores span:nth-child(2) { color: var(--rosa); }
+#tvJogo { position: fixed; inset: 0; background: var(--bg); }
+.tv-area { position: absolute; inset: 0; display: flex; }
+.tv-lado { position: relative; flex: 1; min-width: 0; }
+.tv-lado + .tv-lado { border-left: 4px solid #000; }
+.tv-lado canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tv-placar { position: absolute; top: 10px; left: 12px; font-weight: 700; font-size: 1.6rem; text-shadow: 0 2px 6px #000; pointer-events: none; }
+.tv-placar b { color: var(--ouro); font-size: 2.2rem; }
+#tvLado1 .tv-placar span:first-child { color: var(--rosa); } .tv-lado:first-child .tv-placar span:first-child { color: var(--lima); }
+.tv-queda { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); font-weight: 700; font-size: 1.3rem; text-shadow: 0 2px 6px #000; }
+.tv-podio { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; font-size: 1.6rem; }
+.tv-podio div { background: var(--card); border-radius: 20px; padding: 18px 28px; min-width: 200px; }
+.tv-podio b { display: block; font-size: 2.6rem; color: var(--ouro); }
+.tv-podio .vence { box-shadow: 0 0 0 4px var(--ouro), 0 0 30px rgba(255,209,102,.6); }
+.ct-entrada { display: flex; flex-direction: column; gap: 12px; width: min(340px, 100%); }
+.ct-entrada label { display: flex; flex-direction: column; gap: 4px; text-align: left; color: var(--muted); }
+.ct-entrada input { font: inherit; font-size: 1.4rem; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--card); background: #120f33; color: var(--text); }
+#ctCodigo { text-transform: uppercase; letter-spacing: .3em; font-weight: 700; }
+.ct-painel { display: flex; flex-direction: column; gap: 12px; align-items: center; width: min(420px, 100%); }
+.ct-status { font-size: 1.1rem; min-height: 1.5em; }
+.ct-parar { width: 100%; min-height: 34vh; border-radius: 28px; font-size: 3rem; font-weight: 700; color: #1b1030; background: radial-gradient(circle at 50% 40%, #e4ff8a, var(--lima)); box-shadow: 0 8px 0 #6f9a00; }
+.ct-parar:active { transform: translateY(4px); box-shadow: 0 4px 0 #6f9a00; }
+.ct-parar.disparou { background: radial-gradient(circle at 50% 40%, #ffd1e8, var(--rosa)); }
+.ct-corpo { display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; }
+.ct-camera { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden; background: #000; }
+.ct-camera video, .ct-camera canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ct-camera video { transform: scaleX(-1); }
+.tv-podio p { flex-basis: 100%; font-size: 2rem; color: var(--ouro); font-weight: 700; }

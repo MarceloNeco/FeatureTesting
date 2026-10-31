@@ -25,6 +25,22 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/peluqueria/
 Teclado: **Espaço** ou **Enter** param o item; **Esc** ou **P** pausam. Na TV (`?tv=auto`), o **OK** do
 controle para o item e as setas andam entre os botões.
 
+## Jogar na TV (com o celular como controle)
+
+1. Na TV, abra `solverone.com.br/tv/peluqueria` (ou o cartão Peluqueria em `/kids`, ou o app da LG em
+   `tv-lg-peluqueria/`). Aparece um **código de 4 letras**.
+2. No celular, abra `solverone.com.br/FeatureTesting/peluqueria`, toque em **📱 Sou o controle**, digite o código e o
+   seu nome. Até **2 celulares**.
+3. No celular: escolha o nível e toque em **Começar**. Para parar o item, toque em **PARAR**.
+4. **📷 Usar o corpo**: deixe o celular de pé filmando quem joga. Um **movimento brusco** — levantar um braço ou
+   chutar de repente — para o item. Tremidinha e balanço não contam. Na primeira vez baixa ~20 MB (a
+   inteligência do corpo, reaproveitada da Bagunçolândia). O vídeo **não sai do celular**.
+5. **👯 2 pessoas neste celular** (com o corpo ligado): a pessoa da esquerda é o jogador 1, a da direita o 2.
+6. Com 2 jogadores, a TV divide a tela ao meio; no fim, pódio com o vencedor.
+
+Sem celular, o controle da TV joga sozinho: **OK** começa e **OK** para; setas trocam o nível; **Voltar** volta
+ao código. O atraso da internet é compensado: vale o instante em que você tocou ou se mexeu.
+
 ## Instalar e jogar sem internet
 
 No celular, abra o endereço no Chrome, toque nos três pontinhos ⋮ e em **Adicionar à tela inicial**. Depois da
@@ -48,6 +64,10 @@ primeira abertura o jogo funciona sem internet.
 | `trilhas.js` | as 16 músicas (pop dançante) e a abertura: partitura de cada compasso, testada no Node |
 | `som.js`, `voz.js` | toca as músicas e os efeitos (torcida do "u-huuu!") no WebAudio; fala |
 | `marcar.html`, `marcar.js` | página para marcar o lugar certo nas suas fotos |
+| `tv.js`, `controle.js` | modo TV (código, 1 ou 2 jogadores, pódio) e celular como controle (PARAR, corpo) |
+| `sala.js` | canal TV ↔ celular (Supabase broadcast; `BroadcastChannel` nos testes) |
+| `partida.js`, `gesto.js` | puros: partida de 1 ou 2 jogadores; detector de movimento brusco |
+| `esqueleto.js` | esqueleto por IA (MediaPipe da pasta da Bagunçolândia) |
 | `sw.js` | guarda tudo no aparelho (cache `peluqueria-v…`); `VERSAO` igual à `APP_VERSION` |
 | `teste/` | testes (não vão para o site) e o gerador dos desenhos |
 

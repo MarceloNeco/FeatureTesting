@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Peluqueria — Bolinho de Chuva · SolverONE</title>
 <link rel="icon" href="icone-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -42,6 +42,10 @@
   </div>
   <button id="btMinhas" class="chave" type="button" aria-pressed="false" hidden><span data-t="Minhas imagens|My pictures"></span></button>
   <button id="btJogar" class="grande" type="button" data-t="Jogar|Play"></button>
+  <div class="modos-tv">
+    <button id="btTV" class="medio" type="button" data-t="📺 Jogar na TV|📺 Play on the TV"></button>
+    <button id="btControle" class="medio" type="button" data-t="📱 Sou o controle|📱 I'm the controller"></button>
+  </div>
   <p class="rodape"><span id="ver"></span> · SolverONE · Bolinho de Chuva</p>
 </section>
 
@@ -68,6 +72,59 @@
   <button id="btInicio" class="medio" type="button" data-t="Início|Home"></button>
 </section>
 
+<!-- ===== TV ===== -->
+<section id="tvLobby" class="tela">
+  <h1 class="logo">Peluqueria</h1>
+  <p class="tv-passo" data-t="No celular, abra solverone.com.br/FeatureTesting/peluqueria, toque em 📱 Sou o controle e digite o código:|On the phone, open solverone.com.br/FeatureTesting/peluqueria, tap 📱 I'm the controller and type the code:"></p>
+  <div id="codigo" class="codigo" aria-live="polite">····</div>
+  <div id="tvJogadores" class="tv-jogadores" aria-live="polite"></div>
+  <p class="tv-nivel"><span data-t="Nível|Level"></span>: <b id="tvNivel"></b></p>
+  <p class="tv-passo pequeno" data-t="Até 2 celulares. Sem celular, aperte OK no controle da TV para jogar sozinho.|Up to 2 phones. No phone? Press OK on the TV remote to play alone."></p>
+  <button id="tvComecar" class="grande" type="button" data-t="Começar (OK)|Start (OK)"></button>
+  <p id="tvAviso" class="tv-passo pequeno"></p>
+</section>
+
+<section id="tvJogo" class="tela">
+  <div class="tv-area">
+    <div class="tv-lado"><canvas id="tvPalco0"></canvas><div class="tv-placar"><span id="tvNome0"></span> <b id="tvPontos0">0</b> <span id="tvMult0" class="mult"></span></div></div>
+    <div class="tv-lado" id="tvLado1"><canvas id="tvPalco1"></canvas><div class="tv-placar"><span id="tvNome1"></span> <b id="tvPontos1">0</b> <span id="tvMult1" class="mult"></span></div></div>
+  </div>
+  <div id="tvQueda" class="tv-queda">1/10</div>
+</section>
+
+<section id="tvFim" class="tela">
+  <h2 data-t="Fim da rodada!|Round over!"></h2>
+  <div id="tvPodio" class="tv-podio" aria-live="polite"></div>
+  <p class="tv-passo" data-t="OK ou o celular: jogar de novo · Voltar: lobby|OK or the phone: play again · Back: lobby"></p>
+</section>
+
+<!-- ===== Celular como controle ===== -->
+<section id="controle" class="tela">
+  <div class="faixa"><button id="ctSair" class="mini" type="button" aria-label="Sair / Leave">🏠</button></div>
+  <h2 data-t="📱 Controle da TV|📱 TV controller"></h2>
+  <div id="ctEntrada" class="ct-entrada">
+    <label><span data-t="Código da TV|TV code"></span><input id="ctCodigo" maxlength="4" autocomplete="off" autocapitalize="characters" inputmode="text"></label>
+    <label><span data-t="Seu nome|Your name"></span><input id="ctNome" maxlength="14" autocomplete="off"></label>
+    <button id="ctEntrar" class="grande" type="button" data-t="Entrar|Join"></button>
+  </div>
+  <div id="ctPainel" class="ct-painel" hidden>
+    <p id="ctStatus" class="ct-status" aria-live="polite"></p>
+    <div id="ctNiveis" class="niveis">
+      <button id="ctCrianca" class="nivel crianca" type="button" data-nivel-tv="crianca" data-t="Criança|Kids"></button>
+      <button id="ctNormal" class="nivel normal" type="button" data-nivel-tv="normal" data-t="Normal|Normal"></button>
+      <button id="ctMaluco" class="nivel maluco" type="button" data-nivel-tv="maluco" data-t="Maluco|Crazy"></button>
+    </div>
+    <button id="ctComecar" class="grande" type="button" data-t="Começar|Start"></button>
+    <button id="ctParar" class="ct-parar" type="button" data-t="PARAR!|STOP!"></button>
+    <div class="ct-corpo">
+      <button id="ctCorpo" class="chave" type="button" aria-pressed="false" data-t="📷 Usar o corpo|📷 Use your body"></button>
+      <button id="ctDois" class="chave" type="button" aria-pressed="false" hidden data-t="👯 2 pessoas neste celular|👯 2 people on this phone"></button>
+      <p id="ctDicaCorpo" class="dica" hidden data-t="Deixe o celular de pé, filmando quem joga. Levante um braço ou chute de repente para parar. Tremidinha não conta.|Stand the phone up, filming the players. Raise an arm or kick suddenly to stop. Small wiggles don't count."></p>
+      <div id="ctCamera" class="ct-camera" hidden><video id="ctVideo" muted playsinline></video><canvas id="ctEsq"></canvas></div>
+    </div>
+  </div>
+</section>
+
 <section id="desligado" class="tela">
   <p data-t="Esta brincadeira está desligada no momento.|This game is turned off right now."></p>
 </section>
@@ -82,7 +139,13 @@
 <script src="trilhas.js"></script>
 <script src="som.js"></script>
 <script src="voz.js"></script>
+<script src="gesto.js"></script>
+<script src="partida.js"></script>
+<script src="sala.js"></script>
+<script src="esqueleto.js"></script>
 <script src="../recursos.js" data-app="feature-tester"></script>
 <script src="app.js"></script>
+<script src="tv.js"></script>
+<script src="controle.js"></script>
 </body>
 </html>

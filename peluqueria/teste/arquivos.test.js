@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const pasta = path.resolve(__dirname, '..');
 const ler = f => fs.readFileSync(path.join(pasta, f), 'utf8');
-const CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'";
+const CSP = "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'";
 
 function arquivosSW() {
   const m = ler('sw.js').match(/var ARQUIVOS = (\[[^\]]*\])/);
@@ -25,7 +25,7 @@ test('versão igual nos três lugares', () => {
   const a = ler('app.js').match(/APP_VERSION = '([\d.]+)'/)[1];
   const s = ler('sw.js').match(/VERSAO = '([\d.]+)'/)[1];
   const v = JSON.parse(ler('versoes.json')).versoes[0];
-  assert.equal(a, '0.3.2'); assert.equal(s, '0.3.2'); assert.equal(v.versao, '0.3.2');
+  assert.equal(a, '0.4.0'); assert.equal(s, '0.4.0'); assert.equal(v.versao, '0.4.0');
   for (const k of ['data', 'hora', 'pt', 'en']) assert.ok(v[k], 'versoes.json sem ' + k);
 });
 
