@@ -65,6 +65,13 @@ convida a chamar a TV e jogar com o corpo todo.
 
 **Suas imagens**: veja `meus/LEIA-ME.md` para colocar as figuras que você quiser no jogo.
 
+## Se a TV travar ou desenhar errado
+
+Abra na TV o endereço com `?tv=auto&debug` no fim (ex.: `solverone.com.br/FeatureTesting/baguncolandia/?tv=auto&debug`).
+Aparece uma caixa no canto com a versão, o modo (leve/normal), os quadros por segundo e qualquer erro.
+Tire uma foto dessa caixa e mande: é o que falta para achar o problema. O desenho é blindado: se uma parte
+(boneco, frutas, placar, legenda) falhar no navegador da TV, as outras continuam.
+
 ## Segurança (como foi pensado)
 
 - Só arquivos estáticos. Nada roda em servidor da SolverONE; nada é gravado.

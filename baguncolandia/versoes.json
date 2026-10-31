@@ -2,6 +2,25 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.1",
+      "data": "31/Out/2026",
+      "hora": "11:51:00",
+      "pt": [
+        "Botão 🔄 para trocar a câmera (frente/trás) sempre à vista: em cima da prévia no celular pareado e na barra do modo \"só o celular\". Funciona mesmo quando o aparelho não lista as câmeras.",
+        "TV blindada: cada parte do desenho (boneco, frutas, placar, legenda) roda separada; se uma falhar no navegador da TV, as outras continuam e o quadro fecha inteiro (acaba com o boneco sem cabeça e a tela travada).",
+        "Vídeo do celular mais leve: 480×270 a 20 quadros/s e menos bits, sem filtro de cor na TV (menos \"sinal fraco\").",
+        "TV no modo leve desenha no máximo 30 quadros por segundo.",
+        "?debug no endereço da TV mostra no canto navegador, modo, quadros/s e qualquer erro (para fotografar e mandar)."
+      ],
+      "en": [
+        "🔄 camera switch (front/back) always visible: over the preview on the paired phone and in the phone-only bar. Works even when the device does not list its cameras.",
+        "TV hardened: each drawing part (avatar, fruit, score, captions) runs separately; if one fails on the TV browser the rest keeps going and the frame always completes (fixes the headless avatar and frozen screen).",
+        "Lighter phone video: 480×270 at 20 fps and fewer bits, no colour filter on the TV.",
+        "TV in light mode draws at most 30 frames per second.",
+        "?debug on the TV address shows browser, mode, fps and any error in the corner."
+      ]
+    },
+    {
       "versao": "0.8.0",
       "data": "31/Out/2026",
       "hora": "12:10:00",
@@ -22,8 +41,12 @@
       "versao": "0.7.1",
       "data": "31/Out/2026",
       "hora": "10:40:00",
-      "pt": ["Modo só o celular / no dedo: o lobby não fica mais atrás da barra de botões nem repete textos da TV (em pé e deitado)."],
-      "en": ["Phone-only / by-finger mode: the lobby no longer sits behind the button bar or repeats TV texts (portrait and landscape)."]
+      "pt": [
+        "Modo só o celular / no dedo: o lobby não fica mais atrás da barra de botões nem repete textos da TV (em pé e deitado)."
+      ],
+      "en": [
+        "Phone-only / by-finger mode: the lobby no longer sits behind the button bar or repeats TV texts (portrait and landscape)."
+      ]
     },
     {
       "versao": "0.7.0",

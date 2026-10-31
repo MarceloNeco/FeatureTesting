@@ -18,6 +18,18 @@
     if (root.Boneco) root.Boneco.leve = D.leve;
     D.estrelas = D.estrelas.slice(0, D.leve ? 25 : 60);
   }
+  /* roda uma parte do desenho protegida: se der erro (ex.: recurso que o navegador da TV não tem), registra,
+     desfaz o estado do canvas e segue para a próxima parte, para o quadro sempre fechar inteiro */
+  D.erros = [];
+  function seguro(nome, fn) {
+    var ctx = D.ctx; ctx.save();
+    try { fn(); ctx.restore(); }
+    catch (e) {
+      for (var k = 0; k < 12; k++) ctx.restore();
+      ctx.setTransform(D.escala, 0, 0, D.escala, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.shadowBlur = 0;
+      var msg = nome + ': ' + (e && e.message || e); if (D.erros[D.erros.length - 1] !== msg) D.erros.push(msg); if (D.erros.length > 8) D.erros.shift();
+    }
+  }
   function ehTV() { var ua = (root.navigator && navigator.userAgent) || ''; return /Web0S|webOS|SMART-TV|SmartTV|Tizen|BRAVIA|VIDAA|NetCast|HbbTV|AppleTV|CrKey|AFT[A-Z]/i.test(ua); }
   var EN = /^en/i.test((root.navigator && root.navigator.language) || '');
   function T(pt, en) { return EN ? en : pt; }
@@ -165,9 +177,9 @@
       ctx.restore();
     });
     // boneco de cada jogador (ambiente paisagem)
-    if (paisagem && (D.mostrarBoneco !== false || estado.modo === 'pula')) jogs.forEach(function (jg, j) { boneco(ctx, jg, j, ts, dt); });   // no modo do dedo a pessoa pode esconder o boneco (menos no Pula e abaixa)
+    if (paisagem && (D.mostrarBoneco !== false || estado.modo === 'pula')) jogs.forEach(function (jg, j) { seguro('boneco', function () { boneco(ctx, jg, j, ts, dt); }); });   // no modo do dedo a pessoa pode esconder o boneco (menos no Pula e abaixa)
     // as coisas
-    estado.coisas.forEach(function (c) {
+    seguro('coisas', function () { estado.coisas.forEach(function (c) {
       if (c.morta) return;
       if (c.papel === 'obstaculo') { obstaculo(ctx, c, ts); return; }
       var fig = root.Figuras.porId(c.fig); if (!fig) return;
@@ -178,9 +190,9 @@
       if (c.papel === 'vilao') { ctx.save(); sombra(ctx, '#ff1744', 30); ctx.fillStyle = 'rgba(255,23,68,.18)'; ctx.beginPath(); ctx.arc(c.x, c.y, c.raio * 1.15, 0, 6.2832); ctx.fill(); ctx.restore(); }
       if (c.papel === 'poder' || (fig.mascote)) { ctx.save(); sombra(ctx, fig.mascote ? CORES.ouro : CORES.ciano, 36 + 10 * Math.sin(ts / 150)); ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.beginPath(); ctx.arc(c.x, c.y, c.raio * 1.2, 0, 6.2832); ctx.fill(); ctx.restore(); }
       desenharFigura(ctx, c, fig);
-    });
+    }); });
     // metades cortadas caindo
-    for (var m = D.metades.length - 1; m >= 0; m--) {
+    seguro('metades', function () { for (var m = D.metades.length - 1; m >= 0; m--) {
       var h = D.metades[m]; h.vida -= dtMs; if (h.vida <= 0) { D.metades.splice(m, 1); continue; }
       h.vy += 900 * dt; h.x += h.vx * dt; h.y += h.vy * dt; h.rot += h.lado * 3 * dt;
       var img = h.fig && imagem(h.fig, h.raio), s = h.raio * 2.3;
@@ -190,14 +202,14 @@
       var off = 6 * h.lado; ctx.translate(-sa * off, ca * off);
       if (img) ctx.drawImage(img, -s / 2, -s / 2, s, s); else { ctx.fillStyle = (h.fig && h.fig.suco) || '#fff'; ctx.beginPath(); ctx.arc(0, 0, h.raio, 0, 6.2832); ctx.fill(); }
       ctx.restore();
-    }
-    particulas(ctx, dt, dtMs);
+    } });
+    seguro('particulas', function () { particulas(ctx, dt, dtMs); });
     // clarão
     if (D.flash > 0) { ctx.fillStyle = 'rgba(255,255,255,' + Math.min(0.5, D.flash) + ')'; ctx.fillRect(0, 0, W, H); D.flash -= dt * 1.5; }
     // chuva do Chuvisco: a tela molha
     if (D.chuva > 0) { D.chuva -= dtMs; ctx.fillStyle = 'rgba(79,195,247,' + Math.min(0.35, D.chuva / 4000) + ')'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = 'rgba(200,235,255,.7)'; for (var q = 0; q < (D.menos ? 10 : 40); q++) { var rx = (q * 173 + ts / 3) % W, ry = (q * 97 + ts / 1.5) % H; ctx.fillRect(rx, ry, 2, 14); } }
-    hud(ctx, estado, ts);
-    camadaTexto(ctx, ts, dtMs);
+    seguro('placar', function () { hud(ctx, estado, ts); });
+    seguro('legenda', function () { camadaTexto(ctx, ts, dtMs); });
     if (t0 && !D.leve) { D.medidas.push(performance.now() - t0); if (D.medidas.length >= 60) { var soma = 0; D.medidas.forEach(function (m) { soma += m; }); if (soma / D.medidas.length > 40) leve(true); D.medidas = []; } }
   }
 
@@ -365,5 +377,5 @@
     ctx.restore();
   }
 
-  root.Desenho = { iniciar: iniciar, quadro: quadro, legenda: legenda, contagem: contagem, confete: confete, podio: podio, nomes: nomes, texto: texto, ambiente: ambiente, avatares: avatares, previa: previa, previaCabeca: previaCabeca, imagem: imagem, pulso: pulso, mostrarBoneco: mostrarBoneco, leve: leve, ehTV: ehTV, limpar: limpar, CORES: CORES, W: W, H: H };
+  root.Desenho = { iniciar: iniciar, quadro: quadro, legenda: legenda, contagem: contagem, confete: confete, podio: podio, nomes: nomes, texto: texto, ambiente: ambiente, avatares: avatares, previa: previa, previaCabeca: previaCabeca, imagem: imagem, pulso: pulso, mostrarBoneco: mostrarBoneco, leve: leve, estaLeve: function () { return D.leve; }, erros: function () { return D.erros; }, ehTV: ehTV, limpar: limpar, CORES: CORES, W: W, H: H };
 })(typeof self !== 'undefined' ? self : this);

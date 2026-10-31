@@ -99,6 +99,8 @@ function ok(msg) { console.log('✓ ' + msg); }
   await solo.setViewportSize({ width: 390, height: 844 });
   const barra = await solo.evaluate(() => { const b = document.getElementById('localComecar'); const r = b.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(document.getElementById('tvLocalBar')).display !== 'none'; });
   if (barra) ok('só o celular: botão ▶ visível no lobby'); else falhou('só o celular: sem botão de começar');
+  const cam = await solo.evaluate(() => { const b = document.getElementById('localCamera'); const r = b.getBoundingClientRect(); return r.width >= 40 && r.height >= 40; });
+  if (cam) ok('só o celular: botão 🔄 trocar câmera visível'); else falhou('só o celular: sem botão de trocar câmera');
   await solo.click('#localComecar');
   await solo.waitForFunction(() => window.BaguncaApp.TVApp.tv.fase === 'jogando', null, { timeout: 30000 });
   ok('só o celular: rodada começou pelo ▶ da barra');
@@ -135,6 +137,16 @@ function ok(msg) { console.log('✓ ' + msg); }
   await cel.evaluate(() => { document.getElementById('entrar').classList.remove('ativa'); document.getElementById('jogo').classList.add('ativa'); });
   const largura2 = await cel.evaluate(() => document.documentElement.scrollWidth);
   if (largura2 <= 320) ok('tela da sala sem rolagem lateral em 320 px'); else falhou('rolagem lateral na sala: ' + largura2);
+  const cam2 = await cel.evaluate(() => { const b = document.getElementById('btCameraTopo'); const r = b.getBoundingClientRect(); return r.width >= 40 && r.height >= 40 && !b.disabled; });
+  if (cam2) ok('celular pareado: botão 🔄 em cima da prévia'); else falhou('celular pareado: sem botão 🔄 visível');
+  // v0.8.1: TV com ?debug mostra a caixa de depuração e o desenho blindado não acumula erros
+  const dbg = await ctx.newPage(); await dbg.goto(base + '?teste&tv=auto&debug'); await dbg.waitForFunction(() => document.getElementById('pct').textContent === '100', null, { timeout: 15000 }); await dbg.waitForTimeout(1500);
+  const caixa = await dbg.evaluate(() => { const b = document.getElementById('tvDebug'); return b ? b.textContent : ''; });
+  if (/fps/.test(caixa) && /sem erros/.test(caixa)) ok('TV ?debug: caixa com fps e sem erros'); else falhou('TV ?debug: ' + caixa);
+  await dbg.evaluate(() => window.Desenho.leve(true)); await dbg.waitForTimeout(1200);
+  const leveOk = await dbg.evaluate(() => document.getElementById('tv').classList.contains('leve') && window.Desenho.erros().length === 0);
+  if (leveOk) ok('modo leve: classe na TV e desenho sem erros'); else falhou('modo leve com problema');
+  await dbg.close();
   await cel.screenshot({ path: '/tmp/pagina-cel-jogo.png', fullPage: true });
   const errosReais = erros.filter(e => !/favicon|solverone-dados|ERR_NAME_NOT_RESOLVED|ERR_INTERNET|Failed to load resource.*(youtube|supabase)|supabase-js|net::ERR/i.test(e));
   if (errosReais.length) falhou('erros no console: ' + errosReais.join(' | ')); else ok('sem erros de JavaScript nem de CSP');
