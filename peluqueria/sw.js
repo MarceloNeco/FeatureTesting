@@ -16,8 +16,18 @@ self.addEventListener('fetch', function (e) {
   var req = e.request; if (req.method !== 'GET') return;
   var url = new URL(req.url);
   if (url.origin !== location.origin) return;
-  if (/\.(woff2|png|webp|jpg|jpeg|svg|mp3)$/i.test(url.pathname)) {
-    e.respondWith(caches.match(req).then(function (r) { return r || fetch(req).then(function (resp) { if (resp.ok) { var c2 = resp.clone(); caches.open(CACHE).then(function (c) { c.put(req, c2); }); } return resp; }); }));
+  if (/\.mp3$/i.test(url.pathname)) {
+    // o <audio> pede pedaços (Range → 206), que o cache não aceita: guarda uma cópia inteira (200) pela URL
+    e.respondWith(caches.match(url.href).then(function (r) {
+      return r || fetch(new Request(url.href)).then(function (resp) {
+        if (resp.status === 200) { var c2 = resp.clone(); caches.open(CACHE).then(function (c) { return c.put(url.href, c2); }).catch(function () {}); }
+        return resp;
+      });
+    }));
+    return;
+  }
+  if (/\.(woff2|png|webp|jpg|jpeg|svg)$/i.test(url.pathname)) {
+    e.respondWith(caches.match(req).then(function (r) { return r || fetch(req).then(function (resp) { if (resp.status === 200) { var c2 = resp.clone(); caches.open(CACHE).then(function (c) { return c.put(req, c2); }).catch(function () {}); } return resp; }); }));
     return;
   }
   var nav = req.mode === 'navigate';
@@ -25,7 +35,7 @@ self.addEventListener('fetch', function (e) {
     var feito = false, pedido = fetch(req, { cache: 'no-cache' });
     var t = setTimeout(function () { if (!feito) { feito = true; caches.match(req, { ignoreSearch: nav }).then(function (r) { ok(r || pedido); }); } }, 4000);
     pedido.then(function (resp) {
-      if (resp.ok) { var c2 = resp.clone(); caches.open(CACHE).then(function (c) { c.put(req, c2); }); }
+      if (resp.status === 200) { var c2 = resp.clone(); caches.open(CACHE).then(function (c) { return c.put(req, c2); }).catch(function () {}); }
       if (!feito) { feito = true; clearTimeout(t); ok(resp); }
     }).catch(function () { if (!feito) { feito = true; clearTimeout(t); caches.match(req, { ignoreSearch: nav }).then(function (r) { ok(r || Response.error()); }); } });
   }));

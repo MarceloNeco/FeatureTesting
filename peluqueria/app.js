@@ -27,7 +27,8 @@
   }
   function tela(id) { document.querySelectorAll('.tela').forEach(function (s) { s.classList.toggle('ativa', s.id === id); }); }
 
-  window.PeluqueriaApp = { tela: tela, T: T, get lingua() { return pref.lingua; } };
+  var app = { modo: 'inicio', rodada: null, pausado: false, resto: 0, espera: 0, resultado: null, trava: null };
+  window.PeluqueriaApp = { tela: tela, T: T, get lingua() { return pref.lingua; }, estado: function () { return app.rodada; } };
   if (window.SolverRecursos && !SolverRecursos.ligado('peluqueria', true)) { tela('desligado'); traduzir(); return; }
   try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 
@@ -37,8 +38,7 @@
 
   var desenho = PeluqueriaDesenho.criar($('palco'), { leve: TV });
   var catalogo = { cenarios: { jogo: [], meus: [] }, itens: { jogo: [], meus: [] } };
-  // modo: inicio | contagem | jogo | fim
-  var app = { modo: 'inicio', rodada: null, pausado: false, resto: 0, espera: 0, resultado: null, trava: null };
+  // app.modo: inicio | contagem | jogo | fim
 
   /* ---------- Início ---------- */
   function marcarNivel() {
@@ -114,7 +114,7 @@
   function continuar() {
     if (!app.pausado) return;
     app.pausado = false; $('btSeguir').hidden = true; manterAcesa(true);
-    if (som) som.musica(pref.nivel);
+    if (som) { som.ligar(); som.musica(pref.nivel); }   // ligar(): o iPhone deixa o áudio suspenso depois de sair do app
   }
   $('btPausa').addEventListener('click', pausar);
   $('btSeguir').addEventListener('click', continuar);
@@ -136,6 +136,7 @@
       return;
     }
     var k = ev.key;
+    if (ev.repeat) { if (k === ' ' || k === 'Enter') ev.preventDefault(); return; }   // OK/Enter segurado não para a próxima queda
     if (k === 'Escape' || k === 'p' || k === 'P') { ev.preventDefault(); if (app.pausado) continuar(); else pausar(); return; }
     if (k === ' ' || k === 'Enter') {
       ev.preventDefault();
@@ -186,11 +187,13 @@
     var res = r.fase === 'parado' ? app.resultado : null, rot = res ? ROTULO[res.categoria] : null;
     desenho.pintar(r, { pos: pos, resultado: res, rotulo: rot ? T(rot[0], rot[1]) : '', uhul: res && res.categoria === 'PERFEITO' ? T('UHUL!', 'WOOHOO!') : '', pausado: app.pausado, dt: app.pausado ? 0 : dt });
   }
-  var ultimo = 0;
+  var ultimo = 0, errosQuadro = [];
   function quadro(ts) {
+    requestAnimationFrame(quadro);   // primeiro agenda o próximo: um erro neste quadro nunca congela o jogo
     var dt = ultimo ? Math.min(0.1, (ts - ultimo) / 1000) : 0; ultimo = ts;
-    tick(dt); pintar(dt);
-    requestAnimationFrame(quadro);
+    try { tick(dt); } catch (e) { errosQuadro.push('tick: ' + e.message); }
+    try { pintar(dt); } catch (e) { errosQuadro.push('desenho: ' + e.message); }
+    if (errosQuadro.length > 5) errosQuadro.splice(0, errosQuadro.length - 5);
   }
   function redimensionar() { if (app.modo === 'jogo') { desenho.redimensionar(); pintar(0); } }
   window.addEventListener('resize', redimensionar);
@@ -228,7 +231,7 @@
       qAnt = q; tAnt = agora;
       var av = PeluqueriaCenarios.avisos.concat(PeluqueriaItens.avisos);
       caixa.textContent = 'v' + APP_VERSION + (TV ? ' · TV leve' : '') + ' · fps ' + fps + '\n' +
-        (errosVistos.length ? 'erros: ' + errosVistos.join(' | ') : 'sem erros') + (av.length ? '\navisos: ' + av.join(' | ') : '');
+        (errosVistos.concat(errosQuadro).length ? 'erros: ' + errosVistos.concat(errosQuadro).join(' | ') : 'sem erros') + (av.length ? '\navisos: ' + av.join(' | ') : '');
     };
     atualizar(); setInterval(atualizar, 1000);
   }

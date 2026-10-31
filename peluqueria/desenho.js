@@ -9,10 +9,13 @@
 
   function criar(canvas, op) {
     var leve = !!(op && op.leve), ctx = canvas.getContext('2d');
-    var W = 0, H = 0, confete = [], ultimoResultado = null, quadros = 0;
+    var W = 0, H = 0, dpr = 1, confete = [], ultimoResultado = null, quadros = 0;
+    var cacheFundo = { chave: '', tela: null }, cacheItens = {};
+    var temFiltro = 'filter' in ctx;
+    function telaNova(w, h) { var c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; }
 
     function redimensionar() {
-      var dpr = leve ? 1 : Math.min(2, root.devicePixelRatio || 1);
+      dpr = leve ? 1 : Math.min(2, root.devicePixelRatio || 1);
       W = canvas.clientWidth || root.innerWidth; H = canvas.clientHeight || root.innerHeight;
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -23,29 +26,45 @@
       return { x: (W - w) / 2, y: (H - h) / 2, w: w, h: h };
     }
 
+    /* o fundo (cenário inteiro + sobra desfocada + vinheta) é pintado uma vez por queda/tamanho de tela
+       numa tela escondida; cada quadro só copia essa tela (rasterizar o SVG a cada quadro trava celular fraco) */
     function fundo(c, cx) {
-      ctx.fillStyle = '#0b0a1f'; ctx.fillRect(0, 0, W, H);
-      if (!leve && c.img) {
-        var e = Math.max(W / c.largura, H / c.altura) * 1.1, w = c.largura * e, h = c.altura * e;
-        ctx.save(); ctx.filter = 'blur(24px) brightness(0.5)';
-        ctx.drawImage(c.img, (W - w) / 2, (H - h) / 2, w, h);
-        ctx.restore();
+      var chave = c.src + '|' + W + 'x' + H + '@' + dpr;
+      if (cacheFundo.chave !== chave) {
+        var t = telaNova(W * dpr, H * dpr), g2 = t.getContext('2d');
+        g2.setTransform(dpr, 0, 0, dpr, 0, 0);
+        g2.fillStyle = '#0b0a1f'; g2.fillRect(0, 0, W, H);
+        if (!leve) {
+          var e = Math.max(W / c.largura, H / c.altura) * 1.1, w = c.largura * e, h = c.altura * e;
+          g2.save(); if (temFiltro) g2.filter = 'blur(24px) brightness(0.5)';
+          g2.drawImage(c.img, (W - w) / 2, (H - h) / 2, w, h);
+          g2.restore();
+          if (!temFiltro) { g2.fillStyle = 'rgba(11,10,31,0.6)'; g2.fillRect(0, 0, W, H); }   // Safari sem filter: só escurece
+        }
+        g2.drawImage(c.img, cx.x, cx.y, cx.w, cx.h);
+        var g = g2.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+        g.addColorStop(0, 'rgba(11,10,31,0)'); g.addColorStop(1, 'rgba(11,10,31,0.7)');
+        g2.fillStyle = g; g2.fillRect(0, 0, W, H);
+        cacheFundo = { chave: chave, tela: t };
       }
-      ctx.drawImage(c.img, cx.x, cx.y, cx.w, cx.h);
-      var g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
-      g.addColorStop(0, 'rgba(11,10,31,0)'); g.addColorStop(1, 'rgba(11,10,31,0.7)');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(cacheFundo.tela, 0, 0, W, H);
     }
 
     function item(it, L, cx, x, y, rot, fantasma) {
       var iw = L.tam * (it.escala || 1) * cx.w;
       var ih = iw * ((it.img.naturalHeight || it.img.height || 1) / (it.img.naturalWidth || it.img.width || 1));
+      var chave = it.src + '|' + Math.round(iw) + '@' + dpr, bmp = cacheItens[chave];
+      if (!bmp) {   // o item também vira bitmap uma vez por tamanho
+        bmp = telaNova(iw * dpr, ih * dpr); bmp.getContext('2d').drawImage(it.img, 0, 0, bmp.width, bmp.height);
+        if (Object.keys(cacheItens).length > 40) cacheItens = {};
+        cacheItens[chave] = bmp;
+      }
       ctx.save();
       ctx.translate(cx.x + x * cx.w, cx.y + y * cx.h);
       ctx.rotate(rot * Math.PI / 180);
       if (fantasma) ctx.globalAlpha = 0.35;
       else if (!leve) { ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 10; }
-      ctx.drawImage(it.img, -it.encaixe.x * iw, -it.encaixe.y * ih, iw, ih);
+      ctx.drawImage(bmp, -it.encaixe.x * iw, -it.encaixe.y * ih, iw, ih);
       ctx.restore();
     }
 

@@ -10,7 +10,7 @@
   var Ctx = root.AudioContext || root.webkitAudioContext;
   var ctx = null, mestre = null, ruido = null, mudo = false;
   var nivel = 'normal', bpm = 132, passo = 0, proximo = 0, relogio = 0, tocando = false;
-  var minhas = [], audio = null;
+  var minhas = [], audio = null, fonte = '';   // fonte: '' | 'minhas' | 'jogo'
   var registro = TESTE ? [] : null;
 
   // progressão alegre I–V–vi–IV; notas em semitons acima da tônica de cada nível
@@ -74,27 +74,32 @@
   function agendar() {
     if (!ctx || !tocando) return;
     var dur = 60 / bpm / 4;
+    if (proximo < ctx.currentTime) proximo = ctx.currentTime + 0.02;   // atrasou (app em segundo plano): pula, sem rajada
     while (proximo < ctx.currentTime + 0.1) { agendarPasso(proximo, passo); passo++; proximo += dur; }
   }
 
+  function sintetizada() {
+    if (!ctx) return;
+    fonte = 'jogo'; tocando = true; passo = 0; proximo = ctx.currentTime + 0.05;
+    clearInterval(relogio); relogio = setInterval(agendar, 25); agendar();
+  }
   function musica(n) {
     if (n) nivel = n;
     parar();
-    if (minhas.length) {
-      try {
-        if (!audio) { audio = new Audio(); audio.loop = true; }
-        audio.src = 'musicas/' + minhas[Math.floor(Math.random() * minhas.length)].arquivo;
-        audio.muted = mudo; var pr = audio.play(); if (pr && pr.catch) pr.catch(function () {});
-      } catch (e) {}
-      return;
-    }
-    if (!ctx) return;
-    tocando = true; passo = 0; proximo = ctx.currentTime + 0.05;
-    clearInterval(relogio); relogio = setInterval(agendar, 25); agendar();
+    if (!minhas.length) return sintetizada();
+    // MP3 do dono; se não tocar (arquivo quebrado, sem internet e fora do cache), volta para a trilha do jogo
+    var falhou = function () { if (fonte === 'minhas') { if (audio) try { audio.pause(); } catch (e) {} sintetizada(); } };
+    try {
+      if (!audio) { audio = new Audio(); audio.loop = true; }
+      fonte = 'minhas';
+      audio.onerror = falhou;
+      audio.src = 'musicas/' + minhas[Math.floor(Math.random() * minhas.length)].arquivo;
+      audio.muted = mudo; var pr = audio.play(); if (pr && pr.catch) pr.catch(falhou);
+    } catch (e) { falhou(); }
   }
   function andamento(i) { bpm = BPM[nivel] + 2 * (i || 0); }
   function parar() {
-    tocando = false; clearInterval(relogio);
+    tocando = false; fonte = ''; clearInterval(relogio);
     if (audio) try { audio.pause(); } catch (e) {}
   }
 
@@ -130,5 +135,5 @@
     }).catch(function () {});
   }
 
-  root.PeluqueriaSom = { ligar: ligar, musica: musica, andamento: andamento, parar: parar, efeito: efeito, mudo: definirMudo, registro: registro, minhas: function () { return minhas.slice(); } };
+  root.PeluqueriaSom = { ligar: ligar, musica: musica, andamento: andamento, parar: parar, efeito: efeito, mudo: definirMudo, registro: registro, minhas: function () { return minhas.slice(); }, fonte: function () { return fonte; }, _ctx: function () { return ctx; } };
 })(typeof self !== 'undefined' ? self : this);

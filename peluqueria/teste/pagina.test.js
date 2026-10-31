@@ -27,7 +27,8 @@ async function abrir(browser, url, opcoes = {}) {
   pg.on('console', m => { if (m.type() === 'error') erros.push(m.text() + ' @' + (m.location() && m.location().url)); });
   pg.on('pageerror', e => erros.push('pageerror: ' + e.message));
   await pg.goto(url);
-  await pg.waitForFunction(() => window.PeluqueriaDebug && window.PeluqueriaDebug.pronto, null, { timeout: 15000 });
+  if (opcoes.semDebug) await pg.waitForFunction(() => !document.getElementById('btJogar').disabled, null, { timeout: 15000 });
+  else await pg.waitForFunction(() => window.PeluqueriaDebug && window.PeluqueriaDebug.pronto, null, { timeout: 15000 });
   pg.erros = () => erros.filter(e => !IGNORAR.test(e));
   return pg;
 }
@@ -190,6 +191,68 @@ async function comecar(pg, nivel) {
   await passo(pdb, 500);
   confere(/v0\.1\.0/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
+
+  /* ---------- revisão final ---------- */
+  // 1) segurar Enter/OK: as repetições do teclado não seguem nem param a próxima queda
+  {
+    const pr = await abrir(browser, base + '?teste');
+    await D(pr, () => PeluqueriaDebug.novaRodada('crianca'));
+    await ateAlvo(pr); await pr.keyboard.press('Enter'); await passo(pr, 500);
+    await D(pr, () => { for (let k = 0; k < 3; k++) document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', repeat: true, bubbles: true })); });
+    const er = await est(pr);
+    confere(er.res.length === 1 && er.res[0] === 'PERFEITO' && er.i === 0, 'segurar OK não vira LONGE na próxima queda', er);
+  }
+  // 2) um erro no desenho não congela o laço de verdade (sem ?teste)
+  {
+    const pq = await abrir(browser, base, { antes: () => {
+      let real;
+      Object.defineProperty(window, 'PeluqueriaDesenho', { configurable: true, get: () => real, set: v => {
+        real = { criar: (c, o) => { const d = v.criar(c, o), p = d.pintar; let vez = 0; d.pintar = function () { if (++vez === 3) throw new Error('erro de teste'); return p.apply(this, arguments); }; return d; } };
+      } });
+    }, semDebug: true });
+    await pq.click('#btJogar');
+    await pq.waitForTimeout(3500);
+    const t = await D(pq, () => PeluqueriaApp.estado() && PeluqueriaApp.estado().t);
+    confere(t > 0.5, 'erro no desenho não congela a rodada', t);
+  }
+  // 3) o cenário e o item não são redesenhados a partir do SVG a cada quadro
+  {
+    const pc = await abrir(browser, base + '?teste');
+    await D(pc, () => PeluqueriaDebug.novaRodada('normal'));
+    const n = await D(pc, () => {
+      const e = PeluqueriaDebug.estado(), q = e.quedas[e.i], proto = CanvasRenderingContext2D.prototype, orig = proto.drawImage; let svg = 0;
+      proto.drawImage = function (im) { if (im === q.cenario.img || im === q.item.img) svg++; return orig.apply(this, arguments); };
+      PeluqueriaDebug.passo(1000); proto.drawImage = orig; return svg;
+    });
+    confere(n <= 4, 'SVG do cenário e do item desenhados poucas vezes (cache por queda)', n);
+  }
+  // 5 e 6) música: sem rajada de notas atrasadas; ▶ religa o áudio (iPhone)
+  {
+    const pa = await abrir(browser, base + '?teste', { antes: () => {
+      const par = () => ({ value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {} });
+      const no = () => ({ connect() {}, start() { window.__notas++; }, stop() {}, gain: par(), frequency: par(), type: '', buffer: null });
+      window.__notas = 0; window.__ligou = 0;
+      window.AudioContext = function () { this.currentTime = 0; this.state = 'running'; this.sampleRate = 8000; this.destination = {}; };
+      Object.assign(window.AudioContext.prototype, { createGain: no, createOscillator: no, createBiquadFilter: no, createBufferSource: no, resume() { window.__ligou++; return Promise.resolve(); }, createBuffer: () => ({ getChannelData: () => new Float32Array(8000) }) });
+    } });
+    await D(pa, () => PeluqueriaDebug.novaRodada('normal'));
+    await pa.waitForTimeout(200);
+    const notas = await D(pa, async () => { const c = PeluqueriaSom._ctx(); window.__notas = 0; c.currentTime += 20; await new Promise(r => setTimeout(r, 120)); return window.__notas; });
+    confere(notas < 40, 'atraso de 20 s não dispara rajada de notas', notas);
+    await pa.click('#btPausa'); await D(pa, () => { PeluqueriaSom._ctx().state = 'suspended'; window.__ligou = 0; });
+    await pa.click('#btSeguir');
+    confere(await D(pa, () => window.__ligou) >= 1, '▶ religa o áudio suspenso');
+  }
+  // 4) MP3 do dono que não toca: volta para a trilha do jogo
+  {
+    const ctxA = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'pt-BR' });
+    const pmp = await ctxA.newPage();
+    await pmp.route('**/musicas/musicas.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: '[{"nome":"X","arquivo":"quebrada.mp3"}]' }));
+    await pmp.route('**/musicas/quebrada.mp3', r => r.fulfill({ status: 404, body: '' }));
+    await pmp.goto(base + '?teste'); await pmp.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
+    await pmp.click('#btJogar'); await pmp.waitForTimeout(1500);
+    confere(await D(pmp, () => PeluqueriaSom.fonte()) === 'jogo', 'MP3 que falha cai na trilha do jogo', await D(pmp, () => PeluqueriaSom.fonte()));
+  }
 
   /* ---------- 320 px ---------- */
   const p320 = await abrir(browser, base + '?teste', { ctx: { viewport: { width: 320, height: 640 } } });
