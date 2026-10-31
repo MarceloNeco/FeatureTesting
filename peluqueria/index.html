@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Peluqueria — Bolinho de Chuva · SolverONE</title>
+<link rel="icon" href="icone-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-192.png">
+<meta name="theme-color" content="#0b0a1f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="O provador maluco da família: pare o item na hora certa e ganhe pontos. / The family's crazy fitting room: stop the item at the right moment.">
+<link rel="stylesheet" href="estilo.css">
+<!--
+  Peluqueria — segunda brincadeira da família Bolinho de Chuva (SolverONE · Feature Tester).
+  Um item (coroa, bigode, peruca…) desce sobre uma imagem; toque em qualquer ponto para parar.
+  Quanto mais perto do lugar certo, mais pontos. Sem login, sem banco, sem cookie: só arquivos
+  estáticos (cache no aparelho pelo sw.js). Nenhum script inline: a CSP acima não permite.
+  Mapa dos arquivos: LEIA-ME.md. Versão: APP_VERSION em app.js e VERSAO em sw.js.
+-->
+</head>
+<body>
+
+<section id="inicio" class="tela ativa" data-recurso="peluqueria">
+  <div class="faixa">
+    <button id="btLingua" class="mini" type="button" aria-label="Idioma / Language">EN</button>
+    <button id="btSom" class="mini" type="button" aria-label="Som / Sound">🔊</button>
+    <button id="btAjuda" class="mini" type="button" aria-label="Como jogar / How to play">❓</button>
+  </div>
+  <h1 class="logo">Peluqueria</h1>
+  <p class="sub" data-t="o provador maluco da família|the family's crazy fitting room"></p>
+  <div id="ajuda" class="ajuda" hidden>
+    <p data-t="Um item vai descer sobre a imagem. Toque em qualquer ponto da tela para ele parar. Quanto mais perto do lugar certo, mais pontos: Perfeito vale 100, Bom 60, Quase 30. Acertos seguidos multiplicam até ×3. São 10 quedas por rodada.|An item will fall over the picture. Tap anywhere on the screen to stop it. The closer to the right spot, the more points: Perfect is 100, Good 60, Almost 30. Hits in a row multiply up to ×3. 10 drops per round."></p>
+  </div>
+  <div class="niveis" role="group" aria-label="Nível / Level">
+    <button id="btCrianca" class="nivel crianca" type="button" data-nivel="crianca"><span data-t="Criança|Kids"></span></button>
+    <button id="btNormal" class="nivel normal" type="button" data-nivel="normal"><span data-t="Normal|Normal"></span></button>
+    <button id="btMaluco" class="nivel maluco" type="button" data-nivel="maluco"><span data-t="Maluco|Crazy"></span></button>
+  </div>
+  <button id="btMinhas" class="chave" type="button" aria-pressed="false" hidden><span data-t="Minhas imagens|My pictures"></span></button>
+  <button id="btJogar" class="grande" type="button" data-t="Jogar|Play"></button>
+  <p class="rodape"><span id="ver"></span> · SolverONE · Bolinho de Chuva</p>
+</section>
+
+<section id="contagem" class="tela">
+  <div id="numero" class="numero">3</div>
+</section>
+
+<section id="rodada" class="tela">
+  <canvas id="palco"></canvas>
+  <div class="placar"><span id="pontos">0</span><span id="mult" class="mult" hidden></span><span id="queda">1/10</span></div>
+  <button id="btPausa" class="mini pausa" type="button" aria-label="Pausar / Pause">⏸</button>
+  <button id="btSeguir" class="seguir" type="button" aria-label="Continuar / Resume" hidden>▶</button>
+</section>
+
+<section id="fim" class="tela">
+  <h2 data-t="Fim da rodada!|Round over!"></h2>
+  <div id="estrelas" class="estrelas" aria-live="polite"></div>
+  <p class="total"><span id="total">0</span> <span data-t="pontos|points"></span></p>
+  <p id="novoRecorde" class="recorde-novo" hidden data-t="Novo recorde!|New record!"></p>
+  <p class="recorde"><span data-t="Recorde|Record"></span>: <span id="recorde">0</span></p>
+  <p class="perfeitos"><span data-t="Perfeitos|Perfects"></span>: <span id="perfeitos">0</span></p>
+  <button id="btDeNovo" class="grande" type="button" data-t="Jogar de novo|Play again"></button>
+  <button id="btInicio" class="medio" type="button" data-t="Início|Home"></button>
+</section>
+
+<section id="desligado" class="tela">
+  <p data-t="Esta brincadeira está desligada no momento.|This game is turned off right now."></p>
+</section>
+
+<div id="aviso" class="sr" aria-live="polite"></div>
+<div id="debug" class="debug" hidden></div>
+
+<script src="jogo.js"></script>
+<script src="cenarios.js"></script>
+<script src="itens.js"></script>
+<script src="desenho.js"></script>
+<script src="som.js"></script>
+<script src="voz.js"></script>
+<script src="../recursos.js" data-app="feature-tester"></script>
+<script src="app.js"></script>
+</body>
+</html>

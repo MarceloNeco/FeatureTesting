@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Peluqueria — marcar o lugar certo</title>
+<link rel="icon" href="icone-192.png">
+<meta name="theme-color" content="#0b0a1f">
+<link rel="stylesheet" href="estilo.css">
+<!-- Página de apoio: a foto escolhida é aberta só neste aparelho (não é enviada nem salva). -->
+</head>
+<body class="marcar">
+<main class="marcar-caixa">
+  <div class="faixa"><button id="btLingua" class="mini" type="button" aria-label="Idioma / Language">EN</button></div>
+  <h1 class="logo pequeno">Peluqueria</h1>
+  <h2 data-t="Marcar o lugar certo|Mark the right spot"></h2>
+  <p class="dica" data-t="1. Escolha a foto. Ela fica só neste aparelho, não é enviada para lugar nenhum.|1. Pick the picture. It stays on this device and is not sent anywhere."></p>
+  <label class="medio arquivo"><span data-t="Escolher foto|Choose picture"></span><input id="foto" type="file" accept="image/*"></label>
+  <div class="modos" role="group">
+    <button id="modoCenario" class="nivel marcado" type="button" aria-pressed="true" data-t="Cenário (foto)|Scene (photo)"></button>
+    <button id="modoItem" class="nivel" type="button" aria-pressed="false" data-t="Item (chapéu, óculos…)|Item (hat, glasses…)"></button>
+  </div>
+  <p class="dica" id="dicaModo" data-t="2. Escolha o tipo de lugar e arraste um quadrado sobre a foto: o centro é onde o item para; a largura é o tamanho dele.|2. Pick the kind of spot and drag a box over the picture: the center is where the item stops; the width is its size."></p>
+  <div class="lugares" role="group">
+    <button class="nivel marcado" type="button" data-lugar="cabeca" data-t="Cabeça|Head"></button>
+    <button class="nivel" type="button" data-lugar="olhos" data-t="Olhos|Eyes"></button>
+    <button class="nivel" type="button" data-lugar="nariz" data-t="Nariz|Nose"></button>
+    <button class="nivel" type="button" data-lugar="boca" data-t="Boca|Mouth"></button>
+  </div>
+  <label class="giro"><span data-t="Giro|Tilt"></span> <input id="giro" type="range" min="-45" max="45" step="1" value="0"> <output id="giroValor">0°</output></label>
+  <div id="area" class="area"><img id="imagem" alt=""><div id="quadro" class="quadro" hidden></div><div id="ponto" class="ponto" hidden></div></div>
+  <p class="dica" data-t="3. Copie a linha e cole no arquivo meus/cenarios.json (ou meus/itens.json), entre os colchetes. Instruções em meus/LEIA-ME.md.|3. Copy the line and paste it into meus/cenarios.json (or meus/itens.json), between the brackets. Instructions in meus/LEIA-ME.md."></p>
+  <pre id="linha" class="linha"></pre>
+  <button id="copiar" class="grande" type="button" data-t="Copiar|Copy"></button>
+  <p id="copiado" class="dica" hidden data-t="Copiado!|Copied!"></p>
+  <p id="aviso" class="dica alerta" hidden></p>
+</main>
+<script src="jogo.js"></script>
+<script src="marcar.js"></script>
+</body>
+</html>
