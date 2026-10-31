@@ -128,6 +128,7 @@
     if (!c || typeof c !== 'object') return null;
     var o = { passo: String(c.passo || '').slice(0, 20), ok: !!c.ok };
     if (c.caixa) o.caixa = caixaOk(c.caixa);
+    if ('n' in c) o.n = clamp(+c.n || 0, 0, 9);
     return o;
   }
 

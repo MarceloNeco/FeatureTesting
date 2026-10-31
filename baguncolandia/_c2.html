@@ -2,7 +2,7 @@
 <canvas id="c"></canvas><script src="jogo.js"></script><script src="figuras.js"></script><script src="cenas.js"></script><script src="boneco.js"></script><script src="desenho.js"></script>
 <script>
 var p=Bagunca.criarPartida({modo:'pula',jogadores:2,duracao:60,figuras:Figuras.lista()});
-Desenho.iniciar(document.getElementById('c'),{nomes:['Lia','Téo']});Desenho.ambiente('paisagem','floresta');
+Desenho.iniciar(document.getElementById('c'),{nomes:['Lia','Téo'],leve:true});Desenho.ambiente('paisagem','floresta');
 Desenho.avatares([{cabeca:'menina',cabelo:'trancas',corCabelo:'#1a1446',pele:'#8d5524',cor:'#ff4fa3',roupa:'vestido',acessorio:'laco',sapato:'#ffffff'},{cabeca:'menino',cabelo:'espetado',corCabelo:'#f9a825',pele:'#ffd9b3',cor:'#3ee8ff',roupa:'macacao',acessorio:'bone',sapato:'#ff4fa3'}]);
 p.comecar();p.calibrar(0,{x:0.4,y:0.1,w:0.2,h:0.8});p.calibrar(1,{x:0.4,y:0.1,w:0.2,h:0.8});
 var last=0;function loop(ts){var dt=last?ts-last:16;last=ts;p.avancar(dt);var t=ts/1000;p.corpo(0,{x:0.3+0.2*Math.sin(t),y:0.1,w:0.2,h:0.8},ts);p.corpo(1,{x:0.5,y:Math.sin(t*3)>0.5?-0.1:0.1,w:0.2,h:0.8},ts);p.movimento(0,[[0.8,0.2,90]],ts);Desenho.quadro(p.estado(),p.eventos(),ts);requestAnimationFrame(loop);}requestAnimationFrame(loop);

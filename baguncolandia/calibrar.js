@@ -9,7 +9,7 @@
 (function (root) {
   'use strict';
   var PASSOS = ['fundo', 'parado', 'bracoDir', 'bracoEsq', 'chute', 'pulo'];
-  var TEMPO_PASSO = 10000, CICLO = 100;
+  var TEMPO_PASSO = 7000, CICLO = 100;
   var TEXTOS = {
     fundo: { pt: 'Saia da frente da câmera por um instante', en: 'Step out of the camera view for a moment' },
     parado: { pt: 'Agora entre e fique parado, de braços abertos', en: 'Now step in and stand still with your arms open' },
@@ -31,9 +31,11 @@
     function avisar(estado, dados) { opts.aoPasso && opts.aoPasso(passo(), estado, dados || {}); }
     function proximo(estado) {
       if (estado && idx >= 0) avisar(estado, { caixa: caixa });
+      // se a TV não enxergou a pessoa parada, não adianta pedir braço, chute e pulo: vai direto para o jogo
+      if (estado === 'pulado' && passo() === 'parado') idx = PASSOS.length - 1;
       idx++; inicioPasso = Date.now(); quietoDesde = 0; estavelDesde = 0; acertos = 0; caixaAnterior = null;
       if (idx >= PASSOS.length) { parar(); opts.aoFim && opts.aoFim(caixa || { x: faixa[0] + (faixa[1] - faixa[0]) * 0.2, y: 0.05, w: (faixa[1] - faixa[0]) * 0.6, h: 0.9 }); return; }
-      avisar('espera', { texto: TEXTOS[passo()], caixa: caixa });
+      avisar('espera', { texto: TEXTOS[passo()], caixa: caixa, n: idx + 1, total: PASSOS.length });
     }
     function silhueta(d) { return visao.silhueta(d, faixa); }
     function zona(nome) {   // zonas dentro da caixa (espelhadas): direito = lado direito da tela

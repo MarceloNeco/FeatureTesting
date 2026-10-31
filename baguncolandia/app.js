@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.7.1', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.8.0', APP_UPDATED = '31/10/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -193,7 +193,7 @@
         var acabou = false;
         function fim(caixa) { if (acabou) return; acabou = true; tv.caixas[item.j] = caixa; tv.calib = null; Som.tocar('ok'); dizer(Calibrar.TEXTOS.fim.pt, Calibrar.TEXTOS.fim.en); setTimeout(ok, 1200); }
         function passo(p, estado, d) {
-          if (estado === 'espera') { var t = Calibrar.TEXTOS[p]; dizer(t.pt, t.en); Desenho.legenda(T(t.pt, t.en), '#ff5252', true); }
+          if (estado === 'espera') { var t = Calibrar.TEXTOS[p], n = d && d.n ? d.n : (Calibrar.PASSOS.indexOf(p) + 1); dizer(t.pt, t.en); Desenho.legenda(n + '/' + Calibrar.PASSOS.length + ' · ' + T(t.pt, t.en), '#ff5252', true); }
           else if (estado === 'ok') { Som.tocar('pegou'); Desenho.legenda(T(p === 'parado' ? Calibrar.TEXTOS.vi.pt : Calibrar.TEXTOS.ok.pt, p === 'parado' ? Calibrar.TEXTOS.vi.en : Calibrar.TEXTOS.ok.en), '#c6ff3d', false); if (p === 'parado') dizer(Calibrar.TEXTOS.vi.pt, Calibrar.TEXTOS.vi.en); }
           else if (estado === 'pulado') { Desenho.legenda(T(Calibrar.TEXTOS.pulado.pt, Calibrar.TEXTOS.pulado.en), '#ffd166', false); }
         }
@@ -443,7 +443,7 @@
           if (estado === 'medindo') return;
           var t = Calibrar.TEXTOS[p], txt = estado === 'ok' ? '✅ ' + T(t.pt, t.en) : estado === 'pulado' ? '⏭ ' + T(t.pt, t.en) : '🔴 ' + T(t.pt, t.en);
           $('calTxt').textContent = txt; $('calTxt').className = 'cal ' + (estado === 'ok' ? 'ok' : 'espera');
-          cel.sala.enviarDados({ e: 0, p: [], cal: { passo: p, ok: estado === 'ok', caixa: d.caixa || null } });
+          cel.sala.enviarDados({ e: 0, p: [], cal: { passo: p, ok: estado === 'ok', caixa: d.caixa || null, n: d.n || 0 } });
         },
         aoFim: function (caixa) { cel.calib = null; $('btPularCal').style.display = 'none'; $('calTxt').textContent = '✅ ' + T('Pronto!', 'Ready!'); $('calTxt').className = 'cal ok'; cel.sala.enviarDados({ e: 0, p: [], cal: { passo: 'fim', ok: true, caixa: caixa } }); setTimeout(function () { $('calTxt').textContent = ''; }, 3000); }
       });
