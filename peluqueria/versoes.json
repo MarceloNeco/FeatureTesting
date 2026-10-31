@@ -2,6 +2,21 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.3.0",
+      "data": "31/Out/2026",
+      "hora": "19:22:00",
+      "pt": [
+        "Música de abertura especial na tela de início: rock elétrico rápido, com guitarra distorcida em notas rápidas, bateria de rock, viradas de tons e melodia.",
+        "Cada rodada toca uma música diferente.",
+        "Abertura com luz e movimento: holofotes coloridos varrendo a tela, brilhos piscando, itens do jogo flutuando e o nome brilhando e pulsando na batida da música."
+      ],
+      "en": [
+        "Special opening track on the start screen: fast electric rock with a distorted guitar riff, rock drums, tom fills and a melody.",
+        "Each round plays a different track.",
+        "Opening with lights and motion: colored spotlights sweeping the screen, twinkling sparkles, floating game items and the title shining and pulsing to the beat."
+      ]
+    },
+    {
       "versao": "0.2.1",
       "data": "31/Out/2026",
       "hora": "19:13:00",

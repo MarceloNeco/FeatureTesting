@@ -189,7 +189,7 @@ async function comecar(pg, nivel) {
 
   const pdb = await abrir(browser, base + '?debug&teste');
   await passo(pdb, 500);
-  confere(/v0\.2\.1/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(/v0\.3\.0/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
 
   /* ---------- revisão final ---------- */
@@ -254,21 +254,43 @@ async function comecar(pg, nivel) {
     confere(await D(pmp, () => PeluqueriaSom.fonte()) === 'jogo', 'MP3 que falha cai na trilha do jogo', await D(pmp, () => PeluqueriaSom.fonte()));
   }
 
-  // música desde a tela de início, sem recomeçar ao entrar no jogo, e tocando na tela de fim
+  // abertura especial na tela de início; uma música diferente a cada rodada; música segue no fim
   {
     const pi = await abrir(browser, base + '?teste');
     confere(await D(pi, () => PeluqueriaSom.fonte()) === '', 'sem som antes do primeiro toque');
     await pi.click('#btMaluco');
-    confere(await D(pi, () => PeluqueriaSom.fonte()) === 'jogo', 'primeiro toque na tela de início liga a música');
-    await pi.waitForTimeout(2500);
-    const antes = await D(pi, () => PeluqueriaSom.posicao());
-    await pi.click('#btJogar'); await pi.waitForTimeout(300);
-    const depois = await D(pi, () => PeluqueriaSom.posicao());
-    confere(depois.faixa === antes.faixa && depois.compasso >= antes.compasso, 'entrar no jogo não recomeça a música', [antes, depois]);
+    confere(await D(pi, () => PeluqueriaSom.fonte()) === 'jogo' && (await D(pi, () => PeluqueriaSom.posicao().faixa)) === 'abertura', 'primeiro toque toca a música de abertura');
     confere((await D(pi, () => PeluqueriaTrilhas.FAIXAS.length)) === 10, '10 músicas carregadas');
-    await D(pi, () => { PeluqueriaDebug.passo(2200); for (let k = 0; k < 10; k++) { PeluqueriaDebug.passo(PeluqueriaDebug.tempoAteAlvo()); document.getElementById('palco').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); PeluqueriaDebug.passo(2100); } });
+    const rodada = async () => {
+      await pi.click('#btJogar'); await pi.waitForTimeout(100);
+      const f = await D(pi, () => PeluqueriaSom.posicao().faixa);
+      await D(pi, () => { PeluqueriaDebug.passo(2200); for (let k = 0; k < 10; k++) { PeluqueriaDebug.passo(PeluqueriaDebug.tempoAteAlvo()); document.getElementById('palco').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); PeluqueriaDebug.passo(2100); } });
+      return f;
+    };
+    const f1 = await rodada();
+    confere(typeof f1 === 'number', 'a rodada troca a abertura por uma música do jogo', f1);
     confere(await pi.isVisible('#fim') && await D(pi, () => PeluqueriaSom.fonte()) === 'jogo', 'música segue tocando na tela de fim');
+    await pi.click('#btDeNovo'); await pi.waitForTimeout(100);
+    const f2 = await D(pi, () => PeluqueriaSom.posicao().faixa);
+    confere(typeof f2 === 'number' && f2 !== f1, '"Jogar de novo" toca outra música', [f1, f2]);
+    await passo(pi, 2200); await pi.click('#btCasa');
+    confere((await D(pi, () => PeluqueriaSom.posicao().faixa)) === 'abertura', 'de volta ao menu, toca a abertura');
     confere(pi.erros().length === 0, 'música: sem erros', pi.erros());
+  }
+  // abertura com movimento e luz: holofotes, brilhos, itens flutuando e o nome pulsando na batida
+  {
+    const pv = await abrir(browser, base + '?teste');
+    const feixes = await D(pv, () => [...document.querySelectorAll('#inicio .feixe')].map(e => getComputedStyle(e).animationName));
+    confere(feixes.length >= 2 && feixes.every(n => n && n !== 'none'), 'holofotes girando na abertura', feixes);
+    confere(await D(pv, () => document.querySelectorAll('#inicio .flutuantes img').length) >= 6, 'itens flutuando na abertura');
+    await D(pv, () => { window.__batidas = 0; new MutationObserver(() => { if (document.querySelector('.logo').classList.contains('bate')) window.__batidas++; }).observe(document.querySelector('.logo'), { attributes: true }); });
+    await pv.click('#btNormal'); await pv.waitForTimeout(2500);
+    confere(await D(pv, () => window.__batidas) >= 3, 'nome do jogo pulsa na batida da música', await D(pv, () => window.__batidas));
+    await pv.screenshot({ path: '/tmp/peluqueria-abertura.png' });
+    const ctxR = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'pt-BR', reducedMotion: 'reduce' });
+    const pr2 = await ctxR.newPage(); await pr2.goto(base + '?teste'); await pr2.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
+    const parado = await pr2.evaluate(() => [...document.querySelectorAll('#inicio .feixe, #inicio .flutuantes img')].every(e => getComputedStyle(e).animationName === 'none'));
+    confere(parado, 'com "reduzir movimento" no aparelho, a abertura fica parada');
   }
   {
     const ptk = await abrir(browser, base + '?tv=auto&teste', { ctx: { viewport: { width: 1280, height: 720 } } });

@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.2.1', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.3.0', APP_UPDATED = '31/10/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -94,7 +94,7 @@
     $('numero').textContent = '3'; tela('contagem');
     falar('Três, dois, um, já!', 'Three, two, one, go!');
     efeito('conta');
-    if (som) { som.musica(pref.nivel); som.andamento(0); }
+    if (som) som.rodada(pref.nivel);   // cada rodada, uma música diferente
   }
 
   /* ---------- rodada ---------- */
@@ -144,7 +144,7 @@
   $('palco').addEventListener('pointerdown', function (ev) { ev.preventDefault(); parar(); });
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') { pausar(); if (som) som.parar(); }
-    else if (som && musicaLigada && app.modo !== 'jogo') { som.ligar(); som.musica(app.modo === 'contagem' ? pref.nivel : 'inicio'); }
+    else if (som && musicaLigada && app.modo !== 'jogo') { som.ligar(); som.musica(app.modo === 'contagem' ? pref.nivel : app.modo === 'fim' ? 'fim' : 'inicio'); }
   });
 
   /* setas andam entre os botões visíveis (controle da TV, teclado) */
@@ -172,7 +172,7 @@
 
   function fim() {
     app.modo = 'fim'; manterAcesa(false);
-    if (som) { som.musica('inicio'); som.efeito('fim'); }   // a música continua na tela de fim
+    if (som) { som.musica('fim'); som.efeito('fim'); }   // a música da rodada continua na tela de fim
     var r = app.rodada, n = P.estrelas(r);
     $('estrelas').textContent = '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n);
     $('total').textContent = String(r.pontos);
@@ -233,6 +233,25 @@
     } catch (e) {}
   }
 
+  /* ---------- abertura com movimento: itens flutuando e o nome pulsando na batida ---------- */
+  function flutuantes(itens) {
+    var caixa = $('flutuantes'); if (!caixa || caixa.childElementCount) return;
+    itens.slice(0, 10).forEach(function (it, k) {
+      var im = document.createElement('img'); im.src = it.src; im.alt = '';
+      im.style.setProperty('--x', (4 + (k * 37) % 88) + '%');
+      im.style.setProperty('--w', (54 + (k * 13) % 40) + 'px');
+      im.style.setProperty('--d', (9 + (k * 7) % 8) + 's');
+      im.style.setProperty('--atraso', (-(k * 1.7)) + 's');
+      im.style.setProperty('--giro', ((k % 2 ? -1 : 1) * (180 + (k * 50) % 180)) + 'deg');
+      caixa.appendChild(im);
+    });
+  }
+  if (som && som.aoBater) som.aoBater(function () {
+    if (app.modo !== 'inicio' && app.modo !== 'fim') return;
+    var l = document.querySelector('.tela.ativa .logo') || document.querySelector('#inicio .logo');
+    l.classList.add('bate'); setTimeout(function () { l.classList.remove('bate'); }, 130);
+  });
+
   /* ---------- começo ---------- */
   $('ver').textContent = 'v' + APP_VERSION + ' · ' + APP_UPDATED;
   traduzir(); marcarNivel(); marcarSom(); marcarMinhas();
@@ -240,6 +259,7 @@
   Promise.all([PeluqueriaCenarios.carregar(), PeluqueriaItens.carregar()]).then(function (v) {
     catalogo.cenarios = v[0]; catalogo.itens = v[1];
     $('btMinhas').hidden = !temMinhas();
+    flutuantes(catalogo.itens.jogo);
     $('btJogar').disabled = false;
     if (app.modo === 'inicio') $('btJogar').focus();
     if (TESTE) window.PeluqueriaDebug.pronto = true;

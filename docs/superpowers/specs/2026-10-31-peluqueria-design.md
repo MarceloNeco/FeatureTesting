@@ -74,6 +74,11 @@ Fora da pasta (fase 1):
 5. **Fim**: estrelas (0 a 3), pontos, recorde do nível ("Novo recorde!" quando bate), contagem de
    Perfeitos, botões **Jogar de novo** e **Início**.
 
+**Abertura com luz e movimento (v0.3.0):** três holofotes coloridos (lima, rosa, ciano) varrendo a tela,
+brilhos piscando, os itens do jogo flutuando e girando ao fundo, o nome com brilho correndo e pulsando na
+batida da música, e o botão Jogar pulsando. Tudo só com CSS (leve para a TV; na TV sem brilhos e sem mistura de
+cores); com "reduzir movimento" no aparelho, fica parado.
+
 **Menu (v0.2.1):** a rodada tem 🏠 no canto (ao lado do ⏸). O 🏠, o "Início" do fim e o botão **Voltar do
 celular** levam ao menu: ao começar a jogar, a página ganha uma entrada no histórico, então o Voltar fecha a
 rodada em vez de sair do jogo; no menu, o Voltar sai normalmente.
@@ -201,6 +206,10 @@ o som ligado/desligado e o "Minhas imagens". **Nenhuma imagem é salva nem expor
   acordes diferentes, acordes com sétima, refrão de 8 compassos (frase, resposta, parte nova mais aguda e
   fechamento), melodia própria no verso, arpejo, viradas de bateria e de baixo a cada 4 compassos e subida de
   um tom no último refrão; a melodia evita repetir a mesma nota em seguida.
+- **v0.3.0 (dono):** **música de abertura** especial na tela de início (`M.ABERTURA`, 138 BPM, rock elétrico:
+  guitarra distorcida em semicolcheias alternando nota pedal e notas que andam, só a guitarra no começo,
+  bateria com virada de tons, acordes "power", baixo e melodia; em laço). **Cada rodada toca uma música
+  diferente** (a próxima da lista, do começo); a música da rodada segue na tela de fim; o 🏠 volta à abertura.
 - Tocam desde a tela de início (a partir do primeiro toque) e pelo jogo todo, sem recomeçar ao entrar na
   rodada; o andamento é o da música −6 BPM no Criança e +6 no Maluco, +1 BPM a cada queda.
 - Efeitos: PERFEITO (acorde brilhante + prato) com **torcida sintetizada** "u-huuu!" (várias vozes, plateia e

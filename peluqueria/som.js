@@ -13,10 +13,11 @@
   var M = root.PeluqueriaTrilhas;
   var ctx = null, mestre = null, ruido = null, busAcordes = null, busLead = null, mudo = false;
   var nivel = 'inicio', queda = 0, faixa = TESTE ? 0 : Math.floor(Math.random() * M.FAIXAS.length), compasso = 0, passo = 0;
+  var tipo = 'abertura', rodadas = 0, batidas = [], distorcao = null;   // tipo: 'abertura' (tela de início) | 'jogo'
   var proximo = 0, relogio = 0, tocando = false, contador = 0, eventos = [];
   var minhas = [], audio = null, fonte = '';   // fonte: '' | 'minhas' | 'jogo'
   var registro = TESTE ? [] : null;
-  var VOLUME = 0.7;
+  var VOLUME = 0.62;
 
   function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
 
@@ -114,6 +115,24 @@
     env(g, t, 0.003, Math.min(0.16, dur * 0.9), 0.3 * vol);
     osc(t, 'square', hz(nota), 0, 0.18, f); osc(t, 'triangle', hz(nota + 12), 4, 0.18, f);
   }
+  function curvaDistorcao() {
+    if (distorcao) return distorcao;
+    var n = 1024, c = new Float32Array(n);
+    for (var k = 0; k < n; k++) { var x = k * 2 / n - 1; c[k] = Math.tanh(x * 6) * 0.9; }
+    return (distorcao = c);
+  }
+  function guitarra(t, notas, dur, vol, sustenta) {   // dente de serra → distorção → filtro: guitarra elétrica
+    var ws = ctx.createWaveShaper(), f = filtro('lowpass', sustenta ? 3000 : 3800, 1), g = ctx.createGain();
+    ws.curve = curvaDistorcao(); ws.connect(f); f.connect(g); g.connect(mestre);
+    var pre = ctx.createGain(); pre.gain.value = 0.6; pre.connect(ws);
+    if (sustenta) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16 * vol, t + 0.01); g.gain.setValueAtTime(0.14 * vol, t + dur - 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); }
+    else env(g, t, 0.003, Math.min(dur, 0.14), 0.42 * vol);
+    notas.forEach(function (n) { osc(t, 'sawtooth', hz(n), -8, dur, pre); osc(t, 'sawtooth', hz(n), 8, dur, pre); });
+  }
+  function tom(t, vol, altura) {
+    var g = ctx.createGain(); g.connect(mestre); env(g, t, 0.003, 0.3, 0.8 * vol);
+    var o = osc(t, 'sine', 90 + 160 * altura, 0, 0.32, g); o.frequency.exponentialRampToValueAtTime((90 + 160 * altura) * 0.6, t + 0.25);
+  }
   function tocarEvento(e, t, s16, F) {
     var d = e.dur * s16;
     switch (e.tipo) {
@@ -128,6 +147,9 @@
       case 'acorde': return acorde(t, e.notas, d, e.vol, e.filtro, e.estilo);
       case 'lead': return lead(t, e.nota, d, e.vol, F.lead);
       case 'arpejo': return arpejo(t, e.nota, d, e.vol);
+      case 'guitarra': return guitarra(t, [e.nota], d, e.vol, false);
+      case 'power': return guitarra(t, e.notas, d, e.vol, true);
+      case 'tom': return tom(t, e.vol, e.altura);
     }
   }
 
@@ -136,22 +158,33 @@
     if (!ctx || !tocando) return;
     if (proximo < ctx.currentTime) proximo = ctx.currentTime + 0.02;   // atrasou (app em segundo plano): pula, sem rajada
     while (proximo < ctx.currentTime + 0.12) {
-      var F = M.FAIXAS[faixa], s16 = 60 / M.andamento(F, nivel, queda) / 4;
-      if (passo === 0) eventos = M.partitura(F, compasso).eventos;
+      var ab = tipo === 'abertura', F = ab ? M.ABERTURA : M.FAIXAS[faixa];
+      var s16 = 60 / (ab ? M.ABERTURA.bpm : M.andamento(F, nivel, queda)) / 4;
+      if (passo === 0) eventos = (ab ? M.abertura(compasso) : M.partitura(F, compasso)).eventos;
       for (var k = 0; k < eventos.length; k++) if (eventos[k].t === passo) { try { tocarEvento(eventos[k], proximo, s16, F); } catch (e) {} }
+      if (passo % 4 === 0 && batidas.length) avisarBatida(proximo - ctx.currentTime);
       contador++; passo++; proximo += s16;
-      if (passo === 16) { passo = 0; var p = M.proxima(faixa, compasso + 1); faixa = p.faixa; compasso = p.compasso; }
+      if (passo === 16) {
+        passo = 0;
+        if (ab) compasso = M.proximaAbertura(compasso);
+        else { var p = M.proxima(faixa, compasso + 1); faixa = p.faixa; compasso = p.compasso; }
+      }
     }
   }
 
+  function avisarBatida(emSeg) {   // o nome do jogo pulsa junto com a música
+    setTimeout(function () { batidas.forEach(function (fn) { try { fn(); } catch (e) {} }); }, Math.max(0, emSeg * 1000));
+  }
   function sintetizada() {
     if (!ctx) return;
     fonte = 'jogo'; tocando = true; passo = 0; proximo = ctx.currentTime + 0.05;   // retoma no começo do compasso onde parou
     clearInterval(relogio); relogio = setInterval(agendar, 25); agendar();
   }
-  /* n: 'inicio' | 'crianca' | 'normal' | 'maluco'. Se já está tocando, só muda o andamento (não recomeça). */
+  /* n: 'inicio' (toca a abertura) | 'fim' (segue a música da rodada, no andamento normal) |
+     'crianca' | 'normal' | 'maluco' (segue/retoma a música da rodada). */
   function musica(n) {
-    if (n) { nivel = n; if (n === 'inicio') queda = 0; }
+    if (n === 'inicio' || n === 'fim') { nivel = 'inicio'; queda = 0; } else if (n) nivel = n;
+    if (n === 'inicio' && tipo !== 'abertura') { tipo = 'abertura'; compasso = 0; if (tocando) { parar(); return sintetizada(); } }
     if (tocando && fonte === 'jogo') return;
     if (fonte === 'minhas' && audio && !audio.paused) return;
     parar();
@@ -167,6 +200,14 @@
     } catch (e) { falhou(); }
   }
   function andamento(i) { queda = i || 0; }
+  /* começo de rodada: a próxima música da lista, do começo (cada rodada uma música diferente) */
+  function rodada(n) {
+    nivel = n; queda = 0;
+    if (rodadas++ > 0 || tipo === 'jogo') faixa = (faixa + 1) % M.FAIXAS.length;
+    tipo = 'jogo'; compasso = 0;
+    if (fonte === 'minhas' && audio && !audio.paused) return;
+    parar(); musica(n);
+  }
   function parar() {
     tocando = false; fonte = ''; clearInterval(relogio);
     if (audio) try { audio.pause(); } catch (e) {}
@@ -248,7 +289,8 @@
   root.PeluqueriaSom = {
     ligar: ligar, musica: musica, andamento: andamento, parar: parar, efeito: efeito, mudo: definirMudo, registro: registro,
     minhas: function () { return minhas.slice(); }, fonte: function () { return fonte; },
-    posicao: function () { return { faixa: faixa, compasso: compasso, nome: M.FAIXAS[faixa].nome }; },
+    rodada: rodada, aoBater: function (fn) { batidas.push(fn); },
+    posicao: function () { return tipo === 'abertura' ? { faixa: 'abertura', compasso: compasso, nome: M.ABERTURA.nome } : { faixa: faixa, compasso: compasso, nome: M.FAIXAS[faixa].nome }; },
     _ctx: function () { return ctx; }, _passos: function () { return contador; }
   };
 })(typeof self !== 'undefined' ? self : this);
