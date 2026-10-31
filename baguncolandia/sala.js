@@ -113,7 +113,7 @@
     function oferecer() {
       if (pc) { try { pc.close(); } catch (e) {} }
       pc = new RTCPeerConnection(ICE);
-      stream.getVideoTracks().forEach(function (t) { pc.addTrack(t, stream); });
+      stream.getVideoTracks().forEach(function (t) { try { t.contentHint = 'motion'; } catch (e) {} var snd = pc.addTrack(t, stream); try { var pr = snd.getParameters(); pr.degradationPreference = 'maintain-framerate'; if (!pr.encodings || !pr.encodings.length) pr.encodings = [{}]; pr.encodings[0].maxBitrate = 1200000; snd.setParameters(pr).catch(function () {}); } catch (e) {} });
       try { dc = pc.createDataChannel('jogo', { ordered: false, maxRetransmits: 0 }); dc.onmessage = function (x) { var d; try { d = JSON.parse(x.data); } catch (e) { return; } d = V(d); if (d) opts.aoTV && opts.aoTV(d); }; } catch (e) { dc = null; }
       pc.onicecandidate = function (ev) { if (ev.candidate) mandar(canal, { t: 'ice', id: id, to: 'tv', c: ev.candidate.toJSON() }); };
       pc.onconnectionstatechange = function () {

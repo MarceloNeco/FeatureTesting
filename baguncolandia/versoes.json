@@ -2,6 +2,23 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.0",
+      "data": "31/Out/2026",
+      "hora": "12:10:00",
+      "pt": [
+        "Modo leve na TV: sem sombras e brilhos pesados, menos partículas, resolução interna menor e fundo pré-desenhado. Liga sozinho em TV (LG, Samsung…) ou em qualquer aparelho que estiver lento. Acaba com o quadro pela metade e o \"piscando\".",
+        "Calibração mais curta e clara: passos de 7 s, \"Passo 2 de 6\" na legenda, pulso suave em vez de piscar; se a TV não enxergar a pessoa parada, vai direto para o jogo.",
+        "Vídeo do celular prioriza fluidez (menos quadradinhos quando o Wi-Fi aperta).",
+        "Música nova de carregamento e lobby: pop dançante instrumental sintetizado (bateria, baixo, acordes e melodia), sem plágio."
+      ],
+      "en": [
+        "Light mode on the TV: no heavy shadows/glows, fewer particles, lower internal resolution, pre-drawn background. Turns on automatically on TVs or any slow device. Fixes half-drawn frames and flicker.",
+        "Shorter, clearer calibration: 7 s steps, \"Step 2 of 6\" in the caption, soft pulse instead of blinking; if the TV cannot see you standing still it goes straight to the game.",
+        "Phone video favours smoothness (fewer blocks on weak Wi-Fi).",
+        "New loading/lobby music: synthesized instrumental dance-pop (drums, bass, chords and melody), no plagiarism."
+      ]
+    },
+    {
       "versao": "0.7.1",
       "data": "31/Out/2026",
       "hora": "10:40:00",

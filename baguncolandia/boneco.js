@@ -18,6 +18,7 @@
   var ACESSORIOS = ['nenhum', 'laco', 'coroa', 'oculos', 'chapeu', 'asas', 'flor', 'bone', 'tiara'];
   var PADRAO = { cabeca: 'menino', cabelo: 'curto', corCabelo: '#4a2c17', pele: '#ffd9b3', cor: '#c6ff3d', roupa: 'camiseta', acessorio: 'nenhum', sapato: '#2b2250' };
   var OURO = '#ffd166', CIANO = '#3ee8ff', ROSA = '#ff4fa3', ESCURO = '#1f1b3a';
+  var M = { leve: false };   // modo leve (TV): sem sombra
 
   function normalizar(a, j) {
     a = a || {}; if (typeof a === 'string') a = { cabeca: a };
@@ -131,7 +132,7 @@
     cfg = normalizar(cfg);
     var tipo = cfg.cabeca, R = hs / 2;
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = hs * 0.12; ctx.shadowOffsetY = hs * 0.05;
+    if (!M.leve) { ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = hs * 0.12; ctx.shadowOffsetY = hs * 0.05; }
     if (tipo === 'robo') { robo(ctx, cfg, R); ctx.restore(); acessorio(ctx, cfg, hs); return; }
     if (tipo === 'pano') { pano(ctx, cfg, R, ts); ctx.restore(); acessorio(ctx, cfg, hs); return; }
     if (CABECAS.indexOf(tipo) < 0 && root.Figuras) { figura(ctx, cfg, hs); ctx.restore(); acessorio(ctx, cfg, hs); return; }
@@ -274,5 +275,7 @@
     ctx.restore();
   }
 
-  return { corpoEmPe: corpoEmPe, cabeca: cabeca, marionete: marionete, normalizar: normalizar, CABECAS: CABECAS, CABELOS: CABELOS, ROUPAS: ROUPAS, ACESSORIOS: ACESSORIOS, PADRAO: PADRAO };
+  var API = { corpoEmPe: corpoEmPe, cabeca: cabeca, marionete: marionete, normalizar: normalizar, CABECAS: CABECAS, CABELOS: CABELOS, ROUPAS: ROUPAS, ACESSORIOS: ACESSORIOS, PADRAO: PADRAO };
+  Object.defineProperty(API, 'leve', { get: function () { return M.leve; }, set: function (v) { M.leve = !!v; } });
+  return API;
 });
