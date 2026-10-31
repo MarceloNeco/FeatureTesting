@@ -516,15 +516,15 @@
     },
     {
       "app": "eleicoes-2026",
-      "repositorio": "MarceloNeco/planos-candidatos-2026",
+      "repositorio": "MarceloNeco/radar-one",
       "visibilidade": "publico",
       "hospedagem": "github-pages",
-      "url": "https://solverone.com.br/planos-candidatos-2026/",
+      "url": "https://solverone.com.br/radar-one/",
       "manifesto": null,
       "estado": "beta",
       "nome": {
-        "pt": "Eleições 2026",
-        "en": "Elections 2026"
+        "pt": "RadarONE",
+        "en": "RadarONE"
       }
     },
     {
