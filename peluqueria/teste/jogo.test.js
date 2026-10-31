@@ -150,3 +150,10 @@ test('validação rejeita entradas ruins', () => {
   assert.equal(P.validarItem(Object.assign(ite('coroa'), { encaixe: { x: 2, y: 0 } })), null);
   assert.equal(P.validarItem(Object.assign(ite('coroa'), { arquivo: '../coroa.svg' })), null);
 });
+
+test('item aceita escala opcional entre 0,3 e 3', () => {
+  assert.equal(P.validarItem(Object.assign(ite('peruca'), { escala: 1.7 })).escala, 1.7);
+  assert.equal(P.validarItem(Object.assign(ite('peruca'), { escala: 5 })), null);
+  assert.equal(P.validarItem(Object.assign(ite('peruca'), { escala: 0.1 })), null);
+  assert.equal(P.validarItem(ite('peruca')).escala, undefined);
+});

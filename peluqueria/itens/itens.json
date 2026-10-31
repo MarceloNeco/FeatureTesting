@@ -1,0 +1,14 @@
+[
+  {"id":"peruca-oculos","nome":{"pt":"Peruca com óculos","en":"Wig with glasses"},"arquivo":"peruca-oculos.svg","lugar":"olhos","encaixe":{"x":0.5,"y":0.72},"escala":1.7},
+  {"id":"boca-tubarao","nome":{"pt":"Boca de tubarão","en":"Shark mouth"},"arquivo":"boca-tubarao.svg","lugar":"boca","encaixe":{"x":0.5,"y":0.5},"escala":1.5},
+  {"id":"coroa","nome":{"pt":"Coroa","en":"Crown"},"arquivo":"coroa.svg","lugar":"cabeca","encaixe":{"x":0.5,"y":0.9},"escala":0.8},
+  {"id":"cartola","nome":{"pt":"Cartola","en":"Top hat"},"arquivo":"cartola.svg","lugar":"cabeca","encaixe":{"x":0.5,"y":0.94},"escala":0.85},
+  {"id":"bigode","nome":{"pt":"Bigode","en":"Mustache"},"arquivo":"bigode.svg","lugar":"boca","encaixe":{"x":0.5,"y":0.95},"escala":1.35},
+  {"id":"nariz-palhaco","nome":{"pt":"Nariz de palhaço","en":"Clown nose"},"arquivo":"nariz-palhaco.svg","lugar":"nariz","encaixe":{"x":0.5,"y":0.5},"escala":1.4},
+  {"id":"oculos-escuros","nome":{"pt":"Óculos escuros","en":"Sunglasses"},"arquivo":"oculos-escuros.svg","lugar":"olhos","encaixe":{"x":0.5,"y":0.4},"escala":1.1},
+  {"id":"fone","nome":{"pt":"Fone de ouvido","en":"Headphones"},"arquivo":"fone.svg","lugar":"cabeca","encaixe":{"x":0.5,"y":0.08},"escala":1.25},
+  {"id":"laco","nome":{"pt":"Laço","en":"Bow"},"arquivo":"laco.svg","lugar":"cabeca","encaixe":{"x":0.5,"y":0.75},"escala":0.6},
+  {"id":"bone","nome":{"pt":"Boné","en":"Cap"},"arquivo":"bone.svg","lugar":"cabeca","encaixe":{"x":0.5,"y":0.82},"escala":1.05},
+  {"id":"chapeu-pirata","nome":{"pt":"Chapéu de pirata","en":"Pirate hat"},"arquivo":"chapeu-pirata.svg","lugar":"cabeca","encaixe":{"x":0.5,"y":0.88},"escala":1.15},
+  {"id":"capacete-viking","nome":{"pt":"Capacete viking","en":"Viking helmet"},"arquivo":"capacete-viking.svg","lugar":"cabeca","encaixe":{"x":0.5,"y":0.9},"escala":1.5}
+]

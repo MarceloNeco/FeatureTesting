@@ -156,6 +156,7 @@
     if (LUGARES.indexOf(o.lugar) < 0) return null;
     if (!o.encaixe || !num(o.encaixe.x, 0, 1) || !num(o.encaixe.y, 0, 1)) return null;
     it.lugar = o.lugar; it.encaixe = { x: o.encaixe.x, y: o.encaixe.y };
+    if (o.escala != null) { if (!num(o.escala, 0.3, 3)) return null; it.escala = o.escala; }   // largura = tam do lugar × escala
     return it;
   }
 

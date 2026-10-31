@@ -5,7 +5,7 @@
    Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
 var VERSAO = '0.1.0';
 var CACHE = 'peluqueria-v' + VERSAO;
-var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
+var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'cenarios.js', 'itens.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', 'meus/cenarios.json', 'meus/itens.json', 'cenarios/bebe.svg', 'cenarios/boneco-de-neve.svg', 'cenarios/cachorro.svg', 'cenarios/cavalo.svg', 'cenarios/cenarios.json', 'cenarios/coruja.svg', 'cenarios/gato.svg', 'cenarios/leao.svg', 'cenarios/pinguim.svg', 'cenarios/robo.svg', 'cenarios/sapo.svg', 'cenarios/tubarao.svg', 'cenarios/vovo.svg', 'itens/bigode.svg', 'itens/boca-tubarao.svg', 'itens/bone.svg', 'itens/capacete-viking.svg', 'itens/cartola.svg', 'itens/chapeu-pirata.svg', 'itens/coroa.svg', 'itens/fone.svg', 'itens/itens.json', 'itens/laco.svg', 'itens/nariz-palhaco.svg', 'itens/oculos-escuros.svg', 'itens/peruca-oculos.svg', '../recursos.js'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return Promise.all(ARQUIVOS.map(function (a) { return c.add(a).catch(function () {}); })); }).then(function () { return self.skipWaiting(); }));
 });
