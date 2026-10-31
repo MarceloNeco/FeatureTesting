@@ -37,6 +37,7 @@ button:focus-visible { outline: 3px solid var(--lima); outline-offset: 3px; }
 .mult { font-size: 1.3rem; color: var(--lima); }
 #queda { font-size: 1.1rem; color: #fff; opacity: .85; }
 .pausa { font-size: 1.5rem; position: absolute; top: calc(8px + env(safe-area-inset-top)); right: 10px; background: rgba(0,0,0,.45); }
+.casa { font-size: 1.4rem; position: absolute; top: calc(8px + env(safe-area-inset-top)); right: 64px; background: rgba(0,0,0,.45); }
 .seguir { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; font-size: 3.4rem; background: rgba(0,0,0,.55); color: #fff; box-shadow: 0 0 0 4px #fff inset; }
 
 .estrelas { font-size: 3rem; letter-spacing: 6px; color: var(--ouro); min-height: 3.6rem; }

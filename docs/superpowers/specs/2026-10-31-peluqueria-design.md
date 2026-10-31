@@ -74,6 +74,10 @@ Fora da pasta (fase 1):
 5. **Fim**: estrelas (0 a 3), pontos, recorde do nível ("Novo recorde!" quando bate), contagem de
    Perfeitos, botões **Jogar de novo** e **Início**.
 
+**Menu (v0.2.1):** a rodada tem 🏠 no canto (ao lado do ⏸). O 🏠, o "Início" do fim e o botão **Voltar do
+celular** levam ao menu: ao começar a jogar, a página ganha uma entrada no histórico, então o Voltar fecha a
+rodada em vez de sair do jogo; no menu, o Voltar sai normalmente.
+
 Teclado (computador e, na fase 1, controle da TV): **Espaço** ou **Enter** = parar o item / seguir;
 **Esc** ou **P** = ⏸; setas e Enter navegam nos botões. Com `?tv=auto` a página abre direto no Início, com
 o foco no Jogar, letras maiores e o **modo leve** (seção 8), para dar para jogar na TV só com o controle
@@ -193,6 +197,10 @@ o som ligado/desligado e o "Minhas imagens". **Nenhuma imagem é salva nem expor
   chimbal aberto no contratempo, baixo pulsando (4 estilos), acordes cheios, melodia de refrão gerada aqui
   (nenhuma melodia copiada) com eco. Cada música: intro, verso, subida (chiado subindo + virada de caixa),
   refrão, pausa e refrão final (~1 min); depois a lista segue para a próxima.
+- **v0.2.1 (dono: "parece uma repetição sem fim de 4 notas", nota 4):** verso e refrão com sequências de
+  acordes diferentes, acordes com sétima, refrão de 8 compassos (frase, resposta, parte nova mais aguda e
+  fechamento), melodia própria no verso, arpejo, viradas de bateria e de baixo a cada 4 compassos e subida de
+  um tom no último refrão; a melodia evita repetir a mesma nota em seguida.
 - Tocam desde a tela de início (a partir do primeiro toque) e pelo jogo todo, sem recomeçar ao entrar na
   rodada; o andamento é o da música −6 BPM no Criança e +6 no Maluco, +1 BPM a cada queda.
 - Efeitos: PERFEITO (acorde brilhante + prato) com **torcida sintetizada** "u-huuu!" (várias vozes, plateia e

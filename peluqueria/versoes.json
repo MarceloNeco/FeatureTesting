@@ -2,6 +2,19 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.2.1",
+      "data": "31/Out/2026",
+      "hora": "19:13:00",
+      "pt": [
+        "🏠 durante a rodada e botão Voltar do celular agora levam para o menu (antes o Voltar saía do jogo).",
+        "Músicas menos repetitivas: acordes diferentes no verso e no refrão, acordes mais ricos, refrão de 8 compassos com parte nova mais aguda, melodia própria no verso, arpejo, viradas a cada 4 compassos e subida de tom no último refrão."
+      ],
+      "en": [
+        "🏠 during the round and the phone's Back button now go to the menu (Back used to leave the game).",
+        "Less repetitive music: different chords in verse and chorus, richer chords, 8-bar chorus with a new higher part, its own verse melody, arpeggios, fills every 4 bars and a key change in the last chorus."
+      ]
+    },
+    {
       "versao": "0.2.0",
       "data": "31/Out/2026",
       "hora": "19:00:00",

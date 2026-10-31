@@ -109,6 +109,11 @@
     else { osc(t, 'sawtooth', hz(nota), -9, dur, f); osc(t, 'sawtooth', hz(nota), 9, dur, f); osc(t, 'triangle', hz(nota + 12), 0, dur, f); }
   }
 
+  function arpejo(t, nota, dur, vol) {   // notinhas rápidas e curtas, passam pelo "respiro" dos acordes
+    var f = filtro('lowpass', 3400, 2), g = ctx.createGain(); f.connect(g); g.connect(busAcordes);
+    env(g, t, 0.003, Math.min(0.16, dur * 0.9), 0.3 * vol);
+    osc(t, 'square', hz(nota), 0, 0.18, f); osc(t, 'triangle', hz(nota + 12), 4, 0.18, f);
+  }
   function tocarEvento(e, t, s16, F) {
     var d = e.dur * s16;
     switch (e.tipo) {
@@ -122,6 +127,7 @@
       case 'baixo': return baixo(t, e.nota, d, e.vol);
       case 'acorde': return acorde(t, e.notas, d, e.vol, e.filtro, e.estilo);
       case 'lead': return lead(t, e.nota, d, e.vol, F.lead);
+      case 'arpejo': return arpejo(t, e.nota, d, e.vol);
     }
   }
 

@@ -43,15 +43,15 @@ test('pausa respira sem bumbo; subida tem o chiado subindo e virada de caixa', (
   }
 });
 
-test('notas da melodia e do baixo ficam na escala da música', () => {
+test('notas da melodia, do arpejo e do baixo ficam na escala (do tom do trecho)', () => {
   for (const f of M.FAIXAS) {
     const esc = M.escala(f);
-    for (let c = 0; c < M.compassos(); c++) for (const e of M.partitura(f, c).eventos) {
-      if (e.tipo === 'lead' || e.tipo === 'baixo') {
-        assert.ok(esc.includes(((e.nota - f.tom) % 12 + 12) % 12), f.id + ' c' + c + ' ' + e.tipo + ' fora da escala: ' + e.nota);
+    for (let c = 0; c < M.compassos(); c++) { const p = M.partitura(f, c); for (const e of p.eventos) {
+      if (e.tipo === 'lead' || e.tipo === 'baixo' || e.tipo === 'arpejo') {
+        assert.ok(esc.includes(((e.nota - p.tom) % 12 + 12) % 12), f.id + ' c' + c + ' ' + e.tipo + ' fora da escala: ' + e.nota);
         assert.ok(e.t >= 0 && e.t < 16 && e.dur > 0);
       }
-    }
+    } }
   }
 });
 
@@ -76,4 +76,48 @@ test('andamento: nível e quedas mudam o BPM', () => {
   assert.ok(M.andamento(f, 'crianca', 0) < f.bpm);
   assert.ok(M.andamento(f, 'maluco', 0) > f.bpm);
   assert.equal(M.andamento(f, 'normal', 5), f.bpm + 5);
+});
+
+/* pedido do dono (0.2.0, nota 4): "parece uma repetição sem fim de 4 notas" */
+const leadDe = (f, c) => M.partitura(f, c).eventos.filter(e => e.tipo === 'lead').map(e => e.t + ':' + e.nota).join(',');
+test('refrão de 8 compassos não é um laço de 4: a segunda metade é diferente da primeira', () => {
+  for (const f of M.FAIXAS) {
+    const r = compassoDa('refrao');
+    const a = [0, 1, 2, 3].map(k => leadDe(f, r + k)).join('|'), b = [4, 5, 6, 7].map(k => leadDe(f, r + k)).join('|');
+    assert.notEqual(a, b, f.id);
+  }
+});
+test('melodia do refrão usa pelo menos 6 notas diferentes', () => {
+  for (const f of M.FAIXAS) {
+    const r = compassoDa('refrao'), notas = new Set();
+    for (let k = 0; k < 8; k++) M.partitura(f, r + k).eventos.filter(e => e.tipo === 'lead').forEach(e => notas.add(e.nota));
+    assert.ok(notas.size >= 6, f.id + ': ' + notas.size);
+  }
+});
+test('verso e refrão têm acordes diferentes', () => {
+  const raizes = (f, c0) => [0, 1, 2, 3].map(k => M.partitura(f, c0 + k).eventos.find(e => e.tipo === 'acorde' && e.estilo === 'tapete').notas[0]).join(',');
+  for (const f of M.FAIXAS) assert.notEqual(raizes(f, compassoDa('verso')), raizes(f, compassoDa('refrao')), f.id);
+});
+test('verso tem melodia própria (não só duas notas por compasso)', () => {
+  for (const f of M.FAIXAS) {
+    const v = compassoDa('verso'); let n = 0;
+    for (let k = 0; k < 4; k++) n += M.partitura(f, v + k).eventos.filter(e => e.tipo === 'lead').length;
+    assert.ok(n >= 12, f.id + ': ' + n + ' notas em 4 compassos');
+  }
+});
+test('arpejo dá movimento no verso e no refrão; acordes têm 4 notas', () => {
+  for (const f of M.FAIXAS) for (const sec of ['verso', 'refrao']) {
+    const ev = M.partitura(f, compassoDa(sec)).eventos;
+    assert.ok(ev.filter(e => e.tipo === 'arpejo').length >= 8, f.id + ' ' + sec);
+    assert.equal(ev.find(e => e.tipo === 'acorde' && e.estilo === 'tapete').notas.length, 4);
+  }
+});
+test('virada a cada 4 compassos e subida de tom no último refrão', () => {
+  for (const f of M.FAIXAS) {
+    const r = compassoDa('refrao');
+    assert.ok(M.partitura(f, r + 3).eventos.some(e => e.tipo === 'caixa'), f.id + ' sem virada');
+    const r2 = compassoDa('refrao2');
+    assert.equal(M.partitura(f, r2).tom, f.tom + 2, f.id + ' sem subida de tom');
+    assert.equal(M.partitura(f, r).tom, f.tom);
+  }
 });
