@@ -25,8 +25,11 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/rabiscoland
   peixe…) e emojis por tema. Escolha **como ele mexe** (parado, pula, balança, gira, pulsa, flutua) e toque na folha.
 - **🏞️ Fundo**: papel, cores, **paisagens** (praia com ondas, fundo do mar com bolhas, espaço com estrelas, neve
   caindo…) ou **📷 uma foto sua** (fica só no aparelho).
+- **🧽 Borracha** (a borracha rosa e azul): apaga traços **e também** adesivos e pincéis vivos — basta passar por cima de qualquer parte deles.
 - **↩** desfaz · **🗑️** limpa a folha ou começa um desenho novo · **📸** foto em PNG para salvar ou compartilhar ·
-  **🎵** liga e desliga a música (também no menu, junto do 🔊 dos efeitos).
+  **🎵** liga e desliga a música (também no menu, junto do 🔊 dos efeitos). A música é uma "rádio": 6 músicas gravadas com
+  instrumentos de verdade (Kevin MacLeod, CC BY 4.0, em `musicas/`, créditos em `musicas/LICENCAS.md`) intercaladas com as 4 feitas
+  pelo próprio app, sem parar. As gravadas só baixam quando tocam (e ficam guardadas para tocar sem internet).
 - **🖼️ Meus desenhos**: tudo fica guardado sozinho enquanto desenha (até 40, só neste aparelho); toque para continuar.
 
 ## Em pé ou deitado (folha esperta)
