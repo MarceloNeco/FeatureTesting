@@ -14,10 +14,22 @@ test('o piloto fica quase sempre de costas e vira por 2 s a cada período', () =
   assert.ok(C.estado(1, 0, 7).sorriso > 0, 'sorri quando olha para trás');
 });
 
-test('o giro encolhe e abre (sem pular de costas para frente de uma vez)', () => {
-  const sx = [0.05, 0.25, 0.45, 0.55, 1.55, 1.75, 1.95].map(t => C.estado(t, 0, 7).sx);
-  assert.ok(sx[1] < 0.6, 'quase de lado no meio do giro');
-  for (const v of sx) assert.ok(v >= 0 && v <= 1);
+test('a cabeça gira de verdade: de costas (0) até de frente (±π), sem pulos, e volta', () => {
+  let antes = C.estado(0, 0, 7).giro, maiorPasso = 0, chegouNaFrente = false;
+  for (let t = 0.01; t < 2.2; t += 0.01) {
+    const g = C.estado(t, 0, 7).giro;
+    assert.ok(Math.abs(g) <= Math.PI + 1e-9);
+    maiorPasso = Math.max(maiorPasso, Math.abs(g - antes)); antes = g;
+    if (Math.abs(Math.abs(g) - Math.PI) < 1e-6) chegouNaFrente = true;
+  }
+  assert.ok(chegouNaFrente, 'fica de frente');
+  assert.ok(maiorPasso < 0.2, 'gira aos poucos (maior passo ' + maiorPasso.toFixed(2) + ' rad em 10 ms)');
+  assert.equal(C.estado(2.5, 0, 7).giro, 0, 'voltou a ficar de costas');
+});
+
+test('uma vez vira por um lado, na outra pelo outro', () => {
+  assert.ok(C.estado(1, 0, 7).giro > 0);
+  assert.ok(C.estado(8, 0, 7).giro < 0);
 });
 
 test('todo bichinho tem jeito de ser visto de costas', () => {

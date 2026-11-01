@@ -58,7 +58,7 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 | Grupo | Veículos |
 |---|---|
 | 🚗 Carros | Clássico, GT Redondo (traseira redonda), Superesportivo (largo, aerofólio), Kart, Monstrão |
-| 🏍️ Moto e skate | Moto (deita nas curvas) e Skate (menino de capacete, braços abertos) |
+| 🏍️ Moto e skate | Moto (deita nas curvas) e Skate (menino de costas, um pé no shape e o outro empurrando a rua; quanto mais rápido, mais rema) |
 | ✈️ No céu | Aviãozinho (hélice), Jato (fogo azul no turbo), Helicóptero (rotor girando) |
 
 - Cada um tem um jeito (barrinhas de velocidade e curvas), com diferenças pequenas, de no máximo uns 10%.
@@ -70,7 +70,9 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 
 - O piloto fica **de costas**, olhando a estrada: nuca, orelhas e pelo de cada bichinho (no kart e na moto, o capacete
   com listra). A cada ~7 s ele **vira para trás, olha e sorri** por 2 s, e volta. Na garagem vira mais vezes.
-  Desenhado ao vivo por `cabeca.js`, por cima do veículo, recortado pela janela.
+  O giro é em **3D**: a cabeça continua redonda e gira como uma bola (o rosto entra por um lado, a nuca sai pelo outro),
+  uma vez por cada lado; no kart e na moto o capacete inteiro gira e o rosto aparece pela viseira. No skate, o piloto é
+  a cabeça do menino. Desenhado ao vivo por `cabeca.js`, por cima do veículo, recortado pela janela.
 - **📸 Selfie**: na garagem, o botão 📸 abre a janela da selfie. Ali dá para **🤳 Tirar selfie** (câmera da frente) ou
   **🖼️ Escolher foto**. O rosto é achado **sem internet** pelo MediaPipe Face Detector, que roda no aparelho: o motor
   fica em `../baguncolandia/libs/mediapipe/` (~14 MB, baixado na primeira selfie e guardado) e o modelo de rosto em
@@ -166,7 +168,7 @@ No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para
 | `personagens.js` | os 12 personagens de domínio público (frente e costas) e o sorteio dos rivais, testados no Node. |
 | `maos.js` | volante no ar: lê as mãos pela câmera (MediaPipe) e vira direção, pulo e freio; contas testadas no Node. |
 | `movimento.js` | **puro**: acelerômetro → direção do volante e pulo pelo toquinho (com calibração no 3‑2‑1), testado no Node. |
-| `cabeca.js` | o piloto animado (de costas, vira e sorri; bichinho ou selfie), testado no Node. |
+| `cabeca.js` | o piloto animado (de costas, vira em 3D como uma bola e sorri; bichinho, selfie ou personagem), testado no Node. |
 | `selfie.js` | a selfie: acha o rosto sem internet (MediaPipe + `rosto.tflite`), recorta e guarda só no aparelho. |
 | `baixar.js` | monta o `vruuum.html` de arquivo único (genérico: serve para outro jogo do Bolinho de Chuva; scripts com `data-fora-do-arquivo` ficam de fora). |
 | `sw.js` | cache `vruuum-v…` para funcionar sem internet. `VERSAO` aqui. |
