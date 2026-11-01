@@ -2,6 +2,17 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.10.3",
+      "data": "01/Nov/2026",
+      "hora": "19:35:01",
+      "pt": [
+        "📺 Na TV dá para brincar sem celular: o botão \"👆 Brincar aqui, sem celular\" ficou grande e já vem selecionado (é só apertar OK no controle); as setas andam pelos botões e o OK escolhe."
+      ],
+      "en": [
+        "📺 On the TV you can play without a phone: the \"👆 Play right here, no phone\" button is now big and already selected (just press OK on the remote); the arrows move between buttons and OK picks."
+      ]
+    },
+    {
       "versao": "0.10.2",
       "data": "01/Nov/2026",
       "hora": "19:32:22",

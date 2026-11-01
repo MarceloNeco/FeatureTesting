@@ -135,6 +135,8 @@
   function mostrarTituloTV(e) { var el = $('tvTitulo'); el.hidden = !(e && e.tocando); if (e && e.tocando) el.textContent = '🎶 ' + (e.titulo || (e.fonte === 'purpurina' ? 'Purpurina' : '')); }
   function ligarSom() {
     tv.som = true; Som.iniciar(); $('btLigarSom').hidden = true;
+    // sem o botão do som, o foco vai para "Brincar aqui, sem celular" (o OK do controle já funciona)
+    setTimeout(function () { if (document.activeElement === $('btLigarSom') || document.activeElement === document.body || !document.activeElement) try { $('btTvControle').focus(); } catch (e) { /* ok */ } }, 350);
     if (!tv.tocador.estado().ref && tv.tocador.estado().fonte === 'purpurina') tv.tocador.tocar('purpurina', '');
     Som.tocar('brilho');
   }
