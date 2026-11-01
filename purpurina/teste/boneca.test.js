@@ -77,3 +77,11 @@ test('unhas pintadas nas mãos e nos pés descalços', () => {
   const s = B.svg(e, { id: 'u' }), cor = P.cor('roupa', 'vermelho').hex;
   assert.ok(s.split('fill="' + cor + '"').length - 1 >= 20, 'esperava 10 unhas das mãos + 10 dos pés');
 });
+
+test('realce: palco com fundo desfocado e sombra; miniaturas e camadas da foto sem filtro', () => {
+  const e = V.novo();
+  const palco = B.svg(e, { id: 'p' });
+  assert.match(palco, /filter="url\(#p-desf\)"/); assert.match(palco, /filter="url\(#p-somb\)"/);
+  assert.ok(!/filter="url/.test(B.svg(e, { id: 'm', fundo: false, area: [86, 96, 228, 228] })), 'miniatura sem filtro');
+  assert.ok(!/filter="url/.test(B.svg(e, { id: 'g', realce: false })), 'girando sem filtro');
+});

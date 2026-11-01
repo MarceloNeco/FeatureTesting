@@ -39,6 +39,9 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
   a peça está colocada, e **🚫 Tirar toda a maquiagem / todas as joias / todos os acessórios**. Tocar de novo na peça escolhida também tira.
 - **🔄 Reiniciar**: Brincar livre pergunta se quer continuar o visual ou começar do zero; no estúdio, o 🔄 tira maquiagem,
   roupas e acessórios (a personagem continua) ou começa tudo do zero. O ↩ desfaz.
+- **📸 Foto de estúdio**: montada em camadas no aparelho (cenário bem desfocado, personagem nítida com sombra macia, luz de
+  estúdio, brilho suave, granulado fino e cantos escuros). No palco e na TV, o cenário fica levemente desfocado e a
+  personagem tem sombra; enquanto ela gira, esses efeitos saem (giro liso em celular simples) e voltam quando para.
 - **🎬 Vídeo girando** (na janela da foto): grava no aparelho um vídeo de uns 4 s da personagem dando duas voltas (MP4 quando o
   navegador sabe, senão WebM), para salvar ou compartilhar. A foto sai em 1080×2094 com luz de estúdio.
 - O botão **Voltar do celular** volta uma tela (ou fecha a janela da foto) em vez de sair do jogo.

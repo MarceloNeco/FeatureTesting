@@ -2,6 +2,21 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.6.0",
+      "data": "01/Nov/2026",
+      "hora": "16:10:36",
+      "pt": [
+        "Chega de cara de papel: a personagem ganhou volume (braços e pernas com luz no meio, roupas com sombra nas laterais, brilho de verdade no cabelo, rosto modelado) e contornos mais finos e suaves.",
+        "Profundidade no palco e na TV: a personagem projeta uma sombra macia e o cenário fica levemente desfocado atrás dela, como numa foto.",
+        "📸 Foto de estúdio renderizada: cenário bem desfocado atrás, personagem nítida com sombra, luz de estúdio, brilho suave em volta, granulado fino de câmera e cantos levemente escuros. O 🎬 vídeo girando ganhou o mesmo tratamento."
+      ],
+      "en": [
+        "No more paper look: the character now has volume (arms and legs lit in the middle, clothes shaded at the sides, real shine on the hair, a shaped face) and thinner, softer outlines.",
+        "Depth on the stage and the TV: the character casts a soft shadow and the scene is slightly blurred behind her, like a photo.",
+        "📸 Rendered studio photo: background nicely blurred, sharp character with a soft shadow, studio light, a gentle glow, fine camera grain and slightly darker corners. The 🎬 spinning video got the same treatment."
+      ]
+    },
+    {
       "versao": "0.5.0",
       "data": "01/Nov/2026",
       "hora": "16:02:32",

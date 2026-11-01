@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.5.0';
+  var APP_VERSION = '0.6.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -180,7 +180,9 @@
   }
   function desenharBoneca() {
     var el = $('boneca');
-    el.innerHTML = B.svg(estado, { id: 'palco', anim: !CALMO && !angulo, area: vista, angulo: angulo });
+    // girando (arrastando, dando a volta ou voltando de frente): sem desfoque e sombra, para o giro ficar liso
+    var mexendo = !!(arraste && arraste.mexeu) || emVolta || girando;
+    el.innerHTML = B.svg(estado, { id: 'palco', anim: !CALMO && !angulo, area: vista, angulo: angulo, realce: !mexendo });
     $('btFrente').hidden = !angulo;
     if (angulo !== angMandado && !emVolta) { angMandado = angulo; ponte('giro'); }
     el.setAttribute('aria-label', V.resumo(estado, pref.lingua));
@@ -364,15 +366,16 @@
      Arrastar o dedo para os lados gira (frente, lado, costas). Um toque (ou o ↻) dá uma volta inteira com
      rastro de luz: a cada poucos quadros, uma cópia do desenho fica para trás e vai sumindo (efeito
      estroboscópico, sem piscar a tela). Quem pediu menos movimento vê a volta em 4 paradas, sem rastro. */
-  var angulo = 0, animGiro = 0, arraste = null, pedidoQuadro = 0, angMandado = 0, emVolta = false;
+  var angulo = 0, animGiro = 0, arraste = null, pedidoQuadro = 0, angMandado = 0, emVolta = false, girando = false;
   function redesenharGiro() { if (pedidoQuadro) return; pedidoQuadro = requestAnimationFrame(function () { pedidoQuadro = 0; desenharBoneca(); }); }
   function girarPara(alvo, dur) {
     var id = ++animGiro, de = angulo, ini = performance.now();
     var dif = ((alvo - de) % 360 + 540) % 360 - 180;   // pelo caminho mais curto
+    girando = true;
     (function passo(agora) {
-      if (id !== animGiro) return;
+      if (id !== animGiro) { girando = false; return; }
       var k = Math.min(1, (agora - ini) / dur);
-      angulo = de + dif * (1 - Math.pow(1 - k, 3)); if (k >= 1) angulo = ((alvo % 360) + 360) % 360;
+      angulo = de + dif * (1 - Math.pow(1 - k, 3)); if (k >= 1) { angulo = ((alvo % 360) + 360) % 360; girando = false; }
       desenharBoneca(); if (k < 1) requestAnimationFrame(passo);
     })(ini);
   }
@@ -403,7 +406,7 @@
   }
   function voltaNoPalco() {
     ponte('volta'); emVolta = true;   // a TV faz a própria volta; durante a volta não manda cada quadro
-    volta($('boneca'), $('rastro'), function (a) { angulo = a; desenharBoneca(); }, function () { emVolta = false; angMandado = angulo; var q = naTela(200, 360); faiscas(q[0], q[1], 10); });
+    volta($('boneca'), $('rastro'), function (a) { angulo = a; desenharBoneca(); }, function () { emVolta = false; angMandado = angulo; desenharBoneca(); var q = naTela(200, 360); faiscas(q[0], q[1], 10); });
   }
   var bonecaEl = $('boneca');
   bonecaEl.addEventListener('pointerdown', function (ev) {
@@ -423,6 +426,7 @@
     var foiToque = !arraste.mexeu; arraste = null;
     if (foiToque) voltaNoPalco();
     else if (angulo < 12 || angulo > 348) girarPara(0, 200);   // quase de frente: encaixa
+    else desenharBoneca();   // parou de arrastar: volta o desfoque e a sombra
   }
   bonecaEl.addEventListener('pointerup', soltar);
   bonecaEl.addEventListener('pointercancel', function () { arraste = null; });
@@ -502,35 +506,60 @@
 
   // ---------- foto do visual ----------
   function carimbo() { var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + '-' + z(d.getHours()) + 'h' + z(d.getMinutes()); }
+  /* ---------- foto de estúdio (renderizada) ----------
+     Monta a foto em camadas, como uma câmera de verdade: o cenário bem desfocado atrás (profundidade), a personagem
+     nítida com sombra macia, luz de estúdio, um brilho suave em volta (o glitter brilha), granulado fino de câmera e
+     cantos levemente escuros. Navegador sem filtro de canvas (Safari antigo): sai sem o desfoque, mas sai. */
+  function imagemDe(svg) {
+    return new Promise(function (ok, erro) { var img = new Image(); img.onload = function () { ok(img); }; img.onerror = erro; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+  }
+  var graoCache = null;
+  function grao() {
+    if (graoCache) return graoCache;
+    var g = document.createElement('canvas'); g.width = g.height = 160; var gc = g.getContext('2d'), d = gc.createImageData(160, 160);
+    for (var i = 0; i < d.data.length; i += 4) { var v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 22; }
+    gc.putImageData(d, 0, 0); graoCache = g; return g;
+  }
+  // desfoque rápido: desenha pequeno (com um desfoque leve) e amplia — ampliar já espalha, e fica muito mais leve
+  function borrado(img, W, H, fator, raio) {
+    var p = document.createElement('canvas'); p.width = Math.max(1, Math.round(W / fator)); p.height = Math.max(1, Math.round(H / fator));
+    var pc = p.getContext('2d'); if ('filter' in pc) pc.filter = 'blur(' + raio + 'px)'; pc.drawImage(img, 0, 0, p.width, p.height); return p;
+  }
+  function comporEstudio(c, W, H, fundo, boneca) {
+    var temFiltro = 'filter' in c;
+    c.save(); c.imageSmoothingQuality = 'high'; c.drawImage(borrado(fundo, W, H, 6, 1.6), -W * 0.03, -H * 0.03, W * 1.06, H * 1.06); c.restore();
+    var luz = c.createRadialGradient(W * 0.38, H * 0.25, W * 0.05, W * 0.5, H * 0.45, H * 0.8); luz.addColorStop(0, 'rgba(255,246,225,0.30)'); luz.addColorStop(0.5, 'rgba(255,255,255,0)'); luz.addColorStop(1, 'rgba(30,8,50,0.38)');
+    c.fillStyle = luz; c.fillRect(0, 0, W, H);
+    c.save(); c.shadowColor = 'rgba(40,10,60,0.45)'; c.shadowBlur = W / 22; c.shadowOffsetX = W / 120; c.shadowOffsetY = W / 60; c.drawImage(boneca, 0, 0, W, H); c.restore();
+    if (temFiltro) { c.save(); c.globalCompositeOperation = 'screen'; c.globalAlpha = 0.22; c.drawImage(borrado(boneca, W, H, 8, 2), 0, 0, W, H); c.restore(); }
+    c.save(); c.globalCompositeOperation = 'overlay'; c.fillStyle = c.createPattern(grao(), 'repeat'); c.fillRect(0, 0, W, H); c.restore();
+    var v = c.createRadialGradient(W / 2, H * 0.48, H * 0.32, W / 2, H * 0.5, H * 0.78); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(20,4,36,0.35)');
+    c.fillStyle = v; c.fillRect(0, 0, W, H);
+  }
   function fazerFoto() {
     var Wf = 1080, Hf = 1944, faixa = 150;
-    var svg = B.svg(estado, { id: 'foto', largura: Wf, altura: Hf });
     var fonte = document.fonts && document.fonts.load ? document.fonts.load('700 56px Fredoka').catch(function () {}) : Promise.resolve();
     return fonte.then(function () {
+      return Promise.all([imagemDe(B.svg(estado, { id: 'fotoF', soFundo: true, largura: Wf, altura: Hf })), imagemDe(B.svg(estado, { id: 'fotoB', fundo: false, realce: false, largura: Wf, altura: Hf }))]);
+    }).then(function (imgs) {
       return new Promise(function (ok, erro) {
-        var img = new Image();
-        img.onload = function () {
-          var cv = document.createElement('canvas'); cv.width = Wf; cv.height = Hf + faixa;
-          var c = cv.getContext('2d'); c.drawImage(img, 0, 0, Wf, Hf);
-          // luz de estúdio: centro mais claro e bordas um pouco mais escuras (vinheta)
-          var v = c.createRadialGradient(Wf / 2, Hf * 0.42, Wf * 0.25, Wf / 2, Hf * 0.5, Hf * 0.75); v.addColorStop(0, 'rgba(255,255,255,0.10)'); v.addColorStop(0.6, 'rgba(255,255,255,0)'); v.addColorStop(1, 'rgba(40,10,60,0.32)');
-          c.fillStyle = v; c.fillRect(0, 0, Wf, Hf);
-          var g = c.createLinearGradient(0, Hf, Wf, Hf + faixa); g.addColorStop(0, '#ff5fb4'); g.addColorStop(1, '#8a4fe0');
-          c.fillStyle = g; c.fillRect(0, Hf, Wf, faixa);
-          c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '700 72px Fredoka, sans-serif';
-          var d = desafioAtual();
-          c.fillText('✨ Purpurina ✨', Wf / 2, Hf + 58);
-          c.font = '500 38px Fredoka, sans-serif';
-          c.fillText(d ? N(d) : t('Meu visual', 'My look'), Wf / 2, Hf + 118);
-          cv.toBlob(function (b) { if (b) ok(b); else erro(new Error('sem imagem')); }, 'image/png');
-        };
-        img.onerror = erro;
-        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+        var cv = document.createElement('canvas'); cv.width = Wf; cv.height = Hf + faixa;
+        var c = cv.getContext('2d');
+        comporEstudio(c, Wf, Hf, imgs[0], imgs[1]);
+        var g = c.createLinearGradient(0, Hf, Wf, Hf + faixa); g.addColorStop(0, '#ff5fb4'); g.addColorStop(1, '#8a4fe0');
+        c.fillStyle = g; c.fillRect(0, Hf, Wf, faixa);
+        c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '700 72px Fredoka, sans-serif';
+        var d = desafioAtual();
+        c.fillText('✨ Purpurina ✨', Wf / 2, Hf + 58);
+        c.font = '500 38px Fredoka, sans-serif';
+        c.fillText(d ? N(d) : t('Meu visual', 'My look'), Wf / 2, Hf + 118);
+        cv.toBlob(function (b) { if (b) ok(b); else erro(new Error('sem imagem')); }, 'image/png');
       });
     });
   }
   function foto() {
     Som.tocar('foto');
+    abrirJanela({ titulo: t('📸 Preparando a foto…', '📸 Getting the photo ready…'), botoes: [] });
     var flash = document.createElement('div'); flash.style.cssText = 'position:fixed;inset:0;background:#fff;z-index:70;opacity:.9;transition:opacity .4s;pointer-events:none';
     document.body.appendChild(flash); setTimeout(function () { flash.style.opacity = '0'; setTimeout(function () { flash.remove(); }, 450); }, 60);
     fazerFoto().then(function (blob) {
@@ -544,8 +573,8 @@
       if (podeCompartilhar) botoes.push({ t: t('📤 Compartilhar', '📤 Share'), ficar: true, fn: function () { navigator.share({ files: [arquivo], title: 'Purpurina' }).catch(function () { /* cancelou */ }); } });
       if (VIDEO_OK) botoes.push({ t: t('🎬 Vídeo girando', '🎬 Spinning video'), ficar: true, fn: video });
       botoes.push({ t: t('Fechar', 'Close') });
-      abrirJanela({ titulo: t('📸 Que foto linda!', '📸 What a lovely photo!'), img: url, alt: V.resumo(estado, pref.lingua), botoes: botoes });
-    }).catch(function () { recado(t('Não deu para tirar a foto agora. Tente de novo.', "Couldn't take the photo now. Try again.")); });
+      abrirJanela({ titulo: t('📸 Que foto linda!', '📸 What a lovely photo!'), img: url, alt: V.resumo(estado, pref.lingua), botoes: botoes }, true);
+    }).catch(function () { abrirJanela({ titulo: t('📸 Foto', '📸 Photo'), texto: t('Não deu para tirar a foto agora. Tente de novo.', "Couldn't take the photo now. Try again."), botoes: [{ t: t('Fechar', 'Close') }] }, true); });
   }
 
   /* ---------- vídeo da personagem girando ----------
@@ -560,13 +589,8 @@
   }
   function fazerVideo(andamento) {
     var Wv = 540, Hv = 972, faixa = 76, QUADROS = 48, e = V.copiar(estado), imgs = [], d = desafioAtual();
-    function carregar(i) {
-      return new Promise(function (ok, erro) {
-        var img = new Image(); img.onload = function () { ok(img); }; img.onerror = erro;
-        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(B.svg(e, { id: 'v' + i, largura: Wv, altura: Hv, angulo: i * 360 / QUADROS }));
-      });
-    }
-    var cadeia = Promise.resolve();
+    function carregar(i) { return imagemDe(B.svg(e, { id: 'v' + i, fundo: false, realce: false, largura: Wv, altura: Hv, angulo: i * 360 / QUADROS })); }
+    var fundoImg = null, cadeia = imagemDe(B.svg(e, { id: 'vF', soFundo: true, largura: Wv, altura: Hv })).then(function (img) { fundoImg = img; });
     for (var i = 0; i < QUADROS; i++) (function (k) { cadeia = cadeia.then(function () { return carregar(k); }).then(function (img) { imgs[k] = img; andamento(Math.round((k + 1) / QUADROS * 70)); }); })(i);
     return cadeia.then(function () {
       return new Promise(function (ok, erro) {
@@ -577,7 +601,7 @@
         rec.onstop = function () { var tipo = (rec.mimeType || mime || 'video/webm').split(';')[0]; ok({ blob: new Blob(partes, { type: tipo }), ext: tipo.indexOf('mp4') >= 0 ? 'mp4' : 'webm', tipo: tipo }); };
         rec.onerror = erro;
         function quadro(k) {
-          c.drawImage(imgs[k % QUADROS], 0, 0, Wv, Hv);
+          comporEstudio(c, Wv, Hv, fundoImg, imgs[k % QUADROS]);
           var g = c.createLinearGradient(0, Hv, Wv, Hv + faixa); g.addColorStop(0, '#ff5fb4'); g.addColorStop(1, '#8a4fe0');
           c.fillStyle = g; c.fillRect(0, Hv, Wv, faixa);
           c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '700 34px Fredoka, sans-serif';
@@ -626,7 +650,7 @@
     setTimeout(function () {
       if (atual !== 'desfile') return;
       pas.classList.remove('entrando');
-      volta(pas, $('rastroDesfile'), function (a) { pas.innerHTML = B.svg(estado, { id: 'desfile', anim: !CALMO && !a, angulo: a }); });
+      volta(pas, $('rastroDesfile'), function (a) { pas.innerHTML = B.svg(estado, { id: 'desfile', anim: !CALMO && !a, angulo: a, realce: !a }); });
     }, 1500);
     $('desfileTitulo').textContent = d ? d.ico + ' ' + N(d) : t('💖 Que visual incrível!', '💖 What an amazing look!');
     var est = $('desfileEstrelas'); est.innerHTML = '';
