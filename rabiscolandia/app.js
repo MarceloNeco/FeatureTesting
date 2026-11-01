@@ -4,7 +4,7 @@
    (banco "rabiscolandia"). Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.1';
+  var APP_VERSION = '0.1.2';
   var $ = function (id) { return document.getElementById(id); };
   var F = window.DesenhoFolha, P = window.DesenhoPaginas || { LISTA: [], CATEGORIAS: [] }, Pt = window.DesenhoPintura;
   var Som = window.DesenhoSom || { iniciar: function () {}, musica: function () {}, musicaLigada: function () { return false; }, efeito: function () {}, efeitos: function () {}, efeitosLigados: function () { return false; }, proxima: function () {}, nomeAtual: function () { return ''; } };
@@ -440,27 +440,74 @@
     });
     corpo.appendChild(titulo4(t('Grossura do pincel e tamanho do adesivo', 'Brush thickness and sticker size'))); corpo.appendChild(d);
   }
-  var abaAdesivo = 'vivos';
+  /* Painel de adesivos no jeito do teclado de emojis do celular (a filha do dono não achou os adesivos quando as
+     categorias ocupavam o painel todo): no alto, uma faixa pequena de ícones das categorias e o "como mexe";
+     logo embaixo, TODOS os adesivos numa lista só, com o título de cada categoria. Tocar num ícone rola até a
+     categoria; rolar a lista acende o ícone da categoria que está à vista. Os animados mexem dentro do painel. */
+  var abaAdesivo = 'vivos', animaPainel = 0;
   function painelAdesivos(corpo) {
     var A = window.DesenhoAdesivos; if (!A) return;
-    var f = motor.ferramenta(), abas = document.createElement('div'); abas.className = 'chips';
-    [{ id: 'vivos', ico: '✨', pt: 'Animados', en: 'Animated' }].concat(A.GRUPOS).forEach(function (g) {
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', abaAdesivo === g.id ? 'true' : 'false'); b.textContent = g.ico + ' ' + N(g);
-      b.addEventListener('click', function () { abaAdesivo = g.id; renderPainel('adesivos'); });
-      abas.appendChild(b);
+    var f = motor.ferramenta(), grupos = [{ id: 'vivos', ico: '✨', pt: 'Animados', en: 'Animated' }].concat(A.GRUPOS);
+    var topo = document.createElement('div'); topo.className = 'topo-adesivos';
+    var abas = document.createElement('div'); abas.className = 'abas-ad'; abas.setAttribute('role', 'tablist');
+    var secoes = {}, botoesAba = {}, pulando = 0;
+    grupos.forEach(function (g) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'aba-ad'; b.setAttribute('role', 'tab'); b.setAttribute('aria-label', N(g)); b.title = N(g);
+      var ic = document.createElement('span'); ic.className = 'ico'; ic.textContent = g.ico; b.appendChild(ic);
+      var nm = document.createElement('span'); nm.textContent = N(g).split(' ')[0]; b.appendChild(nm);
+      b.addEventListener('click', function () { marcarAba(g.id); pulando = Date.now(); var sec = secoes[g.id]; if (sec) corpo.scrollTo({ top: sec.offsetTop - topo.offsetTop - topo.offsetHeight - 6, behavior: CALMO ? 'auto' : 'smooth' }); });
+      botoesAba[g.id] = b; abas.appendChild(b);
     });
-    corpo.appendChild(abas);
-    var d = caixaOpcoes();
-    function escolher(tipo, v) { motor.ferramenta({ pincel: 'adesivo', adesivo: { tipo: tipo, v: v, mov: f.adesivo.mov } }); montarBarra(); fecharPainel(); aviso(t('Toque na folha para colar ⭐', 'Tap the page to stick it ⭐')); }
-    if (abaAdesivo === 'vivos') A.VIVOS.forEach(function (v) { var c = document.createElement('canvas'); c.width = c.height = 92; desenharAdesivoMini(c, { tipo: 'vivo', v: v.id }); d.appendChild(opcao(c, N(v), f.pincel === 'adesivo' && f.adesivo.v === v.id, function () { escolher('vivo', v.id); })); });
-    else A.GRUPOS.filter(function (g) { return g.id === abaAdesivo; }).forEach(function (g) { g.itens.forEach(function (e) { var b = document.createElement('button'); b.type = 'button'; b.className = 'emoji'; b.textContent = e; b.setAttribute('aria-pressed', f.adesivo.v === e ? 'true' : 'false'); b.addEventListener('click', function () { escolher('emoji', e); }); d.appendChild(b); }); });
-    corpo.appendChild(d);
-    corpo.appendChild(titulo4(t('Como ele mexe', 'How it moves')));
-    var mv = caixaOpcoes();
-    A.MOVIMENTOS.forEach(function (m) { mv.appendChild(opcao(m.ico, N(m), f.adesivo.mov === m.id, function () { var ad = motor.ferramenta().adesivo; motor.ferramenta({ adesivo: { tipo: ad.tipo, v: ad.v, mov: m.id } }); renderPainel('adesivos'); })); });
-    corpo.appendChild(mv);
+    topo.appendChild(abas);
+    var mv = document.createElement('div'); mv.className = 'mov-ad';
+    var rot = document.createElement('span'); rot.textContent = t('Como mexe:', 'Moves:'); mv.appendChild(rot);
+    A.MOVIMENTOS.forEach(function (m) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'mov'; b.textContent = m.ico; b.title = N(m); b.setAttribute('aria-label', N(m)); b.setAttribute('aria-pressed', f.adesivo.mov === m.id ? 'true' : 'false');
+      b.addEventListener('click', function () { var ad = motor.ferramenta().adesivo; motor.ferramenta({ adesivo: { tipo: ad.tipo, v: ad.v, mov: m.id } }); Array.prototype.forEach.call(mv.querySelectorAll('.mov'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); aviso(m.ico + ' ' + N(m), 1200); });
+      mv.appendChild(b);
+    });
+    topo.appendChild(mv);
+    corpo.appendChild(topo);
+    function escolher(tipo, v) { motor.ferramenta({ pincel: 'adesivo', adesivo: { tipo: tipo, v: v, mov: motor.ferramenta().adesivo.mov } }); montarBarra(); fecharPainel(); aviso(t('Toque na folha para colar ⭐', 'Tap the page to stick it ⭐')); }
+    var vivos = [];
+    grupos.forEach(function (g) {
+      var sec = document.createElement('section'); sec.className = 'sec-ad';
+      var h = document.createElement('h4'); h.textContent = g.ico + ' ' + N(g); sec.appendChild(h);
+      var grade = document.createElement('div'); grade.className = 'grade-ad';
+      if (g.id === 'vivos') A.VIVOS.forEach(function (v) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'item-ad vivo'; b.setAttribute('aria-label', N(v)); b.title = N(v);
+        b.setAttribute('aria-pressed', f.pincel === 'adesivo' && f.adesivo.v === v.id ? 'true' : 'false');
+        var c = document.createElement('canvas'); c.width = c.height = 128; b.appendChild(c);
+        var nm = document.createElement('span'); nm.textContent = N(v); b.appendChild(nm);
+        b.addEventListener('click', function () { escolher('vivo', v.id); });
+        vivos.push({ c: c, v: v.id, fase: Math.random() }); grade.appendChild(b);
+      });
+      else g.itens.forEach(function (e) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'item-ad'; b.textContent = e;
+        b.setAttribute('aria-pressed', f.pincel === 'adesivo' && f.adesivo.v === e ? 'true' : 'false');
+        b.addEventListener('click', function () { escolher('emoji', e); });
+        grade.appendChild(b);
+      });
+      sec.appendChild(grade); secoes[g.id] = sec; corpo.appendChild(sec);
+    });
+    function marcarAba(id) { abaAdesivo = id; Object.keys(botoesAba).forEach(function (k) { botoesAba[k].setAttribute('aria-selected', k === id ? 'true' : 'false'); }); var b = botoesAba[id]; if (b) { var esq = b.offsetLeft - abas.offsetLeft; if (esq < abas.scrollLeft || esq + b.offsetWidth > abas.scrollLeft + abas.clientWidth) abas.scrollLeft = esq - 8; } }   // só a faixa de ícones anda (scrollIntoView rolaria o painel e cortaria o pulo)
+    corpo.onscroll = function () {
+      if (Date.now() - pulando < 900) return;                    // enquanto pula para a categoria tocada, não troca o ícone
+      var y = corpo.scrollTop + topo.offsetTop + topo.offsetHeight + 20, atualId = grupos[0].id;
+      grupos.forEach(function (g) { if (secoes[g.id].offsetTop <= y) atualId = g.id; });
+      if (atualId !== abaAdesivo) marcarAba(atualId);
+    };
+    marcarAba(abaAdesivo);
+    if (abaAdesivo !== 'vivos') setTimeout(function () { var sec = secoes[abaAdesivo]; if (sec) { pulando = Date.now(); corpo.scrollTop = sec.offsetTop - topo.offsetTop - topo.offsetHeight - 6; } }, 0);
+    // os animados mexem de verdade aqui dentro (com "reduzir movimento", ficam parados)
+    var meu = ++animaPainel, t0 = performance.now();
+    function anima(agora) {
+      if (meu !== animaPainel || $('painel').hidden || painelAberto !== 'adesivos') { corpo.onscroll = null; return; }
+      vivos.forEach(function (it) { var x = it.c.getContext('2d'); x.clearRect(0, 0, 128, 128); try { window.DesenhoAdesivos.desenhar(x, { tipo: 'vivo', v: it.v, x: 64, y: 64, s: 100, mov: 'parado', fase: it.fase }, CALMO ? 0.6 : (agora - t0) / 1000); } catch (e) { /* ok */ } });
+      if (!CALMO) requestAnimationFrame(anima);
+    }
+    requestAnimationFrame(anima);
   }
-  function desenharAdesivoMini(c, a) { try { var x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height); window.DesenhoAdesivos.desenhar(x, { tipo: a.tipo, v: a.v, x: c.width / 2, y: c.height / 2, s: c.width * 0.8, mov: 'parado', fase: 0 }, 0.6); } catch (e) { /* ok */ } }
   function painelFundos(corpo) {
     var fu = motor.fundo();
     corpo.appendChild(titulo4(t('Paisagens', 'Landscapes')));
