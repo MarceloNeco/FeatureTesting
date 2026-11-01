@@ -18,6 +18,7 @@ reaproveitados). Criada em 31/Out/2026, com autorização do dono.
 | 9 | Peluqueria: fases 2 a 5 (TV com dois jogadores, palma e braços, minha foto + Gemini, Spotify) e fotos realistas — detalhe em `peluqueria/PENDENCIAS.md` | Dono, 31/Out/2026 | 🔵 em andamento · fases 1 a 3 entregues (v0.4.0: TV, celular-controle, corpo, 2 jogadores); faltam 4 (foto + Gemini) e 5 (Spotify), que dependem da chave e do Client ID do dono |
 | 10 | Vruuum! (corrida de carrinho): testar com as crianças no celular, no tablet e na TV LG; depois, ideias de TV com o celular como volante e casca LG — detalhe em `vruuum/PENDENCIAS.md` | Dono, 01/Nov/2026 | 🔵 em andamento · v0.9.0 entregue (garagem, 9 veículos, voo, selfie, piloto animado, visual neon e túneis) |
 | 11 | Purpurina (vestir e maquiar): testar com as crianças no celular e no tablet, deitado e em pé; depois, ajustes e ideias (pintar com o dedo, mais penteados, TV) — detalhe em `purpurina/PENDENCIAS.md` | Dono, 01/Nov/2026 | 🔵 em andamento · v0.7.0 entregue (bolsas seguradas, aviso de versão nova; antes: foto de estúdio, TV, YouTube e Spotify) |
+| 12 | Rabiscolândia (desenhar, colorir, pintar por números, mão na câmera, TV): testar com as crianças no celular, no iPad e na TV; depois, IA para deixar o desenho "de verdade" e o resto da lista — detalhe em `rabiscolandia/PENDENCIAS.md` | Dono, 01/Nov/2026 | 🔵 em andamento · v0.1.0 entregue |
 
 ## Histórico das entregas
 
@@ -36,4 +37,6 @@ reaproveitados). Criada em 31/Out/2026, com autorização do dono.
 - **01/Nov/2026:** Purpurina 0.6.0 — volume, sombra macia, fundo desfocado e foto de estúdio renderizada.
 - **01/Nov/2026:** Purpurina 0.7.0 — bolsas seguradas na mão com mais detalhe e aviso de versão nova.
 - **01/Nov/2026:** Vruuum! 0.7.0 e 0.8.0 — garagem com 9 veículos e voo pelo céu; piloto de costas que vira e sorri; selfie com rosto achado sem internet (MediaPipe), guardada só no aparelho.
+- **01/Nov/2026:** card e pasta `rabiscolandia/` (Rabiscolândia 0.1.0: desenhar, livro de colorir, pintar por números, adesivos animados, paisagens, música, mão na câmera e TV com celular de controle); interruptor `rabiscolandia` no `recursos-do-app.json`; modelo da mão `hand_landmarker.task` em `baguncolandia/libs/mediapipe/`. Aberto o #12.
+- **01/Nov/2026:** Rabiscolândia 0.1.1 — 23 desenhos de colorir originais e contorno na ordem certa (partes escondidas sem linha atravessando).
 - **01/Nov/2026:** Vruuum! 0.9.0 — visual Neon (padrão) com túneis, faróis, luz neon por baixo e postes piscando; Colorido continua como opção.
