@@ -32,7 +32,7 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
   tema, e mostra **3 dicas** que ganham ✅ na hora. No desfile, cada dica cumprida vale uma estrela; **ninguém
   perde** (sempre pelo menos 1 ⭐). A melhor nota de cada desafio fica guardada no aparelho. As dicas ficam numa
   faixa logo abaixo da personagem (nunca por cima dela).
-- **🔄 Girar**: arrastar o dedo para os lados em cima da personagem gira ela por 16 posições desenhadas (frente, três-quartos, perfil e costas; nada é espremido). Um toque nela
+- **🔄 Girar**: arrastar o dedo para os lados em cima da personagem gira ela suave, grau por grau (o rosto vai para o lado do dedo): olhos, nariz e boca andam numa esfera e o contorno do rosto vira o perfil aos poucos; o cabelo da frente gira junto e o de trás vai para trás; passando de ~100° ela fica de costas. Um toque nela
   ou no **↻** dá uma volta inteira com rastro de luz (cópias do desenho que vão sumindo; não pisca a tela). O **🙂** volta
   para a frente. No desfile ela dá uma volta sozinha. Com "reduzir movimento" no aparelho, a volta é em 4 paradas.
 - **🚫 Tirar**: toda parte que dá para tirar tem a bolinha com a diagonal; em cima das opções aparece **🚫 Tirar: …** quando
@@ -106,7 +106,7 @@ estrofe, refrão, sininhos, palmas, viradas e prato, feitas na hora pelo `som.js
 | `estilo.css` | visual, em pé × deitado, bordas seguras, animações (respeita "reduzir movimento"). |
 | `pecas.js` | **só dados**: paletas, abas, categorias, opções (com `tags`), áreas de zoom (`ZOOM`, e `zoom` em cada parte), padrão e os desafios. Peça nova entra aqui. |
 | `visual.js` | **puro**: regras (vestido × blusa/saia/calça, nunca sem roupa), surpresa, desfazer, limpar look antigo, dicas e estrelas. |
-| `boneca.js` | o desenho em SVG da personagem (com giro: `opcoes.angulo`, frente/lado/costas), das roupas, acessórios e dos 8 cenários (tudo em código). Peça nova = um `case` aqui. |
+| `boneca.js` | o desenho em SVG da personagem (com giro contínuo: `opcoes.angulo` em graus — `cabecaVirada`, `contorno`, `torcer`), das roupas, acessórios e dos 8 cenários (tudo em código). Peça nova = um `case` aqui. |
 | `som.js` | músicas e efeitos sintetizados (WebAudio). |
 | `sala.js` | canal TV ↔ celular (Supabase Realtime; `BroadcastChannel` com `?teste`); confere toda mensagem que chega. |
 | `musica.js` | links do YouTube/Spotify e o tocador (Purpurina, YouTube IFrame API, Spotify iFrame API). |

@@ -2,6 +2,23 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.8.0",
+      "data": "01/Nov/2026",
+      "hora": "17:16:44",
+      "pt": [
+        "🔄 Giro de verdade: agora ela gira suave, grau por grau, como um boneco 3D. Olhos, nariz e boca andam juntos pelo rosto e ficam mais estreitos de lado (os olhos têm sempre o mesmo tamanho); o rosto vai virando aos poucos o perfil; o cabelo da frente gira junto e o de trás vai para trás.",
+        "👧 Perfil novo, delicado e arredondado: testa redonda, nariz pequeno e arrebitado, lábios, queixo redondinho, orelha com desenho de dentro e o cabelo preso atrás da orelha.",
+        "👆 Arrastar o dedo para a direita faz ela virar para a direita (antes era ao contrário).",
+        "🔤 Os nomes das abas não se encostam mais: em tela estreita aparece o nome curto (Make, Enfeites)."
+      ],
+      "en": [
+        "🔄 Real spinning: she now turns smoothly, degree by degree, like a 3D doll. Eyes, nose and mouth move together across the face and get narrower from the side (the eyes always keep the same size); the face slowly becomes the profile; the front hair turns with it and the back hair goes behind.",
+        "👧 New profile, soft and rounded: round forehead, small upturned nose, lips, a little round chin, an ear with inner detail and the hair tucked behind the ear.",
+        "👆 Dragging your finger to the right turns her to the right (it used to be the other way around).",
+        "🔤 Tab names no longer bump into each other: on narrow screens the short name shows up (Makeup, Extras)."
+      ]
+    },
+    {
       "versao": "0.7.0",
       "data": "01/Nov/2026",
       "hora": "16:33:19",

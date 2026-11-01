@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.7.0';
+  var APP_VERSION = '0.8.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -247,17 +247,26 @@
 
   // abas (grupos), partes (categorias) e opções
   function catsDoGrupo(g) { return P.CATEGORIAS.filter(function (c) { return c.grupo === g; }); }
+  // tela estreita: o nome comprido da aba que não cabe troca pelo nome curto (Maquiagem → Make)
+  function encaixarAbas() {
+    Array.prototype.forEach.call(document.querySelectorAll('.grupo-bt .t'), function (t) {
+      var b = t.parentNode; t.textContent = b.getAttribute('aria-label');
+      if (t.getAttribute('data-curto') && t.scrollWidth > t.clientWidth + 1) t.textContent = t.getAttribute('data-curto');
+    });
+  }
+  window.addEventListener('resize', encaixarAbas);
   function desenharGrupos() {
     var caixa = $('grupos'); caixa.innerHTML = '';
     P.GRUPOS.forEach(function (g) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'grupo-bt'; b.setAttribute('role', 'tab');
       b.setAttribute('aria-selected', String(g.id === grupoAtual)); b.setAttribute('aria-label', N(g));
       var i = document.createElement('span'); i.className = 'i'; i.textContent = g.ico;
-      var tx = document.createElement('span'); tx.className = 't'; tx.textContent = N(g);
+      var tx = document.createElement('span'); tx.className = 't'; tx.textContent = N(g); tx.setAttribute('data-curto', g.curto ? N(g.curto) : '');
       b.appendChild(i); b.appendChild(tx);
       b.addEventListener('click', function () { grupoAtual = g.id; Som.tocar('aba'); desenharGrupos(); desenharOpcoes(); zoomDaParte(); });
       caixa.appendChild(b);
     });
+    encaixarAbas();
     var cats = catsDoGrupo(grupoAtual), cc = $('cats'); cc.innerHTML = '';
     if (!catPorGrupo[grupoAtual]) catPorGrupo[grupoAtual] = cats[0].id;
     cc.hidden = cats.length < 2;
@@ -419,7 +428,7 @@
     var dx = ev.clientX - arraste.x;
     if (Math.abs(dx) > 6) arraste.mexeu = true;
     if (!arraste.mexeu) return;
-    angulo = ((arraste.a - dx * 1.1) % 360 + 360) % 360; redesenharGiro();
+    angulo = ((arraste.a + dx * 0.9) % 360 + 360) % 360; redesenharGiro();   // o rosto vai para o lado do dedo
   });
   function soltar() {
     if (!arraste) return;

@@ -72,25 +72,23 @@
     if (op.soFundo) return fechar();
     out.push(elip(200, 664, 96, 13, { fill: '#000', opacity: 0.16 }));
 
-    /* ---------- giro (opcoes.angulo, em graus) ----------
-       Personagem de papel que gira: o corpo afina com o cosseno do ângulo (de lado fica fininho) e, quando
-       passa de 90°, aparece de costas (espelhada, sem rosto, com o cabelo por cima). De frente, olhos, boca e
-       maquiagem escorregam para o lado do giro, recortados pelo contorno do rosto — parece que ela vira a cabeça. */
-    /* giro em 16 posições desenhadas (de 22,5° em 22,5°), como os bonecos dos jogos: frente, três-quartos (o rosto
-       desliza para o lado), perfil de verdade e costas. A cabeça nunca é espremida; o corpo só fica um pouco mais
-       estreito de lado, como um corpo de verdade visto de perfil. */
-    var ang = Math.round(((((op.angulo || 0) % 360) + 360) % 360) / 22.5) * 22.5 % 360, rad = ang * Math.PI / 180, cos = Math.cos(rad), sen = Math.sin(rad);
-    if (Math.abs(cos) < 1e-9) cos = 0;
-    var costas = cos < 0, escalaX = 0.62 + 0.38 * Math.abs(cos), desliza = costas ? 0 : sen * 44;
-    // de lado (entre 60° e 120°, e entre 240° e 300°): cabeça desenhada de perfil, virada para onde ela gira
-    var perfil = Math.abs(cos) < 0.5, lado = sen >= 0 ? 1 : -1;
+    /* ---------- giro (opcoes.angulo, em graus, qualquer valor) ----------
+       Contínuo, como um boneco 3D: a cabeça é tratada como uma esfera. Olhos, sobrancelhas, nariz e boca andam
+       sobre ela e encolhem de lado (ver cabecaVirada); o contorno do rosto vai virando, aos poucos, o perfil
+       (testa, nariz, lábios e queixo); o cabelo da frente gira junto com o rosto e o de trás vai para trás.
+       O corpo só fica um pouco mais estreito de lado e, passando de 90°, aparece de costas; passando de ~100°,
+       a cabeça também fica de costas (só cabelo). */
+    var ang = (((op.angulo || 0) % 360) + 360) % 360; if (ang < 0.5 || ang > 359.5) ang = 0;
+    var rad = ang * Math.PI / 180, radS = ang > 180 ? rad - 2 * Math.PI : rad, cos = ang ? Math.cos(rad) : 1, sen = ang ? Math.sin(rad) : 0;
+    var corpoCostas = cos < 0, costas = cos < -0.17, virada = !!ang && !costas, escalaX = 0.62 + 0.38 * Math.abs(cos);
+    // de lado, o cabelo de trás e o pescoço não afinam junto com o corpo
+    if (virada) out.push(grupo(torcer(cabeloTras(e, I, cab, cabE), true, radS)), pescoco());
     var iniBoneca = out.length;
-    function andar(s, dx) { return dx ? '<g transform="translate(' + n(dx) + ' 0)">' + s + '</g>' : s; }
 
     // ---------- asas e cabelo de trás (de costas, vão por cima do corpo, lá embaixo) ----------
     var asasF = vis('vestido') && e.vestido === 'fada' ? asas(C('vestido')) : '';
-    if (!costas) out.push(asasF);
-    if (!costas && !perfil) out.push(grupo(cabeloTras(e, I, cab, cabE)));
+    if (!corpoCostas) out.push(asasF);
+    if (!ang) out.push(grupo(cabeloTras(e, I, cab, cabE)));
 
     // ---------- pernas, pés e sapatos ----------
     var peleS = esc(pele, 0.12), peleL = cla(pele, 0.28);
@@ -106,7 +104,7 @@
     if (vis('saia')) out.push(saia(e.saia, C('saia'), peca, linha));
 
     // ---------- pescoço, tronco e braços ----------
-    if (!perfil) out.push(ret(186, 270, 28, 80, { fill: pele, stroke: peleE, 'stroke-width': 2 }), ret(187, 300, 26, 18, { fill: '#000', opacity: 0.08 }));
+    if (!virada) out.push(ret(186, 270, 28, 80, { fill: pele, stroke: peleE, 'stroke-width': 2 }), ret(187, 300, 26, 18, { fill: '#000', opacity: 0.08 }));
     out.push(p('M150,342 Q200,330 250,342 Q262,346 260,366 L248,458 L152,458 L140,366 Q138,346 150,342Z', { fill: pele, stroke: peleE, 'stroke-width': 1.4 }) + p('M150,342 Q200,330 250,342 Q262,346 260,366 L248,458 L152,458 L140,366 Q138,346 150,342Z', { fill: 'url(#' + I + 'lado)' }));
     var bracos = ['M150,354 Q126,420 118,498', 'M250,354 Q274,420 282,498'];
     bracos.forEach(function (d) { out.push(membro(d, 23)); });
@@ -119,71 +117,150 @@
     if (vis('bolsa')) out.push(bolsa(e.bolsa, C('bolsa'), peca, linha));
     var esmalte = { tipo: e.unhas, cor: C('unhas') };
     out.push(mao(118, -1, pele, peleE, esmalte), mao(282, 1, pele, peleE, esmalte));
-    if (!costas && vis('colar')) out.push(colar(e.colar, C('colar'), I));
-    if (!costas && vis('broche')) out.push(broche(e.broche, C('broche')));
+    if (!corpoCostas && vis('colar')) out.push(colar(e.colar, C('colar'), I));
+    if (!corpoCostas && vis('broche')) out.push(broche(e.broche, C('broche')));
     if (vis('pulseira')) out.push(pulseira(e.pulseira, C('pulseira')));
-    if (!costas && vis('anel')) out.push(anel(e.anel, C('anel')));
-    if (costas) out.push(asasF);
+    if (!corpoCostas && vis('anel')) out.push(anel(e.anel, C('anel')));
+    if (corpoCostas) out.push(asasF);
 
     // ---------- cabeça (tudo aqui dentro vai para o grupo aumentado) ----------
     var corpo = out; out = [];
-    var rosto = 'M114,200 C114,140 155,113 200,113 C245,113 286,140 286,200 C286,262 250,297 200,297 C150,297 114,262 114,200Z';
-    var orelhaE = costas || sen > -0.35, orelhaD = costas || sen < 0.35;
-    if (orelhaE) out.push(elip(116 + desliza * 0.3, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }));
-    if (orelhaD) out.push(elip(284 + desliza * 0.3, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }));
-    if (perfil) {
-      out = [perfilCabeca(e, I, C, pele, peleE, cab, cabE, vis, peca)];
-    } else if (costas) {
+    var rosto = ROSTO;
+    if (virada) out.push(cabecaVirada());
+    else if (costas) {
       // de costas: a cabeça é só cabelo
+      out.push(elip(116, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }), elip(284, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }));
       out.push(p(rosto, { fill: 'url(#' + I + 'cab)', stroke: cabE, 'stroke-width': 2.2 }) + p('M200,118 L200,200', { stroke: cabE, 'stroke-width': 2, opacity: 0.5 }));
       out.push(cabeloTras(e, I, cab, cabE));
-      if (vis('brincos')) out.push(andar(brincos(e.brincos, C('brincos'), I), 0));
+      if (vis('brincos')) out.push(brincos(e.brincos, C('brincos'), I));
     } else {
+      out.push(elip(116, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }), elip(284, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }));
       out.push(p(rosto, { fill: 'url(#' + I + 'pele)', stroke: peleE, 'stroke-width': 2.2 }));
-      // luz e sombra suaves: sombra da franja na testa, dobra da pálpebra, brilho no nariz e no queixo
-      var luz = elip(200, 150, 84, 26, { fill: '#000', opacity: 0.06 }) + elip(152, 246, 26, 16, { fill: '#ff8f7a', opacity: 0.1 }) + elip(248, 246, 26, 16, { fill: '#ff8f7a', opacity: 0.1 }) +
-        p('M203,226 Q208,240 205,250', { fill: 'none', stroke: esc(pele, 0.25), 'stroke-width': 3, opacity: 0.22, 'stroke-linecap': 'round' }) + elip(200, 291, 16, 3.5, { fill: '#000', opacity: 0.07 }) + elip(200, 286, 70, 14, { fill: '#000', opacity: 0.04 }) +
-        elip(128, 214, 10, 34, { fill: '#000', opacity: 0.04 }) + elip(272, 214, 10, 34, { fill: '#000', opacity: 0.04 }) + elip(200, 238, 2.6, 7, { fill: '#fff', opacity: 0.35 }) + elip(200, 284, 12, 4, { fill: '#fff', opacity: 0.18 }) +
-        p('M146,201 Q164,178 182,199', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: 0.55 }) + p('M218,199 Q236,178 254,201', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: 0.55 });
-      var feicoes = [luz, base(e.base, pele, rosto), blush(e, C('blush').hex, I), olho(164, -1, e, I, C), olho(236, 1, e, I, C)];
       var sob = mistura(cab, '#2a1c1a', 0.45);
-      feicoes.push(linha('M144,184 Q163,172 183,181', sob, 5.5), linha('M217,181 Q237,172 256,184', sob, 5.5));
-      feicoes.push(linha('M195,248 Q200,253 205,248', esc(pele, 0.25), 2.6));
-      feicoes.push(boca(e, C('batom'), pele, I));
-      if (vis('adesivo')) feicoes.push(adesivo(e.adesivo, 266, 250, 13));
-      if (e.glitter === 'bochechas' || e.glitter === 'olhos') feicoes.push(glitter(e, C('glitter'), op.anim));
-      out.push(desliza ? '<g clip-path="url(#' + I + 'rostoC)">' + andar(feicoes.join(''), desliza) + '</g>' : feicoes.join(''));
+      out.push(luzLados(pele), luzMeio(pele, true), base(e.base, pele, rosto), blush(e, C('blush').hex, I), olho(164, -1, e, I, C), olho(236, 1, e, I, C));
+      out.push(linha('M144,184 Q163,172 183,181', sob, 5.5), linha('M217,181 Q237,172 256,184', sob, 5.5));
+      out.push(linha('M195,248 Q200,253 205,248', esc(pele, 0.25), 2.6));
+      out.push(boca(e, C('batom'), pele, I));
+      if (vis('adesivo')) out.push(adesivo(e.adesivo, 266, 250, 13));
+      if (e.glitter === 'bochechas' || e.glitter === 'olhos') out.push(glitter(e, C('glitter'), op.anim));
       // ---------- cabelo da frente e acessórios do rosto ----------
-      out.push(andar(cabeloFrente(e, I, cab, cabE), desliza * 0.3));
-      if (vis('brincos')) out.push(andar(brincos(e.brincos, C('brincos'), I, orelhaE, orelhaD), desliza * 0.3));
-      if (vis('oculos')) out.push(andar(oculos(e.oculos, C('oculos')), desliza));
+      out.push(cabeloFrente(e, I, cab, cabE));
+      if (vis('brincos')) out.push(brincos(e.brincos, C('brincos'), I));
+      if (vis('oculos')) out.push(oculos(e.oculos, C('oculos')));
     }
     var enfeites = '';
     if (vis('laco') && !(e.laco === 'alto' && (e.cabeca === 'chapeu' || e.cabeca === 'gorro'))) enfeites += lacos(e.laco, C('laco'), e.cabelo);
     if (vis('cabeca')) enfeites += cabeca(e.cabeca, C('cabeca'), I, peca);
-    out.push(perfil ? '<g transform="translate(200 0) scale(0.62 1) translate(-196 0)">' + enfeites + '</g>' : enfeites);
-    if (e.glitter === 'cabelo' && !perfil) out.push(glitter(e, C('glitter'), op.anim));
-    if (perfil) {
-      // de lado: corpo afinado; cabelo de trás e cabeça de perfil desenhados à parte (sem afinar), virados para o lado do giro
-      var vira = function (s) { return lado < 0 ? '<g transform="translate(400 0) scale(-1 1)">' + s + '</g>' : s; };
-      var corpoLado = corpo.splice(iniBoneca).join('') + (e.glitter === 'tudo' ? glitter(e, C('glitter'), false) : '');
-      corpo.push(vira(grupo('<g transform="translate(-36 0) translate(200 0) scale(0.6 1) translate(-200 0)">' + cabeloTras(e, I, cab, cabE) + '</g>')));
-      corpo.push('<g transform="translate(200 0) scale(' + n((costas ? -1 : 1) * escalaX * 100) / 100 + ' 1) translate(-200 0)">' + corpoLado + '</g>');
-      corpo.push(vira(grupo(out.join(''))));
-      out = corpo;
-      return fechar();
-    }
+    // enfeites de cabeça: de lado, vão um pouco para a frente e ficam mais estreitos (vistos de lado)
+    out.push(virada && enfeites ? '<g transform="translate(' + n(200 + sen * 22) + ' 0) scale(' + n(1 - 0.32 * Math.abs(sen)) + ' 1) translate(-200 0)">' + enfeites + '</g>' : enfeites);
+    if (e.glitter === 'cabelo') out.push(virada ? torcer(glitter(e, C('glitter'), op.anim), false, radS, sen >= 0 ? 1 : -1).frente : glitter(e, C('glitter'), op.anim && !ang));
     var cabecaPronta = grupo(out.join(''));
     out = corpo;
     if (e.glitter === 'tudo') out.push(glitter(e, C('glitter'), op.anim && !ang));
     if (ang) {
       // só o corpo afina um pouco; a cabeça fica do tamanho certo (de costas, espelhada: laço e cabelo trocam de lado)
       var boneca = out.splice(iniBoneca).join('');
-      out.push('<g transform="translate(200 0) scale(' + n((costas ? -1 : 1) * escalaX * 100) / 100 + ' 1) translate(-200 0)">' + boneca + '</g>');
+      out.push('<g transform="translate(200 0) scale(' + n((corpoCostas ? -1 : 1) * escalaX * 100) / 100 + ' 1) translate(-200 0)">' + boneca + '</g>');
       out.push(costas ? '<g transform="translate(400 0) scale(-1 1)">' + cabecaPronta + '</g>' : cabecaPronta);
     } else out.push(cabecaPronta);
-    if (ang) defs += '<clipPath id="' + I + 'rostoC"><path d="' + rosto + '"/></clipPath>';
     return fechar();
+
+    // pescoço girado: de lado fica um pouco mais largo e mais para trás, com a sombra do queixo
+    function pescoco() {
+      var as = Math.abs(sen), m = 200 - sen * 5, l = 14 + 8 * as;
+      return grupo(p('M' + n(m - l) + ',262 L' + n(m + l) + ',262 L' + n(m + l + 2 * as) + ',352 L' + n(m - l - 2 * as) + ',352Z', { fill: pele, stroke: peleE, 'stroke-width': 2 }) +
+        p('M' + n(m - l) + ',284 Q' + n(m + sen * 10) + ',' + n(306 + 6 * as) + ' ' + n(m + l) + ',284 L' + n(m + l) + ',300 Q' + m + ',316 ' + n(m - l) + ',300Z', { fill: '#000', opacity: 0.1 }));
+    }
+
+    /* ---------- a cabeça girada ----------
+       Cada parte do rosto tem um "ângulo de lugar" na esfera da cabeça (az): olhos a ±26°, boca e nariz a 0°,
+       orelhas a ±90°. Girando a cabeça de θ, a parte vai para x = 200 + R·sen(az+θ) e fica mais estreita
+       (cos(az+θ)) — some quando passa para trás. O contorno mistura o rosto de frente e o perfil. */
+    function cabecaVirada() {
+      var s = '', sg = sen >= 0 ? 1 : -1, as = Math.abs(sen), G = Math.PI / 180, sob = mistura(cab, '#2a1c1a', 0.45);
+      var cont = contorno(sen, 0), contV = contorno(sen, 10);
+      function xa(az, R) { return 200 + R * Math.sin(az * G + rad); }
+      function proj(conteudo, x0, az, R, corte, minimo) {
+        var k = Math.cos(az * G + rad); if (k < (minimo === undefined ? 0.12 : minimo)) return '';
+        var kx = Math.max(k, 0.3);
+        return '<g transform="translate(' + n(xa(az, R)) + ' 0) scale(' + n(kx * 1000) / 1000 + ' 1) translate(' + (-x0) + ' 0)">' + (corte ? '<g clip-path="url(#' + I + corte + ')">' + conteudo + '</g>' : conteudo) + '</g>';
+      }
+      var xE = xa(-sg * 90, 86), xF = xa(sg * 90, 86), zE = Math.cos((-sg * 90) * G + rad), zF = Math.cos((sg * 90) * G + rad);
+      defs += '<clipPath id="' + I + 'rostoV"><path d="' + cont + '"/></clipPath><clipPath id="' + I + 'cabV"><path d="' + contV + '"/></clipPath>' +
+        '<clipPath id="' + I + 'mE"><rect x="0" y="0" width="200" height="720"/></clipPath><clipPath id="' + I + 'mD"><rect x="200" y="0" width="200" height="720"/></clipPath>';
+      var hf = torcer(cabeloFrente(e, I, cab, cabE), false, radS, sg);
+      defs += '<clipPath id="' + I + 'cabF"><path d="' + contV + '"/><rect x="' + (sg > 0 ? -400 : 200) + '" y="-200" width="600" height="1200"/></clipPath>';
+      // mecha do lado de lá (vai para trás da cabeça) e orelhas que ficam atrás do rosto
+      s += hf.atras;
+      if (zF > -0.35) s += orelha(xF, 12, false, -sg);
+      if (zE <= 0.3) s += orelha(xE, 12, false, sg);
+      // rosto, maquiagem e feições (recortados pelo contorno)
+      s += p(cont, { fill: 'url(#' + I + 'pele)', stroke: peleE, 'stroke-width': 2.2 });
+      var fe = '';
+      if (e.base === 'natural') fe += p(cont, { fill: mistura(pele, '#ffd9c7', 0.3), opacity: 0.45 });
+      if (e.base === 'bronze') fe += p(cont, { fill: '#c8743f', opacity: 0.13 });
+      var bs = e.base === 'natural' ? '' : base(e.base, pele, ROSTO); if (e.base === 'bronze') bs = bs.replace(/^<path[^>]*\/>/, '');
+      var xn = xa(0, 94), cn = esc(pele, 0.28);
+      defs += '<linearGradient id="' + I + 'sombV" gradientUnits="userSpaceOnUse" x1="' + n(xn - sg * 6) + '" y1="0" x2="' + n(xn + sg * 70) + '" y2="0"><stop offset="0" stop-color="#7a3040" stop-opacity="0"/><stop offset="1" stop-color="#7a3040" stop-opacity="' + n(0.2 * as) + '"/></linearGradient>';
+      var lados = luzLados(pele) + bs +
+        blush(e, C('blush').hex, I) + (e.glitter === 'bochechas' || e.glitter === 'olhos' ? glitter(e, C('glitter'), op.anim) : '') + (vis('adesivo') ? adesivo(e.adesivo, 266, 250, 13) : '');
+      var olhar = sen * 11;
+      fe += proj(lados + olho(164, -1, e, I, C, olhar) + linha('M144,184 Q163,172 183,181', sob, 5.5), 164, -26.3, 81.4, 'mE');
+      fe += proj(lados + olho(236, 1, e, I, C, olhar) + linha('M217,181 Q237,172 256,184', sob, 5.5), 236, 26.3, 81.4, 'mD');
+      // sombra macia do lado de longe do rosto e embaixo do queixo
+      fe += p(cont, { fill: 'url(#' + I + 'sombV)' });
+      // nariz: a curvinha de frente some aos poucos e aparece a lateral do nariz
+      fe += linha('M' + n(xn - 5 * cos) + ',248 Q' + n(xn) + ',253 ' + n(xn + 5 * cos) + ',248', cn, 2.6, n(Math.max(0, cos)));
+      if (as > 0.12) fe += linha('M' + n(xn - sg * 9 * as) + ',226 Q' + n(xn - sg * 2 * as) + ',240 ' + n(xn - sg * 6 * as) + ',250', cn, 2, n(Math.min(0.55, as)) ) +
+        linha('M' + n(xn - sg * 11 * as) + ',250 Q' + n(xn - sg * 7 * as) + ',245 ' + n(xn - sg * 3 * as) + ',251', cn, 2.2, n(Math.min(0.8, as * 1.2)));
+      fe += proj(boca(e, C('batom'), pele, I), 200, 0, 89, null, -0.3);
+      s += '<g clip-path="url(#' + I + 'rostoV)">' + fe + '</g>';
+      // cabelo que cobre a parte de trás e de cima da cabeça (aparece quando ela vira)
+      s += touca(sg, xE, contV);
+      // cabelo da frente: gira junto com o rosto; o que passaria da cabeça do lado para onde ela olha é cortado
+      // virando, do lado de cá da têmpora quem mostra o cabelo é a touca (a franja termina na linha do cabelo)
+      var xT = xa(-sg * 56, 86), xP = xa(-sg * 34, 86) + sg * 6, xH = xa(-sg * 44, 86), mv = -sg * 300 * (1 - Math.min(1, as / 0.4)), xL = 200 + sg * 900;
+      defs += '<clipPath id="' + I + 'cabY"><path d="M' + n(xL) + ',-200 L' + n(xP + sg * 64 + mv) + ',-200 L' + n(xP + mv) + ',116 Q' + n(xH + mv) + ',134 ' + n(xT + mv) + ',168 Q' + n(xT + sg * 4 + mv) + ',204 ' + n(xT + sg * 16 + mv) + ',240 L' + n(xT + sg * 30 + mv) + ',900 L' + n(xL) + ',900Z"/></clipPath>';
+      s += '<g clip-path="url(#' + I + 'cabF)"><g clip-path="url(#' + I + 'cabY)">' + hf.frente + '</g></g>' + hf.lado;
+      // orelha do lado de cá (com o desenho de dentro), por cima do cabelo, como cabelo preso atrás da orelha
+      if (zE > 0.3) s += orelha(xE, 11 + 6 * zE, true, sg);
+      // brincos nas orelhas que aparecem
+      if (vis('brincos')) {
+        if (zE > -0.35) s += '<g transform="translate(' + n(xE - (sg > 0 ? 116 : 284)) + ' 0)">' + brincos(e.brincos, C('brincos'), I, sg > 0, sg < 0) + '</g>';
+        if (zF > -0.35 && zF < 0.3 && as < 0.75) s += '<g transform="translate(' + n(xF - (sg > 0 ? 284 : 116)) + ' 0)">' + brincos(e.brincos, C('brincos'), I, sg < 0, sg > 0) + '</g>';
+      }
+      // óculos: cada lente vai com o seu olho; de lado aparece a haste até a orelha
+      if (vis('oculos')) {
+        var oc = oculos(e.oculos, C('oculos')), kO = Math.cos(-sg * 26.3 * G + rad), xO = xa(-sg * 26.3, 81.4);
+        s += proj(oc, 164, -26.3, 81.4, 'mE', 0.05) + proj(oc, 236, 26.3, 81.4, 'mD', 0.05);
+        if (as > 0.3) s += linha('M' + n(xO - sg * 26 * Math.max(kO, 0.3)) + ',208 L' + n(xE + sg * 6) + ',206', C('oculos').hex, 3.5);
+      }
+      return s;
+    }
+    function orelha(x, w, detalhe, fr) {
+      var s = elip(x, 216, w, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 });
+      if (detalhe) s += p('M' + n(x + fr * w * 0.3) + ',205 Q' + n(x - fr * w * 0.75) + ',203 ' + n(x - fr * w * 0.45) + ',218 Q' + n(x - fr * w * 0.25) + ',229 ' + n(x + fr * w * 0.25) + ',229', { fill: 'none', stroke: esc(pele, 0.3), 'stroke-width': 2, 'stroke-linecap': 'round' }) +
+        elip(x + fr * w * 0.12, 219, w * 0.32, 6, { fill: esc(pele, 0.14), opacity: 0.7 });
+      return s;
+    }
+    // a "touca" de cabelo: cobre o alto e a parte de trás da cabeça, com a linha do cabelo na frente da orelha
+    function toucaD(sg, xE) {
+      var G = Math.PI / 180;
+      function xa(az) { return 200 + 86 * Math.sin(az * G + rad); }
+      return 'M' + n(xa(-sg * 34) + sg * 70) + ',20 L' + n(xa(-sg * 34) + sg * 6) + ',116 Q' + n(xa(-sg * 44)) + ',134 ' + n(xa(-sg * 56)) + ',168 Q' + n(xa(-sg * 62)) + ',190 ' + n(xE + sg * 15) + ',198' +
+        ' L' + n(xE + sg * 11) + ',232 Q' + n(xE) + ',244 ' + n(xE - sg * 14) + ',236 Q' + n(xE - sg * 20) + ',262 ' + n(xE - sg * 32) + ',304 L' + n(xE - sg * 240) + ',330 L' + n(xE - sg * 240) + ',20Z';
+    }
+    function touca(sg, xE, contV) {
+      var as = Math.abs(sen);
+      if (as < 0.08) return '';
+      var d = toucaD(sg, xE);
+      defs += '<clipPath id="' + I + 'touca"><path d="' + d + '"/></clipPath>';
+      var fios = '';
+      for (var i = 0; i < 6; i++) fios += linha('M' + n(xE + sg * (78 - i * 13)) + ',' + (106 + i * 4) + ' Q' + n(xE - sg * (8 + i * 12)) + ',' + (134 + i * 12) + ' ' + n(xE - sg * (34 + i * 7)) + ',300', i % 2 ? '#fff' : cabE, i % 2 ? 2 : 1.6, i % 2 ? 0.16 : 0.45);
+      var brilho = linha('M' + n(xE - sg * 60) + ',176 Q' + n(xE - sg * 34) + ',118 ' + n(xE + sg * 40) + ',112', '#fff', 8, 0.24);
+      return '<g clip-path="url(#' + I + 'cabV)" opacity="' + n(Math.min(1, as * 5)) + '"><g clip-path="url(#' + I + 'touca)">' + p(contV, { fill: 'url(#' + I + 'cab)', stroke: cabE, 'stroke-width': 2.2 }) + fios + brilho + '</g>' +
+        p(d, { fill: 'none', stroke: cabE, 'stroke-width': 2, 'stroke-linejoin': 'round' }) + '</g>';
+    }
 
     function fechar() {
       var w = op.largura, h = op.altura;
@@ -225,7 +302,6 @@
       '<radialGradient id="' + I + 'iris" cx=".5" cy=".38" r=".6"><stop offset="0" stop-color="' + cla(iris, 0.35) + '"/><stop offset=".7" stop-color="' + iris + '"/><stop offset="1" stop-color="' + esc(iris, 0.45) + '"/></radialGradient>' +
       '<radialGradient id="' + I + 'blush"><stop offset="0" stop-color="' + P.cor('blush', e.blushCor).hex + '" stop-opacity=".8"/><stop offset="1" stop-color="' + P.cor('blush', e.blushCor).hex + '" stop-opacity="0"/></radialGradient>' +
       '<radialGradient id="' + I + 'lab" cx=".5" cy=".55" r=".6"><stop offset="0" stop-color="' + cla(P.cor('batom', e.batomCor).hex, 0.45) + '"/><stop offset="1" stop-color="' + P.cor('batom', e.batomCor).hex + '"/></radialGradient>' +
-      '<clipPath id="' + I + 'olhoP"><path d="M240,209 Q252,198 264,207 Q256,219 240,209Z"/></clipPath>' +
       '<clipPath id="' + I + 'olhoE"><path d="' + formaOlho(164) + '"/></clipPath><clipPath id="' + I + 'olhoD"><path d="' + formaOlho(236) + '"/></clipPath>';
   }
 
@@ -363,71 +439,98 @@
     return s;
   }
 
-  // ---------- cabeça de perfil (virada para a direita; o espelho vira para a esquerda) ----------
-  var PERFIL = 'M196,108 C246,108 266,132 270,170 C272,186 274,196 270,210 C276,222 288,232 292,238 Q294,246 284,248 L278,250 Q280,256 284,260 Q285,265 276,267 Q284,270 282,276 Q278,282 272,284 Q276,294 266,300 C246,306 222,302 206,292 C170,296 130,280 118,236 C108,180 130,108 196,108Z';
-  function perfilCabeca(e, I, C, pele, peleE, cab, cabE, vis, peca) {
-    var s = '', sob = mistura(cab, '#2a1c1a', 0.45), som = C('sombra'), del = C('delineado').hex, cil = C('cilios').hex;
-    function lin(d, cor, w, op2) { return p(d, { fill: 'none', stroke: cor, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: op2 }); }
-    // pescoço e cabeça
-    s += p('M178,272 L222,278 L226,322 L176,322Z', { fill: pele, stroke: peleE, 'stroke-width': 2 }) + p('M180,296 L222,300 L224,312 L178,310Z', { fill: '#000', opacity: 0.07 });
-    s += p(PERFIL, { fill: 'url(#' + I + 'pele)', stroke: peleE, 'stroke-width': 2.2 });
-    if (e.base === 'natural') s += p(PERFIL, { fill: mistura(pele, '#ffd9c7', 0.3), opacity: 0.45 });
-    if (e.base === 'bronze') s += p(PERFIL, { fill: '#c8743f', opacity: 0.13 });
-    if (e.base === 'iluminada') s += elip(250, 234, 14, 6, { fill: '#fff', opacity: 0.45, transform: 'rotate(-15 250 234)' }) + elip(280, 226, 3, 9, { fill: '#fff', opacity: 0.45, transform: 'rotate(-35 280 226)' });
-    if (e.base === 'sardas') [[244, 238], [254, 236], [250, 246], [262, 240], [240, 248]].forEach(function (q) { s += circ(q[0], q[1], 2, { fill: esc(pele, 0.35), opacity: 0.7 }); });
-    // blush
-    if (e.blush === 'redondo' || e.blush === 'diagonal') s += elip(244, 250, 22, e.blush === 'diagonal' ? 10 : 20, { fill: 'url(#' + I + 'blush)' });
-    if (e.blush === 'coracao') s += p(coracao(244, 250, 10), { fill: C('blush').hex, opacity: 0.75 });
-    // olho de lado
-    var lid = 'M239,208 Q252,197 265,206';
-    if (e.sombra !== 'nenhum') {
-      var cores = e.sombra === 'arco' ? ['#7cc8ff', '#ffe066', '#ff8fc8'] : [som.hex];
-      cores.forEach(function (c2, k) { s += p('M237,207 Q252,' + (184 + k * 5) + ' 269,203 Q252,196 237,207Z', { fill: c2, opacity: e.sombra === 'esfumada' ? 0.5 : 0.82 }); });
-      if (e.sombra === 'brilhante') s += p(estrela4(260, 194, 3.5), { fill: '#fff' });
+  // ---------- cabeça girada: contorno (de frente → perfil) e cabelo que gira junto ----------
+  // rosto de frente e rosto de perfil (virado para a direita): testa arredondada, nariz pequeno e arrebitado,
+  // lábios, queixo redondinho e a nuca cheia — os dois só com M e C, para serem amostrados em raios
+  var ROSTO = 'M114,200 C114,140 155,113 200,113 C245,113 286,140 286,200 C286,262 250,297 200,297 C150,297 114,262 114,200Z';
+  var PERFIL = 'M200,112 C236,111 266,128 280,158 C286,172 290,186 289,198 C288,206 285,212 286,219 C288,229 296,236 302,242 C306,246 302,252 295,252 ' +
+    'C292,252 290,253 290,256 C292,258 296,260 296,264 C296,267 292,268 289,269 C293,271 295,275 293,278 C291,281 287,281 286,283 ' +
+    'C288,287 290,292 286,296 C282,302 272,304 262,302 C246,299 230,292 218,283 C204,277 182,278 162,274 C134,262 112,236 110,200 C108,160 132,114 200,112Z';
+  var NR = 240, RF = null, RP = null;
+  function pontosDe(d) {
+    var v = d.match(/-?\d*\.?\d+/g).map(Number), pts = [[v[0], v[1]]], x0 = v[0], y0 = v[1];
+    for (var i = 2; i + 5 < v.length; i += 6) {
+      for (var k = 1; k <= 16; k++) { var t = k / 16, u = 1 - t; pts.push([u * u * u * x0 + 3 * u * u * t * v[i] + 3 * u * t * t * v[i + 2] + t * t * t * v[i + 4], u * u * u * y0 + 3 * u * u * t * v[i + 1] + 3 * u * t * t * v[i + 3] + t * t * t * v[i + 5]]); }
+      x0 = v[i + 4]; y0 = v[i + 5];
     }
-    s += p('M240,209 Q252,198 264,207 Q256,219 240,209Z', { fill: '#fff' });
-    s += '<g clip-path="url(#' + I + 'olhoP)">' + circ(256, 209, 8.6, { fill: 'url(#' + I + 'iris)' }) + circ(258, 209, 4.2, { fill: '#1d1420' }) + circ(260, 205.5, 2.3, { fill: '#fff' }) + '</g>';
-    s += lin(lid, '#2a1c1a', 3);
-    if (e.delineado !== 'nenhum') s += lin(lid, del, e.delineado === 'grosso' ? 5.5 : 3.6) + (e.delineado === 'gatinho' ? p('M262,206 L276,197 L263,202Z', { fill: del, stroke: del, 'stroke-width': 1.5 }) : '');
-    var nCil = { curtos: 3, longos: 4, boneca: 6, gatinho: 5, volume: 7, baixo: 4, arco: 6, strass: 4 }[e.cilios] || 3;
-    var tam = { curtos: 7, longos: 11, boneca: 14, gatinho: 12, volume: 12, baixo: 10, arco: 12, strass: 11 }[e.cilios] || 7;
-    var arco = ['#ff5a6e', '#ff9f1c', '#ffd23f', '#5cc46a', '#5ac8ff', '#7a5cff', '#d05cff'];
-    for (var i = 0; i < nCil; i++) {
-      var t = 0.45 + i * 0.55 / Math.max(1, nCil - 1), x = (1 - t) * (1 - t) * 239 + 2 * (1 - t) * t * 252 + t * t * 265, y = (1 - t) * (1 - t) * 208 + 2 * (1 - t) * t * 197 + t * t * 206;
-      var L = tam * (0.6 + t * 0.5);
-      s += lin('M' + n(x) + ',' + n(y) + ' Q' + n(x + L * 0.5) + ',' + n(y - L * 0.7) + ' ' + n(x + L * 0.95) + ',' + n(y - L * 0.55), e.cilios === 'arco' ? arco[i % arco.length] : cil, e.cilios === 'boneca' ? 2.8 : 2.2);
+    return pts;
+  }
+  // distância do centro da cabeça (200, 205) até o contorno, em NR direções (0 = para cima, sentido horário)
+  function raios(d) {
+    var pts = pontosDe(d), r = [];
+    for (var i = 0; i < NR; i++) {
+      var a = i / NR * Math.PI * 2, dx = Math.sin(a), dy = -Math.cos(a), melhor = 0;
+      for (var j = 0; j < pts.length; j++) {
+        var A = pts[j], B = pts[(j + 1) % pts.length], ex = B[0] - A[0], ey = B[1] - A[1], ax = A[0] - 200, ay = A[1] - 205, det = ex * dy - dx * ey;
+        if (Math.abs(det) < 1e-9) continue;
+        var t = (ex * ay - ax * ey) / det, u = (dx * ay - dy * ax) / det;
+        if (u >= 0 && u <= 1 && t > melhor) melhor = t;
+      }
+      r.push(melhor);
     }
-    if (e.cilios === 'boneca' || e.cilios === 'baixo') s += lin('M252,216 L254,222 M258,215 L261,220', cil, 1.8);
-    if (e.cilios === 'strass') s += circ(250, 199, 2.2, { fill: '#fff', stroke: '#ff9fd2', 'stroke-width': 1 });
-    s += lin('M240,190 Q254,182 268,188', sob, 5);
-    s += lin('M279,245 Q284,247 287,244', esc(pele, 0.3), 2);
-    // boca de lado
-    var cima = 'M274,262 Q283,258 285,263 Q281,267 272,266Z', baixo = 'M272,267 Q283,268 282,274 Q278,280 271,276Z';
-    if (e.batom === 'nenhum') { var nat = mistura(pele, '#e0707a', 0.4); s += p(cima, { fill: esc(nat, 0.08) }) + p(baixo, { fill: nat }); }
-    else {
-      var bc = C('batom').hex; s += p(cima, { fill: esc(bc, 0.1) }) + p(baixo, { fill: e.batom === 'degrade' ? cla(bc, 0.3) : bc });
-      if (e.batom === 'gloss') s += elip(278, 272, 3.5, 1.6, { fill: '#fff', opacity: 0.75 });
-      if (e.batom === 'brilho') s += circ(276, 271, 1.2, { fill: '#fff' }) + circ(280, 274, 1.2, { fill: '#fff' });
+    return r;
+  }
+  // contorno da cabeça virada: sn = seno do giro (+ olha para a direita, − para a esquerda); extra = folga (volume do cabelo)
+  function contorno(sn, extra) {
+    if (!RF) { RF = raios(ROSTO); RP = raios(PERFIL); }
+    var tf = Math.pow(Math.abs(sn), 2.2), d = '';
+    for (var i = 0; i < NR; i++) {
+      var a = i / NR * Math.PI * 2, ip = sn >= 0 ? i : (NR - i) % NR, r = RF[i] + (RP[ip] - RF[i]) * tf + (extra || 0);
+      d += (i ? 'L' : 'M') + n(200 + Math.sin(a) * r) + ',' + n(205 - Math.cos(a) * r);
     }
-    s += lin('M271,266 L283,265', esc(pele, 0.45), 1.4);
-    if (vis('adesivo')) s += adesivo(e.adesivo, 232, 244, 10);
-    if (e.glitter === 'bochechas' || e.glitter === 'olhos') [[236, 238], [250, 256], [228, 252], [262, 196], [232, 204]].forEach(function (q, k) { s += p(estrela4(q[0], q[1], 3 + k % 2), { fill: C('glitter').id === 'arco' ? arco[k] : C('glitter').hex }); });
-    // cabelo de perfil: cobre o alto e a parte de trás da cabeça; a franja fica na testa
-    var f = { fill: 'url(#' + I + 'cab)', stroke: cabE, 'stroke-width': 2.2, 'stroke-linejoin': 'round' };
-    var curto = ['pixie', 'chanel', 'rabo', 'coque', 'coqueDuplo', 'puffs', 'afro', 'cacheado', 'cachosCurtos', 'rabinhoAlto', 'coroaTranca', 'coqueBaguncado', 'lob'].indexOf(e.cabelo) >= 0;
-    s += p('M270,180 Q274,110 198,100 Q122,100 110,168 Q102,236 ' + (curto ? '136,276 L160,280' : '124,300 L152,304') + ' Q146,250 154,222 Q168,206 182,200 Q190,174 214,160 Q246,150 270,180Z', f);
-    if (['franja', 'chanel', 'franjinha', 'cortina'].indexOf(e.cabelo) >= 0) s += p('M272,184 Q276,150 254,134 L238,170 Q256,166 272,184Z', f);
-    if (e.cabelo === 'cacheado' || e.cabelo === 'afro') for (var c3 = 0; c3 < 7; c3++) s += circ(130 + c3 * 20, 112 - Math.sin(c3 / 6 * Math.PI) * 10, 18, f);
-    s += p('M150,124 Q196,104 246,124', { fill: 'none', stroke: '#fff', 'stroke-width': 6, 'stroke-linecap': 'round', opacity: 0.25 });
-    if (e.mechas === 'frente') s += lin('M250,124 Q262,150 266,176', P.cor('cabelo', e.mechasCor).hex, 7, 0.9);
-    // orelha, brinco e óculos
-    s += elip(186, 216, 11, 16, { fill: pele, stroke: peleE, 'stroke-width': 2 }) + lin('M188,206 Q180,216 188,226', esc(pele, 0.25), 1.8);
-    if (vis('brincos')) s += '<g transform="translate(-98 0)">' + brincos(e.brincos, C('brincos'), I, false, true) + '</g>';
-    if (vis('oculos')) {
-      var oc = C('oculos').hex;
-      s += lin('M256,204 L188,206', oc, 3.2) + elip(258, 212, 6, 17, { fill: e.oculos === 'sol' ? mistura(oc, '#1d1420', 0.6) : '#fff', opacity: e.oculos === 'sol' ? 0.85 : 0.2, stroke: oc, 'stroke-width': 3.5 });
+    return d + 'Z';
+  }
+  /* cabelo girado: cada ponto do desenho de frente vira um ponto num elipsoide em volta da cabeça (mais estreito
+     lá em cima, onde o alto da cabeça quase não sai do lugar) e gira junto. tras = cabelo da parte de trás (gira
+     para o outro lado). Na frente, as mechas compridas dos lados andam inteiras, presas atrás da orelha (como nas
+     ilustrações de perfil): a do lado de cá fica por cima, a do lado de lá vai para trás da cabeça (devolvida em
+     .atras). Com giro 0 o desenho fica exatamente igual. */
+  function torcer(s, tras, th, sg) {
+    var M = Math.PI / 2, atras = '', lado = '';
+    function raio(y) { var dy = Math.max(0, 215 - y) / 118; return (tras ? 112 : 92) * Math.sqrt(Math.max(0, 1 - dy * dy)); }
+    function fx(x, y) {
+      var R = raio(y), d = x - 200, lado = d < 0 ? -1 : 1, exc = 0, u;
+      if (R < 1 || Math.abs(d) > R) { exc = d - lado * R; u = lado; } else u = d / R;
+      var f = Math.asin(u);
+      if (tras) f = Math.PI - f;
+      var a = f + th, some = !tras && Math.abs(a) > M;
+      if (tras) a = Math.max(M, Math.min(3 * M, a));   // o de trás não passa para a frente: fica na borda
+      var sa = Math.sin(a);
+      return [200 + R * (some ? (a > 0 ? 1 : -1) : sa) + exc * Math.abs(sa), some];
     }
-    return s;
+    var res = s.replace(/<(path|circle|ellipse)\s([^>]*?)(\/?)>/g, function (m, tag, atr, fecha) {
+      // mecha comprida do lado? (começa abaixo da testa e desce bastante)
+      var xs = [], ys = [];
+      (atr.match(/(^|\s)d="([^"]*)"/) || ['', '', ''])[2].replace(/(-?\d*\.?\d+),(-?\d*\.?\d+)/g, function (m3, x, y) { xs.push(+x); ys.push(+y); });
+      var cc = atr.match(/cx="([^"]*)" cy="([^"]*)"/); if (cc) { xs.push(+cc[1]); ys.push(+cc[2]); }
+      if (!tras && fecha && xs.length) {
+        var cx = xs.reduce(function (a, b) { return a + b; }, 0) / xs.length, cy = ys.reduce(function (a, b) { return a + b; }, 0) / ys.length;
+        if (cy > 236 && Math.abs(cx - 200) > 40) {
+          var lm = cx < 200 ? -1 : 1, a0 = lm * 110 * Math.PI / 180, dx = 96 * (Math.sin(a0 + th) - Math.sin(a0)), kx = 1 - 0.25 * Math.abs(Math.sin(th));
+          var el = '<g transform="translate(' + n(cx + dx) + ' 0) scale(' + n(kx * 100) / 100 + ' 1) translate(' + n(-cx) + ' 0)">' + m + '</g>';
+          if (lm === sg && th) { if (Math.cos(a0 + th) > -0.75) atras += el; } else lado += el;
+          return '';
+        }
+      }
+      var tot = 0, fora = 0;
+      function um(x, y) { var r = fx(+x, +y); tot++; if (r[1]) fora++; return n(r[0]); }
+      atr = atr.replace(/(^|\s)d="([^"]*)"/, function (m2, ini, d) { return ini + 'd="' + d.replace(/(-?\d*\.?\d+),(-?\d*\.?\d+)/g, function (m3, x, y) { return um(x, y) + ',' + y; }) + '"'; });
+      atr = atr.replace(/cx="([^"]*)" cy="([^"]*)"/, function (m2, x, y) { return 'cx="' + um(x, y) + '" cy="' + y + '"'; });
+      if (!tras && fecha && tot && fora / tot >= 0.6) return '';
+      return '<' + tag + ' ' + atr + fecha + '>';
+    });
+    if (tras) return res;
+    return { frente: res, lado: lado, atras: atras };
+  }
+  // luz e sombra do rosto de frente: dos lados (testa, bochechas, pálpebras) e do meio (nariz e queixo)
+  function luzLados(pele) {
+    return elip(200, 150, 84, 26, { fill: '#000', opacity: 0.06 }) + elip(152, 246, 26, 16, { fill: '#ff8f7a', opacity: 0.1 }) + elip(248, 246, 26, 16, { fill: '#ff8f7a', opacity: 0.1 }) +
+      elip(128, 214, 10, 34, { fill: '#000', opacity: 0.04 }) + elip(272, 214, 10, 34, { fill: '#000', opacity: 0.04 }) +
+      p('M146,201 Q164,178 182,199', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: 0.55 }) + p('M218,199 Q236,178 254,201', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: 0.55 });
+  }
+  function luzMeio(pele, nariz) {
+    return (nariz ? p('M203,226 Q208,240 205,250', { fill: 'none', stroke: esc(pele, 0.25), 'stroke-width': 3, opacity: 0.22, 'stroke-linecap': 'round' }) + elip(200, 238, 2.6, 7, { fill: '#fff', opacity: 0.35 }) : '') +
+      elip(200, 291, 16, 3.5, { fill: '#000', opacity: 0.07 }) + elip(200, 286, 70, 14, { fill: '#000', opacity: 0.04 }) + elip(200, 284, 12, 4, { fill: '#fff', opacity: 0.18 });
   }
 
   // ---------- mãos: palma, 4 dedos e polegar (do lado de dentro, virado para o corpo) ----------
@@ -480,8 +583,8 @@
     if (e.blush === 'diagonal') return elip(152, 248, 24, 9, { fill: 'url(#' + I + 'blush)', transform: 'rotate(-22 152 248)' }) + elip(248, 248, 24, 9, { fill: 'url(#' + I + 'blush)', transform: 'rotate(22 248 248)' });
     return '';
   }
-  function olho(cx, lado, e, I, C) {
-    var cy = 214, s = '', som = C('sombra'), del = C('delineado').hex, cil = C('cilios').hex;
+  function olho(cx, lado, e, I, C, olhar) {
+    var cy = 214, ix = cx + (olhar || 0), s = '', som = C('sombra'), del = C('delineado').hex, cil = C('cilios').hex;
     function palpebra(alt, larg) { return 'M' + (cx - larg) + ',' + (cy - 2) + 'Q' + cx + ',' + (cy - alt) + ' ' + (cx + larg) + ',' + (cy - 2) + 'Q' + cx + ',' + (cy - alt * 0.55) + ' ' + (cx - larg) + ',' + (cy - 2) + 'Z'; }
     switch (e.sombra) {
       case 'simples': s += p(palpebra(40, 26), { fill: som.hex, opacity: 0.8 }); break;
@@ -491,8 +594,8 @@
     }
     var forma = formaOlho(cx), clip = 'url(#' + I + (lado < 0 ? 'olhoE' : 'olhoD') + ')';
     s += p(forma, { fill: '#fff' });
-    s += '<g clip-path="' + clip + '">' + circ(cx, cy + 4, 16, { fill: 'url(#' + I + 'iris)' }) + circ(cx, cy + 5, 7.5, { fill: '#1d1420' }) +
-      circ(cx + 6, cy - 3, 5.2, { fill: '#fff' }) + circ(cx - 5, cy + 11, 2.6, { fill: '#fff', opacity: 0.85 }) + p('M' + (cx - 22) + ',' + (cy - 2) + 'Q' + cx + ',' + (cy - 32) + ' ' + (cx + 22) + ',' + (cy - 2) + 'L' + (cx + 22) + ',' + (cy + 2) + 'Q' + cx + ',' + (cy - 22) + ' ' + (cx - 22) + ',' + (cy + 2) + 'Z', { fill: '#000', opacity: 0.08 }) + '</g>';
+    s += '<g clip-path="' + clip + '">' + circ(ix, cy + 4, 16, { fill: 'url(#' + I + 'iris)' }) + circ(ix, cy + 5, 7.5, { fill: '#1d1420' }) +
+      circ(ix + 6, cy - 3, 5.2, { fill: '#fff' }) + circ(ix - 5, cy + 11, 2.6, { fill: '#fff', opacity: 0.85 }) + p('M' + (cx - 22) + ',' + (cy - 2) + 'Q' + cx + ',' + (cy - 32) + ' ' + (cx + 22) + ',' + (cy - 2) + 'L' + (cx + 22) + ',' + (cy + 2) + 'Q' + cx + ',' + (cy - 22) + ' ' + (cx - 22) + ',' + (cy + 2) + 'Z', { fill: '#000', opacity: 0.08 }) + '</g>';
     var lid = 'M' + (cx - 22) + ',' + (cy - 2) + 'Q' + cx + ',' + (cy - 32) + ' ' + (cx + 22) + ',' + (cy - 2);
     s += p(lid, { fill: 'none', stroke: '#2a1c1a', 'stroke-width': 3.2, 'stroke-linecap': 'round' });
     if (e.delineado === 'fino') s += p(lid, { fill: 'none', stroke: del, 'stroke-width': 3.6, 'stroke-linecap': 'round' });

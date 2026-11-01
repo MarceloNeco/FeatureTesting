@@ -66,10 +66,20 @@ test('anel e pulseira: só a parte da frente (arco aberto, sem círculo inteiro)
   assert.ok(!/<ellipse cx="120\.5" cy="487"/.test(s), 'pulseira sem elipse inteira');
 });
 
-test('perfil: de lado desenha a cabeça de perfil para os dois lados', () => {
+test('perfil: de lado a cabeça vira de verdade (contorno do perfil) para os dois lados', () => {
   const e = Object.assign(V.novo(), { oculos: 'sol', brincos: 'perola', batom: 'gloss', cilios: 'arco' });
-  for (const a of [70, 90, 110, 250, 270, 290]) { const s = B.svg(e, { id: 'p', angulo: a }); assert.equal(bemFormado(s), ''); assert.match(s, /p-olhoP/, 'olho de perfil em ' + a); }
-  assert.ok(!/p-olhoP\)/.test(B.svg(e, { id: 'p', angulo: 0 })), 'de frente não usa o olho de perfil');
+  for (const a of [70, 90, 95, 265, 270, 290]) { const s = B.svg(e, { id: 'p', angulo: a }); assert.equal(bemFormado(s), ''); assert.match(s, /p-rostoV/, 'cabeça girada em ' + a); }
+  assert.ok(!/p-rostoV/.test(B.svg(e, { id: 'p', angulo: 110 })), 'passando de 100° a cabeça fica de costas');
+  assert.ok(!/p-rostoV/.test(B.svg(e, { id: 'p', angulo: 0 })), 'de frente é o desenho de frente');
+});
+
+test('giro contínuo: cada grau desenha diferente e com 0° fica igual ao de frente', () => {
+  const e = Object.assign(V.novo(), { cabelo: 'ondasLongas', brincos: 'argola' });
+  assert.notEqual(B.svg(e, { id: 'g', angulo: 10 }), B.svg(e, { id: 'g', angulo: 12 }), 'sem pular de 22,5 em 22,5');
+  assert.equal(B.svg(e, { id: 'g', angulo: 360 }), B.svg(e, { id: 'g', angulo: 0 }));
+  // olhos: os dois de frente; de lado, só o do lado de cá
+  const olhos = (a) => (B.svg(e, { id: 'o', angulo: a, fundo: false }).match(/clip-path="url\(#o-olho[ED]\)"/g) || []).length;
+  assert.equal(olhos(30), 2); assert.equal(olhos(90), 1); assert.equal(olhos(270), 1);
 });
 
 test('unhas pintadas nas mãos e nos pés descalços', () => {
