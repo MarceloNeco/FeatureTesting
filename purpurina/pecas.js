@@ -97,6 +97,17 @@
   var ZOOM = { pes: [96, 520, 208, 170], unhas: [76, 462, 92, 80], rosto: [72, 70, 256, 260], busto: [56, 120, 288, 300], maos: [56, 428, 150, 130], cabeca: [30, 20, 340, 430] };
   var CATEGORIAS = [
     { id: 'pele', grupo: 'eu', ico: '🎨', pt: 'Pele', en: 'Skin', cores: 'pele', area: A.rosto, zoom: 'rosto' },
+    { id: 'personagem', grupo: 'eu', ico: '👧', pt: 'Menina ou menino', en: 'Girl or boy', area: A.cabeca, zoom: 'cabeca', opcoes: [
+      o('menina', 'Menina', 'Girl'), o('menino', 'Menino', 'Boy')
+    ] },
+    { id: 'rosto', grupo: 'eu', ico: '🙂', pt: 'Rosto', en: 'Face shape', area: A.rosto, zoom: 'rosto', opcoes: [
+      o('oval', 'Oval', 'Oval'), o('redondo', 'Redondinho', 'Round'), o('coracao', 'Coração', 'Heart'), o('fininho', 'Fininho', 'Slim'),
+      o('bochechudo', 'Bochechudo', 'Chubby cheeks')
+    ] },
+    { id: 'nariz', grupo: 'eu', ico: '👃', pt: 'Nariz', en: 'Nose', area: A.rosto, zoom: 'rosto', opcoes: [
+      o('botao', 'Botãozinho', 'Button'), o('arrebitado', 'Arrebitado', 'Upturned'), o('fininho', 'Fininho', 'Slim'),
+      o('redondinho', 'Redondinho', 'Round tip'), o('pequenino', 'Pequenininho', 'Tiny')
+    ] },
     { id: 'cabelo', grupo: 'eu', ico: '💇', pt: 'Cabelo', en: 'Hair', cores: 'cabelo', area: A.cabeca, zoom: 'cabeca', opcoes: [
       o('longo', 'Longo e liso', 'Long and straight'), o('ondulado', 'Ondulado', 'Wavy'), o('cacheado', 'Cacheado', 'Curly'),
       o('rabo', 'Rabo de cavalo', 'Ponytail', ['esporte']), o('chiquinhas', 'Maria-chiquinha', 'Pigtails'), o('coque', 'Coque', 'Bun', ['bailarina', 'princesa']),
@@ -110,7 +121,12 @@
       o('cachosCurtos', 'Cachinhos curtos', 'Short curls'), o('ondasLongas', 'Ondas longas', 'Long waves', ['praia', 'princesa']),
       o('franjinha', 'Franjinha', 'Baby bangs'), o('chiquinhasBaixas', 'Chiquinhas baixas', 'Low pigtails', ['jardim']),
       o('dreads', 'Dreads', 'Locs', ['pop']), o('ondasLado', 'Ondas de lado', 'Side-swept waves', ['festa', 'princesa']),
-      o('cacheadoLongo', 'Cachos longos', 'Long ringlets', ['princesa'])
+      o('cacheadoLongo', 'Cachos longos', 'Long ringlets', ['princesa']),
+      o('lisoPontas', 'Liso de pontas redondinhas', 'Straight with curled-in ends', ['princesa', 'festa']), o('lisoRepartido', 'Liso repartido no meio', 'Sleek middle part', ['festa', 'pop']),
+      o('chanelPontas', 'Chanel de pontas para dentro', 'Rounded bob', ['escola', 'festa']), o('pontasFora', 'Pontas para fora', 'Flipped ends', ['pop', 'festa']),
+      o('cachinhos', 'Cachinhos de molinha', 'Spiral curls', ['princesa', 'festa']), o('encaracolado', 'Encaracolado volumoso', 'Big curly hair', ['pop', 'praia']),
+      o('rabinhoCachos', 'Rabo de cachos', 'Curly ponytail', ['festa', 'pop']),
+      o('curtinho', 'Curtinho', 'Short cut', ['escola', 'esporte']), o('topete', 'Topete', 'Quiff', ['pop', 'escola'])
     ] },
     { id: 'mechas', grupo: 'eu', ico: '🌈', pt: 'Mechas', en: 'Highlights', cores: 'cabelo', area: A.cabeloTodo, zoom: 'cabeca', opcoes: [
       NENHUM('Sem mechas', 'No highlights'), o('pontas', 'Pontas coloridas', 'Colored tips', ['pop']), o('frente', 'Mechas na frente', 'Front streaks', ['pop']),
@@ -136,7 +152,9 @@
     { id: 'cilios', grupo: 'make', ico: '👁️', pt: 'Cílios', en: 'Lashes', cores: 'cilios', area: A.olhos, zoom: 'rosto', opcoes: [
       NENHUM('Sem cílios postiços', 'No false lashes'), o('curtos', 'Naturais', 'Natural'), o('longos', 'Longos', 'Long', ['festa']), o('boneca', 'De boneca', 'Doll lashes', ['princesa', 'pop']),
       o('gatinho', 'Gatinho', 'Cat-eye lashes', ['pop']), o('volume', 'Volume', 'Volume', ['festa', 'pop']), o('baixo', 'Em cima e embaixo', 'Top and bottom'),
-      o('arco', 'Arco-íris', 'Rainbow lashes', ['pop', 'festa']), o('strass', 'Com strass', 'With rhinestones', ['brilho', 'festa', 'princesa'])
+      o('arco', 'Arco-íris', 'Rainbow lashes', ['pop', 'festa']), o('strass', 'Com strass', 'With rhinestones', ['brilho', 'festa', 'princesa']),
+      o('fadinha', 'De fadinha', 'Fairy lashes', ['fada', 'princesa']), o('dramaticos', 'Bem longos', 'Dramatic lashes', ['festa', 'pop']),
+      o('coracao', 'Com coraçãozinho', 'With little hearts', ['festa', 'aniversario'])
     ] },
     { id: 'unhas', grupo: 'make', ico: '💅', pt: 'Unhas', en: 'Nails', cores: 'roupa', area: [86, 478, 66, 56], zoom: 'unhas', opcoes: [
       NENHUM('Sem esmalte', 'No polish'), o('liso', 'Esmalte liso', 'Plain polish'), o('francesinha', 'Francesinha', 'French tips', ['festa', 'princesa']),
@@ -214,18 +232,26 @@
       NENHUM('Nada na cabeça', 'Nothing'), o('tiara', 'Tiara', 'Tiara', ['princesa', 'festa']), o('coroa', 'Coroa', 'Crown', ['princesa']),
       o('flores', 'Coroa de flores', 'Flower crown', ['jardim', 'praia']), o('chapeu', 'Chapéu de praia', 'Sun hat', ['praia', 'verao']),
       o('gorro', 'Gorro', 'Beanie', ['inverno']), o('orelhas', 'Orelhinhas de gato', 'Cat ears', ['pijama', 'pop']),
-      o('diadema', 'Diadema de joias', 'Jeweled headband', ['princesa', 'festa', 'joia'])
+      o('diadema', 'Diadema de joias', 'Jeweled headband', ['princesa', 'festa', 'joia']),
+      o('faixa', 'Faixa com nó', 'Knotted headband', ['escola', 'casual', 'pop']), o('unicornio', 'Tiara de unicórnio', 'Unicorn headband', ['pop', 'fada', 'aniversario']),
+      o('estrelas', 'Tiara de estrelinhas', 'Star headband', ['pop', 'pijama', 'festa'])
     ] },
     { id: 'laco', grupo: 'acess', ico: '🎀', pt: 'Laços', en: 'Bows', cores: 'roupa', area: A.cabeca, zoom: 'cabeca', opcoes: [
       NENHUM('Sem laço', 'No bow'), o('alto', 'Laço no alto', 'Top bow', ['festa', 'aniversario']), o('lado', 'Laço do lado', 'Side bow', ['festa', 'aniversario']),
-      o('dois', 'Dois lacinhos', 'Two little bows', ['aniversario', 'pop']), o('estrela', 'Presilha de estrela', 'Star clip', ['pop'])
+      o('dois', 'Dois lacinhos', 'Two little bows', ['aniversario', 'pop']), o('estrela', 'Presilha de estrela', 'Star clip', ['pop']),
+      o('presilhas', 'Presilhas coloridas', 'Colorful clips', ['pop', 'escola']), o('perolas', 'Presilhas de pérola', 'Pearl clips', ['princesa', 'festa', 'joia']),
+      o('borboletas', 'Presilhas de borboleta', 'Butterfly clips', ['jardim', 'pop']), o('florGrande', 'Flor no cabelo', 'Big hair flower', ['praia', 'jardim', 'verao']),
+      o('lacao', 'Laço gigante', 'Giant bow', ['festa', 'aniversario', 'princesa'])
     ] },
     { id: 'brincos', grupo: 'joias', ico: '💎', pt: 'Brincos', en: 'Earrings', cores: 'roupa', area: A.rosto, zoom: 'rosto', opcoes: [
       NENHUM('Sem brinco', 'No earrings'), o('bolinha', 'Bolinha', 'Studs'), o('argola', 'Argola', 'Hoops', ['pop']),
       o('estrela', 'Estrela', 'Stars', ['pop']), o('coracao', 'Coração', 'Hearts', ['festa', 'aniversario']), o('gota', 'Gota brilhante', 'Sparkly drops', ['princesa', 'festa', 'joia']),
       o('perola', 'Pérola', 'Pearl', ['princesa', 'festa', 'joia']), o('diamante', 'Diamante', 'Diamond', ['princesa', 'festa', 'joia', 'brilho']),
       o('lua', 'Lua', 'Moon', ['pijama']), o('borboleta', 'Borboleta', 'Butterfly', ['jardim']), o('flor', 'Florzinha', 'Little flower', ['jardim', 'praia']),
-      o('pingente', 'Pingente longo', 'Chandelier', ['festa', 'princesa', 'joia']), o('cereja', 'Cereja', 'Cherries', ['pop', 'verao'])
+      o('pingente', 'Pingente longo', 'Chandelier', ['festa', 'princesa', 'joia']), o('cereja', 'Cereja', 'Cherries', ['pop', 'verao']),
+      o('cascata', 'Cascata de cristais', 'Crystal cascade', ['princesa', 'festa', 'joia', 'brilho']), o('argolaPerola', 'Argola com pérola', 'Pearl hoops', ['joia', 'festa']),
+      o('lacinho', 'Lacinho', 'Little bows', ['aniversario', 'festa']), o('franja', 'Franjinha de fios', 'Tassels', ['pop', 'praia']),
+      o('morango', 'Morango', 'Strawberries', ['pop', 'verao'])
     ] },
     { id: 'colar', grupo: 'joias', ico: '📿', pt: 'Colares', en: 'Necklaces', cores: 'roupa', area: A.pescoco, zoom: 'busto', opcoes: [
       NENHUM('Sem colar', 'No necklace'), o('perolas', 'Pérolas', 'Pearls', ['princesa', 'festa', 'joia']), o('coracao', 'Coração', 'Heart', ['festa', 'aniversario']),
@@ -269,7 +295,7 @@
 
   // como a personagem começa (e o que volta no "começar de novo")
   var PADRAO = {
-    pele: 'p3', cabelo: 'ondulado', cabeloCor: 'castanho', mechas: 'nenhum', mechasCor: 'rosa', olhos: 'castanho',
+    pele: 'p3', personagem: 'menina', rosto: 'oval', nariz: 'botao', cabelo: 'ondulado', cabeloCor: 'castanho', mechas: 'nenhum', mechasCor: 'rosa', olhos: 'castanho',
     base: 'nenhum', blush: 'nenhum', blushCor: 'rosa', sombra: 'nenhum', sombraCor: 'lilas', delineado: 'nenhum', delineadoCor: 'preto',
     cilios: 'curtos', ciliosCor: 'preto', unhas: 'nenhum', unhasCor: 'chiclete', batom: 'nenhum', batomCor: 'rosaclaro', glitter: 'nenhum', glitterCor: 'dourado', adesivo: 'nenhum',
     vestido: 'nenhum', vestidoCor: 'lilas', blusa: 'camiseta', blusaCor: 'rosaclaro', saia: 'nenhum', saiaCor: 'chiclete',

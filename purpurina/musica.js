@@ -64,6 +64,8 @@
       return { fonte: est.fonte, ref: est.ref, titulo: est.titulo, tocando: est.tocando, erro: est.erro };
     }
     function tituloPurpurina() { return Som && Som.faixaAtual ? Som.faixaAtual() : 'Purpurina'; }
+    // a rádio da Purpurina trocou de música sozinha: atualiza o nome na tela
+    if (Som && Som.aoTrocarMusica) Som.aoTrocarMusica(function (nome) { if (est.fonte === 'purpurina') { est.titulo = nome; avisar(); } });
     function pararFora() {
       if (yt) try { yt.stopVideo(); } catch (e) { /* ok */ }
       if (sp) try { sp.pause(); } catch (e) { /* ok */ }

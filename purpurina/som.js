@@ -1,6 +1,7 @@
-/* Purpurina — música e sons feitos na hora pelo navegador (WebAudio). Nenhum arquivo de áudio.
-   Mesmo motor do Vruuum! (som.js de lá), com músicas e timbres próprios: sininhos, palmas e
-   baixo dançante. O navegador só deixa tocar depois de um toque: iniciar() é chamado no 1º botão. */
+/* Purpurina — música e sons. A "rádio" da Purpurina intercala músicas pop gravadas, de licença livre
+   (musicas/*.mp3, créditos em musicas/LICENCAS.md), com as 3 músicas feitas na hora pelo navegador
+   (WebAudio: sininhos, palmas e baixo dançante). Os efeitos também são feitos na hora.
+   O navegador só deixa tocar depois de um toque: iniciar() é chamado no 1º botão. */
 (function (raiz) {
   'use strict';
   var ac = null, mestre = null, musGanho = null, ligado = true, musicaLigada = false, timer = null, prox = 0, passo = 0, faixa = 0;
@@ -84,20 +85,75 @@
     if (!ac) return;
     while (prox < ac.currentTime + 0.12) {
       tocarPasso(passo, prox); passo++; prox += PASSO();
-      if (passo >= 16 * 16 * 2) { passo = 0; faixa = (faixa + 1) % MUSICAS.length; }   // depois de 2 voltas, a próxima música
+      if (passo >= 16 * 16 * 2) { passo = 0; setTimeout(avancar, 0); return; }   // depois de 2 voltas, a próxima da rádio
     }
   }
+  function sintLigar() { if (!timer) { passo = 0; prox = ac.currentTime + 0.05; timer = setInterval(agendar, 25); } }
+  function sintParar() { if (timer) { clearInterval(timer); timer = null; } }
+
+  // ---------- a rádio: gravadas (pop, dance e R&B, licença livre) e as feitas pelo jogo ----------
+  var GRAVADAS = [
+    { url: 'musicas/disco-medusae.mp3', nome: 'Disco Medusae', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/shoepop.mp3', nome: 'Shoepop', autor: 'Loyalty Freak Music', licenca: 'CC0' },
+    { url: 'musicas/sunglasses.mp3', nome: 'Sunglasses', autor: 'Loyalty Freak Music', licenca: 'CC0' },
+    { url: 'musicas/electrodoodle.mp3', nome: 'Electrodoodle', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/beach.mp3', nome: 'Beach', autor: 'Loyalty Freak Music', licenca: 'CC0' },
+    { url: 'musicas/walking-shoes.mp3', nome: 'Walking Shoes', autor: 'Loyalty Freak Music', licenca: 'CC0' },
+    { url: 'musicas/friend-to-friend.mp3', nome: 'Friend to Friend', autor: 'Loyalty Freak Music', licenca: 'CC0' },
+    { url: 'musicas/yippee.mp3', nome: 'Yippee!', autor: 'Loyalty Freak Music', licenca: 'CC0' }
+  ];
+  var lista = [], atual = -1, audio = null, aoTrocar = null, falhas = 0;
+  // duas gravadas, uma feita pelo jogo, duas gravadas... (no arquivo baixado ou sem <audio>: só as do jogo)
+  function montarLista() {
+    var grav = raiz.JOGO_EM_ARQUIVO || !raiz.Audio ? [] : GRAVADAS.map(function (g) { return { g: g }; });
+    var sint = MUSICAS.map(function (m, k) { return { s: k }; });
+    lista = [];
+    while (grav.length || sint.length) {
+      if (grav.length) lista.push(grav.shift());
+      if (grav.length) lista.push(grav.shift());
+      if (sint.length) lista.push(sint.shift());
+    }
+  }
+  function nomeDe(it) { return it.g ? it.g.nome + ' — ' + it.g.autor + ' (' + it.g.licenca + ')' : MUSICAS[it.s].nome; }
+  function pararTudo() { sintParar(); if (audio) audio.pause(); }
+  function tocarItem(k) {
+    if (!lista.length) montarLista();
+    atual = ((k % lista.length) + lista.length) % lista.length;
+    var it = lista[atual];
+    pararTudo();
+    if (aoTrocar) try { aoTrocar(nomeDe(it)); } catch (e) { /* ok */ }
+    if (!musicaLigada || !ac) return;
+    if (it.s != null) { faixa = it.s; sintLigar(); falhas = 0; return; }
+    if (!audio) {
+      audio = new raiz.Audio(); audio.preload = 'auto';
+      audio.addEventListener('ended', avancar);
+    }
+    audio.src = it.g.url; audio.volume = 0.75; audio.muted = !ligado;
+    var p = audio.play();
+    // sem o arquivo (sem internet e ainda não guardado): pula para a próxima
+    if (p && p.then) p.then(function () { falhas = 0; }).catch(function () { if (musicaLigada && ++falhas < lista.length) avancar(); });
+  }
+  function avancar() { tocarItem(atual + 1); }
   function musica(liga) {
     if (!ac) return;
-    if (liga && !musicaLigada) { musicaLigada = true; passo = 0; prox = ac.currentTime + 0.05; timer = setInterval(agendar, 25); }
-    else if (!liga && musicaLigada) { musicaLigada = false; clearInterval(timer); timer = null; }
+    if (liga && !musicaLigada) {
+      musicaLigada = true;
+      if (atual < 0) { tocarItem(0); return; }
+      var it = lista[atual];
+      if (it.s != null) sintLigar();
+      else if (audio) { var p = audio.play(); if (p && p.catch) p.catch(function () {}); }
+    } else if (!liga && musicaLigada) { musicaLigada = false; pararTudo(); }
   }
   // desafio novo ou desfile: a próxima música, do começo
-  function faixaAtual() { return MUSICAS[faixa].nome; }
-  function anterior() { faixa = (faixa + MUSICAS.length - 1) % MUSICAS.length; passo = 0; if (ac) prox = Math.max(prox, ac.currentTime + 0.05); }
-  function proxima() { faixa = (faixa + 1) % MUSICAS.length; passo = 0; if (ac) prox = Math.max(prox, ac.currentTime + 0.05); }
+  function faixaAtual() { if (!lista.length) montarLista(); return nomeDe(lista[Math.max(0, atual)]); }
+  function anterior() { tocarItem(atual - 1); }
+  function proxima() { tocarItem(atual + 1); }
   // app escondido (outra aba, tela apagada): silencia; ao voltar, continua
-  function dormir(sim) { if (!ac) return; if (sim) ac.suspend(); else ac.resume(); }
+  function dormir(sim) {
+    if (!ac) return;
+    if (sim) { ac.suspend(); if (audio) audio.pause(); }
+    else { ac.resume(); if (musicaLigada && atual >= 0 && lista[atual].g && audio) { var p = audio.play(); if (p && p.catch) p.catch(function () {}); } }
+  }
 
   // ---------- efeitos ----------
   var efeitos = {
@@ -116,7 +172,7 @@
     tada: function (t) { [523, 659, 784, 1047].forEach(function (f, k) { tom('square', f, t + k * 0.09, k === 3 ? 0.7 : 0.12, 0.11); sino(f * 2, t + k * 0.09, 0.4, 0.06); }); ruido(t + 0.4, 1.2, 0.14, 'highpass', 5500); }
   };
   function tocar(nome) { if (!ac || !ligado || !efeitos[nome]) return; efeitos[nome](ac.currentTime + 0.005); }
-  function alternar() { ligado = !ligado; if (mestre) mestre.gain.setTargetAtTime(ligado ? 0.8 : 0, ac.currentTime, 0.05); return ligado; }
+  function alternar() { ligado = !ligado; if (mestre) mestre.gain.setTargetAtTime(ligado ? 0.8 : 0, ac.currentTime, 0.05); if (audio) audio.muted = !ligado; return ligado; }
 
-  raiz.PurpurinaSom = { iniciar: iniciar, tocar: tocar, musica: musica, proxima: proxima, anterior: anterior, faixaAtual: faixaAtual, tocandoMusica: function () { return musicaLigada; }, dormir: dormir, alternar: alternar, ligado: function () { return ligado; }, MUSICAS: MUSICAS };
+  raiz.PurpurinaSom = { iniciar: iniciar, tocar: tocar, musica: musica, proxima: proxima, anterior: anterior, faixaAtual: faixaAtual, tocandoMusica: function () { return musicaLigada; }, aoTrocarMusica: function (fn) { aoTrocar = fn; }, GRAVADAS: GRAVADAS, dormir: dormir, alternar: alternar, ligado: function () { return ligado; }, MUSICAS: MUSICAS };
 })(this);

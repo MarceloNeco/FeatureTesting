@@ -40,6 +40,11 @@
       if (!temOpcao(cat, valor)) return e;
       e[cat.id] = valor;
     }
+    // menina ou menino: troca o jeito básico (cabelo, cílios e batom) para o personagem já aparecer certo
+    if (catId === 'personagem' && !ehCor && e0.personagem !== valor) {
+      if (valor === 'menino') { e.cabelo = 'curtinho'; e.cilios = 'nenhum'; e.batom = 'nenhum'; e.blush = 'nenhum'; e.vestido = 'nenhum'; e.saia = 'nenhum'; if (e.calca === 'nenhum' || e.calca === 'legging') e.calca = 'jeans'; }
+      else { e.cabelo = P.PADRAO.cabelo; e.cilios = P.PADRAO.cilios; }
+    }
     // mexer em blusa, saia ou calça tira o vestido; a estampa vai para a peça que está aparecendo
     if (catId === 'blusa' || catId === 'saia' || catId === 'calca') e.vestido = 'nenhum';
     return arrumar(e, catId);
@@ -70,7 +75,7 @@
   function ids(cat, semNenhum) { return cat.opcoes.map(function (x) { return x.id; }).filter(function (id) { return !semNenhum || id !== 'nenhum'; }); }
   function cores(cat) { return P.CORES[cat.cores].map(function (x) { return x.id; }); }
 
-  /* Surpresa: sorteia tudo, mas com bom senso — pele, cabelo, mechas e olhos ficam (é a personagem dela),
+  /* Surpresa: sorteia tudo, mas com bom senso — pele, rosto, nariz, cabelo, mechas e olhos ficam (é a personagem dela),
      roupa e maquiagem combinando, acessório às vezes sim, às vezes não. Cenário fica. */
   function surpresa(e0, r) {
     r = r || Math.random;
@@ -100,6 +105,8 @@
       var cat = P.categoria(id); e[id] = r() < 0.45 ? um(ids(cat, true), r) : 'nenhum'; e[id + 'Cor'] = r() < 0.5 ? um(['dourado', 'prata'], r) : corDoDia();
     });
     if (e.cabeca === 'chapeu' || e.cabeca === 'gorro') e.laco = 'nenhum';
+    // menino: roupa de cima e calça, sem maquiagem de olho e boca (o resto ele escolhe se quiser)
+    if (e.personagem === 'menino') { e.vestido = 'nenhum'; e.saia = 'nenhum'; if (e.calca === 'nenhum' || e.calca === 'legging') e.calca = 'jeans'; ['blush', 'sombra', 'delineado', 'batom', 'cilios', 'base'].forEach(function (id) { e[id] = 'nenhum'; }); }
     return arrumar(e, 'saia');
   }
 

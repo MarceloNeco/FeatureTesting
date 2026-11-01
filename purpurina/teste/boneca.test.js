@@ -95,3 +95,27 @@ test('realce: palco com fundo desfocado e sombra; miniaturas e camadas da foto s
   assert.ok(!/filter="url/.test(B.svg(e, { id: 'm', fundo: false, area: [86, 96, 228, 228] })), 'miniatura sem filtro');
   assert.ok(!/filter="url/.test(B.svg(e, { id: 'g', realce: false })), 'girando sem filtro');
 });
+
+test('olhos piscam no palco (anim) e não na foto', () => {
+  const e = V.novo();
+  assert.match(B.svg(e, { id: 'p', anim: true }), /<animate attributeName="opacity" values="0;0;1;1;0;0"/);
+  assert.ok(!/values="0;0;1;1;0;0"/.test(B.svg(e, { id: 'p', anim: false })), 'foto com olhos abertos');
+});
+
+test('sem "barba": nada de sombra escura na parte de baixo do rosto', () => {
+  for (const a of [0, 40, 80]) {
+    const s = B.svg(V.novo(), { id: 'b', fundo: false, angulo: a });
+    assert.ok(!/<ellipse cx="200" cy="2(8[0-9]|9[0-9])"[^>]*fill="#000"/.test(s), 'queixo sem sombra preta em ' + a);
+    assert.ok(!/stop-color="#7a3040"/.test(s), 'sem sombra marrom no rosto girado');
+  }
+});
+
+test('todos os formatos de rosto e nariz, menino e penteados novos desenham de frente e girando', () => {
+  for (const rosto of ['oval', 'redondo', 'coracao', 'fininho', 'bochechudo']) for (const nariz of ['botao', 'arrebitado', 'fininho', 'redondinho', 'pequenino']) for (const a of [0, 60, 300]) {
+    const s = B.svg(Object.assign(V.novo(), { rosto, nariz }), { id: 'f', angulo: a }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), rosto + nariz + a);
+  }
+  const m = V.aplicar(V.novo(), 'personagem', 'menino');
+  for (const c of ['curtinho', 'topete', 'lisoPontas', 'lisoRepartido', 'chanelPontas', 'pontasFora', 'cachinhos', 'encaracolado', 'rabinhoCachos']) for (const a of [0, 45, 90, 180]) {
+    const s = B.svg(Object.assign({}, m, { cabelo: c }), { id: 'c', angulo: a, anim: true }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), c + a);
+  }
+});
