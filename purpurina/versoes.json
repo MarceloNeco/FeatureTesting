@@ -2,6 +2,19 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.7.0",
+      "data": "01/Nov/2026",
+      "hora": "16:33:19",
+      "pt": [
+        "👜 Bolsas seguradas de verdade: as de alça (coração, cesta e de palha) ficam penduradas embaixo da mão, com a alça passando por dentro do punho e os dedos por cima; a bolsinha de mão fica presa entre os dedos; a de ombro atravessa o peito e fica no quadril. Todas com costura, fecho dourado, brilho e sombra.",
+        "✨ Aviso de versão nova: se a aba do jogo ficou aberta com uma versão antiga, aparece o botão \"Versão nova! Toque para atualizar\"."
+      ],
+      "en": [
+        "👜 Bags held for real: handle bags (heart, basket and straw) hang below the hand, with the handle through the fist and the fingers on top; the clutch is held between the fingers; the shoulder bag crosses the chest and rests at the hip. All with stitching, a gold clasp, shine and shadow.",
+        "✨ New version notice: if the game tab stayed open with an old version, a \"New version! Tap to update\" button shows up."
+      ]
+    },
+    {
       "versao": "0.6.0",
       "data": "01/Nov/2026",
       "hora": "16:10:36",

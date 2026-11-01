@@ -67,6 +67,11 @@ Como funciona: a TV e os celulares trocam mensagens pequenas pela "sala" (`sala.
 o mesmo canal da Peluqueria): o visual de cada personagem, o ângulo do giro, o desfile e os comandos de música. Nada de
 vídeo, foto nem dado pessoal (só o nome que a criança digita). Toda mensagem que chega é conferida antes de ser usada.
 
+## Versão nova
+
+Se a aba do jogo ficou aberta desde antes, ela continua com a versão antiga. Ao abrir e ao voltar para o jogo, ele
+confere o `versoes.json` do site e, se houver versão mais nova, mostra **✨ Versão nova! Toque para atualizar**.
+
 ## Controles
 
 | Onde | Como |
