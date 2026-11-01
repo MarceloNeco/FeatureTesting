@@ -18,9 +18,9 @@ ul { list-style: none; }
 .tela.ativa { display: flex; }
 
 /* ---------- telas de rolar (entrada, menu, desafios, looks) ---------- */
-#entrada, #menu, #desafios, #looks, #desligado { position: relative; min-height: 100vh; min-height: 100dvh; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center;
+#entrada, #menu, #desafios, #looks, #conectar, #musica, #desligado { position: relative; min-height: 100vh; min-height: 100dvh; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center;
   padding: calc(16px + var(--st)) calc(16px + var(--sr)) calc(24px + var(--sb)) calc(16px + var(--sl)); }
-#menu, #desafios, #looks { justify-content: flex-start; }
+#menu, #desafios, #looks, #conectar, #musica { justify-content: flex-start; }
 #menu { padding-top: calc(58px + var(--st)); }
 .faixa { position: absolute; top: calc(8px + var(--st)); right: calc(8px + var(--sr)); display: flex; gap: 6px; z-index: 2; }
 .mini { background: rgba(62, 26, 102, .9); border-radius: 14px; font-size: 1.2rem; padding: 0 10px; border: 2px solid transparent; }
@@ -78,7 +78,7 @@ ul { list-style: none; }
 .rastro { position: absolute; inset: 0; pointer-events: none; }
 .fantasma { position: absolute; inset: 0; filter: drop-shadow(0 0 8px #ff9fd2) saturate(1.4); }
 .fantasma svg { width: 100%; height: 100%; display: block; }
-.giro { position: absolute; top: 6px; right: 6px; display: flex; gap: 6px; }
+.giro { position: absolute; top: 6px; right: 6px; display: flex; gap: 6px; z-index: 2; }
 .giro .mini { background: rgba(42, 17, 70, .78); font-size: 1.3rem; }
 .dica-giro { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); background: rgba(42, 17, 70, .85); border-radius: 999px; padding: 4px 12px; font-size: .9rem; white-space: nowrap; pointer-events: none; }
 .tirar-linha { display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0; }
@@ -176,6 +176,47 @@ ul { list-style: none; }
 .janela-botoes { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .recado { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; bottom: calc(16px + var(--sb)); background: #fff; color: #3a1450; font-weight: 600; border-radius: 999px; padding: 10px 18px; z-index: 55; box-shadow: 0 6px 20px rgba(0,0,0,.35); max-width: calc(100% - 32px); text-align: center; animation: subir .2s ease-out; }
 .festa { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+
+/* ---------- 📺 conectar, 🎵 música, TV ---------- */
+.linha-menu { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.passos { max-width: 560px; text-align: left; display: grid; gap: 6px; padding-left: 1.4em; line-height: 1.4; }
+.form-conectar { display: grid; gap: 10px; width: min(100%, 360px); }
+.form-conectar label { display: grid; gap: 4px; text-align: left; font-weight: 600; }
+.campo { font: inherit; font-size: 1.15rem; padding: 10px 14px; border-radius: 14px; border: 2px solid var(--borda); background: #fff; color: #3a1450; min-height: 48px; width: 100%; }
+.campo.codigo { text-transform: uppercase; letter-spacing: 8px; font-size: 1.8rem; text-align: center; font-weight: 700; }
+.fontes { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.opcao-fonte { background: var(--card); border: 3px solid transparent; border-radius: 16px; padding: 0 16px; font-size: 1.1rem; font-weight: 600; }
+.opcao-fonte[aria-pressed="true"] { border-color: var(--rosa); background: var(--card2); }
+.link-musica { display: grid; gap: 8px; width: min(100%, 520px); }
+.musica-agora { font-size: 1.15rem; font-weight: 600; min-height: 1.4em; }
+.controles-musica { display: flex; gap: 10px; }
+.grande-mini { font-size: 1.6rem; min-width: 64px; }
+.palco-esq { position: absolute; top: 6px; left: 6px; display: flex; gap: 6px; z-index: 2; }
+.palco-esq .mini { background: rgba(42, 17, 70, .78); font-size: 1.2rem; }
+.selo-tv { font-size: .95rem !important; color: var(--menta); }
+.mini-tocador { position: fixed; right: calc(8px + var(--sr)); bottom: calc(8px + var(--sb)); width: 220px; z-index: 45; background: #000; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,.5); }
+.mini-tocador .yt { width: 220px; height: 220px; } .mini-tocador .sp { width: 300px; } .mini-tocador[data-fonte="spotify"] { width: 300px; }
+.mini-tocador iframe { width: 100%; height: 100%; border: 0; display: block; }
+.fechar-mini { position: absolute; top: 2px; right: 2px; z-index: 2; background: rgba(0,0,0,.6) !important; min-height: 32px; min-width: 32px; font-size: .9rem; }
+.tela-tv.ativa { display: block; position: fixed; inset: 0; overflow: hidden; background: radial-gradient(ellipse at 50% 0%, var(--bg2), var(--bg) 75%); }
+.tv-palcos { position: absolute; inset: 0; display: flex; }
+.tv-palco { flex: 1; position: relative; min-width: 0; transition: transform .4s, filter .4s; }
+.tv-palco.holofote { transform: scale(1.04); filter: drop-shadow(0 0 3vh #fff6b0); z-index: 2; }
+.tv-boneca { position: absolute; inset: 0 0 6vh 0; }
+.tv-boneca svg { width: 100%; height: 100%; display: block; }
+.tv-nome { position: absolute; left: 0; right: 0; bottom: 1vh; text-align: center; font-size: 3.4vh; font-weight: 700; text-shadow: 0 2px 6px #000; }
+.tv-espera { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4vh; text-align: center; padding: 4vh; }
+.tv-passos { font-size: 3vh; line-height: 1.5; }
+.tv-codigo { font-size: 16vh; font-weight: 700; letter-spacing: 3vh; color: var(--ouro); text-shadow: 0 0 4vh rgba(255, 209, 102, .5); }
+.tv-canto { position: absolute; top: 2vh; right: 2vw; background: rgba(42, 17, 70, .8); border-radius: 999px; padding: .6vh 2vh; font-size: 2.6vh; font-weight: 700; z-index: 3; }
+.tv-titulo { position: absolute; top: 2vh; left: 2vw; max-width: 50vw; background: rgba(42, 17, 70, .8); border-radius: 999px; padding: .6vh 2vh; font-size: 2.4vh; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 3; }
+.tv-musica { position: absolute; right: 2vw; bottom: 2vh; width: 300px; height: 200px; border-radius: 14px; overflow: hidden; z-index: 3; background: #000; }
+.tv-musica[data-fonte="spotify"] { height: 152px; width: 340px; }
+.tv-musica .yt, .tv-musica .sp, .tv-musica iframe { width: 100%; height: 100%; border: 0; }
+.tv-desfile { position: absolute; left: 0; right: 0; top: 4vh; text-align: center; z-index: 4; pointer-events: none; }
+.tv-desfile p { font-size: 5vh; font-weight: 700; text-shadow: 0 2px 10px #000; }
+.tv-estrelas { font-size: 9vh !important; letter-spacing: 1vh; }
+.tv-jurados { font-size: 7vh !important; }
 
 /* TV: tudo um pouco maior para ver do sofá */
 .tv .op-bt { font-size: 1rem; } .tv .op-bt .mini-svg { height: 90px; } .tv .cat-bt, .tv .grupo-bt { font-size: 1.1rem; }

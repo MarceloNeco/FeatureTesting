@@ -2,6 +2,21 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.5.0",
+      "data": "01/Nov/2026",
+      "hora": "16:02:32",
+      "pt": [
+        "📺 Purpurina na TV com o celular de controle: na TV, abra solverone.com.br/tv/purpurina (ou o Kids) e aparece um código; no celular, toque em 📺 Conectar na TV e digite o código. A personagem aparece grande na TV e tudo o que a criança faz no celular aparece lá na hora: maquiagem, roupa, giro e desfile com confete. Até 4 celulares ao mesmo tempo, cada um com a sua personagem lado a lado.",
+        "🎵 Música: as músicas da Purpurina, ▶ YouTube (cole o link de um vídeo ou playlist) e 🟢 Spotify (cole o link de uma música, álbum ou playlist). Conectado na TV, a música toca na TV; senão, no celular. ⏮ ⏯ ⏭ ⏹ no celular.",
+        "Sem celular, dá para brincar na TV com o controle remoto (🎮 Brincar aqui com o controle da TV)."
+      ],
+      "en": [
+        "📺 Purpurina on the TV with the phone as remote: on the TV open solverone.com.br/tv/purpurina (or Kids) to get a code; on the phone tap 📺 Connect to TV and type the code. The character shows big on the TV and everything the child does on the phone shows there right away: makeup, clothes, spinning and the runway with confetti. Up to 4 phones at once, each character side by side.",
+        "🎵 Music: Purpurina's own songs, ▶ YouTube (paste a video or playlist link) and 🟢 Spotify (paste a song, album or playlist link). Connected to the TV, the music plays on the TV; otherwise on the phone. ⏮ ⏯ ⏭ ⏹ on the phone.",
+        "Without a phone, you can play on the TV with the remote (🎮 Play here with the TV remote)."
+      ]
+    },
+    {
       "versao": "0.4.0",
       "data": "01/Nov/2026",
       "hora": "15:42:22",

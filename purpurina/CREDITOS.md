@@ -10,3 +10,5 @@
 
 Nenhuma foto, música ou desenho de terceiros. O jogo é de um gênero clássico (vestir e maquiar), mas a personagem,
 as peças, os desafios, as regras e a arte são próprios.
+| Biblioteca **supabase-js** (canal da TV) | a mesma da Bagunçolândia (`../baguncolandia/libs/supabase.js`, licença ao lado) | MIT |
+| Tocadores do **YouTube** e do **Spotify** | carregados dos próprios serviços só quando alguém escolhe tocar algo deles; as músicas são de quem as publicou | termos de uso do YouTube e do Spotify |
