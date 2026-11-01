@@ -2,6 +2,17 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.10.1",
+      "data": "01/Nov/2026",
+      "hora": "18:48:10",
+      "pt": [
+        "🔄 Giro bem mais suave e natural: a cabeça agora é feita de volumes redondos (crânio, rosto, queixo, nariz e lábios). Girando, o contorno do rosto fica sempre redondinho e liso — sem ondinhas — e o nariz, os lábios e o queixo só aparecem na borda quando ela está quase de lado, como numa cabeça de verdade. A boca e o nariz desenhados andam na mesma profundidade dos volumes."
+      ],
+      "en": [
+        "🔄 Much smoother, more natural spinning: the head is now made of round volumes (skull, face, chin, nose and lips). While turning, the face outline stays round and smooth — no more wiggles — and the nose, lips and chin only reach the edge when she is almost sideways, like a real head. The drawn mouth and nose move at the same depth as the volumes."
+      ]
+    },
+    {
       "versao": "0.10.0",
       "data": "01/Nov/2026",
       "hora": "18:35:33",

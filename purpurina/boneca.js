@@ -130,18 +130,18 @@
 
     // ---------- cabeça (tudo aqui dentro vai para o grupo aumentado) ----------
     var corpo = out; out = [];
-    var rosto = ROSTOS[e.rosto] || ROSTO, menino = e.personagem === 'menino';
+    var rosto = contorno(0, 0, e.rosto, e.nariz), menino = e.personagem === 'menino';
     var sobr = menino ? ['M143,182 Q163,175 184,179', 'M216,179 Q237,175 257,182', 7] : ['M144,184 Q163,172 183,181', 'M217,181 Q237,172 256,184', 5.5];
     if (virada) out.push(cabecaVirada());
     else if (costas) {
       // de costas: a cabeça é só cabelo
       out.push(elip(116, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }), elip(284, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }));
-      out.push(p(rosto, { fill: 'url(#' + I + 'cab)', stroke: cabE, 'stroke-width': 2.2 }) + p('M200,118 L200,200', { stroke: cabE, 'stroke-width': 2, opacity: 0.5 }));
+      out.push(pintar(rosto, 'url(#' + I + 'cab)', cabE) + p('M200,118 L200,200', { stroke: cabE, 'stroke-width': 2, opacity: 0.5 }));
       out.push(cabeloTras(e, I, cab, cabE));
       if (vis('brincos')) out.push(brincos(e.brincos, C('brincos'), I));
     } else {
       out.push(elip(116, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }), elip(284, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }));
-      out.push(p(rosto, { fill: 'url(#' + I + 'pele)', stroke: peleE, 'stroke-width': 2.2 }));
+      out.push(pintar(rosto, 'url(#' + I + 'pele)', peleE));
       var sob = mistura(cab, '#2a1c1a', 0.45);
       out.push(luzLados(pele), luzMeio(pele), base(e.base, pele, rosto), blush(e, C('blush').hex, I), olho(164, -1, e, I, C, 0, op.anim), olho(236, 1, e, I, C, 0, op.anim));
       out.push(linha(sobr[0], sob, sobr[2]), linha(sobr[1], sob, sobr[2]));
@@ -186,7 +186,7 @@
        (cos(az+θ)) — some quando passa para trás. O contorno mistura o rosto de frente e o perfil. */
     function cabecaVirada() {
       var s = '', sg = sen >= 0 ? 1 : -1, as = Math.abs(sen), G = Math.PI / 180, sob = mistura(cab, '#2a1c1a', 0.45);
-      var cont = contorno(sen, 0, e.rosto, e.nariz), contV = contorno(sen, 10, e.rosto, e.nariz);
+      var cont = contorno(radS, 0, e.rosto, e.nariz), contV = contorno(radS, 10, e.rosto, e.nariz);
       function xa(az, R) { return 200 + R * Math.sin(az * G + rad); }
       function proj(conteudo, x0, az, R, corte, minimo) {
         var k = Math.cos(az * G + rad); if (k < (minimo === undefined ? 0.12 : minimo)) return '';
@@ -203,12 +203,12 @@
       if (zF > -0.35) s += orelha(xF, 12, false, -sg);
       if (zE <= 0.3) s += orelha(xE, 12, false, sg);
       // rosto, maquiagem e feições (recortados pelo contorno)
-      s += p(cont, { fill: 'url(#' + I + 'pele)', stroke: peleE, 'stroke-width': 2.2 });
+      s += pintar(cont, 'url(#' + I + 'pele)', peleE);
       var fe = '';
       if (e.base === 'natural') fe += p(cont, { fill: mistura(pele, '#ffd9c7', 0.3), opacity: 0.45 });
       if (e.base === 'bronze') fe += p(cont, { fill: '#c8743f', opacity: 0.13 });
       var bs = e.base === 'natural' ? '' : base(e.base, pele, rosto); if (e.base === 'bronze') bs = bs.replace(/^<path[^>]*\/>/, '');
-      var xn = xa(0, 94), cn = esc(pele, 0.28);
+      var xn = xa(0, 84), cn = esc(pele, 0.28);
       defs += '<linearGradient id="' + I + 'sombV" gradientUnits="userSpaceOnUse" x1="' + n(xn - sg * 6) + '" y1="0" x2="' + n(xn + sg * 70) + '" y2="0"><stop offset="0" stop-color="#e88a90" stop-opacity="0"/><stop offset="1" stop-color="#e88a90" stop-opacity="' + n(0.14 * as) + '"/></linearGradient>';
       var lados = luzLados(pele) + bs +
         blush(e, C('blush').hex, I) + (e.glitter === 'bochechas' || e.glitter === 'olhos' ? glitter(e, C('glitter'), op.anim) : '') + (vis('adesivo') ? adesivo(e.adesivo, 266, 250, 13) : '');
@@ -218,10 +218,10 @@
       // sombra macia do lado de longe do rosto e embaixo do queixo
       fe += p(cont, { fill: 'url(#' + I + 'sombV)' });
       // nariz: a curvinha de frente some aos poucos e aparece a lateral do nariz
-      if (cos > 0.05) fe += '<g opacity="' + n(cos) + '">' + proj(narizFrente(e.nariz, pele), 200, 0, 94, null, 0.05) + '</g>';
+      if (cos > 0.05) fe += '<g opacity="' + n(cos) + '">' + proj(narizFrente(e.nariz, pele), 200, 0, 84, null, 0.05) + '</g>';
       if (as > 0.12) fe += linha('M' + n(xn - sg * 9 * as) + ',226 Q' + n(xn - sg * 2 * as) + ',240 ' + n(xn - sg * 6 * as) + ',250', cn, 2, n(Math.min(0.55, as)) ) +
         linha('M' + n(xn - sg * 11 * as) + ',250 Q' + n(xn - sg * 7 * as) + ',245 ' + n(xn - sg * 3 * as) + ',251', cn, 2.2, n(Math.min(0.8, as * 1.2)));
-      fe += proj(boca(e, C('batom'), pele, I), 200, 0, 89, null, -0.3);
+      fe += proj(boca(e, C('batom'), pele, I), 200, 0, 68, null, -0.3);
       s += '<g clip-path="url(#' + I + 'rostoV)">' + fe + '</g>';
       // cabelo que cobre a parte de trás e de cima da cabeça (aparece quando ela vira)
       s += touca(sg, xE, contV);
@@ -266,7 +266,7 @@
       var fios = '';
       for (var i = 0; i < 6; i++) fios += linha('M' + n(xE + sg * (78 - i * 13)) + ',' + (106 + i * 4) + ' Q' + n(xE - sg * (8 + i * 12)) + ',' + (134 + i * 12) + ' ' + n(xE - sg * (34 + i * 7)) + ',300', i % 2 ? '#fff' : cabE, i % 2 ? 2 : 1.6, i % 2 ? 0.16 : 0.45);
       var brilho = linha('M' + n(xE - sg * 60) + ',176 Q' + n(xE - sg * 34) + ',118 ' + n(xE + sg * 40) + ',112', '#fff', 8, 0.24);
-      return '<g clip-path="url(#' + I + 'cabV)" opacity="' + n(Math.min(1, as * 5)) + '"><g clip-path="url(#' + I + 'touca)">' + p(contV, { fill: 'url(#' + I + 'cab)', stroke: cabE, 'stroke-width': 2.2 }) + fios + brilho + '</g>' +
+      return '<g clip-path="url(#' + I + 'cabV)" opacity="' + n(Math.min(1, as * 5)) + '"><g clip-path="url(#' + I + 'touca)">' + pintar(contV, 'url(#' + I + 'cab)', cabE) + fios + brilho + '</g>' +
         p(d, { fill: 'none', stroke: cabE, 'stroke-width': 2, 'stroke-linejoin': 'round' }) + '</g>';
     }
 
@@ -517,66 +517,37 @@
     return s;
   }
 
-  // ---------- cabeça girada: contorno (de frente → perfil) e cabelo que gira junto ----------
-  // rosto de frente e rosto de perfil (virado para a direita): testa arredondada, nariz pequeno e arrebitado,
-  // lábios, queixo redondinho e a nuca cheia — os dois só com M e C, para serem amostrados em raios
-  // formatos de rosto de frente (todos com o mesmo tamanho de cabeça, para o cabelo servir em todos)
-  var ROSTOS = {
-    oval: 'M114,200 C114,140 155,113 200,113 C245,113 286,140 286,200 C286,262 250,297 200,297 C150,297 114,262 114,200Z',
-    redondo: 'M110,204 C110,138 154,113 200,113 C246,113 290,138 290,204 C290,254 254,288 200,288 C146,288 110,254 110,204Z',
-    coracao: 'M110,192 C110,134 154,113 200,113 C246,113 290,134 290,192 C290,236 238,296 200,304 C162,296 110,236 110,192Z',
-    fininho: 'M122,198 C122,136 158,110 200,110 C242,110 278,136 278,198 C278,268 244,304 200,304 C156,304 122,268 122,198Z',
-    bochechudo: 'M114,192 C112,136 154,113 200,113 C246,113 288,136 286,192 C298,240 268,294 200,294 C132,294 102,240 114,192Z'
+  // ---------- cabeça girada: volumes redondos (crânio, rosto, queixo, nariz, lábios) e cabelo que gira junto ----------
+  /* A cabeça é feita de volumes de verdade — elipsoides em 3D, em volta do centro (200, 205) — e cada um, girado
+     em torno do eixo de cima para baixo, aparece no desenho como uma elipse. O contorno é a união dessas elipses:
+     fica sempre redondinho e liso, e o nariz, os lábios e o queixo só "saem" da borda quando ela está quase de lado,
+     como numa cabeça de verdade. c = centro (x, y, z para a frente), r = raios. */
+  var VOLUMES = {
+    oval: [{ c: [0, -8, -4], r: [86, 90, 90] }, { c: [0, 42, 16], r: [70, 52, 62] }, { c: [0, 77, 50], r: [17, 11, 15] }],
+    redondo: [{ c: [0, -6, -4], r: [88, 88, 90] }, { c: [0, 38, 16], r: [76, 50, 62] }, { c: [0, 74, 48], r: [20, 10, 14] }],
+    coracao: [{ c: [0, -10, -4], r: [88, 90, 90] }, { c: [0, 44, 18], r: [62, 54, 58] }, { c: [0, 83, 48], r: [14, 11, 14] }],
+    fininho: [{ c: [0, -8, -4], r: [80, 94, 88] }, { c: [0, 46, 16], r: [62, 56, 60] }, { c: [0, 83, 48], r: [15, 11, 14] }],
+    bochechudo: [{ c: [0, -8, -4], r: [86, 90, 90] }, { c: [0, 42, 16], r: [70, 52, 62] }, { c: [0, 77, 50], r: [17, 11, 15] }, { c: [-44, 34, 30], r: [38, 32, 34] }, { c: [44, 34, 30], r: [38, 32, 34] }]
   };
-  var ROSTO = ROSTOS.oval;
-  // perfil (virado para a direita): testa, nariz (um para cada formato), lábios, queixo redondinho e a nuca
-  var PERFIL_A = 'M200,112 C236,111 266,128 280,158 C286,172 290,186 289,198 C288,206 285,212 286,219 ';
-  var NARIZ_P = {
-    botao: 'C288,229 294,236 298,241 C302,245 300,251 294,251 C292,251 290,253 290,256 ',
-    arrebitado: 'C288,229 296,236 302,241 C306,244 303,251 295,252 C292,252 290,253 290,256 ',
-    fininho: 'C289,230 297,239 301,246 C302,249 299,252 294,252 C292,252 290,253 290,256 ',
-    redondinho: 'C288,230 293,236 297,239 C305,242 305,253 296,253 C292,253 290,254 290,256 ',
-    pequenino: 'C287,231 291,238 294,242 C297,245 296,250 292,251 C291,251 290,253 290,256 '
+  var NARIZ_V = {
+    botao: [{ c: [0, 30, 78], r: [6, 11, 7] }, { c: [0, 38, 83], r: [6.5, 6, 7] }],
+    arrebitado: [{ c: [0, 30, 78], r: [6, 10, 7] }, { c: [0, 35, 85], r: [6, 5.5, 7] }],
+    fininho: [{ c: [0, 28, 79], r: [4.5, 14, 7] }, { c: [0, 38, 83], r: [5, 5, 6] }],
+    redondinho: [{ c: [0, 31, 78], r: [6, 10, 7] }, { c: [0, 39, 82], r: [9, 8, 9] }],
+    pequenino: [{ c: [0, 33, 78], r: [5, 8, 6] }, { c: [0, 38, 81], r: [5, 5, 5] }]
   };
-  var PERFIL_B = 'C292,258 296,260 296,264 C296,267 292,268 289,269 C293,271 295,275 293,278 C291,281 287,281 286,283 ' +
-    'C288,287 290,292 286,296 C282,302 272,304 262,302 C246,299 230,292 218,283 C204,277 182,278 162,274 C134,262 112,236 110,200 C108,160 132,114 200,112Z';
-  function perfilDe(nariz) { return PERFIL_A + (NARIZ_P[nariz] || NARIZ_P.botao) + PERFIL_B; }
-  var NR = 240, RF = {}, RP = {};
-  function pontosDe(d) {
-    var v = d.match(/-?\d*\.?\d+/g).map(Number), pts = [[v[0], v[1]]], x0 = v[0], y0 = v[1];
-    for (var i = 2; i + 5 < v.length; i += 6) {
-      for (var k = 1; k <= 16; k++) { var t = k / 16, u = 1 - t; pts.push([u * u * u * x0 + 3 * u * u * t * v[i] + 3 * u * t * t * v[i + 2] + t * t * t * v[i + 4], u * u * u * y0 + 3 * u * u * t * v[i + 1] + 3 * u * t * t * v[i + 3] + t * t * t * v[i + 5]]); }
-      x0 = v[i + 4]; y0 = v[i + 5];
-    }
-    return pts;
+  var LABIOS_V = [{ c: [0, 61, 67], r: [13, 6, 7] }, { c: [0, 69, 65], r: [11, 6, 7] }];
+  // contorno da cabeça girada de th (radianos; + olha para a direita): união das elipses; extra = folga (volume do cabelo)
+  function contorno(th, extra, forma, nariz) {
+    var vs = (VOLUMES[forma] || VOLUMES.oval).concat(NARIZ_V[nariz] || NARIZ_V.botao, LABIOS_V), c = Math.cos(th), s = Math.sin(th), d = '';
+    vs.forEach(function (v) {
+      var x = 200 + v.c[0] * c + v.c[2] * s, y = 205 + v.c[1], rx = Math.sqrt(v.r[0] * v.r[0] * c * c + v.r[2] * v.r[2] * s * s) + (extra || 0), ry = v.r[1] + (extra || 0);
+      d += 'M' + n(x - rx) + ',' + n(y) + 'a' + n(rx) + ',' + n(ry) + ' 0 1,0 ' + n(2 * rx) + ',0a' + n(rx) + ',' + n(ry) + ' 0 1,0 ' + n(-2 * rx) + ',0Z';
+    });
+    return d;
   }
-  // distância do centro da cabeça (200, 205) até o contorno, em NR direções (0 = para cima, sentido horário)
-  function raios(d) {
-    var pts = pontosDe(d), r = [];
-    for (var i = 0; i < NR; i++) {
-      var a = i / NR * Math.PI * 2, dx = Math.sin(a), dy = -Math.cos(a), melhor = 0;
-      for (var j = 0; j < pts.length; j++) {
-        var A = pts[j], B = pts[(j + 1) % pts.length], ex = B[0] - A[0], ey = B[1] - A[1], ax = A[0] - 200, ay = A[1] - 205, det = ex * dy - dx * ey;
-        if (Math.abs(det) < 1e-9) continue;
-        var t = (ex * ay - ax * ey) / det, u = (dx * ay - dy * ax) / det;
-        if (u >= 0 && u <= 1 && t > melhor) melhor = t;
-      }
-      r.push(melhor);
-    }
-    return r;
-  }
-  // contorno da cabeça virada: sn = seno do giro (+ olha para a direita, − para a esquerda); extra = folga (volume do cabelo)
-  function contorno(sn, extra, forma, nariz) {
-    forma = ROSTOS[forma] ? forma : 'oval'; nariz = NARIZ_P[nariz] ? nariz : 'botao';
-    if (!RF[forma]) RF[forma] = raios(ROSTOS[forma]);
-    if (!RP[nariz]) RP[nariz] = raios(perfilDe(nariz));
-    var rf = RF[forma], rp = RP[nariz], tf = Math.pow(Math.abs(sn), 2.2), d = '';
-    for (var i = 0; i < NR; i++) {
-      var a = i / NR * Math.PI * 2, ip = sn >= 0 ? i : (NR - i) % NR, r = rf[i] + (rp[ip] - rf[i]) * tf + (extra || 0);
-      d += (i ? 'L' : 'M') + n(200 + Math.sin(a) * r) + ',' + n(205 - Math.cos(a) * r);
-    }
-    return d + 'Z';
-  }
+  // pinta o contorno sem as linhas de dentro: primeiro o traço grosso, depois o recheio por cima
+  function pintar(d, recheio, traco, larg) { return p(d, { fill: 'none', stroke: traco, 'stroke-width': (larg || 2.2) * 2, 'stroke-linejoin': 'round' }) + p(d, { fill: recheio }); }
   // nariz de frente, em cada formato (desenhado em volta de x = 200)
   function narizFrente(tipo, pele) {
     var c = esc(pele, 0.27), l = function (d, w, o2) { return p(d, { fill: 'none', stroke: c, 'stroke-width': w, 'stroke-linecap': 'round', opacity: o2 }); };
