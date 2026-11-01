@@ -2,6 +2,21 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "1.2.1",
+      "data": "01/Nov/2026",
+      "hora": "22:20:00",
+      "pt": [
+        "A olhadinha para trás ficou natural: o piloto olha por cima do ombro (a cabeça gira uns 130°, mostrando o rosto de três quartos e indo um pouco para o lado do ombro), em vez de girar a cabeça inteira de costas para frente com o corpo parado.",
+        "Skatista com a cabeça maior, do tamanho certo para o corpo, e pescoço mais fino. A selfie não tem mais o aro branco, que virava uma risca no giro.",
+        "Os rivais não tremem mais: andam lisos pela estrada (antes pulavam de um pedaço da estrada para o outro) e, quando encostam em você, dão um empurrãozinho e mudam de faixa, em vez de ficar batendo e voltando sem parar. O trânsito e o outro jogador também andam lisos."
+      ],
+      "en": [
+        "The look back is natural now: the driver looks over the shoulder (the head turns about 130°, showing the face in three-quarter view and moving a little toward the shoulder) instead of spinning the whole head around with the body still.",
+        "The skater's head is bigger, the right size for the body, with a slimmer neck. The selfie no longer has the white ring, which turned into a stripe during the turn.",
+        "Rivals don't shake anymore: they glide smoothly along the road (before they jumped from one road piece to the next) and, when they touch you, they give a little bump and change lanes instead of bumping back and forth nonstop. Traffic and the other player glide smoothly too."
+      ]
+    },
+    {
       "versao": "1.2.0",
       "data": "01/Nov/2026",
       "hora": "21:55:00",

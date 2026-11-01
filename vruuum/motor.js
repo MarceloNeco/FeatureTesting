@@ -193,10 +193,15 @@
       var s = pista.segs[k]; if (!s) continue;
       for (var q = 0; q < s.coisas.length; q++) { var c = s.coisas[q]; if ((c.tipo === 'cone' || c.tipo === 'lama') && Math.abs(c.x - rv.x) < 0.25 && (k * SEG + SEG / 2) > zAntes && (k * SEG + SEG / 2) <= rv.z) rv.lento = 0.8; }
     }
-    // encostou num jogador: empurrãozinho dos dois lados
+    // encostou num jogador: um empurrãozinho dos dois lados e o rival muda para a faixa do outro lado
+    // (antes ele voltava para a mesma faixa, encostava de novo e ficava tremendo do lado do jogador)
+    if (rv.encostou > 0) rv.encostou -= dt;
     e.jogadores.forEach(function (j) {
       if (j.pulo > 0 || Math.abs(j.z - rv.z) > SEG * 0.6 || Math.abs(j.x - rv.x) > 0.38) return;
-      var lado = j.x <= rv.x ? -1 : 1; j.x += lado * 0.07; rv.x -= lado * 0.05;
+      var lado = j.x <= rv.x ? -1 : 1, longe = P.FAIXAS.filter(function (fx) { return lado < 0 ? fx > j.x + 0.4 : fx < j.x - 0.4; });
+      if (longe.length) rv.faixa = longe.sort(function (a, b) { return Math.abs(a - rv.x) - Math.abs(b - rv.x); })[0];
+      if (rv.encostou > 0) return;
+      rv.encostou = 0.6; j.x += lado * 0.07; rv.x -= lado * 0.05;
       if (j.empurrao <= 0) { j.empurrao = 0.5; e.eventos.push({ tipo: 'tum', j: j.n }); }
     });
     if (!rv.chegou && rv.z >= pista.zChegada) { rv.chegou = true; rv.tempo = e.t; }

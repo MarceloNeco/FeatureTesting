@@ -320,6 +320,13 @@
       });
     }
 
+    // quem anda (trânsito, rivais, o outro jogador) fica no ponto exato dentro do pedaço da estrada, e não
+    // grudado no começo do pedaço: senão pula de um pedaço para o outro e parece tremer
+    function noPonto(n, z) {
+      var f = n + 1 < cnt && aZ[n + 1] > PROF ? Math.max(0, Math.min(1, z / SEG - (baseI + n))) : 0;
+      var sc = aS[n] + (aS[n + 1] - aS[n]) * f;
+      return { x: aX[n] + (aX[n + 1] - aX[n]) * f, y: aY[n] + (aY[n + 1] - aY[n]) * f, esc: sc * K, escY: sc * KY };
+    }
     // enfeites, coisas, trânsito e o outro jogador, do longe para o perto
     var outro = e.jogadores.length === 2 ? e.jogadores[1 - ji] : null, oSeg = outro ? Math.floor(outro.z / SEG) : -1;
     for (n = cnt - 1; n >= 0; n--) {
@@ -351,24 +358,24 @@
       }
       var cs = porSeg[idx];
       if (cs) for (k2 = 0; k2 < cs.length; k2++) {
-        var tx = sx + esc * cs[k2].x * LARG;
-        if (voa) { sprite(c, base[sprCeu(cs[k2].tipo)], esc, tx, syAr - escY * 200, 0, w); if (nS2 || s.tunel) luzesAviao(c, tx, syAr - escY * 200, esc, idx); }
-        else { sprite(c, base[cs[k2].tipo], esc, tx, sy, clip, w); if ((nS2 || s.tunel) && sy <= clip + 2) lanternasTransito(c, cs[k2].tipo, tx, sy, esc); }
+        var pc = noPonto(n, cs[k2].z), tx = pc.x + pc.esc * cs[k2].x * LARG, tyA = pc.y - pc.escY * (ALT_VOO + 200);
+        if (voa) { sprite(c, base[sprCeu(cs[k2].tipo)], pc.esc, tx, tyA, 0, w); if (nS2 || s.tunel) luzesAviao(c, tx, tyA, pc.esc, idx); }
+        else { sprite(c, base[cs[k2].tipo], pc.esc, tx, pc.y, clip, w); if ((nS2 || s.tunel) && pc.y <= clip + 2) lanternasTransito(c, cs[k2].tipo, tx, pc.y, pc.esc); }
       }
       var rs = porSegR[idx];   // rivais neste pedaço (no céu se forem de avião)
       if (rs) for (k2 = 0; k2 < rs.length; k2++) {
         var rv = e.rivais[rs[k2]], rd = RIV[rs[k2]]; if (!rd || rv.z < j.z - JOG_Z * 0.6) continue;
-        var rX = sx + esc * rv.x * LARG, rY = rd.voa ? syAr : sy, rW = rd.spr.w * esc, rH = rd.spr.h * esc;
-        sprite(c, S.quadro(rd.spr, rd.spr.quadros ? faseSkate(rd, rv, e) : 0), esc, rX, rY, rd.voa || voa ? 0 : clip, w);
+        var pr = noPonto(n, rv.z), rX = pr.x + pr.esc * rv.x * LARG, rY = rd.voa ? pr.y - pr.escY * ALT_VOO : pr.y, rW = rd.spr.w * pr.esc, rH = rd.spr.h * pr.esc;
+        sprite(c, S.quadro(rd.spr, rd.spr.quadros ? faseSkate(rd, rv, e) : 0), pr.esc, rX, rY, rd.voa || voa ? 0 : clip, w);
         if (rW > 24 && (rd.voa || voa || rY <= clip)) pilotoVivo(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info, 10 + rs[k2] * 2.1, 6);
         if (!rd.voa && (nS2 || s.tunel) && rY <= clip + 2) { c.save(); c.globalCompositeOperation = 'lighter'; luz(c, rX - rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7); luz(c, rX + rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7); c.restore(); }
       }
       if (idx === oSeg && outro.z > j.z - JOG_Z * 0.6) {
         var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / (outro.puloMax || raiz.VruuumMotor.PULO))) * 1400 * (outro.puloMax || 1.1) / 1.1 : 0;
         var oVoa = !!VOA[outro.n];   // o outro pode estar voando enquanto eu vou de carro (e vice-versa)
-        var oSpr = carrosJog[outro.n], oX = sx + esc * outro.x * LARG, oY = (oVoa ? syAr : sy) - escY * lift;
-        sprite(c, S.quadro(oSpr, VS[outro.n] && VS[outro.n].fPe != null ? VS[outro.n].fPe : 0.8), esc, oX, oY, oVoa || voa ? 0 : clip, w);
-        if (oSpr.w * esc > 24 && (oVoa || voa || oY <= clip)) pilotoVivo(c, VEIC[outro.n], oX - oSpr.w * esc / 2, oY - oSpr.h * esc, oSpr.w * esc, oSpr.h * esc, INFO[outro.n], outro.n * 3.3, 7);
+        var po = noPonto(n, outro.z), oSpr = carrosJog[outro.n], oX = po.x + po.esc * outro.x * LARG, oY = (oVoa ? po.y - po.escY * ALT_VOO : po.y) - po.escY * lift;
+        sprite(c, S.quadro(oSpr, VS[outro.n] && VS[outro.n].fPe != null ? VS[outro.n].fPe : 0.8), po.esc, oX, oY, oVoa || voa ? 0 : clip, w);
+        if (oSpr.w * po.esc > 24 && (oVoa || voa || oY <= clip)) pilotoVivo(c, VEIC[outro.n], oX - oSpr.w * po.esc / 2, oY - oSpr.h * po.esc, oSpr.w * po.esc, oSpr.h * po.esc, INFO[outro.n], outro.n * 3.3, 7);
       }
     }
 

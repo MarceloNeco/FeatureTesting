@@ -70,8 +70,8 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 
 - O piloto fica **de costas**, olhando a estrada: nuca, orelhas e pelo de cada bichinho (no kart e na moto, o capacete
   com listra). A cada ~7 s ele **vira para trás, olha e sorri** por 2 s, e volta. Na garagem vira mais vezes.
-  O giro é em **3D**: a cabeça continua redonda e gira como uma bola (o rosto entra por um lado, a nuca sai pelo outro),
-  uma vez por cada lado; no kart e na moto o capacete inteiro gira e o rosto aparece pela viseira. No skate, o piloto é
+  O giro é em **3D**: a cabeça continua redonda e gira como uma bola e olha **por cima do ombro** (uns 130°, rosto de
+  três quartos, como uma pessoa de verdade), uma vez por cada lado; no kart e na moto o capacete inteiro gira e o rosto aparece pela viseira. No skate, o piloto é
   a cabeça do menino. Desenhado ao vivo por `cabeca.js`, por cima do veículo, recortado pela janela.
 - **📸 Selfie**: na garagem, o botão 📸 abre a janela da selfie. Ali dá para **🤳 Tirar selfie** (câmera da frente) ou
   **🖼️ Escolher foto**. O rosto é achado **sem internet** pelo MediaPipe Face Detector, que roda no aparelho: o motor
