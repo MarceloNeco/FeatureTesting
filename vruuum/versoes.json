@@ -2,6 +2,23 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "1.0.0",
+      "data": "01/Nov/2026",
+      "hora": "18:26:00",
+      "pt": [
+        "🙌 Mãos na câmera (volante no ar): a câmera vê as duas mãos. Mão direita para baixo vira para a direita, mão esquerda para baixo vira para a esquerda; as duas para cima rápido, pula; as duas lá embaixo, freia. Com 2 jogadores, cada um usa as mãos na sua metade da câmera. Para jogar na TV, ligue o celular, tablet ou notebook na TV com a câmera virada para quem joga. O vídeo não sai do aparelho.",
+        "Visual 🔀 Misto (o novo padrão): a corrida alterna rápido entre trechos de dia, coloridos, e trechos de noite, em neon, com o céu escurecendo e clareando aos poucos. Neon e Colorido continuam no menu.",
+        "Pontos e checkpoints: estrela vale 100, estrela no ar 200, turbo e rampa 50. Cada portal de mundo é um CHECKPOINT: 500 pontos + bônus por chegar rápido. Bater tira pontos, mas ninguém perde a corrida. No fim, quem fez mais pontos ganha, e o recorde agora é de pontos.",
+        "Novo veículo: 🛹 Skate, um menino de capacete andando de skate, de braços abertos, que inclina nas curvas."
+      ],
+      "en": [
+        "🙌 Hands on camera (air steering wheel): the camera sees both hands. Right hand down turns right, left hand down turns left; both up fast, jump; both low, brake. With 2 players, each uses their own half of the camera. To play on a TV, connect the phone, tablet or laptop to the TV with the camera facing the players. The video never leaves the device.",
+        "🔀 Mixed look (the new default): the race switches quickly between colorful day stretches and neon night stretches, with the sky slowly darkening and brightening. Neon and Colorful are still in the menu.",
+        "Points and checkpoints: star 100, star in the air 200, turbo and ramp 50. Every world gate is a CHECKPOINT: 500 points + a bonus for getting there fast. Crashing takes points away, but nobody loses the race. At the end, most points wins, and the record is now in points.",
+        "New ride: 🛹 Skateboard, a helmeted kid skating with open arms who leans into turns."
+      ]
+    },
+    {
       "versao": "0.9.1",
       "data": "01/Nov/2026",
       "hora": "18:17:00",

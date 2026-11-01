@@ -115,6 +115,18 @@ ul { list-style: none; }
 .cat-bt { min-width: 0; overflow: hidden; background: rgba(255, 255, 255, .08); border-radius: 14px; padding: 3px 2px; font-size: .74rem; line-height: 1.05; border: 2px solid transparent; min-height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
 .cat-bt .i { font-size: 1.25rem; }
 .cat-bt[aria-pressed="true"] { background: var(--rosa); color: #fff; }
+/* passo 1: as partes da aba, grandes e todas à vista */
+.cats { align-content: start; }
+.cats .cat-bt { min-height: 64px; font-size: .85rem; }
+.cats .cat-bt .i { font-size: 1.6rem; }
+/* passo 2: a parte escolhida em cima, com o botão para voltar às partes */
+.parte-bar { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.parte-bar[hidden] { display: none; }
+.partes-bt { background: rgba(255, 255, 255, .14); border-radius: 999px; padding: 0 14px; min-height: 40px; font-weight: 700; font-size: .95rem; flex-shrink: 0; }
+.parte-nome { flex: 1; min-width: 0; background: var(--rosa); color: #fff; border-radius: 999px; padding: 8px 14px; font-weight: 700; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
+.opcoes-painel[hidden] { display: none; }
+/* escolhendo opções: o palco fica um pouco menor e o painel ganha espaço (em pé) */
+#estudio.ativa.escolhendo { grid-template: "topo" auto "palco" minmax(0, 1fr) "dicas" auto "acoes" auto "painel" minmax(0, 56%) / minmax(0, 1fr); }
 .opcoes-painel { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; display: flex; flex-direction: column; gap: 8px; padding: 2px; }
 .cores { display: flex; flex-wrap: wrap; gap: 5px; }
 .cor-bt { width: 30px; height: 30px; min-width: 30px; min-height: 30px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .3); position: relative; }
@@ -132,7 +144,7 @@ ul { list-style: none; }
 /* deitado e computador: personagem de um lado, painel do outro */
 @media (max-width: 380px) { .acoes .medio { font-size: .92rem; padding: 0 4px; } .titulo { font-size: 1rem; } }
 @media (orientation: landscape) {
-  #estudio.ativa { grid-template: "palco topo" auto "palco dicas" auto "palco painel" minmax(0, 1fr) "palco acoes" auto / minmax(0, 42%) minmax(0, 1fr); }
+  #estudio.ativa, #estudio.ativa.escolhendo { grid-template: "palco topo" auto "palco dicas" auto "palco painel" minmax(0, 1fr) "palco acoes" auto / minmax(0, 42%) minmax(0, 1fr); }
   .estilos { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); }
 }
 @media (orientation: landscape) and (max-height: 500px) {

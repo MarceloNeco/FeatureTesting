@@ -42,6 +42,8 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 - **Tela**: horizonte a ~30% da altura e base do veículo a 90% (`geom` em `desenho.js`), deitado ou em pé; em pé, a
   estrada se estica para cima (escala de altura `KY` separada da de largura `K`). Durante a corrida a tela fica **travada**
   na posição em que começou (`screen.orientation.lock`, no Android em tela cheia ou instalado); destrava no menu.
+- **🔀 Misto** (padrão desde a 1.0): alterna dia (colorido) e noite (neon) a cada 260 pedaços da pista (~8 s), com o céu
+  escurecendo e clareando aos poucos (`noiteEm` em `desenho.js`).
 - **Colorido**: o visual de dia, com as cores e personagens de antes. Os faróis só acendem dentro dos túneis.
 - **Túneis** (nos dois visuais): de 2 a 4 por corrida (`pista.js`, longe dos portais, da largada e da chegada). No chão,
   paredes com faixas de luz correndo e contorno de luz na entrada; lá dentro as paredes seguram o carro na pista. No céu,
@@ -56,7 +58,7 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 | Grupo | Veículos |
 |---|---|
 | 🚗 Carros | Clássico, GT Redondo (traseira redonda), Superesportivo (largo, aerofólio), Kart, Monstrão |
-| 🏍️ Moto | Moto (deita nas curvas) |
+| 🏍️ Moto e skate | Moto (deita nas curvas) e Skate (menino de capacete, braços abertos) |
 | ✈️ No céu | Aviãozinho (hélice), Jato (fogo azul no turbo), Helicóptero (rotor girando) |
 
 - Cada um tem um jeito (barrinhas de velocidade e curvas), com diferenças pequenas, de no máximo uns 10%.
@@ -77,6 +79,25 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 - **Privacidade**: a foto **nunca sai do aparelho**. Fica no `localStorage` (`vruuum.foto.0` e `.1`, ~17 KB cada) e se
   apaga em 📸 → **🗑️ Apagar minha foto**. Sem o detector (aparelho antigo ou arquivo baixado), o círculo começa no
   meio e a pessoa ajusta à mão.
+
+## Pontos e checkpoints
+
+Ninguém perde a corrida, mas o placar sobe e desce (`PONTOS` em `motor.js`): estrela **+100**, estrela no ar **+200**,
+turbo e rampa **+50**, cone **−50**, batida **−150** (nunca abaixo de zero). Cada portal de mundo é um **CHECKPOINT**:
+**+500** e mais um bônus de tempo (quanto mais rápido no trecho, mais pontos). Na chegada, **+1.000** com o mesmo bônus,
+e mais **+500** para quem chegar primeiro com 2 jogadores. O placar mostra estrelas e pontos; o fim mostra pontos,
+estrelas, batidas e tempo, e o **recorde é de pontos** (por nível, só neste aparelho).
+
+## 🙌 Mãos na câmera (volante no ar)
+
+No menu, em "Como dirigir", escolha **🙌 Mãos na câmera**. Ao correr, a câmera da frente liga e uma janelinha no canto
+mostra as mãos e o volante (`maos.js`, MediaPipe Hand Landmarker no próprio aparelho; o vídeo não sai dele):
+
+- **duas mãos**, como num volante: a direita mais baixa vira para a direita, a esquerda mais baixa vira para a esquerda;
+- **as duas subindo rápido**: pula; **as duas lá embaixo**: freia; **uma mão só**: vale a posição dela para os lados;
+- **2 jogadores**: a metade esquerda da câmera é do jogador 1 e a direita do jogador 2;
+- **na TV**: ligue o celular, tablet ou notebook na TV (espelhar a tela ou cabo), com a câmera virada para quem joga. A TV
+  em si não tem câmera; num próximo passo dá para fazer como a Bagunçolândia (o celular filma e a TV mostra).
 
 ## Controles
 
@@ -130,6 +151,7 @@ No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para
 | `rock.js` | a banda de rock e as 3 músicas (partitura em `MUSICAS`), testadas no Node. |
 | `som.js` | motor, buzina e efeitos sintetizados (WebAudio); liga e desliga a música do `rock.js`. |
 | `app.js` | menu, controles, tela cheia, bordas seguras, laço da corrida, pausa, resultado, recorde, instalar e baixar. `APP_VERSION` aqui. |
+| `maos.js` | volante no ar: lê as mãos pela câmera (MediaPipe) e vira direção, pulo e freio; contas testadas no Node. |
 | `movimento.js` | **puro**: acelerômetro → direção do volante e pulo pelo toquinho (com calibração no 3‑2‑1), testado no Node. |
 | `cabeca.js` | o piloto animado (de costas, vira e sorri; bichinho ou selfie), testado no Node. |
 | `selfie.js` | a selfie: acha o rosto sem internet (MediaPipe + `rosto.tflite`), recorta e guarda só no aparelho. |
