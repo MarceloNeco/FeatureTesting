@@ -119,3 +119,15 @@ test('todos os formatos de rosto e nariz, menino e penteados novos desenham de f
     const s = B.svg(Object.assign({}, m, { cabelo: c }), { id: 'c', angulo: a, anim: true }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), c + a);
   }
 });
+
+test('desfile: passarela de show, sorriso, tchau e olhar para os lados', () => {
+  const pas = B.passarela('p'); assert.equal(bemFormado(pas), ''); assert.match(pas, /pas-holofote/); assert.match(pas, /pas-flash/);
+  const e = Object.assign(V.novo(), { bolsa: 'mao', pulseira: 'perolas', anel: 'pedra' });
+  for (const op of [{ sorriso: true }, { tchau: true, anim: true }, { olhar: -38, sorriso: true }, { olhar: 38, tchau: true }]) {
+    const s = B.svg(e, Object.assign({ id: 'd', fundo: false }, op)); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s));
+  }
+  assert.match(B.svg(e, { id: 'd', tchau: true, anim: true }), /animateTransform/, 'a mão do tchau balança');
+  const olhando = B.svg(e, { id: 'd', fundo: false, olhar: 38 });
+  assert.match(olhando, /d-rostoV/, 'olhar vira a cabeça');
+  assert.ok(!/translate\(200 0\) scale\(/.test(olhando), 'o corpo continua de frente');
+});

@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.9.1';
+  var APP_VERSION = '0.10.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -673,26 +673,79 @@
     0: [['Lindo!', 'Gorgeous!'], ['Que estilo!', 'What style!'], ['Brilhou!', 'You shine!']]
   };
   var JURADOS = ['🐱', '🦄', '🐰'];
+  /* ---------- o desfile ----------
+     Passarela de show (boneca.js → passarela): a personagem entra lá do fundo e vem andando, rebolando, até a
+     frente; para, sorri e dá tchauzinho; olha para um lado e para o outro; dá uma volta com rastro de luz; e
+     fica posando, sorrindo e acenando de vez em quando. Fogos de artifício e flashes da plateia o tempo todo.
+     As estrelas e os jurados aparecem quando ela chega na frente. Quem pediu menos movimento vê ela parada,
+     sorrindo, sem fogos. */
+  var desfileSeq = 0, desfileK = 1, desfileLugar = null;
+  window.addEventListener('resize', function () { if (atual === 'desfile' && desfileLugar) desfileLugar(desfileK); });
   function desfilar() {
     var d = desafioAtual(), r = d ? V.avaliar(estado, d) : null;
     ir('desfile');
-    var pas = $('passarela');
-    pas.classList.add('entrando'); pas.innerHTML = B.svg(estado, { id: 'desfile', anim: !CALMO });
-    setTimeout(function () {
-      if (atual !== 'desfile') return;
-      pas.classList.remove('entrando');
-      volta(pas, $('rastroDesfile'), function (a) { pas.innerHTML = B.svg(estado, { id: 'desfile', anim: !CALMO && !a, angulo: a, realce: !a }); });
-    }, 1500);
+    var seq = ++desfileSeq, pas = $('passarela'), mod = $('modelo'), palco = $('palcoDesfile');
+    $('cenaDesfile').innerHTML = B.passarela('pas');
+    function vale() { return seq === desfileSeq && atual === 'desfile'; }
+    function depois(ms, fn) { setTimeout(function () { if (vale()) fn(); }, ms); }
+    function pose(op) { pas.innerHTML = B.svg(estado, Object.assign({ id: 'desfile', fundo: false, anim: !CALMO, realce: false }, op || {})); }
+    // posição na passarela: k = 0 (lá no fundo) até 1 (na frente); a cena é cortada por baixo (slice), como no boneca.js
+    function lugar(k) {
+      desfileK = k; desfileLugar = lugar;
+      var W = palco.clientWidth, H = palco.clientHeight, s = Math.max(W / 400, H / 720), h = mod.clientHeight;
+      var longe = Math.min(290 * s, H * 0.55), perto = 26 * s, escala = 0.24 + 0.76 * k, pe = longe + (perto - longe) * k;
+      mod.style.transform = 'translateX(-50%) translateY(' + Math.round(-(pe - 0.09 * h * escala)) + 'px) scale(' + escala.toFixed(3) + ')';
+    }
+    function olharPara(de, para, ms, fim) {
+      var ini = performance.now();
+      (function passo(agora) {
+        if (!vale()) return;
+        var k = Math.min(1, (agora - ini) / ms), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        pose({ sorriso: true, olhar: de + (para - de) * e });
+        if (k < 1) requestAnimationFrame(passo); else if (fim) fim();
+      })(ini);
+    }
+    var titulo = $('desfileTitulo'), jur = $('jurados');
+    if (CALMO) { lugar(1); pose({ sorriso: true }); }
+    else {
+      titulo.classList.add('esperando'); jur.classList.add('esperando');
+      lugar(0); pose({}); mod.classList.add('andando');
+      fogos(seq, 9000);
+      var ini = performance.now(), dur = 3600;
+      (function andar(agora) {
+        if (!vale()) return;
+        var k = Math.min(1, (agora - ini) / dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        lugar(e);
+        if (k < 1) requestAnimationFrame(andar);
+        else {
+          // chegou na frente: sorri, dá tchau, estrelas e jurados
+          mod.classList.remove('andando'); pose({ sorriso: true, tchau: true });
+          titulo.classList.remove('esperando'); jur.classList.remove('esperando');
+          Som.tocar('tada'); setTimeout(function () { Som.tocar('aplausos'); }, 400); confete();
+          depois(2200, function () { olharPara(0, -38, 450, function () { depois(700, function () { olharPara(-38, 38, 700, function () { depois(700, function () { olharPara(38, 0, 450, function () {
+            depois(300, function () {
+              volta(pas, $('rastroDesfile'), function (a) { pas.innerHTML = B.svg(estado, { id: 'desfile', fundo: false, anim: !CALMO && !a, angulo: a, realce: false, sorriso: true }); }, function () {
+                if (!vale()) return;
+                pose({ sorriso: true });
+                // posando: um tchauzinho de vez em quando
+                (function acenar() { depois(3800, function () { pose({ sorriso: true, tchau: true }); depois(1800, function () { pose({ sorriso: true }); acenar(); }); }); })();
+              });
+            });
+          }); }); }); }); }); });
+        }
+      })(ini);
+    }
     $('desfileTitulo').textContent = d ? d.ico + ' ' + N(d) : t('💖 Que visual incrível!', '💖 What an amazing look!');
     var est = $('desfileEstrelas'); est.innerHTML = '';
     var n = r ? r.estrelas : 0;
     est.setAttribute('aria-label', r ? n + ' ' + t('de 3 estrelas', 'of 3 stars') : '');
     for (var i = 0; i < 3; i++) {
       var s = document.createElement('span'); s.className = 'e' + (r && i >= n ? ' apagada' : ''); s.textContent = r ? '⭐' : '💖';
-      s.style.animationDelay = (0.9 + i * 0.35) + 's'; est.appendChild(s);
-      if (!r || i < n) setTimeout(function () { Som.tocar('estrela'); }, 900 + i * 350);
+      var atraso = (CALMO ? 0.9 : 4.1) + i * 0.35;
+      s.style.animationDelay = atraso + 's'; est.appendChild(s);
+      if (!r || i < n) setTimeout(function () { Som.tocar('estrela'); }, atraso * 1000);
     }
-    var jur = $('jurados'); jur.innerHTML = '';
+    jur.innerHTML = '';
     JURADOS.forEach(function (bicho, k) {
       var f = FRASES[r ? n : 0][k], j = document.createElement('div'); j.className = 'jurado';
       var b = document.createElement('span'); b.className = 'b'; b.textContent = bicho;
@@ -705,8 +758,38 @@
     $('desfileRecorde').hidden = !recorde;
     $('btProximo').textContent = d ? t('▶ Próximo desafio', '▶ Next challenge') : t('🎨 Continuar brincando', '🎨 Keep playing');
     $('btMaisUm').hidden = !d;
-    Som.proxima(); Som.tocar('tada'); setTimeout(function () { Som.tocar('aplausos'); }, 500);
-    confete(); ponte('desfile', { d: modo || '', est: r ? r.estrelas : 0 });
+    Som.proxima();
+    if (CALMO) { Som.tocar('tada'); setTimeout(function () { Som.tocar('aplausos'); }, 500); }
+    ponte('desfile', { d: modo || '', est: r ? r.estrelas : 0 });
+  }
+  // fogos de artifício por cima da passarela (canvas): foguetes sobem e estouram em bolinhas coloridas
+  function fogos(seq, dur) {
+    var cv = $('fogos'), c = cv.getContext('2d'), w = cv.width = cv.clientWidth, h = cv.height = cv.clientHeight, fim = performance.now() + dur, bolas = [], foguetes = [], prox = 0;
+    var cores = ['#ff5fb4', '#ffd166', '#86ecc8', '#cfa8ff', '#7ee8ff', '#ffffff', '#ff8a5c'];
+    function quadro(agora) {
+      if (seq !== desfileSeq || atual !== 'desfile') { c.clearRect(0, 0, w, h); return; }
+      if (agora < fim && agora > prox) { prox = agora + 380 + Math.random() * 520; foguetes.push({ x: w * (0.15 + Math.random() * 0.7), y: h, vy: -(h * 0.018 + Math.random() * h * 0.008), alvo: h * (0.1 + Math.random() * 0.32), cor: cores[Math.floor(Math.random() * cores.length)] }); }
+      c.clearRect(0, 0, w, h);
+      foguetes = foguetes.filter(function (f) {
+        f.y += f.vy; c.fillStyle = '#fff6c8'; c.beginPath(); c.arc(f.x, f.y, 2, 0, 7); c.fill();
+        if (f.y > f.alvo) return true;
+        Som.tocar('fogo');
+        for (var i = 0; i < 64; i++) { var a = Math.PI * 2 * i / 64, v = (1.6 + Math.random() * 2.6) * Math.max(1, w / 400); bolas.push({ x: f.x, y: f.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vida: 1, cor: i % 5 ? f.cor : '#fff' }); }
+        return false;
+      });
+      bolas = bolas.filter(function (b) {
+        var x0 = b.x, y0 = b.y;
+        b.x += b.vx; b.y += b.vy; b.vy += 0.045; b.vx *= 0.985; b.vida -= 0.014;
+        if (b.vida <= 0) return false;
+        // cada faísca deixa um risquinho de luz atrás
+        c.globalAlpha = Math.max(0, b.vida); c.strokeStyle = b.cor; c.lineWidth = 2.6; c.lineCap = 'round';
+        c.beginPath(); c.moveTo(x0 - b.vx * 2, y0 - b.vy * 2); c.lineTo(b.x, b.y); c.stroke();
+        return true;
+      });
+      c.globalAlpha = 1;
+      if (agora < fim || bolas.length || foguetes.length) requestAnimationFrame(quadro); else c.clearRect(0, 0, w, h);
+    }
+    requestAnimationFrame(quadro);
   }
   $('btProximo').addEventListener('click', function () {
     var d = desafioAtual();

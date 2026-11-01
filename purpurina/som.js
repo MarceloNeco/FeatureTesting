@@ -169,6 +169,7 @@
     dica: function (t) { sino(1047, t, 0.15, 0.12); sino(1568, t + 0.08, 0.3, 0.12); },
     estrela: function (t) { [1047, 1319, 1568].forEach(function (f, k) { sino(f, t + k * 0.06, 0.2, 0.12); }); },
     aplausos: function (t) { for (var k = 0; k < 26; k++) ruido(t + k * 0.06 + Math.random() * 0.04, 0.05, 0.25 + Math.random() * 0.2, 'bandpass', 1200 + Math.random() * 1500); },
+    fogo: function (t) { tom('sine', 900, t, 0.25, 0.04, 2400); ruido(t + 0.22, 0.35, 0.3, 'lowpass', 900); for (var k = 0; k < 6; k++) ruido(t + 0.3 + k * 0.05 + Math.random() * 0.04, 0.04, 0.12, 'highpass', 5000); },
     tada: function (t) { [523, 659, 784, 1047].forEach(function (f, k) { tom('square', f, t + k * 0.09, k === 3 ? 0.7 : 0.12, 0.11); sino(f * 2, t + k * 0.09, 0.4, 0.06); }); ruido(t + 0.4, 1.2, 0.14, 'highpass', 5500); }
   };
   function tocar(nome) { if (!ac || !ligado || !efeitos[nome]) return; efeitos[nome](ac.currentTime + 0.005); }
