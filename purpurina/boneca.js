@@ -61,8 +61,8 @@
         s += p(d, { fill: cor.hex });
         if (est) s += p(d, { fill: 'url(#' + I + 'est)' });
         if (cor.brilho) s += p(d, { fill: 'url(#' + I + 'shine)' });
-        s += p(d, { fill: 'url(#' + I + 'vol)' });
-        s += p(d, { fill: 'none', stroke: esc(cor.hex, 0.35), 'stroke-width': 2.2, 'stroke-linejoin': 'round' });
+        s += p(d, { fill: 'url(#' + I + 'vol)' }) + p(d, { fill: 'url(#' + I + 'lado)' });
+        s += p(d, { fill: 'none', stroke: esc(cor.hex, 0.4), 'stroke-width': 1.4, 'stroke-linejoin': 'round', opacity: 0.8 });
       });
       return s;
     }
@@ -93,7 +93,12 @@
     if (!costas && !perfil) out.push(grupo(cabeloTras(e, I, cab, cabE)));
 
     // ---------- pernas, pés e sapatos ----------
-    ['M177,455 L173,640', 'M223,455 L227,640'].forEach(function (d) { out.push(p(d, { stroke: peleE, 'stroke-width': 33, 'stroke-linecap': 'round', fill: 'none' }), p(d, { stroke: pele, 'stroke-width': 29, 'stroke-linecap': 'round', fill: 'none' })); });
+    var peleS = esc(pele, 0.12), peleL = cla(pele, 0.28);
+    function membro(d, larg) {
+      return p(d, { stroke: peleE, 'stroke-width': larg + 2.6, 'stroke-linecap': 'round', fill: 'none', opacity: 0.85 }) + p(d, { stroke: peleS, 'stroke-width': larg, 'stroke-linecap': 'round', fill: 'none' }) +
+        p(d, { stroke: pele, 'stroke-width': larg * 0.72, 'stroke-linecap': 'round', fill: 'none' }) + '<g transform="translate(-2.5 0)">' + p(d, { stroke: peleL, 'stroke-width': larg * 0.26, 'stroke-linecap': 'round', fill: 'none', opacity: 0.55 }) + '</g>';
+    }
+    ['M177,455 L173,640', 'M223,455 L227,640'].forEach(function (d) { out.push(membro(d, 29)); });
     out.push(sapatos(e, C('sapatos'), pele, peleE, peca));
 
     // ---------- parte de baixo ----------
@@ -102,9 +107,9 @@
 
     // ---------- pescoço, tronco e braços ----------
     if (!perfil) out.push(ret(186, 270, 28, 80, { fill: pele, stroke: peleE, 'stroke-width': 2 }), ret(187, 300, 26, 18, { fill: '#000', opacity: 0.08 }));
-    out.push(p('M150,342 Q200,330 250,342 Q262,346 260,366 L248,458 L152,458 L140,366 Q138,346 150,342Z', { fill: pele, stroke: peleE, 'stroke-width': 2 }));
+    out.push(p('M150,342 Q200,330 250,342 Q262,346 260,366 L248,458 L152,458 L140,366 Q138,346 150,342Z', { fill: pele, stroke: peleE, 'stroke-width': 1.4 }) + p('M150,342 Q200,330 250,342 Q262,346 260,366 L248,458 L152,458 L140,366 Q138,346 150,342Z', { fill: 'url(#' + I + 'lado)' }));
     var bracos = ['M150,354 Q126,420 118,498', 'M250,354 Q274,420 282,498'];
-    bracos.forEach(function (d) { out.push(p(d, { stroke: peleE, 'stroke-width': 27, 'stroke-linecap': 'round', fill: 'none' }), p(d, { stroke: pele, 'stroke-width': 23, 'stroke-linecap': 'round', fill: 'none' })); });
+    bracos.forEach(function (d) { out.push(membro(d, 23)); });
 
     // ---------- vestido ou blusa ----------
     if (vis('vestido')) out.push(vestido(e.vestido, C('vestido'), peca, linha, pele, peleE));
@@ -136,7 +141,9 @@
     } else {
       out.push(p(rosto, { fill: 'url(#' + I + 'pele)', stroke: peleE, 'stroke-width': 2.2 }));
       // luz e sombra suaves: sombra da franja na testa, dobra da pálpebra, brilho no nariz e no queixo
-      var luz = elip(200, 150, 84, 26, { fill: '#000', opacity: 0.06 }) + elip(200, 238, 2.6, 7, { fill: '#fff', opacity: 0.35 }) + elip(200, 284, 12, 4, { fill: '#fff', opacity: 0.18 }) +
+      var luz = elip(200, 150, 84, 26, { fill: '#000', opacity: 0.06 }) + elip(152, 246, 26, 16, { fill: '#ff8f7a', opacity: 0.1 }) + elip(248, 246, 26, 16, { fill: '#ff8f7a', opacity: 0.1 }) +
+        p('M203,226 Q208,240 205,250', { fill: 'none', stroke: esc(pele, 0.25), 'stroke-width': 3, opacity: 0.22, 'stroke-linecap': 'round' }) + elip(200, 291, 16, 3.5, { fill: '#000', opacity: 0.07 }) + elip(200, 286, 70, 14, { fill: '#000', opacity: 0.04 }) +
+        elip(128, 214, 10, 34, { fill: '#000', opacity: 0.04 }) + elip(272, 214, 10, 34, { fill: '#000', opacity: 0.04 }) + elip(200, 238, 2.6, 7, { fill: '#fff', opacity: 0.35 }) + elip(200, 284, 12, 4, { fill: '#fff', opacity: 0.18 }) +
         p('M146,201 Q164,178 182,199', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: 0.55 }) + p('M218,199 Q236,178 254,201', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: 0.55 });
       var feicoes = [luz, base(e.base, pele, rosto), blush(e, C('blush').hex, I), olho(164, -1, e, I, C), olho(236, 1, e, I, C)];
       var sob = mistura(cab, '#2a1c1a', 0.45);
@@ -180,6 +187,12 @@
 
     function fechar() {
       var w = op.largura, h = op.altura;
+      // realce (palco e TV): cenário levemente desfocado atrás e a personagem com sombra macia — tira o "papel recortado"
+      var realce = op.realce !== undefined ? op.realce : (fundo && !op.soFundo);
+      if (realce && out.length > 1) {
+        var cen = out.shift();
+        out = ['<g filter="url(#' + I + 'desf)">' + cen + '</g>' + ret(0, 0, W, H, { fill: 'url(#' + I + 'luzE)' }), '<g filter="url(#' + I + 'somb)">' + out.join('') + '</g>'];
+      }
       return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + area.join(' ') + '"' + (w ? ' width="' + w + '" height="' + h + '"' : '') +
         ' preserveAspectRatio="xMidYMid ' + (op.cortar ? 'slice' : 'meet') + '"><defs>' + defs + '</defs>' + out.join('') + '</svg>';
     }
@@ -202,6 +215,10 @@
     var iris = P.cor('olhos', e.olhos).hex;
     return padrao +
       '<radialGradient id="' + I + 'pele" cx=".45" cy=".38" r=".7"><stop offset="0" stop-color="' + cla(pele, 0.16) + '"/><stop offset="1" stop-color="' + esc(pele, 0.05) + '"/></radialGradient>' +
+      '<linearGradient id="' + I + 'lado" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".2"/><stop offset=".22" stop-color="#000" stop-opacity="0"/><stop offset=".4" stop-color="#fff" stop-opacity=".1"/><stop offset=".62" stop-color="#fff" stop-opacity="0"/><stop offset=".85" stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".24"/></linearGradient>' +
+      '<filter id="' + I + 'somb" x="-30%" y="-15%" width="160%" height="135%"><feDropShadow dx="5" dy="9" stdDeviation="8" flood-color="#2a0a3c" flood-opacity=".38"/></filter>' +
+      '<filter id="' + I + 'desf" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="2.2"/></filter>' +
+      '<radialGradient id="' + I + 'luzE" cx=".3" cy=".2" r=".9"><stop offset="0" stop-color="#fff8e8" stop-opacity=".28"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#1a0630" stop-opacity=".28"/></radialGradient>' +
       '<radialGradient id="' + I + 'vol" cx=".42" cy=".3" r=".85"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></radialGradient>' +
       '<linearGradient id="' + I + 'shine" x1="0" y1="0" x2="1" y2="1"><stop offset=".3" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".6"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
       gradienteCabelo(e, I, cab) +
@@ -215,7 +232,7 @@
   // ---------- cabelo ----------
   // mechas: "pontas" e "arco" mudam o degradê do cabelo (vale para todos os cortes); "frente" desenha faixas
   function gradienteCabelo(e, I, cab) {
-    var m = P.cor('cabelo', e.mechasCor).hex, st = [[0, cla(cab, 0.18)], [0.6, cab], [1, esc(cab, 0.12)]];
+    var m = P.cor('cabelo', e.mechasCor).hex, st = [[0, cla(cab, 0.12)], [0.1, cla(cab, 0.34)], [0.2, cla(cab, 0.06)], [0.55, cab], [0.85, esc(cab, 0.14)], [1, esc(cab, 0.22)]];
     if (e.mechas === 'pontas') st = [[0, cla(cab, 0.18)], [0.45, cab], [0.8, m], [1, cla(m, 0.2)]];
     if (e.mechas === 'arco') st = [[0, cla(cab, 0.18)], [0.4, cab], [0.55, '#ff7cc8'], [0.68, '#ffd76a'], [0.8, '#7ee8ff'], [0.92, '#b892ff'], [1, '#86ecc8']];
     return '<linearGradient id="' + I + 'cab" x1="0" y1="0" x2="0" y2="1">' + st.map(function (s) { return '<stop offset="' + s[0] + '" stop-color="' + s[1] + '"/>'; }).join('') + '</linearGradient>';

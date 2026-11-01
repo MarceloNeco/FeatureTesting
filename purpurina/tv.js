@@ -156,7 +156,11 @@
     }
     if (!j) return;
     j.visto = Date.now();
-    if (m.t === 'giro') { j.ang = m.ang || 0; desenharJogador(j); return; }
+    if (m.t === 'giro') {
+      j.ang = m.ang || 0; desenharJogador(j, null, true);
+      clearTimeout(j.parou); j.parou = setTimeout(function () { desenharJogador(j); }, 400);   // parou de girar: volta o realce
+      return;
+    }
     if (m.t === 'volta') { volta(j); return; }
     if (m.t === 'desfile') { desfileTV(j, m.d, m.est); return; }
     if (m.t === 'musica' && m.fonte) { if (!tv.som) ligarSom(); tv.tocador.tocar(m.fonte, m.ref || ''); return; }
@@ -176,17 +180,17 @@
       d.appendChild(b); d.appendChild(nome); caixa.appendChild(d); desenharJogador(j);
     });
   }
-  function desenharJogador(j, ang) {
+  function desenharJogador(j, ang, girando) {
     var el = document.querySelector('#tvp-' + j.id + ' .tv-boneca'); if (!el) return;
     var a = ang != null ? ang : j.ang;
-    el.innerHTML = B.svg(j.e, { id: 'tv' + j.id, angulo: a, anim: !a });
+    el.innerHTML = B.svg(j.e, { id: 'tv' + j.id, angulo: a, anim: !a, realce: !girando });
   }
   function volta(j) {
     var ini = performance.now(), dur = 1700;
     if (tv.som) Som.tocar('surpresa');
     (function passo(agora) {
       var k = Math.min(1, (agora - ini) / dur), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
-      desenharJogador(j, k >= 1 ? j.ang : e * 360);
+      desenharJogador(j, k >= 1 ? j.ang : e * 360, k < 1);
       if (k < 1) requestAnimationFrame(passo);
     })(ini);
   }
