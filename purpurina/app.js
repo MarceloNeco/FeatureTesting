@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.9.0';
+  var APP_VERSION = '0.9.1';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -31,7 +31,7 @@
   // ---------- telas e o botão Voltar do celular ----------
   /* Cada tela nova entra no histórico do navegador; o Voltar do celular volta uma tela (ou fecha a
      janela aberta) em vez de sair do jogo. Fechar pelo botão da tela também tira a entrada (history.back). */
-  var atual = 'entrada', pilha = [], ignorar = 0, janelaAberta = false;
+  var atual = 'entrada', pilha = [], ignorar = 0, janelaAberta = false, parteNoHist = false;
   function mostrar(id) {
     Array.prototype.forEach.call(document.querySelectorAll('.tela'), function (s) { s.classList.toggle('ativa', s.id === id); });
     atual = id; window.scrollTo(0, 0);
@@ -48,12 +48,13 @@
   function irMenu() {
     var i = pilha.lastIndexOf('menu');
     if (i < 0) { mostrar('menu'); return; }
-    var passos = pilha.length - i; pilha = pilha.slice(0, i);
+    var passos = pilha.length - i + (parteNoHist ? 1 : 0); pilha = pilha.slice(0, i); parteNoHist = false; naParte = false;
     ignorar++; history.go(-passos); mostrar('menu');
   }
   window.addEventListener('popstate', function () {
     if (ignorar) { ignorar--; if (aposFechar) { var fn = aposFechar; aposFechar = null; fn(); } return; }
     if (janelaAberta) { fecharJanela(); return; }
+    if (parteNoHist && atual === 'estudio') { parteNoHist = false; mostrarPartes(); return; }   // Voltar do celular: das opções volta para as partes
     if (pilha.length) mostrar(pilha.pop());
   });
   Array.prototype.forEach.call(document.querySelectorAll('.voltar'), function (b) { b.addEventListener('click', voltar); });
@@ -154,7 +155,7 @@
     e.cenario = d.cenario; return e;
   }
   function comecar(desafioId) {
-    modo = desafioId; hist.limpar();
+    modo = desafioId; hist.limpar(); naParte = false;
     var d = desafioAtual();
     if (d) { estado = baseDesafio(d); grupoAtual = 'roupa'; Som.proxima(); }
     else { estado = livre; grupoAtual = grupoAtual || 'eu'; }
@@ -252,10 +253,19 @@
   function encaixarAbas() {
     Array.prototype.forEach.call(document.querySelectorAll('.grupo-bt .t'), function (t) {
       var b = t.parentNode; t.textContent = b.getAttribute('aria-label');
-      if (t.getAttribute('data-curto') && t.scrollWidth > t.clientWidth + 1) t.textContent = t.getAttribute('data-curto');
+      if (t.getAttribute('data-curto') && t.scrollWidth > t.clientWidth) t.textContent = t.getAttribute('data-curto');
     });
   }
   window.addEventListener('resize', encaixarAbas);
+  var naParte = false;
+  function entrarNaParte() {
+    if (!naParte && !parteNoHist) { parteNoHist = true; try { history.pushState({ parte: 1 }, ''); } catch (e) { parteNoHist = false; } }
+    naParte = true;
+  }
+  // volta da lista de opções para as partes (pelo botão ⬅ ou pelo Voltar do celular)
+  function mostrarPartes() { naParte = false; desenharGrupos(); zoomDaParte(); }
+  function sairDaParte() { if (parteNoHist) { parteNoHist = false; ignorar++; history.back(); } }
+  $('btPartes').addEventListener('click', function () { Som.tocar('clique'); if (parteNoHist) history.back(); else mostrarPartes(); });
   function desenharGrupos() {
     var caixa = $('grupos'); caixa.innerHTML = '';
     P.GRUPOS.forEach(function (g) {
@@ -264,20 +274,28 @@
       var i = document.createElement('span'); i.className = 'i'; i.textContent = g.ico;
       var tx = document.createElement('span'); tx.className = 't'; tx.textContent = N(g); tx.setAttribute('data-curto', g.curto ? N(g.curto) : '');
       b.appendChild(i); b.appendChild(tx);
-      b.addEventListener('click', function () { grupoAtual = g.id; Som.tocar('aba'); desenharGrupos(); desenharOpcoes(); zoomDaParte(); });
+      b.addEventListener('click', function () { grupoAtual = g.id; Som.tocar('aba'); sairDaParte(); naParte = false; desenharGrupos(); desenharOpcoes(); zoomDaParte(); });
       caixa.appendChild(b);
     });
     encaixarAbas();
     var cats = catsDoGrupo(grupoAtual), cc = $('cats'); cc.innerHTML = '';
     if (!catPorGrupo[grupoAtual]) catPorGrupo[grupoAtual] = cats[0].id;
-    cc.hidden = cats.length < 2;
+    /* dois passos, para caber no celular: primeiro as partes da aba (Base, Blush, Batom…), grandes; tocou numa,
+       as partes recolhem num botão "⬅ Partes", o palco diminui um pouco e as opções ganham o espaço todo */
+    var soUma = cats.length < 2, mostrandoOpcoes = soUma || naParte, atualC = P.categoria(catPorGrupo[grupoAtual]);
+    cc.hidden = mostrandoOpcoes;
+    $('opcoes').hidden = !mostrandoOpcoes;
+    $('parteBar').hidden = soUma || !naParte;
+    $('parteNome').textContent = atualC.ico + ' ' + N(atualC);
+    $('estudio').classList.toggle('escolhendo', mostrandoOpcoes && !soUma);
+    if (!mostrandoOpcoes) $('btMais').hidden = true;
     cats.forEach(function (c) {
       // botão quadradinho (desenho em cima, nome embaixo): todas as partes ficam à vista, nada escondido para o lado
       var b = document.createElement('button'); b.type = 'button'; b.className = 'cat-bt';
       var ci = document.createElement('span'); ci.className = 'i'; ci.textContent = c.ico; var ct = document.createElement('span'); ct.textContent = N(c);
       b.appendChild(ci); b.appendChild(ct);
       b.setAttribute('aria-pressed', String(c.id === catPorGrupo[grupoAtual]));
-      b.addEventListener('click', function () { catPorGrupo[grupoAtual] = c.id; Som.tocar('clique'); desenharGrupos(); desenharOpcoes(); $('opcoes').scrollTop = 0; zoomDaParte(); });
+      b.addEventListener('click', function () { catPorGrupo[grupoAtual] = c.id; Som.tocar('clique'); entrarNaParte(); desenharGrupos(); desenharOpcoes(); $('opcoes').scrollTop = 0; zoomDaParte(); });
       cc.appendChild(b);
     });
   }
@@ -405,7 +423,10 @@
       if (++quadro % 3 === 0 && k < 1) {
         var atualSvg = alvoEl.querySelector('svg');
         if (atualSvg) {
-          var f = document.createElement('div'); f.className = 'fantasma'; f.appendChild(atualSvg.cloneNode(true));
+          // a cópia ganha nomes internos próprios (recortes, degradês): com os mesmos nomes, o navegador usava os
+          // recortes da cópia (de outro ângulo) no desenho de verdade e o cabelo e a orelha saíam no lugar errado
+          var pref = ((atualSvg.querySelector('[id]') || {}).id || '').split('-')[0], f = document.createElement('div'); f.className = 'fantasma';
+          f.innerHTML = pref ? atualSvg.outerHTML.replace(new RegExp('(id="|url\\(#)' + pref + '-', 'g'), '$1f' + quadro + pref + '-') : atualSvg.outerHTML;
           rastroEl.appendChild(f);
           while (rastroEl.children.length > 4) rastroEl.removeChild(rastroEl.firstChild);
           Array.prototype.forEach.call(rastroEl.children, function (c, i, l) { c.style.opacity = String(0.08 + 0.12 * (i + 1) * (4 / l.length) / 2); });

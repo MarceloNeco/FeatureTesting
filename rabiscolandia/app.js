@@ -4,7 +4,7 @@
    (banco "rabiscolandia"). Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.2';
+  var APP_VERSION = '0.1.3';
   var $ = function (id) { return document.getElementById(id); };
   var F = window.DesenhoFolha, P = window.DesenhoPaginas || { LISTA: [], CATEGORIAS: [] }, Pt = window.DesenhoPintura;
   var Som = window.DesenhoSom || { iniciar: function () {}, musica: function () {}, musicaLigada: function () { return false; }, efeito: function () {}, efeitos: function () {}, efeitosLigados: function () { return false; }, proxima: function () {}, nomeAtual: function () { return ''; } };
@@ -37,7 +37,7 @@
     document.documentElement.lang = pref.lingua === 'en' ? 'en' : 'pt-BR';
     Array.prototype.forEach.call(document.querySelectorAll('[data-t]'), function (el) { var p = el.getAttribute('data-t').split('|'); el.textContent = pref.lingua === 'en' ? p[1] : p[0]; });
     $('btLingua').textContent = pref.lingua === 'en' ? 'PT' : 'EN';
-    $('versao').textContent = t('Versão ', 'Version ') + APP_VERSION;
+    $('versao').textContent = t('Versão ', 'Version ') + APP_VERSION + t(' · Músicas gravadas: Kevin MacLeod (incompetech.com), CC BY 4.0', ' · Recorded music: Kevin MacLeod (incompetech.com), CC BY 4.0');
   }
 
   // ---------- telas e o botão Voltar do celular ----------
@@ -85,6 +85,8 @@
   function fecharPeloBotao(fn) { if (!janelaAberta) { if (fn) fn(); return; } fecharJanela(); ignorar++; aposFechar = fn || null; history.back(); }
 
   // ---------- som ----------
+  // música gravada começando: mostra nome e autor (a licença CC BY pede o crédito) — só quando a pessoa está desenhando
+  if (Som.aoTrocar) Som.aoTrocar(function (nome, gravada) { if (gravada && (atual === 'pintar' || atual === 'menu')) aviso('🎵 ' + nome, 3500); });
   function aplicarSom() {
     Som.efeitos(pref.efeitos); Som.musica(pref.musica);
     $('btMusica').textContent = pref.musica ? '🎵' : '🔇'; $('btMusica').setAttribute('aria-pressed', pref.musica ? 'true' : 'false');
@@ -222,6 +224,7 @@
         setTimeout(function () { abrirJanela({ titulo: t('🎉 Ficou lindo!', '🎉 It looks beautiful!'), img: motor.miniatura(600), botoes: [{ t: t('📸 Salvar foto', '📸 Save photo'), fn: tirarFoto }, { t: t('Continuar', 'Continue') }] }); }, 2200);
       },
       aoBalde: function () { Som.efeito('balde'); }, aoAdesivo: function () { Som.efeito('adesivo'); },
+      aoApagarObjeto: function () { Som.efeito('apagar'); },
       aoTocar: function () { if (!$('painel').hidden) fecharPainel(); }
     });
     window.DesenhoMotor = motor;
@@ -317,11 +320,19 @@
     var pt = document.createElement('span'); pt.className = 'ponto'; var px = Math.max(6, Math.min(30, f.tam * 0.38)); pt.style.width = pt.style.height = px + 'px';
     caixa.appendChild(botaoFerr('tamanho', pt, t('Tamanho', 'Size'), function () { abrirPainel('tamanho'); }, false));
     caixa.appendChild(botaoFerr('balde', '🪣', t('Balde de tinta', 'Paint bucket'), function () { escolherPincel('balde'); }, f.pincel === 'balde'));
-    caixa.appendChild(botaoFerr('borracha', '🧽', t('Borracha', 'Eraser'), function () { escolherPincel('borracha'); }, f.pincel === 'borracha'));
+    caixa.appendChild(botaoFerr('borracha', iconeBorracha(), t('Borracha', 'Eraser'), function () { escolherPincel('borracha'); aviso(t('Borracha: apaga traços, adesivos e animados — é só passar por cima', 'Eraser: erases strokes, stickers and animations — just rub over them'), 2600); }, f.pincel === 'borracha'));
     caixa.appendChild(botaoFerr('adesivo', f.pincel === 'adesivo' && f.adesivo.tipo === 'emoji' ? f.adesivo.v : '⭐', t('Adesivos', 'Stickers'), function () { abrirPainel('adesivos'); }, f.pincel === 'adesivo'));
     caixa.appendChild(botaoFerr('mover', '✋', t('Mover adesivo', 'Move sticker'), function () { escolherPincel('mover'); aviso(t('Arraste um adesivo para mudar de lugar ✋', 'Drag a sticker to move it ✋')); }, f.pincel === 'mover'));
     caixa.appendChild(botaoFerr('fundo', '🏞️', t('Fundo', 'Background'), function () { abrirPainel('fundos'); }, false));
     montarCores(cores);
+  }
+  /* borracha de escola desenhada (rosa e azul): o 🧽 parecia um amendoim para a criança */
+  function iconeBorracha() {
+    var s = document.createElement('span'); s.className = 'ico-borracha'; s.setAttribute('aria-hidden', 'true');
+    s.innerHTML = '<svg viewBox="0 0 48 48" width="36" height="36"><g transform="rotate(-32 24 24)"><rect x="5" y="14" width="38" height="20" rx="5" fill="#ff8fb1" stroke="#2b2b2b" stroke-width="2.5"/>' +
+      '<path d="M26 14h12a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H26z" fill="#4f8cff" stroke="#2b2b2b" stroke-width="2.5"/><rect x="9" y="17.5" width="13" height="3.5" rx="1.7" fill="#fff" opacity=".7"/></g>' +
+      '<circle cx="8" cy="40" r="2" fill="#ff8fb1"/><circle cx="14" cy="43" r="1.6" fill="#ff8fb1"/><circle cx="4" cy="44" r="1.4" fill="#ff8fb1"/></svg>';
+    return s;
   }
   function coresDaVez() {
     var p = motor.pagina(), lista = CORES.slice();
@@ -630,6 +641,6 @@
   window.DesenhoApp = {
     t: t, N: N, ir: ir, mostrar: mostrar, voltar: voltar, aviso: aviso, abrirJanela: abrirJanela, som: Som, pref: pref, salvarPref: salvarPref, aplicarSom: aplicarSom,
     motor: function () { criarMotor(); return motor; }, abrirLivre: abrirLivre, abrirPagina: abrirPagina, montarBarra: montarBarra, atual: function () { return atual; },
-    CORES: CORES, PINCEIS_LIVRES: PINCEIS_LIVRES, TV: TV, tipoAparelho: tipoAparelho, versao: APP_VERSION
+    CORES: CORES, PINCEIS_LIVRES: PINCEIS_LIVRES, iconeBorracha: iconeBorracha, TV: TV, tipoAparelho: tipoAparelho, versao: APP_VERSION
   };
 })();

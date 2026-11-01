@@ -37,7 +37,7 @@
     { id: 'purpurina', ico: '✨', pt: 'Purpurina', en: 'Glitter', vivo: true },
     { id: 'minhoca', ico: '🐛', pt: 'Minhoca dançante', en: 'Dancing worm', vivo: true },
     { id: 'balde', ico: '🪣', pt: 'Balde de tinta', en: 'Paint bucket' },
-    { id: 'borracha', ico: '🧽', pt: 'Borracha', en: 'Eraser' },
+    { id: 'borracha', ico: '🧽', pt: 'Borracha (apaga traços, adesivos e animados)', en: 'Eraser (erases strokes, stickers and animations)' },
     { id: 'adesivo', ico: '⭐', pt: 'Adesivo', en: 'Sticker' },
     { id: 'mover', ico: '✋', pt: 'Mover adesivo', en: 'Move sticker' }
   ];
@@ -294,16 +294,18 @@
     }
     /* a borracha também tira pincéis vivos e adesivos que ela tocar */
     function borrachaObjetos(tr, x, y) {
-      var r = tr.f.tam * 0.8 + 6;
+      var r = tr.f.tam * 0.8 + 6, apagou = false;
       for (var i = vivos.length - 1; i >= 0; i--) {
         var p = vivos[i].pts, toca = false;
         for (var k = 0; k < p.length; k += 2) if (Math.hypot(p[k] - x, p[k + 1] - y) < r + vivos[i].tam / 2) { toca = true; break; }
-        if (toca) { tr.o.vivos = tr.o.vivos || []; tr.o.vivos.unshift({ i: i, obj: vivos[i] }); vivos.splice(i, 1); }
+        if (toca) { tr.o.vivos = tr.o.vivos || []; tr.o.vivos.unshift({ i: i, obj: vivos[i] }); vivos.splice(i, 1); apagou = true; }
       }
       for (var j = adesivos.length - 1; j >= 0; j--) {
         var a = adesivos[j];
-        if (Math.hypot(a.x - x, a.y - y) < r + a.s * 0.35) { tr.o.adesivos = tr.o.adesivos || []; tr.o.adesivos.unshift({ i: j, obj: a }); adesivos.splice(j, 1); }
+        // encostou em QUALQUER parte do adesivo (não só no meio): apaga — o dono e a filha passavam na beirada e nada
+        if (Math.abs(a.x - x) < a.s * 0.5 + r && Math.abs(a.y - y) < a.s * 0.5 + r) { tr.o.adesivos = tr.o.adesivos || []; tr.o.adesivos.unshift({ i: j, obj: a }); adesivos.splice(j, 1); apagou = true; }
       }
+      if (apagou) { sujo = true; if (op.aoApagarObjeto) op.aoApagarObjeto(); }
     }
 
     /* ---------- balde de tinta (respeita o contorno do desenho) ----------
