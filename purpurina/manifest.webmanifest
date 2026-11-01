@@ -1,0 +1,16 @@
+{
+  "name": "Purpurina — Bolinho de Chuva",
+  "short_name": "Purpurina",
+  "description": "Maquiagem, roupas e muito brilho: monte o visual, faça desafios e guarde os looks. / Makeup, outfits and sparkle: style, take challenges and save your looks.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#2a1146",
+  "theme_color": "#2a1146",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

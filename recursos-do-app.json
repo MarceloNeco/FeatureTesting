@@ -35,6 +35,14 @@
       "pagina": "vruuum/"
     },
     {
+      "id": "purpurina",
+      "nome": {
+        "pt": "Purpurina (Bolinho de Chuva)",
+        "en": "Purpurina (Rain Dumpling)"
+      },
+      "pagina": "purpurina/"
+    },
+    {
       "id": "arch-one",
       "nome": {
         "pt": "ArchONE (mapa vivo, protótipo)",

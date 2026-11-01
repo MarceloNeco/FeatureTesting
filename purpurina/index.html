@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Purpurina — Bolinho de Chuva · SolverONE</title>
+<link rel="icon" href="icone-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-192.png">
+<meta name="theme-color" content="#2a1146">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Maquiagem, roupas e muito brilho: monte o visual da sua personagem, faça desafios, tire foto e guarde os looks favoritos. / Makeup, outfits and sparkle: style your character, take challenges, save photos and favorite looks.">
+<link rel="stylesheet" href="estilo.css">
+<!--
+  Purpurina — quinta brincadeira da família Bolinho de Chuva (SolverONE · Feature Tester).
+  Jogo de vestir e maquiar: personagem (pele, cabelo, olhos), maquiagem, roupas, acessórios e cenários,
+  com desfazer, surpresa, desafios com estrelas, desfile com festa, foto do visual e looks favoritos.
+  Sem login, sem banco, sem cookie: só arquivos estáticos (cache no aparelho pelo sw.js). Nada de
+  script inline: a CSP acima não permite. Mapa dos arquivos: LEIA-ME.md.
+  Versão: APP_VERSION em app.js, VERSAO em sw.js e versoes.json.
+-->
+</head>
+<body>
+
+<section id="entrada" class="tela ativa" data-recurso="purpurina">
+  <div class="brilhos" aria-hidden="true"></div>
+  <div id="entradaBoneca" class="entrada-boneca" aria-hidden="true"></div>
+  <h1 class="logo">Purpurina</h1>
+  <p class="sub" data-t="maquiagem, roupas e muito brilho|makeup, outfits and lots of sparkle"></p>
+  <button id="btEntrar" class="grande" type="button" data-t="✨ Toque para brilhar!|✨ Tap to sparkle!"></button>
+  <p class="dica" data-t="Aumente o volume 🔊|Turn the volume up 🔊"></p>
+</section>
+
+<section id="menu" class="tela" data-recurso="purpurina">
+  <div class="faixa">
+    <button id="btLingua" class="mini" type="button" aria-label="Idioma / Language">EN</button>
+    <button id="btSom" class="mini" type="button" aria-label="Som / Sound">🔊</button>
+    <button id="btAjuda" class="mini" type="button" aria-label="Como brincar / How to play" aria-expanded="false">❓</button>
+  </div>
+  <h1 class="logo pequeno">Purpurina</h1>
+  <div id="ajuda" class="ajuda" hidden>
+    <p data-t="Monte o visual da sua personagem: escolha a pele, o cabelo e os olhos, faça a maquiagem (base, blush, sombra, delineado, cílios, batom, glitter e adesivos), vista roupas e sapatos e coloque acessórios. Toque numa aba embaixo (👧 💄 👗 💍 🏞️), depois numa parte e numa opção. As bolinhas coloridas trocam a cor.|Style your character: pick skin, hair and eyes, do the makeup (foundation, blush, eyeshadow, eyeliner, lashes, lipstick, glitter and stickers), choose clothes and shoes and add accessories. Tap a tab at the bottom (👧 💄 👗 💍 🏞️), then a part and an option. The colored dots change the color."></p>
+    <p data-t="↩ desfaz a última troca, 🎲 sorteia um visual surpresa e 🔄 começa de novo. 📸 tira uma foto para guardar no celular e 💖 guarda o look nos favoritos. Toque na personagem para ela girar!|↩ undoes the last change, 🎲 picks a surprise look and 🔄 starts over. 📸 takes a photo to save on the phone and 💖 saves the look to favorites. Tap the character to make her twirl!"></p>
+    <p data-t="⭐ Desafios: monte o visual para o tema, siga as 3 dicas e toque em ✨ Desfilar! Ninguém perde: todo desfile ganha pelo menos 1 estrela.|⭐ Challenges: style a look for the theme, follow the 3 tips and tap ✨ Runway! Nobody loses: every show gets at least 1 star."></p>
+  </div>
+  <div id="menuBoneca" class="menu-boneca" aria-hidden="true"></div>
+  <div class="botoes-menu">
+    <button id="btLivre" class="grande" type="button" data-t="🎨 Brincar livre|🎨 Free play"></button>
+    <button id="btDesafios" class="grande roxo" type="button" data-t="⭐ Desafios|⭐ Challenges"></button>
+    <button id="btLooks" class="medio" type="button"><span data-t="💖 Meus looks|💖 My looks"></span> <span id="qtdLooks" class="bolha">0</span></button>
+  </div>
+  <div id="guardar" class="guardar">
+    <button id="btInstalar" class="medio" type="button" hidden data-t="📲 Instalar no celular|📲 Install on the phone"></button>
+    <button id="btBaixar" class="medio" type="button" data-t="📥 Baixar o jogo (arquivo)|📥 Download the game (file)"></button>
+    <p id="baixarAviso" class="dica" aria-live="polite" data-t="Funciona sem internet e sem login. O arquivo baixado abre direto no celular.|Works offline, no login. The downloaded file opens right on the phone."></p>
+  </div>
+  <p class="rodape"><span id="ver"></span> · SolverONE · <a href="https://solverone.com.br/bolinho-de-chuva/" data-t="🍩 Mais brincadeiras|🍩 More games"></a></p>
+</section>
+
+<section id="desafios" class="tela" data-recurso="purpurina">
+  <div class="topo-simples">
+    <button class="mini voltar" type="button" aria-label="Voltar / Back">⬅</button>
+    <h2 data-t="⭐ Desafios|⭐ Challenges"></h2>
+  </div>
+  <p class="dica" data-t="Escolha um tema, monte o visual e desfile. Cada dica cumprida vale uma estrela!|Pick a theme, style the look and walk the runway. Each tip you follow is worth a star!"></p>
+  <div id="listaDesafios" class="lista-desafios"></div>
+</section>
+
+<section id="looks" class="tela" data-recurso="purpurina">
+  <div class="topo-simples">
+    <button class="mini voltar" type="button" aria-label="Voltar / Back">⬅</button>
+    <h2 data-t="💖 Meus looks|💖 My looks"></h2>
+  </div>
+  <p id="semLooks" class="dica" data-t="Nenhum look guardado ainda. No estúdio, toque em 💖 para guardar o visual aqui (fica só neste aparelho).|No saved looks yet. In the studio, tap 💖 to save the look here (it stays on this device only)."></p>
+  <div id="listaLooks" class="lista-looks"></div>
+</section>
+
+<section id="estudio" class="tela" data-recurso="purpurina">
+  <div class="topo">
+    <button id="btCasa" class="mini" type="button" aria-label="Menu">🏠</button>
+    <p id="titulo" class="titulo"></p>
+    <button id="btDesfazer" class="mini" type="button" aria-label="Desfazer / Undo">↩</button>
+    <button id="btSurpresa" class="mini" type="button" aria-label="Surpresa / Surprise">🎲</button>
+    <button id="btRecomecar" class="mini" type="button" aria-label="Começar de novo / Start over">🔄</button>
+  </div>
+  <div id="palco" class="palco">
+    <div id="boneca" class="boneca" role="img"></div>
+    <div id="dicasCaixa" class="dicas" hidden>
+      <button id="btDicas" class="dicas-titulo" type="button" aria-expanded="true" aria-controls="dicas"></button>
+      <ul id="dicas"></ul>
+    </div>
+    <div id="efeitos" class="efeitos" aria-hidden="true"></div>
+  </div>
+  <div class="acoes">
+    <button id="btFoto" class="medio" type="button" data-t="📸 Foto|📸 Photo"></button>
+    <button id="btGuardar" class="medio" type="button" data-t="💖 Guardar|💖 Save"></button>
+    <button id="btDesfilar" class="medio forte" type="button" data-t="✨ Desfilar!|✨ Runway!"></button>
+  </div>
+  <div class="painel">
+    <div id="grupos" class="grupos" role="tablist"></div>
+    <div id="cats" class="cats"></div>
+    <div id="opcoes" class="opcoes-painel">
+      <div id="cores" class="cores" role="group"></div>
+      <div id="estilos" class="estilos" role="group"></div>
+    </div>
+  </div>
+</section>
+
+<section id="desfile" class="tela">
+  <div id="passarela" class="passarela" aria-hidden="true"></div>
+  <div class="placar">
+    <p id="desfileTitulo" class="desfile-titulo"></p>
+    <p id="desfileEstrelas" class="desfile-estrelas" aria-live="polite"></p>
+    <div id="jurados" class="jurados" aria-hidden="true"></div>
+    <ul id="desfileDicas" class="desfile-dicas"></ul>
+    <p id="desfileRecorde" class="recorde" hidden data-t="🎉 Novo recorde neste desafio!|🎉 New record on this challenge!"></p>
+    <div class="desfile-botoes">
+      <button id="btProximo" class="grande" type="button"></button>
+      <button id="btMaisUm" class="medio" type="button" data-t="✏️ Arrumar mais|✏️ Keep styling"></button>
+      <button id="btFotoDesfile" class="medio" type="button" data-t="📸 Foto|📸 Photo"></button>
+      <button id="btGuardarDesfile" class="medio" type="button" data-t="💖 Guardar|💖 Save"></button>
+      <button id="btMenuDesfile" class="medio" type="button" data-t="🏠 Menu|🏠 Menu"></button>
+    </div>
+  </div>
+</section>
+
+<section id="desligado" class="tela">
+  <p data-t="Esta brincadeira está desligada no momento.|This game is turned off right now."></p>
+</section>
+
+<div id="janela" class="janela" hidden role="dialog" aria-modal="true" aria-labelledby="janelaTitulo">
+  <div class="janela-caixa">
+    <h2 id="janelaTitulo"></h2>
+    <p id="janelaTexto"></p>
+    <img id="janelaImg" alt="" hidden>
+    <div id="janelaBotoes" class="janela-botoes"></div>
+  </div>
+</div>
+
+<canvas id="festa" class="festa" aria-hidden="true"></canvas>
+<div id="recado" class="recado" role="status" aria-live="polite" hidden></div>
+
+<script src="pecas.js"></script>
+<script src="visual.js"></script>
+<script src="boneca.js"></script>
+<script src="som.js"></script>
+<script src="baixar.js"></script>
+<script src="../recursos.js" data-app="feature-tester" data-fora-do-arquivo></script>
+<script src="app.js"></script>
+</body>
+</html>

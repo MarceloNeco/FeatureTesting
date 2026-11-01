@@ -1,0 +1,522 @@
+/* Purpurina — telas, estúdio, desafios, desfile, foto e looks favoritos.
+   As peças ficam em pecas.js, as regras em visual.js, o desenho em boneca.js e o som em som.js.
+   Guarda só neste aparelho (localStorage, chaves "purpurina.*"): preferências, o visual do "brincar
+   livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
+(function () {
+  'use strict';
+  var APP_VERSION = '0.1.0';
+  var $ = function (id) { return document.getElementById(id); };
+  var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
+  var TV = /[?&]tv=auto\b/.test(location.search);
+  if (TV) document.documentElement.classList.add('tv');
+  var TOQUE = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
+  var CALMO = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var MAX_LOOKS = 30;
+
+  function ler(k, padrao) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : padrao; } catch (e) { return padrao; } }
+  function gravar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; /* aparelho sem espaço ou modo privado: segue sem gravar */ } }
+  var pref = ler('purpurina.pref', null) || {};
+  if (pref.lingua !== 'en' && pref.lingua !== 'pt') pref.lingua = (navigator.language || 'pt').slice(0, 2) === 'pt' ? 'pt' : 'en';
+  function salvarPref() { gravar('purpurina.pref', pref); }
+
+  // ---------- idioma ----------
+  function t(pt, en) { return pref.lingua === 'en' ? en : pt; }
+  function N(x) { return pref.lingua === 'en' ? x.en : x.pt; }
+  function traduzir() {
+    document.documentElement.lang = pref.lingua === 'en' ? 'en' : 'pt-BR';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-t]'), function (el) { var p = el.getAttribute('data-t').split('|'); el.textContent = pref.lingua === 'en' ? p[1] : p[0]; });
+    $('btLingua').textContent = pref.lingua === 'en' ? 'PT' : 'EN';
+  }
+
+  // ---------- telas e o botão Voltar do celular ----------
+  /* Cada tela nova entra no histórico do navegador; o Voltar do celular volta uma tela (ou fecha a
+     janela aberta) em vez de sair do jogo. Fechar pelo botão da tela também tira a entrada (history.back). */
+  var atual = 'entrada', pilha = [], ignorar = 0, janelaAberta = false;
+  function mostrar(id) {
+    Array.prototype.forEach.call(document.querySelectorAll('.tela'), function (s) { s.classList.toggle('ativa', s.id === id); });
+    atual = id; window.scrollTo(0, 0);
+    if (id !== 'desfile') pararConfete();
+    if (id === 'menu') desenharMenu();
+    if (id === 'desafios') listaDesafios();
+    if (id === 'looks') listaLooks();
+    if (id === 'estudio') desenharTudo();
+    setTimeout(focarPrimeiro, 30);
+  }
+  function ir(id) { if (id === atual) return; pilha.push(atual); try { history.pushState({ purpurina: pilha.length }, ''); } catch (e) { /* sem histórico: segue */ } mostrar(id); }
+  function voltar() { if (pilha.length) history.back(); }
+  function irMenu() {
+    var i = pilha.lastIndexOf('menu');
+    if (i < 0) { mostrar('menu'); return; }
+    var passos = pilha.length - i; pilha = pilha.slice(0, i);
+    ignorar++; history.go(-passos); mostrar('menu');
+  }
+  window.addEventListener('popstate', function () {
+    if (ignorar) { ignorar--; return; }
+    if (janelaAberta) { fecharJanela(); return; }
+    if (pilha.length) mostrar(pilha.pop());
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.voltar'), function (b) { b.addEventListener('click', voltar); });
+
+  if (window.SolverRecursos && !SolverRecursos.ligado('purpurina', true)) { mostrar('desligado'); traduzir(); return; }
+
+  // ---------- janela (foto, confirmar) ----------
+  function abrirJanela(o) {
+    $('janelaTitulo').textContent = o.titulo || ''; $('janelaTexto').textContent = o.texto || ''; $('janelaTexto').hidden = !o.texto;
+    var img = $('janelaImg'); img.hidden = !o.img; if (o.img) { img.src = o.img; img.alt = o.alt || ''; }
+    var caixa = $('janelaBotoes'); caixa.innerHTML = '';
+    o.botoes.forEach(function (b) {
+      var bt = document.createElement('button'); bt.type = 'button'; bt.className = b.classe || 'medio'; bt.textContent = b.t;
+      bt.addEventListener('click', function () { if (b.ficar) { b.fn(); return; } fecharPeloBotao(); if (b.fn) b.fn(); });
+      caixa.appendChild(bt);
+    });
+    $('janela').hidden = false; janelaAberta = true;
+    try { history.pushState({ janela: 1 }, ''); } catch (e) { /* ok */ }
+    setTimeout(function () { var p = caixa.querySelector('button'); if (p) p.focus(); }, 30);
+  }
+  function fecharJanela() { $('janela').hidden = true; janelaAberta = false; var img = $('janelaImg'); if (img.src && img.src.indexOf('blob:') === 0) URL.revokeObjectURL(img.src); img.removeAttribute('src'); }
+  function fecharPeloBotao() { if (!janelaAberta) return; fecharJanela(); ignorar++; history.back(); }
+  $('janela').addEventListener('click', function (e) { if (e.target === $('janela')) fecharPeloBotao(); });
+
+  var tRecado = 0;
+  function recado(msg) { var r = $('recado'); r.textContent = msg; r.hidden = false; clearTimeout(tRecado); tRecado = setTimeout(function () { r.hidden = true; }, 2600); }
+
+  // ---------- entrada e menu ----------
+  var livre = V.limpar(ler('purpurina.atual', null));
+  function entrar() {
+    if (atual !== 'entrada') return;
+    Som.iniciar(); Som.musica(true); Som.tocar('brilho');
+    telaCheia();
+    try { history.replaceState({ inicio: 1 }, ''); } catch (e) { /* ok */ }
+    mostrar('menu');
+  }
+  $('btEntrar').addEventListener('click', entrar);
+  function desenharMenu() {
+    $('menuBoneca').innerHTML = B.svg(livre, { id: 'menu', fundo: false, area: [40, 40, 320, 640] });
+    $('qtdLooks').textContent = ler('purpurina.looks', []).length;
+  }
+  $('btLingua').addEventListener('click', function () { pref.lingua = pref.lingua === 'en' ? 'pt' : 'en'; salvarPref(); traduzir(); Som.tocar('clique'); });
+  $('btSom').addEventListener('click', function () { Som.iniciar(); var lig = Som.alternar(); $('btSom').textContent = lig ? '🔊' : '🔇'; });
+  $('btAjuda').addEventListener('click', function () { var a = $('ajuda'); a.hidden = !a.hidden; $('btAjuda').setAttribute('aria-expanded', String(!a.hidden)); });
+  $('btLivre').addEventListener('click', function () { Som.tocar('aba'); comecar(null); });
+  $('btDesafios').addEventListener('click', function () { Som.tocar('aba'); ir('desafios'); });
+  $('btLooks').addEventListener('click', function () { Som.tocar('aba'); ir('looks'); });
+
+  // tela cheia no celular: a barra do navegador não tampa nada (deitado ou em pé). No iPhone não existe.
+  function telaCheia() {
+    if (!TOQUE || TV) return;
+    var d = document, el = d.documentElement;
+    try {
+      if (!(d.fullscreenElement || d.webkitFullscreenElement)) { var p = el.requestFullscreen ? el.requestFullscreen({ navigationUI: 'hide' }) : (el.webkitRequestFullscreen && el.webkitRequestFullscreen()); if (p && p.catch) p.catch(function () {}); }
+    } catch (e) { /* navegador sem tela cheia: segue normal */ }
+  }
+
+  // ---------- desafios ----------
+  function estrelasTxt(n) { return n ? '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n) : '☆☆☆'; }
+  function listaDesafios() {
+    var caixa = $('listaDesafios'); caixa.innerHTML = '';
+    P.DESAFIOS.forEach(function (d) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'desafio';
+      var est = ler('purpurina.estrelas.' + d.id, 0);
+      var ico = document.createElement('span'); ico.className = 'ico'; ico.textContent = d.ico;
+      var txt = document.createElement('span'), nome = document.createElement('span'), e = document.createElement('span');
+      nome.className = 'nome'; nome.textContent = N(d); e.className = 'est'; e.textContent = estrelasTxt(est);
+      e.setAttribute('aria-label', est + ' ' + t('de 3 estrelas', 'of 3 stars'));
+      txt.appendChild(nome); txt.appendChild(e); b.appendChild(ico); b.appendChild(txt);
+      b.addEventListener('click', function () { Som.tocar('aba'); comecar(d.id); });
+      caixa.appendChild(b);
+    });
+  }
+
+  // ---------- estúdio ----------
+  var modo = null, estado = livre, hist = new V.Historico(), grupoAtual = 'eu', catPorGrupo = {}, dicasAntes = [];
+  function desafioAtual() { return modo ? V.desafio(modo) : null; }
+  // desafio começa limpinho, com a personagem dela (pele, cabelo, olhos) e o cenário do tema
+  function baseDesafio(d) {
+    var e = V.novo();
+    ['pele', 'cabelo', 'cabeloCor', 'olhos'].forEach(function (k) { e[k] = livre[k]; });
+    e.cenario = d.cenario; return e;
+  }
+  function comecar(desafioId) {
+    modo = desafioId; hist.limpar();
+    var d = desafioAtual();
+    if (d) { estado = baseDesafio(d); grupoAtual = 'roupa'; Som.proxima(); }
+    else { estado = livre; grupoAtual = grupoAtual || 'eu'; }
+    dicasAntes = d ? V.avaliar(estado, d).dicas : [];
+    ir('estudio');
+  }
+  function mudar(novo, catId) {
+    if (V.iguais(novo, estado)) return;
+    hist.guardar(estado); estado = novo; aposMudar(); efeito(catId);
+  }
+  function aposMudar() {
+    if (!modo) { livre = estado; gravar('purpurina.atual', estado); }
+    desenharBoneca(); desenharOpcoes(); desenharDicas(true);
+    $('btDesfazer').disabled = !hist.tem();
+  }
+  function desenharTudo() {
+    var d = desafioAtual();
+    $('titulo').textContent = d ? d.ico + ' ' + N(d) : t('🎨 Brincar livre', '🎨 Free play');
+    desenharGrupos(); desenharBoneca(); desenharOpcoes(); desenharDicas(false);
+    $('btDesfazer').disabled = !hist.tem();
+  }
+  function desenharBoneca() {
+    var el = $('boneca');
+    el.innerHTML = B.svg(estado, { id: 'palco', anim: !CALMO });
+    el.setAttribute('aria-label', V.resumo(estado, pref.lingua));
+  }
+  function desenharDicas(comSom) {
+    var d = desafioAtual(), ul = $('dicas');
+    $('dicasCaixa').hidden = !d; if (!d) return;
+    var r = V.avaliar(estado, d); ul.innerHTML = '';
+    $('btDicas').textContent = '💡 ' + t('Dicas', 'Tips') + ' ' + r.cumpridas + '/3 ' + (ul.hidden ? '▸' : '▾');
+    d.dicas.forEach(function (x, i) {
+      var li = document.createElement('li'), m = document.createElement('span'), s = document.createElement('span');
+      li.className = r.dicas[i] ? 'ok' : ''; m.className = 'marca'; m.textContent = r.dicas[i] ? '✅' : '⚪'; s.textContent = N(x);
+      if (r.dicas[i] && !dicasAntes[i] && comSom) { Som.tocar('dica'); li.classList.add('novo'); }
+      else m.style.animation = 'none';
+      li.appendChild(m); li.appendChild(s); ul.appendChild(li);
+    });
+    dicasAntes = r.dicas;
+  }
+
+  // o quadro de dicas recolhe com um toque (para ver a personagem inteira)
+  $('btDicas').addEventListener('click', function () { var ul = $('dicas'); ul.hidden = !ul.hidden; $('btDicas').setAttribute('aria-expanded', String(!ul.hidden)); Som.tocar('clique'); desenharDicas(false); });
+
+  // abas (grupos), partes (categorias) e opções
+  function catsDoGrupo(g) { return P.CATEGORIAS.filter(function (c) { return c.grupo === g; }); }
+  function desenharGrupos() {
+    var caixa = $('grupos'); caixa.innerHTML = '';
+    P.GRUPOS.forEach(function (g) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'grupo-bt'; b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', String(g.id === grupoAtual)); b.setAttribute('aria-label', N(g));
+      var i = document.createElement('span'); i.className = 'i'; i.textContent = g.ico;
+      var tx = document.createElement('span'); tx.className = 't'; tx.textContent = N(g);
+      b.appendChild(i); b.appendChild(tx);
+      b.addEventListener('click', function () { grupoAtual = g.id; Som.tocar('aba'); desenharGrupos(); desenharOpcoes(); });
+      caixa.appendChild(b);
+    });
+    var cats = catsDoGrupo(grupoAtual), cc = $('cats'); cc.innerHTML = '';
+    if (!catPorGrupo[grupoAtual]) catPorGrupo[grupoAtual] = cats[0].id;
+    cc.hidden = cats.length < 2;
+    cats.forEach(function (c) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'cat-bt'; b.textContent = c.ico + ' ' + N(c);
+      b.setAttribute('aria-pressed', String(c.id === catPorGrupo[grupoAtual]));
+      b.addEventListener('click', function () { catPorGrupo[grupoAtual] = c.id; Som.tocar('clique'); desenharGrupos(); desenharOpcoes(); $('opcoes').scrollTop = 0; });
+      cc.appendChild(b);
+    });
+  }
+  function desenharOpcoes() {
+    var cat = P.categoria(catPorGrupo[grupoAtual] || catsDoGrupo(grupoAtual)[0].id);
+    var cores = $('cores'), estilos = $('estilos'); cores.innerHTML = ''; estilos.innerHTML = '';
+    cores.hidden = !cat.cores; estilos.hidden = !cat.opcoes;
+    cores.setAttribute('aria-label', t('Cores', 'Colors') + ' — ' + N(cat));
+    estilos.setAttribute('aria-label', N(cat));
+    if (cat.cores) {
+      var chave = cat.opcoes ? cat.id + 'Cor' : cat.id;
+      P.CORES[cat.cores].forEach(function (c) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'cor-bt' + (cat.opcoes ? '' : ' grande-cor') + (c.brilho ? ' metal' : '');
+        b.style.backgroundColor = c.hex;
+        if (c.id === 'arco' && cat.id === 'glitter') b.style.background = 'conic-gradient(#ff7cc8, #ffd76a, #7ee8ff, #b892ff, #ff7cc8)';
+        b.setAttribute('aria-label', N(c)); b.title = N(c);
+        b.setAttribute('aria-pressed', String(estado[chave] === c.id && (!cat.opcoes || estado[cat.id] !== 'nenhum')));
+        b.addEventListener('click', function () { mudar(V.aplicar(estado, cat.id, c.id, true), cat.id); });
+        cores.appendChild(b);
+      });
+    }
+    if (cat.opcoes) {
+      cat.opcoes.forEach(function (op, k) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'op-bt' + (op.id === 'nenhum' ? ' nenhum' : '') + (cat.id === 'cenario' ? ' fundo' : '');
+        var vis = document.createElement('span'); vis.className = 'mini-svg';
+        if (op.id === 'nenhum') vis.textContent = '🚫';
+        else {
+          var e = V.aplicar(estado, cat.id, op.id);
+          vis.innerHTML = cat.id === 'cenario' ? B.svg(e, { id: 'm' + k, soFundo: true, cortar: true }) : B.svg(e, { id: 'm' + k, fundo: false, area: cat.area });
+        }
+        var nome = document.createElement('span'); nome.textContent = N(op);
+        b.appendChild(vis); b.appendChild(nome);
+        b.setAttribute('aria-pressed', String(estado[cat.id] === op.id && V.visivel(estado, cat.id) || (op.id === 'nenhum' && estado[cat.id] === 'nenhum')));
+        b.addEventListener('click', function () { mudar(V.aplicar(estado, cat.id, op.id), cat.id); });
+        estilos.appendChild(b);
+      });
+    }
+  }
+
+  // ---------- efeitos na personagem: pincel, faíscas, giro ----------
+  var ALVO = { base: [200, 200, 1], blush: [250, 252, 1], sombra: [236, 192, 1], delineado: [236, 205, 1], cilios: [236, 195, 1], batom: [200, 272, 1], glitter: [200, 180, 1], adesivo: [266, 250, 1],
+    pele: [200, 205, 1], cabelo: [200, 130, 1], olhos: [200, 214, 1], vestido: [200, 480], blusa: [200, 400], saia: [200, 490], calca: [200, 540], estampa: [200, 400], sapatos: [200, 646],
+    cabeca: [200, 110, 1], laco: [250, 130, 1], brincos: [284, 236, 1], colar: [200, 350], oculos: [200, 214, 1], bolsa: [290, 515], cenario: [200, 360] };
+  var PINCEL = { base: '🧽', blush: '🖌️', sombra: '🖌️', delineado: '✏️', cilios: '🖌️', batom: '💄', glitter: '✨', adesivo: '💟' };
+  function naTela(x, y, cabeca) {
+    if (cabeca) { x = 200 + (x - 200) * 1.12; y = 297 + (y - 297) * 1.12 + 14; }   // mesma conta do grupo da cabeça em boneca.js
+    var r = $('boneca').getBoundingClientRect(), s = Math.min(r.width / 400, r.height / 720);
+    return [(r.width - 400 * s) / 2 + x * s, (r.height - 720 * s) / 2 + y * s];
+  }
+  function faiscas(x, y, qtd, emojis) {
+    if (CALMO) return;
+    var caixa = $('efeitos'), lista = emojis || ['✨', '💖', '⭐', '✨'];
+    for (var i = 0; i < qtd; i++) {
+      var f = document.createElement('span'), a = Math.random() * Math.PI * 2, d = 30 + Math.random() * 50;
+      f.className = 'faisca'; f.textContent = lista[i % lista.length];
+      f.style.setProperty('--x0', (x - 10) + 'px'); f.style.setProperty('--y0', (y - 10) + 'px');
+      f.style.setProperty('--x1', (x - 10 + Math.cos(a) * d) + 'px'); f.style.setProperty('--y1', (y - 10 + Math.sin(a) * d) + 'px');
+      caixa.appendChild(f);
+      setTimeout(function (n) { return function () { n.remove(); }; }(f), 850);
+    }
+  }
+  function efeito(catId) {
+    var cat = P.categoria(catId); if (!cat) return;
+    var a = ALVO[catId] || [200, 360], q = naTela(a[0], a[1], a[2]);
+    if (cat.grupo === 'make' && !CALMO) {
+      Som.tocar('pincel');
+      var p = document.createElement('span'), r = $('boneca').getBoundingClientRect();
+      p.className = 'pincel'; p.textContent = PINCEL[catId] || '🖌️';
+      p.style.setProperty('--x0', (r.width - 40) + 'px'); p.style.setProperty('--y0', (r.height - 40) + 'px');
+      p.style.setProperty('--x1', (q[0] - 8) + 'px'); p.style.setProperty('--y1', (q[1] - 30) + 'px');
+      $('efeitos').appendChild(p);
+      setTimeout(function () { p.remove(); faiscas(q[0], q[1], 6); Som.tocar('brilho'); }, 650);
+      return;
+    }
+    Som.tocar(cat.grupo === 'roupa' ? 'roupa' : cat.grupo === 'eu' ? 'clique' : 'brilho');
+    faiscas(q[0], q[1], cat.grupo === 'fundo' ? 12 : 7);
+  }
+  $('boneca').addEventListener('click', function () {
+    var el = $('boneca'); el.classList.remove('girar'); void el.offsetWidth; el.classList.add('girar');
+    Som.tocar('brilho'); var q = naTela(200, 360); faiscas(q[0], q[1], 8);
+  });
+
+  // ---------- botões do estúdio ----------
+  $('btCasa').addEventListener('click', function () { Som.tocar('clique'); irMenu(); });
+  $('btDesfazer').addEventListener('click', function () {
+    var e = hist.voltar(); if (!e) return;
+    estado = e; Som.tocar('desfazer'); aposMudar();
+  });
+  $('btSurpresa').addEventListener('click', function () {
+    var novo = V.surpresa(estado); var d = desafioAtual(); if (d) novo.cenario = d.cenario;
+    mudar(novo, null); Som.tocar('surpresa');
+    var q = naTela(200, 360); faiscas(q[0], q[1], 16, ['✨', '🎲', '💖', '⭐']);
+    var el = $('boneca'); el.classList.remove('girar'); void el.offsetWidth; el.classList.add('girar');
+  });
+  $('btRecomecar').addEventListener('click', function () {
+    var d = desafioAtual(), e = d ? baseDesafio(d) : V.novo();
+    if (!d) ['pele', 'cabelo', 'cabeloCor', 'olhos', 'cenario'].forEach(function (k) { e[k] = estado[k]; });
+    mudar(e, null); Som.tocar('desfazer');
+    recado(t('Tudo limpinho! A personagem continua. ↩ desfaz.', 'All fresh! Your character stays. ↩ undoes.'));
+  });
+  $('btGuardar').addEventListener('click', guardarLook);
+  $('btGuardarDesfile').addEventListener('click', guardarLook);
+  $('btFoto').addEventListener('click', foto);
+  $('btFotoDesfile').addEventListener('click', foto);
+  $('btDesfilar').addEventListener('click', desfilar);
+
+  // ---------- looks favoritos ----------
+  function guardarLook() {
+    var looks = ler('purpurina.looks', []);
+    if (looks.some(function (l) { return V.iguais(V.limpar(l.e), estado); })) { recado(t('Esse look já está guardado 💖', 'This look is already saved 💖')); return; }
+    if (looks.length >= MAX_LOOKS) { recado(t('Já tem ' + MAX_LOOKS + ' looks guardados. Apague um em 💖 Meus looks.', 'You already have ' + MAX_LOOKS + ' looks. Delete one in 💖 My looks.')); return; }
+    looks.unshift({ id: Date.now(), quando: new Date().toISOString(), e: V.copiar(estado) });
+    if (!gravar('purpurina.looks', looks)) { recado(t('Não deu para guardar: o aparelho está sem espaço.', "Couldn't save: the device is out of space.")); return; }
+    Som.tocar('coracao'); recado(t('Guardado em 💖 Meus looks!', 'Saved to 💖 My looks!'));
+    if (atual === 'estudio') { var q = naTela(200, 360); faiscas(q[0], q[1], 10, ['💖', '💕', '💗']); }
+  }
+  function listaLooks() {
+    var looks = ler('purpurina.looks', []), caixa = $('listaLooks'); caixa.innerHTML = '';
+    $('semLooks').hidden = looks.length > 0;
+    looks.forEach(function (l, k) {
+      var card = document.createElement('div'); card.className = 'look';
+      var mini = document.createElement('div'); mini.className = 'mini-boneca';
+      mini.innerHTML = B.svg(V.limpar(l.e), { id: 'look' + k, area: [0, 60, 400, 600], cortar: true });
+      var linha = document.createElement('div'); linha.className = 'linha';
+      var vestir = document.createElement('button'); vestir.type = 'button'; vestir.textContent = t('👗 Vestir', '👗 Wear');
+      vestir.addEventListener('click', function () { livre = V.limpar(l.e); gravar('purpurina.atual', livre); Som.tocar('brilho'); comecar(null); });
+      var apagar = document.createElement('button'); apagar.type = 'button'; apagar.textContent = '🗑'; apagar.setAttribute('aria-label', t('Apagar este look', 'Delete this look'));
+      apagar.addEventListener('click', function () {
+        abrirJanela({ titulo: t('Apagar este look?', 'Delete this look?'), texto: t('Ele sai dos seus looks guardados.', 'It will be removed from your saved looks.'), botoes: [
+          { t: t('🗑 Apagar', '🗑 Delete'), classe: 'grande', fn: function () { var ls = ler('purpurina.looks', []).filter(function (x) { return x.id !== l.id; }); gravar('purpurina.looks', ls); listaLooks(); } },
+          { t: t('Não, deixa', 'No, keep it') }
+        ] });
+      });
+      linha.appendChild(vestir); linha.appendChild(apagar); card.appendChild(mini); card.appendChild(linha); caixa.appendChild(card);
+    });
+  }
+
+  // ---------- foto do visual ----------
+  function carimbo() { var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + '-' + z(d.getHours()) + 'h' + z(d.getMinutes()); }
+  function fazerFoto() {
+    var Wf = 800, Hf = 1440, faixa = 120;
+    var svg = B.svg(estado, { id: 'foto', largura: Wf, altura: Hf });
+    var fonte = document.fonts && document.fonts.load ? document.fonts.load('700 56px Fredoka').catch(function () {}) : Promise.resolve();
+    return fonte.then(function () {
+      return new Promise(function (ok, erro) {
+        var img = new Image();
+        img.onload = function () {
+          var cv = document.createElement('canvas'); cv.width = Wf; cv.height = Hf + faixa;
+          var c = cv.getContext('2d'); c.drawImage(img, 0, 0, Wf, Hf);
+          var g = c.createLinearGradient(0, Hf, Wf, Hf + faixa); g.addColorStop(0, '#ff5fb4'); g.addColorStop(1, '#8a4fe0');
+          c.fillStyle = g; c.fillRect(0, Hf, Wf, faixa);
+          c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '700 56px Fredoka, sans-serif';
+          var d = desafioAtual();
+          c.fillText('✨ Purpurina ✨', Wf / 2, Hf + 46);
+          c.font = '500 30px Fredoka, sans-serif';
+          c.fillText(d ? N(d) : t('Meu visual', 'My look'), Wf / 2, Hf + 94);
+          cv.toBlob(function (b) { if (b) ok(b); else erro(new Error('sem imagem')); }, 'image/png');
+        };
+        img.onerror = erro;
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      });
+    });
+  }
+  function foto() {
+    Som.tocar('foto');
+    var flash = document.createElement('div'); flash.style.cssText = 'position:fixed;inset:0;background:#fff;z-index:70;opacity:.9;transition:opacity .4s;pointer-events:none';
+    document.body.appendChild(flash); setTimeout(function () { flash.style.opacity = '0'; setTimeout(function () { flash.remove(); }, 450); }, 60);
+    fazerFoto().then(function (blob) {
+      var url = URL.createObjectURL(blob), nome = 'purpurina-' + carimbo() + '.png';
+      var arquivo = null; try { arquivo = new File([blob], nome, { type: 'image/png' }); } catch (e) { /* navegador antigo */ }
+      var podeCompartilhar = !!(arquivo && navigator.canShare && navigator.canShare({ files: [arquivo] }));
+      var botoes = [{ t: t('💾 Salvar no celular', '💾 Save to device'), classe: 'grande', ficar: true, fn: function () {
+        var a = document.createElement('a'); a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+        recado(t('A foto foi para a pasta Downloads (ou Arquivos).', 'The photo went to your Downloads (or Files).'));
+      } }];
+      if (podeCompartilhar) botoes.push({ t: t('📤 Compartilhar', '📤 Share'), ficar: true, fn: function () { navigator.share({ files: [arquivo], title: 'Purpurina' }).catch(function () { /* cancelou */ }); } });
+      botoes.push({ t: t('Fechar', 'Close') });
+      abrirJanela({ titulo: t('📸 Que foto linda!', '📸 What a lovely photo!'), img: url, alt: V.resumo(estado, pref.lingua), botoes: botoes });
+    }).catch(function () { recado(t('Não deu para tirar a foto agora. Tente de novo.', "Couldn't take the photo now. Try again.")); });
+  }
+
+  // ---------- desfile ----------
+  var FRASES = {
+    3: [['Arrasou!', 'Amazing!'], ['Perfeito!', 'Perfect!'], ['Uau, que brilho!', 'Wow, so sparkly!']],
+    2: [['Que lindo!', 'So pretty!'], ['Muito estilo!', 'Great style!'], ['Quase 3!', 'Almost 3!']],
+    1: [['Que fofo!', 'So cute!'], ['Gostei!', 'I like it!'], ['Veja as dicas!', 'Check the tips!']],
+    0: [['Lindo!', 'Gorgeous!'], ['Que estilo!', 'What style!'], ['Brilhou!', 'You shine!']]
+  };
+  var JURADOS = ['🐱', '🦄', '🐰'];
+  function desfilar() {
+    var d = desafioAtual(), r = d ? V.avaliar(estado, d) : null;
+    ir('desfile');
+    $('passarela').innerHTML = B.svg(estado, { id: 'desfile', anim: !CALMO });
+    $('desfileTitulo').textContent = d ? d.ico + ' ' + N(d) : t('💖 Que visual incrível!', '💖 What an amazing look!');
+    var est = $('desfileEstrelas'); est.innerHTML = '';
+    var n = r ? r.estrelas : 0;
+    est.setAttribute('aria-label', r ? n + ' ' + t('de 3 estrelas', 'of 3 stars') : '');
+    for (var i = 0; i < 3; i++) {
+      var s = document.createElement('span'); s.className = 'e' + (r && i >= n ? ' apagada' : ''); s.textContent = r ? '⭐' : '💖';
+      s.style.animationDelay = (0.9 + i * 0.35) + 's'; est.appendChild(s);
+      if (!r || i < n) setTimeout(function () { Som.tocar('estrela'); }, 900 + i * 350);
+    }
+    var jur = $('jurados'); jur.innerHTML = '';
+    JURADOS.forEach(function (bicho, k) {
+      var f = FRASES[r ? n : 0][k], j = document.createElement('div'); j.className = 'jurado';
+      var b = document.createElement('span'); b.className = 'b'; b.textContent = bicho;
+      j.appendChild(b); j.appendChild(document.createTextNode(t(f[0], f[1]))); jur.appendChild(j);
+    });
+    var ul = $('desfileDicas'); ul.innerHTML = ''; ul.hidden = !d;
+    if (d) d.dicas.forEach(function (x, i) { var li = document.createElement('li'); li.className = r.dicas[i] ? 'ok' : 'nao'; li.textContent = (r.dicas[i] ? '✅ ' : '💡 ') + N(x); ul.appendChild(li); });
+    var recorde = false;
+    if (d) { var antes = ler('purpurina.estrelas.' + d.id, 0); if (n > antes) { gravar('purpurina.estrelas.' + d.id, n); recorde = antes > 0; } }
+    $('desfileRecorde').hidden = !recorde;
+    $('btProximo').textContent = d ? t('▶ Próximo desafio', '▶ Next challenge') : t('🎨 Continuar brincando', '🎨 Keep playing');
+    $('btMaisUm').hidden = !d;
+    Som.proxima(); Som.tocar('tada'); setTimeout(function () { Som.tocar('aplausos'); }, 500);
+    confete();
+  }
+  $('btProximo').addEventListener('click', function () {
+    var d = desafioAtual();
+    if (d) {
+      var i = P.DESAFIOS.indexOf(d), prox = P.DESAFIOS[(i + 1) % P.DESAFIOS.length];
+      modo = prox.id; hist.limpar(); estado = baseDesafio(prox); grupoAtual = 'roupa'; dicasAntes = V.avaliar(estado, prox).dicas;
+    }
+    Som.tocar('aba'); voltar();
+  });
+  $('btMaisUm').addEventListener('click', function () { Som.tocar('aba'); voltar(); });
+  $('btMenuDesfile').addEventListener('click', function () { Som.tocar('clique'); irMenu(); });
+
+  // confete na tela inteira (canvas por cima, sem pegar toque)
+  var confeteAtivo = 0;
+  function pararConfete() { confeteAtivo++; var cv = $('festa'); if (cv.width) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); }
+  function confete() {
+    if (CALMO) return;
+    var cv = $('festa'), c = cv.getContext('2d'), w = cv.width = window.innerWidth, h = cv.height = window.innerHeight, pecas = [], fim = performance.now() + 3800, id = ++confeteAtivo;
+    var cores = ['#ff5fb4', '#ffd166', '#86ecc8', '#cfa8ff', '#7ee8ff', '#fff'];
+    for (var i = 0; i < 150; i++) pecas.push({ x: Math.random() * w, y: -20 - Math.random() * h * 0.6, vx: (Math.random() - 0.5) * 3, vy: 2 + Math.random() * 3.5, r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.3, t: 5 + Math.random() * 7, cor: cores[i % cores.length], estrela: i % 7 === 0 });
+    function quadro(agora) {
+      if (id !== confeteAtivo) return;
+      c.clearRect(0, 0, w, h);
+      pecas.forEach(function (p) {
+        p.x += p.vx; p.y += p.vy; p.r += p.vr; p.vx += Math.sin(agora / 300 + p.t) * 0.02;
+        c.save(); c.translate(p.x, p.y); c.rotate(p.r); c.fillStyle = p.cor;
+        if (p.estrela) { c.font = (p.t * 2.4) + 'px sans-serif'; c.fillText('✨', 0, 0); } else c.fillRect(-p.t / 2, -p.t / 4, p.t, p.t / 2);
+        c.restore();
+      });
+      if (agora < fim) requestAnimationFrame(quadro); else c.clearRect(0, 0, w, h);
+    }
+    requestAnimationFrame(quadro);
+  }
+
+  // ---------- teclado e controle da TV: setas andam entre os botões ----------
+  function focaveis() {
+    var raiz = janelaAberta ? $('janela') : $(atual); if (!raiz) return [];
+    return Array.prototype.filter.call(raiz.querySelectorAll('button, a[href]'), function (b) { return b.offsetParent !== null && !b.disabled; });
+  }
+  function focarPrimeiro() {
+    if (!TV) return;
+    var alvo = atual === 'entrada' ? $('btEntrar') : atual === 'menu' ? $('btLivre') : focaveis()[0];
+    if (alvo) try { alvo.focus(); } catch (e) { /* ok */ }
+  }
+  function moverFoco(dx, dy) {
+    var l = focaveis(); if (!l.length) return;
+    var at = document.activeElement;
+    if (l.indexOf(at) < 0) { l[0].focus(); return; }
+    var a = at.getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2, melhor = null, nota = Infinity;
+    l.forEach(function (b) {
+      if (b === at) return;
+      var r = b.getBoundingClientRect(), x = r.left + r.width / 2 - ax, y = r.top + r.height / 2 - ay;
+      var principal = dx ? x * dx : y * dy, lado = dx ? Math.abs(y) : Math.abs(x);
+      if (principal <= 2) return;
+      var v = principal + lado * 2.2; if (v < nota) { nota = v; melhor = b; }
+    });
+    if (melhor) { melhor.focus(); if (melhor.scrollIntoView) melhor.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+  }
+  document.addEventListener('keydown', function (e) {
+    var k = e.key || '', c = e.keyCode || 0;
+    if (atual === 'entrada' && (k === 'Enter' || k === ' ' || c === 13)) { e.preventDefault(); entrar(); return; }
+    if (k === 'ArrowLeft' || c === 37) { e.preventDefault(); moverFoco(-1, 0); }
+    else if (k === 'ArrowRight' || c === 39) { e.preventDefault(); moverFoco(1, 0); }
+    else if (k === 'ArrowUp' || c === 38) { e.preventDefault(); moverFoco(0, -1); }
+    else if (k === 'ArrowDown' || c === 40) { e.preventDefault(); moverFoco(0, 1); }
+    else if (k === 'Escape' || k === 'GoBack' || k === 'BrowserBack' || c === 27 || c === 461 || c === 10009) {
+      if (janelaAberta) { e.preventDefault(); fecharPeloBotao(); } else if (pilha.length) { e.preventDefault(); voltar(); }
+    }
+  });
+
+  // a música toca o tempo todo; só silencia quando o app fica escondido (outra aba, tela apagada)
+  document.addEventListener('visibilitychange', function () { Som.dormir(document.hidden); });
+
+  // ---------- guardar no celular: instalar (atalho) ou baixar o arquivo do jogo ----------
+  var pedidoInstalar = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); pedidoInstalar = e; $('btInstalar').hidden = false; });
+  $('btInstalar').addEventListener('click', function () {
+    if (!pedidoInstalar) return;
+    pedidoInstalar.prompt();
+    pedidoInstalar.userChoice.then(function () { pedidoInstalar = null; $('btInstalar').hidden = true; }).catch(function () {});
+  });
+  var EM_ARQUIVO = !!window.JOGO_EM_ARQUIVO || location.protocol === 'file:' || location.protocol === 'content:';
+  if (EM_ARQUIVO || !window.BaixarJogo) $('guardar').hidden = true;
+  $('btBaixar').addEventListener('click', function () {
+    var aviso = $('baixarAviso');
+    aviso.textContent = t('Preparando o arquivo…', 'Preparing the file…');
+    BaixarJogo.baixar('purpurina.html').then(function () {
+      aviso.textContent = t('Pronto! O arquivo purpurina.html foi para os Downloads. Toque nele para brincar, mesmo sem internet. (Os looks guardados ficam separados dos do site.)', 'Done! purpurina.html went to Downloads. Tap it to play, even offline. (Saved looks stay separate from the website ones.)');
+    }).catch(function () {
+      aviso.textContent = t('Não deu para baixar agora. Abra o jogo com internet e tente de novo.', "Couldn't download now. Open the game online and try again.");
+    });
+  });
+
+  // ---------- começo ----------
+  $('ver').textContent = 'v' + APP_VERSION;
+  $('btSom').textContent = Som.ligado() ? '🔊' : '🔇';
+  $('entradaBoneca').innerHTML = B.svg(livre, { id: 'entrada', fundo: false, area: [40, 40, 320, 640] });
+  traduzir();
+  if (TV) setTimeout(focarPrimeiro, 200);
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(function () { /* sem modo offline */ });
+})();
