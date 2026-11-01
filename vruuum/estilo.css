@@ -106,3 +106,26 @@ a { color: var(--ciano); }
   .opcoes-garagem { flex: 1; min-width: 0; }
 }
 @media (max-width: 520px) { #menu { padding-top: calc(58px + env(safe-area-inset-top)); } }
+
+/* ---------- selfie: rosto no carrinho (a foto fica só no aparelho) ---------- */
+.selfie { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 20; background: rgba(11,10,31,.92); display: flex; align-items: center; justify-content: center;
+  padding: calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left)); }
+.selfie-painel { background: var(--card); border: 1px solid var(--borda); border-radius: 22px; padding: 16px; width: min(560px, 100%); max-height: 100%; overflow: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.selfie-painel h2 { font-size: 1.4rem; }
+.selfie-botoes { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.botao-arquivo { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; overflow: hidden; cursor: pointer; }
+.botao-arquivo input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.botao-arquivo:focus-within { outline: 3px solid var(--lima); outline-offset: 3px; }
+.selfie-editor { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: center; width: 100%; }
+#selfieTela { max-width: 100%; max-height: 52vh; border-radius: 14px; touch-action: none; cursor: grab; }
+.selfie-ajuste { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.selfie-tam { display: flex; flex-direction: column; gap: 4px; }
+.selfie-tam input { width: 220px; }
+.bicho.foto canvas { width: 38px; height: 38px; border-radius: 50%; }
+.bicho.camera { font-size: 1.3rem; background: linear-gradient(180deg, #ff7cc0, var(--rosa)); }
+@media (orientation: landscape) and (max-height: 520px) {
+  .selfie-painel { width: min(900px, 100%); }
+  .selfie-editor { flex-wrap: nowrap; }
+  #selfieTela { max-height: 62vh; }
+}

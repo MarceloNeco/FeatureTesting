@@ -47,6 +47,20 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
   cones), nuvem de tempestade (lama), anel dourado (turbo), corrente de ar (rampa), balões e aviões (trânsito). As
   regras são as mesmas; só o desenho muda. Com 2 jogadores dá para misturar um carro e um avião.
 
+## O piloto e a selfie
+
+- O piloto fica **de costas**, olhando a estrada: nuca, orelhas e pelo de cada bichinho (no kart e na moto, o capacete
+  com listra). A cada ~7 s ele **vira para trás, olha e sorri** por 2 s, e volta. Na garagem vira mais vezes.
+  Desenhado ao vivo por `cabeca.js`, por cima do veículo, recortado pela janela.
+- **📸 Selfie**: na garagem, o botão 📸 abre a janela da selfie. Ali dá para **🤳 Tirar selfie** (câmera da frente) ou
+  **🖼️ Escolher foto**. O rosto é achado **sem internet** pelo MediaPipe Face Detector, que roda no aparelho: o motor
+  fica em `../baguncolandia/libs/mediapipe/` (~14 MB, baixado na primeira selfie e guardado) e o modelo de rosto em
+  `rosto.tflite` (229 KB). Um círculo marca o rosto e dá para arrastar e mudar de tamanho. **✅ Usar este rosto**
+  recorta 256×256 e guarda. De costas aparece um cabelo da cor tirada da foto, e de frente, o rosto.
+- **Privacidade**: a foto **nunca sai do aparelho**. Fica no `localStorage` (`vruuum.foto.0` e `.1`, ~17 KB cada) e se
+  apaga em 📸 → **🗑️ Apagar minha foto**. Sem o detector (aparelho antigo ou arquivo baixado), o círculo começa no
+  meio e a pessoa ajusta à mão.
+
 ## Controles
 
 | Onde | Como |
@@ -100,6 +114,8 @@ No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para
 | `som.js` | motor, buzina e efeitos sintetizados (WebAudio); liga e desliga a música do `rock.js`. |
 | `app.js` | menu, controles, tela cheia, bordas seguras, laço da corrida, pausa, resultado, recorde, instalar e baixar. `APP_VERSION` aqui. |
 | `movimento.js` | **puro**: acelerômetro → direção do volante e pulo pelo toquinho (com calibração no 3‑2‑1), testado no Node. |
+| `cabeca.js` | o piloto animado (de costas, vira e sorri; bichinho ou selfie), testado no Node. |
+| `selfie.js` | a selfie: acha o rosto sem internet (MediaPipe + `rosto.tflite`), recorta e guarda só no aparelho. |
 | `baixar.js` | monta o `vruuum.html` de arquivo único (genérico: serve para outro jogo do Bolinho de Chuva; scripts com `data-fora-do-arquivo` ficam de fora). |
 | `sw.js` | cache `vruuum-v…` para funcionar sem internet. `VERSAO` aqui. |
 | `versoes.json` | novidades de cada versão (PT e EN). |

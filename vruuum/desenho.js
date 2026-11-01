@@ -22,7 +22,11 @@
 
   var lingua = 'pt', base = null, carrosJog = [], portais = [], largada = null, chegada = null;
   var ALT_VOO = 6500;               // altura do voo acima da estrada (quem vai de avião, jato ou helicóptero)
-  var VOA = [], VEIC = [];          // por jogador: voa? e a ficha do veículo
+  var VOA = [], VEIC = [], INFO = [];   // por jogador: voa?, a ficha do veículo e o piloto (bichinho ou selfie)
+  var Cab = function () { return raiz.VruuumCabeca; };
+  function infoPiloto(cor, piloto, foto) { return { emoji: piloto, foto: foto || null, camisa: V() ? V().tom(cor, -0.4) : '#3a2f73' }; }
+  // o piloto vivo: de costas, e de vez em quando vira, olha e sorri
+  function pilotoVivo(c, vv, x0, y0, cw, ch, info, semente, periodo) { if (Cab()) Cab().desenhar(c, vv, x0, y0, cw, ch, info, Date.now() / 1000, semente, periodo); }
   var V = function () { return raiz.VruuumVeiculos; };
   // o que aparece no lugar de cada coisa quando se está voando
   var NO_CEU = { cone: 'passaro', lama: 'nuvemRaio', turbo: 'anel', rampa: 'corrente', onibus: 'balao' };
@@ -41,7 +45,8 @@
   function preparar(estado, jogadores, lang) {
     lingua = lang || 'pt';
     base = S.basicos();
-    carrosJog = jogadores.map(function (j) { return S.carroJogador(j.cor, j.piloto, j.veic); });
+    carrosJog = jogadores.map(function (j) { return S.carroJogador(j.cor, null, j.veic); });
+    INFO = jogadores.map(function (j) { return infoPiloto(j.cor, j.piloto, j.foto); });
     VEIC = jogadores.map(function (j) { return V() ? V().achar(j.veic) : null; });
     VOA = jogadores.map(function (j) { return !!(V() && V().voa(j.veic)); });
     portais = estado.pista.mundos.map(function (m) { var tm = TEMAS[m]; return S.arco(tm.emoji + ' ' + t(tm.nome[0], tm.nome[1]), tm.cor, '#ffffff', false); });
@@ -250,7 +255,9 @@
       if (idx === oSeg && outro.z > j.z - JOG_Z * 0.6) {
         var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / (outro.puloMax || raiz.VruuumMotor.PULO))) * 1400 * (outro.puloMax || 1.1) / 1.1 : 0;
         var oVoa = !!VOA[outro.n];   // o outro pode estar voando enquanto eu vou de carro (e vice-versa)
-        sprite(c, carrosJog[outro.n], esc, sx + esc * outro.x * LARG, (oVoa ? syAr : sy) - esc * lift, oVoa || voa ? 0 : clip, w);
+        var oSpr = carrosJog[outro.n], oX = sx + esc * outro.x * LARG, oY = (oVoa ? syAr : sy) - esc * lift;
+        sprite(c, oSpr, esc, oX, oY, oVoa || voa ? 0 : clip, w);
+        if (oSpr.w * esc > 24 && (oVoa || voa || oY <= clip)) pilotoVivo(c, VEIC[outro.n], oX - oSpr.w * esc / 2, oY - oSpr.h * esc, oSpr.w * esc, oSpr.h * esc, INFO[outro.n], outro.n * 3.3, 7);
       }
     }
 
@@ -285,6 +292,7 @@
     if (j.rodando > 0) c.scale(Math.max(0.25, Math.abs(Math.cos(j.rodando * 9))) * (Math.cos(j.rodando * 9) < 0 ? -1 : 1), 1);
     extrasAntes(c, vv, cw, ch, tt);
     c.drawImage(spr.img, -cw / 2, -ch, cw, ch);
+    pilotoVivo(c, vv, -cw / 2, -ch, cw, ch, INFO[j.n], j.n * 3.3, 7);
     extrasDepois(c, vv, cw, ch, tt, j.turbo > 0);
     c.restore();
   }
@@ -408,14 +416,14 @@
 
   // prévia da garagem: o veículo grande, animado (hélice, rotor, fogo), na estrada ou no céu
   var cachePrevia = {};
-  function spritePrevia(cor, piloto, veic) {
-    var k = cor + '|' + piloto + '|' + veic;
-    if (!cachePrevia[k]) cachePrevia[k] = S.carroJogador(cor, piloto, veic, 360);
+  function spritePrevia(cor, veic) {
+    var k = cor + '|' + veic;
+    if (!cachePrevia[k]) cachePrevia[k] = S.carroJogador(cor, null, veic, 360);
     return cachePrevia[k];
   }
-  function previa(cv, cor, piloto, veic) {
+  function previa(cv, cor, piloto, veic, foto) {
     var c = cv.getContext('2d'), W = cv.width, H = cv.height, vv = V() ? V().achar(veic) : null, voa = !!(V() && V().voa(veic)), tt = Date.now() / 1000;
-    var spr = spritePrevia(cor, piloto, veic);
+    var spr = spritePrevia(cor, veic);
     var g = c.createLinearGradient(0, 0, 0, H);
     if (voa) { g.addColorStop(0, '#38b6ff'); g.addColorStop(1, '#c9f0ff'); } else { g.addColorStop(0, '#2a2160'); g.addColorStop(1, '#3a2f73'); }
     c.fillStyle = g; c.fillRect(0, 0, W, H);
@@ -430,15 +438,18 @@
     var esc = Math.min(W * 0.78 / spr.w, H * 0.8 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
     c.save(); c.translate(W / 2, H * 0.94 + (voa ? Math.sin(tt * 2.2) * H * 0.02 - H * 0.06 : Math.sin(tt * 9) * 1.2));
     if (voa) c.rotate(Math.sin(tt * 0.9) * 0.08);
-    extrasAntes(c, vv, cw, ch, tt); c.drawImage(spr.img, -cw / 2, -ch, cw, ch); extrasDepois(c, vv, cw, ch, tt, false);
+    extrasAntes(c, vv, cw, ch, tt); c.drawImage(spr.img, -cw / 2, -ch, cw, ch);
+    pilotoVivo(c, vv, -cw / 2, -ch, cw, ch, infoPiloto(cor, piloto, foto), 1.2, 4.5);   // na garagem vira mais vezes
+    extrasDepois(c, vv, cw, ch, tt, false);
     c.restore();
   }
   // miniatura parada (cartões da garagem)
-  function miniatura(cv, cor, piloto, veic) {
-    var c = cv.getContext('2d'), spr = spritePrevia(cor, piloto, veic), W = cv.width, H = cv.height;
+  function miniatura(cv, cor, piloto, veic, foto) {
+    var c = cv.getContext('2d'), spr = spritePrevia(cor, veic), W = cv.width, H = cv.height;
     c.clearRect(0, 0, W, H);
     var esc = Math.min(W * 0.9 / spr.w, H * 0.9 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
     c.drawImage(spr.img, (W - cw) / 2, H * 0.95 - ch, cw, ch);
+    if (Cab()) Cab().desenhar(c, V().achar(veic), (W - cw) / 2, H * 0.95 - ch, cw, ch, infoPiloto(cor, piloto, foto), 50, 0, 1000);   // parado, de costas
   }
 
   raiz.VruuumDesenho = { preparar: preparar, desenhar: desenhar, passo: passo, evento: evento, vistas: vistas, margemLocal: margemLocal, botaoPulo: botaoPulo, previa: previa, miniatura: miniatura, ALT_VOO: ALT_VOO, TEMAS: TEMAS, CORES: CORES, PILOTOS: PILOTOS };
