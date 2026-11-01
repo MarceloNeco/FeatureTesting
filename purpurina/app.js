@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.0';
+  var APP_VERSION = '0.9.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -149,7 +149,8 @@
   // desafio começa limpinho, com a personagem dela (pele, cabelo, olhos) e o cenário do tema
   function baseDesafio(d) {
     var e = V.novo();
-    ['pele', 'cabelo', 'cabeloCor', 'olhos'].forEach(function (k) { e[k] = livre[k]; });
+    ['personagem', 'pele', 'rosto', 'nariz', 'cabelo', 'cabeloCor', 'olhos'].forEach(function (k) { e[k] = livre[k]; });
+    if (e.personagem === 'menino') e.cilios = 'nenhum';
     e.cenario = d.cenario; return e;
   }
   function comecar(desafioId) {
@@ -464,8 +465,8 @@
     var d = desafioAtual();
     function limpo(tudo) {
       var e = d ? baseDesafio(d) : V.novo();
-      if (!tudo) ['pele', 'cabelo', 'cabeloCor', 'mechas', 'mechasCor', 'olhos'].forEach(function (k) { e[k] = estado[k]; });
-      else ['pele', 'cabelo', 'cabeloCor', 'mechas', 'mechasCor', 'olhos'].forEach(function (k) { e[k] = P.PADRAO[k]; });
+      if (!tudo) ['personagem', 'pele', 'rosto', 'nariz', 'cabelo', 'cabeloCor', 'mechas', 'mechasCor', 'olhos'].forEach(function (k) { e[k] = estado[k]; });
+      else ['personagem', 'pele', 'rosto', 'nariz', 'cabelo', 'cabeloCor', 'mechas', 'mechasCor', 'olhos'].forEach(function (k) { e[k] = P.PADRAO[k]; });
       e.cenario = d ? d.cenario : (tudo ? P.PADRAO.cenario : estado.cenario);
       mudar(e, null); Som.tocar('desfazer');
       recado(t('Pronto, começou de novo! ↩ desfaz.', 'Done, starting over! ↩ undoes.'));

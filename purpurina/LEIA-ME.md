@@ -11,10 +11,10 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
 ## Como brincar
 
 - Toque em **✨ Toque para brilhar!** (o navegador só deixa tocar som depois de um toque).
-- **🎨 Brincar livre**: o estúdio. Embaixo ficam 6 abas: **👧 Eu** (pele, 30 penteados, mechas, olhos), **💄 Maquiagem**
-  (base, blush, sombra, delineado, cílios, 💅 unhas, batom, glitter, adesivos), **👗 Roupas** (13 vestidos, 11 blusas,
-  8 saias, 9 calças, 9 estampas, 28 sapatos), **💎 Joias** (13 brincos, 14 colares, pulseiras, anéis e broches),
-  **👑 Acessórios** (coroas, chapéus e diadema, laços, óculos, bolsas) e **🏞️ Cenário** (8 lugares). Cada parte tem
+- **🎨 Brincar livre**: o estúdio. Embaixo ficam 6 abas: **👧 Eu** (pele, menina ou menino — o jogo é feito para meninas, menina é o padrão —, 5 formatos de rosto, 5 de nariz, 39 penteados, mechas, olhos), **💄 Maquiagem**
+  (base, blush, sombra, delineado, 12 cílios, 💅 unhas, batom, glitter, adesivos), **👗 Roupas** (13 vestidos, 11 blusas,
+  8 saias, 9 calças, 9 estampas, 28 sapatos), **💎 Joias** (18 brincos, 14 colares, pulseiras, anéis e broches),
+  **👑 Acessórios** (coroas, chapéus, tiaras e faixas, laços e presilhas, óculos, bolsas) e **🏞️ Cenário** (8 lugares). Cada parte tem
   estilos (com miniatura do resultado) e bolinhas de cor.
 - **🔍 Zoom**: ao escolher uma parte da maquiagem, dos olhos ou dos brincos, o palco chega perto do rosto sozinho; no
   colar e no broche, do busto; na pulseira e no anel, das mãos; no cabelo e nas coroas, da cabeça. Nas roupas e no
@@ -81,10 +81,19 @@ confere o `versoes.json` do site e, se houver versão mais nova, mostra **✨ Ve
 
 ## Música
 
-Três músicas próprias de dance-pop (Brilho de Purpurina 128 bpm, Passarela Rosa 136, Laço de Estrela 142), com
-estrofe, refrão, sininhos, palmas, viradas e prato, feitas na hora pelo `som.js` (mesmo motor do Vruuum!). Tocam
-**o tempo todo**, uma depois da outra; desafio novo e desfile começam a próxima. Só silenciam com o app escondido
-(outra aba, tela apagada) ou no 🔊 do menu.
+A "rádio" da Purpurina (`som.js`) toca **o tempo todo**, uma música depois da outra (duas gravadas, uma do jogo…);
+desafio novo e desfile começam a próxima. Só silenciam com o app escondido (outra aba, tela apagada) ou no 🔊 do menu.
+
+- **Gravadas** (`musicas/*.mp3`, ~17 MB, licença livre — detalhes em `musicas/LICENCAS.md`): Disco Medusae e
+  Electrodoodle do **Kevin MacLeod** (incompetech.com, **CC BY 4.0**) e Shoepop, Sunglasses, Beach, Walking Shoes,
+  Friend to Friend e Yippee! da **Loyalty Freak Music** (**CC0**). Disco, dance-pop, electro-pop e R&B. O nome, o
+  autor e a licença aparecem enquanto toca. Músicas de artistas famosos (Madonna, Beyoncé, Dua Lipa…) não podem
+  entrar: têm direitos autorais.
+- **Feitas pelo jogo**: três dance-pops próprios (Brilho de Purpurina 128 bpm, Passarela Rosa 136, Laço de Estrela
+  142), com estrofe, refrão, sininhos, palmas, viradas e prato.
+- Sem internet: as gravadas ficam guardadas no aparelho depois da primeira abertura (cache `purpurina-musicas-v1`,
+  que não baixa de novo a cada versão); se uma não estiver guardada, pula para a próxima. No arquivo baixado tocam
+  só as feitas pelo jogo, para o arquivo continuar pequeno.
 
 ## Instalar, baixar e brincar sem internet
 
@@ -107,13 +116,14 @@ estrofe, refrão, sininhos, palmas, viradas e prato, feitas na hora pelo `som.js
 | `pecas.js` | **só dados**: paletas, abas, categorias, opções (com `tags`), áreas de zoom (`ZOOM`, e `zoom` em cada parte), padrão e os desafios. Peça nova entra aqui. |
 | `visual.js` | **puro**: regras (vestido × blusa/saia/calça, nunca sem roupa), surpresa, desfazer, limpar look antigo, dicas e estrelas. |
 | `boneca.js` | o desenho em SVG da personagem (com giro contínuo: `opcoes.angulo` em graus — `cabecaVirada`, `contorno`, `torcer`), das roupas, acessórios e dos 8 cenários (tudo em código). Peça nova = um `case` aqui. |
-| `som.js` | músicas e efeitos sintetizados (WebAudio). |
+| `som.js` | a rádio (gravadas + feitas pelo jogo) e os efeitos sintetizados (WebAudio). |
+| `musicas/` | as 8 músicas gravadas (MP3, CC BY 4.0 e CC0) e `LICENCAS.md`. |
 | `sala.js` | canal TV ↔ celular (Supabase Realtime; `BroadcastChannel` com `?teste`); confere toda mensagem que chega. |
 | `musica.js` | links do YouTube/Spotify e o tocador (Purpurina, YouTube IFrame API, Spotify iFrame API). |
 | `tv.js` | modo TV (código, até 4 personagens, desfile, música), celular-controle (📺 Conectar) e a tela 🎵 Música. |
 | `app.js` | telas, Voltar do celular, estúdio, zoom do palco, pincel e faíscas, foto, looks, desfile, confete, teclado/TV, instalar e baixar. `APP_VERSION` aqui. |
 | `baixar.js` | **cópia idêntica** do `vruuum/baixar.js` (o teste confere): monta o `.html` de arquivo único. |
-| `sw.js` | cache `purpurina-v…` para funcionar sem internet. `VERSAO` aqui. |
+| `sw.js` | cache `purpurina-v…` para funcionar sem internet e `purpurina-musicas-v1` para as músicas. `VERSAO` aqui. |
 | `versoes.json` | novidades de cada versão (PT e EN). |
 | `teste/` | testes no Node: `node --test purpurina/teste/*.test.js` (rodar da raiz do repositório). |
 
