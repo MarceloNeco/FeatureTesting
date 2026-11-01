@@ -34,7 +34,7 @@
   }
 
   function moverJogador(e, j, ent, dt) {
-    var pista = e.pista, cfg = pista.cfg, max = cfg.velMax;
+    var pista = e.pista, cfg = pista.cfg, mod = j.mod || {}, max = cfg.velMax * (mod.vel || 1);   // mod: jeito do veículo (veiculos.js)
     var seg = P.achar(pista, j.z), pct = j.vel / max;
     var dir = Math.max(-1, Math.min(1, (ent && ent.dir) || 0));
     if (j.rodando > 0) { j.rodando = Math.max(0, j.rodando - dt); dir = 0; }
@@ -46,7 +46,7 @@
     }
 
     // volante e força da curva (empurra para fora; no nível Criança quase nada)
-    var dx = dt * 2 * Math.max(pct, 0.35);
+    var dx = dt * 2 * Math.max(pct, 0.35) * (mod.curva || 1);
     j.x += dx * dir;
     j.x -= dx * pct * seg.curva * cfg.centrifuga;
     // nível Criança: sem mexer no volante, o carro volta sozinho para a estrada

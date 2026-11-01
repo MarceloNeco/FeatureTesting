@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Vruuum! — Bolinho de Chuva · SolverONE</title>
 <link rel="icon" href="icone-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -41,6 +41,7 @@
   <h1 class="logo pequeno">Vruuum!</h1>
 
   <div id="ajuda" class="ajuda" hidden>
+    <p data-t="✈️ Avião, jato e helicóptero voam: a estrada fica lá embaixo e você segue o caminho de luzes no céu, desviando de pássaros, nuvens de tempestade e outros aviões. Os anéis dourados dão TURBO e as correntes de ar levam lá para cima, até as estrelas altas.|✈️ Plane, jet and helicopter fly: the road stays far below and you follow the path of lights in the sky, dodging birds, storm clouds and other planes. Golden rings give TURBO and updrafts lift you up to the high stars."></p>
     <p data-t="O carro acelera sozinho. Você vira para a esquerda e para a direita e aperta ⬆ PULAR para passar por cima dos cones, da lama e dos carrinhos. Pegue as ⭐ estrelas, passe pelo 🌈 arco-íris para ganhar TURBO e suba na rampa para um pulão até as estrelas do ar. Ninguém perde: bater só deixa o carro mais lento e derruba umas estrelas.|The car speeds up by itself. Steer left and right and press ⬆ JUMP to hop over cones, mud and cars. Grab the ⭐ stars, drive through the 🌈 rainbow for TURBO and hit the ramp for a big jump to the stars in the air. Nobody loses: crashing only slows you down and drops a few stars."></p>
     <p data-t="👆 Celular ou tablet (deitado ou em pé): segure o lado esquerdo ou direito da tela para virar; toque no botão ⬆ ou deslize o dedo para cima para pular. Com 2 jogadores, cada um no seu pedaço da tela.|👆 Phone or tablet (sideways or upright): hold the left or right side of the screen to steer; tap the ⬆ button or swipe up to jump. With 2 players, each one on their own half."></p>
     <p data-t="📱 Com 1 jogador, o celular também é volante: incline para um lado e o carro vira; dê um toquinho com o celular para cima e o carro pula. Celular retinho = carro reto.|📱 With 1 player, the phone is also a steering wheel: tilt it and the car turns; give the phone a little flick up and the car jumps. Phone level = car straight."></p>
@@ -64,22 +65,33 @@
     </div>
   </div>
 
-  <div id="pilotos" class="pilotos">
-    <div class="piloto" data-j="0">
-      <p class="rotulo"><span data-t="Jogador 1|Player 1"></span> <span class="tecla" data-t="(A, D e W)|(A, D and W)" hidden></span></p>
-      <canvas class="previa" width="240" height="140" aria-hidden="true"></canvas>
-      <div class="cores" role="group" aria-label="Cor do carro / Car color"></div>
-      <div class="bichos" role="group" aria-label="Piloto / Driver"></div>
+  <div id="garagem" class="garagem">
+    <div class="vitrine">
+      <div id="abas" class="abas" role="tablist" hidden>
+        <button class="aba" type="button" role="tab" data-aba="0"></button>
+        <button class="aba" type="button" role="tab" data-aba="1"></button>
+      </div>
+      <canvas id="previa" class="previa" width="560" height="340" aria-hidden="true"></canvas>
+      <p id="nomeVeic" class="nome-veic" aria-live="polite"></p>
+      <div class="fichas">
+        <span data-t="Velocidade|Speed"></span><span class="barra"><i id="barraVel"></i></span>
+        <span data-t="Curvas|Handling"></span><span class="barra"><i id="barraCurva"></i></span>
+      </div>
+      <p id="dicaTecla" class="tecla" hidden></p>
     </div>
-    <div class="piloto" data-j="1" hidden>
-      <p class="rotulo"><span data-t="Jogador 2|Player 2"></span> <span class="tecla" data-t="(setas e ⬆)|(arrows and ⬆)"></span></p>
-      <canvas class="previa" width="240" height="140" aria-hidden="true"></canvas>
-      <div class="cores" role="group" aria-label="Cor do carro / Car color"></div>
-      <div class="bichos" role="group" aria-label="Piloto / Driver"></div>
+    <div class="opcoes-garagem">
+      <p class="rotulo titulo-garagem" data-t="Escolha o veículo|Pick your ride"></p>
+      <div id="veiculos" class="veiculos"></div>
+      <p class="rotulo" data-t="Cor|Color"></p>
+      <div id="cores" class="cores" role="group" aria-label="Cor / Color"></div>
+      <p class="rotulo" data-t="Piloto|Driver"></p>
+      <div id="bichos" class="bichos" role="group" aria-label="Piloto / Driver"></div>
     </div>
   </div>
 
-  <button id="btCorrer" class="grande" type="button" data-t="🏁 Correr!|🏁 Race!"></button>
+  <div class="barra-correr">
+    <button id="btCorrer" class="grande" type="button" data-t="🏁 Correr!|🏁 Race!"></button>
+  </div>
   <p class="recorde-menu"><span data-t="Recorde de estrelas neste nível|Star record on this level"></span>: <b id="recordeMenu">0</b></p>
   <div id="guardar" class="guardar">
     <button id="btGuardar" class="medio" type="button" data-t="📲 Guardar no celular|📲 Save on the phone"></button>
@@ -113,16 +125,42 @@
   <p data-t="Esta brincadeira está desligada no momento.|This game is turned off right now."></p>
 </section>
 
+<div id="selfie" class="selfie" hidden role="dialog" aria-modal="true" aria-labelledby="selfieTitulo">
+  <div class="selfie-painel">
+    <h2 id="selfieTitulo" data-t="📸 Seu rosto no carrinho|📸 Your face in the car"></h2>
+    <p class="dica" data-t="A foto fica só neste aparelho e não vai para a internet. Peça ajuda a um adulto.|The photo stays only on this device and never goes online. Ask a grown-up to help."></p>
+    <div class="selfie-botoes">
+      <label class="medio botao-arquivo"><span data-t="🤳 Tirar selfie|🤳 Take a selfie"></span><input id="selfieCamera" type="file" accept="image/*" capture="user"></label>
+      <label class="medio botao-arquivo"><span data-t="🖼️ Escolher foto|🖼️ Pick a photo"></span><input id="selfieGaleria" type="file" accept="image/*"></label>
+    </div>
+    <div id="selfieEditor" class="selfie-editor" hidden>
+      <canvas id="selfieTela" width="400" height="400" aria-label="Arraste o círculo até o rosto / Drag the circle onto the face"></canvas>
+      <div class="selfie-ajuste">
+        <p id="selfieAviso" class="dica" aria-live="polite"></p>
+        <label class="rotulo selfie-tam"><span data-t="Tamanho do círculo|Circle size"></span><input id="selfieTam" type="range" min="8" max="80" value="35"></label>
+        <button id="selfieUsar" class="grande" type="button" data-t="✅ Usar este rosto|✅ Use this face"></button>
+      </div>
+    </div>
+    <div class="selfie-botoes">
+      <button id="selfieApagar" class="medio" type="button" data-t="🗑️ Apagar minha foto|🗑️ Delete my photo"></button>
+      <button id="selfieFechar" class="medio" type="button" data-t="Fechar|Close"></button>
+    </div>
+  </div>
+</div>
+
 <div id="aviso" class="sr" aria-live="polite"></div>
 <div id="sondaBorda" aria-hidden="true"></div>
 
 <script src="pista.js"></script>
 <script src="motor.js"></script>
 <script src="sprites.js"></script>
+<script src="veiculos.js"></script>
+<script src="cabeca.js"></script>
 <script src="desenho.js"></script>
 <script src="rock.js"></script>
 <script src="som.js"></script>
 <script src="movimento.js"></script>
+<script src="selfie.js"></script>
 <script src="baixar.js"></script>
 <script src="../recursos.js" data-app="feature-tester" data-fora-do-arquivo></script>
 <script src="app.js"></script>

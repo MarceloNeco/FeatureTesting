@@ -34,7 +34,8 @@ test('index.html: CSP sem script inline, scripts existem, interruptor e textos P
 
 test('ids usados no app.js existem no index.html', () => {
   const html = ler('index.html'), js = ler('app.js');
-  for (const m of js.matchAll(/\$\('([A-Za-z0-9]+)'\)/g)) assert.ok(html.includes('id="' + m[1] + '"'), 'falta id ' + m[1]);
+  const criados = [...js.matchAll(/\.id = '([A-Za-z0-9]+)'/g)].map(m => m[1]);   // botões criados pelo próprio app.js
+  for (const m of js.matchAll(/\$\('([A-Za-z0-9]+)'\)/g)) assert.ok(html.includes('id="' + m[1] + '"') || criados.includes(m[1]), 'falta id ' + m[1]);
 });
 
 test('interruptor vruuum no recursos-do-app.json do Feature Tester', () => {

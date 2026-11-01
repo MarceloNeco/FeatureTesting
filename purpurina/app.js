@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.6.0';
+  var APP_VERSION = '0.7.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -770,6 +770,31 @@
       aviso.textContent = t('Não deu para baixar agora. Abra o jogo com internet e tente de novo.', "Couldn't download now. Open the game online and try again.");
     });
   });
+
+  /* ---------- versão nova ----------
+     Uma aba que ficou aberta continua com a versão antiga na memória. Ao abrir e ao voltar para o jogo (no máximo a cada
+     5 min), confere o versoes.json no site; se a versão de lá for mais nova, mostra "✨ Versão nova! Toque para atualizar". */
+  function maisNova(a, b) { var x = String(a).split('.').map(Number), y = String(b).split('.').map(Number); for (var i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); } return false; }
+  var ultimaConferida = 0;
+  function conferirVersao() {
+    if (EM_ARQUIVO || !window.fetch || Date.now() - ultimaConferida < 5 * 60000) return;
+    ultimaConferida = Date.now();
+    fetch('versoes.json?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var nova = j && j.versoes && j.versoes[0] && j.versoes[0].versao;
+      if (!nova || !maisNova(nova, APP_VERSION)) return;
+      var b = $('btNovaVersao'); b.textContent = t('✨ Versão nova (v', '✨ New version (v') + nova + t(')! Toque para atualizar', ')! Tap to update'); b.hidden = false;
+    }).catch(function () { /* sem internet: tenta da próxima vez */ });
+  }
+  $('btNovaVersao').addEventListener('click', function () {
+    var b = $('btNovaVersao'); b.textContent = t('Atualizando…', 'Updating…');
+    // pede ao navegador para conferir os arquivos novos, mas recarrega de qualquer jeito em no máximo 1,5 s
+    var feito = false, rec = function () { if (feito) return; feito = true; location.reload(); };
+    setTimeout(rec, 1500);
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update(); }).then(rec, rec);
+    else rec();
+  });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) conferirVersao(); });
+  setTimeout(conferirVersao, 3000);
 
   // ---------- começo ----------
   $('ver').textContent = 'v' + APP_VERSION;

@@ -2,6 +2,38 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "0.8.0",
+      "data": "01/Nov/2026",
+      "hora": "17:02:00",
+      "pt": [
+        "O piloto agora fica de costas, olhando a estrada: aparece a nuca, as orelhas e o pelo de cada bichinho (no kart e na moto, o capacete). De vez em quando ele vira para trás, olha para você e sorri, e volta a olhar para a frente.",
+        "📸 Selfie no carrinho: na garagem, toque no 📸, tire uma selfie ou escolha uma foto. O jogo acha o rosto sozinho, sem internet, e mostra um círculo que dá para arrastar e aumentar. O seu rosto vira o piloto do carro, da moto ou do avião; de costas aparece o seu cabelo, com a cor tirada da foto.",
+        "A foto fica só neste aparelho e nunca vai para a internet. Dá para apagar a qualquer hora em 📸 → Apagar minha foto. Cada jogador tem a sua."
+      ],
+      "en": [
+        "The driver now faces the road: you see the back of the head, the ears and fur of each animal (a helmet on the kart and motorbike). Every now and then they turn around, look at you and smile, then face forward again.",
+        "📸 Selfie in the car: in the garage, tap 📸 and take a selfie or pick a photo. The game finds the face by itself, offline, and shows a circle you can drag and resize. Your face becomes the driver of the car, bike or plane; from behind you see your hair, in the color taken from the photo.",
+        "The photo stays only on this device and never goes online. You can delete it any time in 📸 → Delete my photo. Each player has their own."
+      ]
+    },
+    {
+      "versao": "0.7.0",
+      "data": "01/Nov/2026",
+      "hora": "16:47:00",
+      "pt": [
+        "Garagem nova: o veículo fica sempre à vista. Em pé, ele fica preso no topo enquanto você rola as opções; deitado, fica de um lado e as opções do outro. O botão Correr fica sempre embaixo. Com 2 jogadores, abas Jogador 1 e Jogador 2.",
+        "9 veículos, todos à mostra com desenho e nome: Clássico, GT Redondo, Superesportivo, Kart, Monstrão, Moto, Aviãozinho, Jato e Helicóptero, cada um com barrinhas de velocidade e curvas. A prévia é animada (hélice e rotor girando, fogo do jato, estrada andando).",
+        "Quem escolhe avião, jato ou helicóptero voa: a estrada fica lá embaixo com névoa, e um caminho de luzes com trilhos brilhantes marca a rota no céu. Os obstáculos viram pássaros, nuvens de tempestade, balões e outros aviões; o turbo é um anel dourado e a rampa é uma corrente de ar. O avião inclina nas curvas.",
+        "Com 2 jogadores dá para misturar: um de carro e outro de avião (quem vai de carro vê o avião voando lá em cima)."
+      ],
+      "en": [
+        "New garage: your ride is always in view. Upright, it stays pinned at the top while you scroll the options; sideways, it sits on one side with the options on the other. The Race button is always at the bottom. With 2 players, Player 1 and Player 2 tabs.",
+        "9 rides, all on show with picture and name: Classic, Round GT, Supercar, Kart, Monster Truck, Motorbike, Little Plane, Jet and Helicopter, each with speed and handling bars. The preview is animated (spinning propeller and rotor, jet flame, moving road).",
+        "Pick the plane, jet or helicopter and you fly: the road is far below in the haze, and a path of lights with glowing rails marks the route in the sky. Obstacles become birds, storm clouds, balloons and other planes; turbo is a golden ring and the ramp is an updraft. The plane banks in turns.",
+        "With 2 players you can mix: one by car, one by plane (the driver sees the plane flying overhead)."
+      ]
+    },
+    {
       "versao": "0.6.0",
       "data": "01/Nov/2026",
       "hora": "15:12:00",

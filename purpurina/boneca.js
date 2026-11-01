@@ -860,21 +860,45 @@
   }
 
   // ---------- acessórios ----------
+  /* Bolsas seguradas de verdade: a mão (x 282, palma em y 501, dedos até ~520) é desenhada DEPOIS da bolsa, então os
+     dedos ficam por cima da alça. Bolsas de alça ficam penduradas embaixo da mão (a alça sobe por dentro do punho);
+     a bolsinha de mão fica presa entre os dedos; a bolsa de ombro atravessa o peito e fica no quadril.
+     Detalhes: costura pontilhada, metal dourado, brilho e sombra. */
   function bolsa(tipo, cor, peca, linha) {
-    var c = esc(cor.hex, 0.3);
+    var c = esc(cor.hex, 0.3), cl = cla(cor.hex, 0.45), ouro = '#e9b949', ouroE = '#a87a1c';
+    function costura(d, cc) { return p(d, { fill: 'none', stroke: cc || cl, 'stroke-width': 1.1, 'stroke-dasharray': '2.2 2', opacity: 0.85 }); }
+    function metal(x, y, w, h) { return ret(x, y, w, h, { fill: ouro, stroke: ouroE, 'stroke-width': 0.8, rx: Math.min(w, h) / 3 }) + ret(x + 0.6, y + 0.4, w * 0.45, h * 0.35, { fill: '#fff6cf', opacity: 0.8, rx: 0.6 }); }
+    function alca(d, larg) { return p(d, { fill: 'none', stroke: esc(cor.hex, 0.45), 'stroke-width': (larg || 3.4) + 1.6, 'stroke-linecap': 'round' }) + p(d, { fill: 'none', stroke: esc(cor.hex, 0.08), 'stroke-width': larg || 3.4, 'stroke-linecap': 'round' }); }
+    function sombra(cx, cy, rx) { return elip(cx, cy, rx, 3.2, { fill: '#000', opacity: 0.12 }); }
     switch (tipo) {
-      case 'mao': return peca('M262,498 Q262,494 266,494 L306,494 Q310,494 310,498 L310,522 Q310,528 304,528 L268,528 Q262,528 262,522Z', cor, 'x') + p('M262,500 L286,514 L310,500', { fill: 'none', stroke: c, 'stroke-width': 2 }) + p(estrela4(286, 512, 6), { fill: '#fff', stroke: c, 'stroke-width': 0.8 });
-      case 'ombro': return linha('M156,346 L280,486', esc(cor.hex, 0.2), 4) + peca('M268,480 Q268,474 274,474 L312,474 Q318,474 318,480 L318,514 Q318,520 312,520 L274,520 Q268,520 268,514Z', cor, 'x') + p('M268,478 L318,478 L314,498 Q293,506 272,498Z', { fill: esc(cor.hex, 0.12), stroke: c, 'stroke-width': 1.5 }) + circ(293, 500, 3, { fill: '#ffd23f' });
-      case 'coracao': return linha('M274,504 Q290,478 306,504', c, 3.5) + peca(coracao(290, 524, 22), cor, 'x') + p(estrela4(282, 516, 5), { fill: '#fff', opacity: 0.9 });
+      case 'mao':
+        return '<g transform="rotate(-9 280 518)">' +
+          peca('M254,506 Q254,502 258,502 L302,502 Q306,502 306,506 L306,528 Q306,533 301,533 L259,533 Q254,533 254,528Z', cor, 'x') +
+          p('M254,505 Q280,523 306,505 L306,512 Q280,529 254,512Z', { fill: esc(cor.hex, 0.14), opacity: 0.9 }) +
+          costura('M257,505 Q280,521 303,505') + costura('M257,530 L303,530') +
+          metal(276, 512, 9, 6) + p(estrela4(296, 525, 3), { fill: '#fff', opacity: 0.9 }) + elip(266, 524, 7, 2, { fill: '#fff', opacity: 0.25 }) + '</g>';
+      case 'ombro':
+        var s = p('M158,346 Q206,400 252,446', { fill: 'none', stroke: esc(cor.hex, 0.45), 'stroke-width': 6, 'stroke-linecap': 'round' }) + p('M158,346 Q206,400 252,446', { fill: 'none', stroke: esc(cor.hex, 0.05), 'stroke-width': 4, 'stroke-linecap': 'round' }) +
+          costura('M158,346 Q206,400 252,446', cla(cor.hex, 0.6)) + metal(196, 384, 7, 7) + sombra(262, 492, 22);
+        s += peca('M238,446 Q238,440 244,440 L282,440 Q288,440 288,446 L288,484 Q288,490 282,490 L244,490 Q238,490 238,484Z', cor, 'x');
+        s += p('M238,444 L288,444 L287,466 Q263,476 239,466Z', { fill: esc(cor.hex, 0.13), stroke: c, 'stroke-width': 1 }) + costura('M241,447 L285,447 M241,463 Q263,472 285,463') + metal(259, 466, 8, 9) + elip(248, 480, 6, 2, { fill: '#fff', opacity: 0.22 });
+        return s;
+      case 'coracao':
+        return alca('M270,536 Q270,500 282,497 Q294,500 294,536', 3.4) + sombra(282, 572, 18) +
+          peca(coracao(282, 548, 21), cor, 'x') + p(coracao(282, 548, 15), { fill: 'none', stroke: cl, 'stroke-width': 1.1, 'stroke-dasharray': '2.2 2' }) +
+          metal(279, 530, 6, 5) + p(estrela4(273, 541, 4.5), { fill: '#fff', opacity: 0.9 }) + elip(274, 547, 4, 7, { fill: '#fff', opacity: 0.2, transform: 'rotate(25 274 547)' });
       case 'cesta':
-        var s = linha('M266,514 Q290,462 314,514', '#a86d38', 5) + p('M260,512 L320,512 L311,556 L269,556Z', { fill: '#d39a5c', stroke: '#a86d38', 'stroke-width': 2 });
-        for (var i = 1; i < 4; i++) s += linha('M' + (261 + i * 0.5) + ',' + (512 + i * 11) + ' L' + (319 - i * 2.2) + ',' + (512 + i * 11), '#a86d38', 1.5, 0.8);
-        for (var k = 0; k < 6; k++) s += ret(262 + k * 9.5, 504, 9.5, 9, { fill: k % 2 ? '#fff' : cor.hex });
-        return s + ret(262, 504, 57, 9, { fill: 'none', stroke: c, 'stroke-width': 1.2 });
+        var b = p('M262,530 Q263,492 282,490 Q301,492 302,530', { fill: 'none', stroke: '#8a5a2a', 'stroke-width': 6.5, 'stroke-linecap': 'round' }) + p('M262,530 Q263,492 282,490 Q301,492 302,530', { fill: 'none', stroke: '#c48a4c', 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-dasharray': '4 3' }) + sombra(282, 574, 26);
+        b += p('M254,530 L310,530 L302,570 Q282,575 262,570Z', { fill: '#d39a5c', stroke: '#8a5a2a', 'stroke-width': 1.6 });
+        for (var r = 0; r < 4; r++) b += p('M' + (255 + r * 0.9) + ',' + (538 + r * 9) + ' L' + (309 - r * 1.9) + ',' + (538 + r * 9), { stroke: '#8a5a2a', 'stroke-width': 1.2, opacity: 0.6 });
+        for (var v = 0; v < 7; v++) b += p('M' + (260 + v * 7.5) + ',531 L' + (264 + v * 6.2) + ',569', { stroke: '#a8743a', 'stroke-width': 1, opacity: 0.55 });
+        for (var k = 0; k < 6; k++) b += p('M' + (256 + k * 9) + ',521 L' + (265 + k * 9) + ',521 L' + (264 + k * 9) + ',531 L' + (257 + k * 9) + ',531Z', { fill: k % 2 ? '#fff' : cor.hex });
+        return b + p('M256,521 L310,521 L309,531 L257,531Z', { fill: 'none', stroke: c, 'stroke-width': 1 }) + ret(254, 528, 56, 5, { fill: '#b07a40', rx: 2.5 });
       case 'praia':
-        var b = linha('M270,502 Q280,472 290,502', esc(cor.hex, 0.1), 4) + linha('M290,502 Q300,472 310,502', esc(cor.hex, 0.1), 4) + p('M262,500 L318,500 L312,550 L268,550Z', { fill: '#f0cf86', stroke: '#c9a352', 'stroke-width': 2 });
-        for (var j = 0; j < 5; j++) b += linha('M' + (264 + j * 12) + ',502 L' + (270 + j * 10) + ',548', '#c9a352', 1.2, 0.7);
-        return b + p('M264,516 L316,516 L315,526 L265,526Z', { fill: cor.hex, stroke: c, 'stroke-width': 1 });
+        var t = alca('M266,526 Q268,498 280,499', 3.4) + alca('M298,526 Q296,498 284,499', 3.4) + sombra(282, 578, 26);
+        t += p('M256,524 L308,524 L302,574 Q282,579 262,574Z', { fill: '#f0cf86', stroke: '#b8954e', 'stroke-width': 1.6 });
+        for (var y = 0; y < 6; y++) t += p('M' + (257 + y * 0.9) + ',' + (530 + y * 8) + ' L' + (307 - y * 1) + ',' + (530 + y * 8), { stroke: '#c9a352', 'stroke-width': 1.1, 'stroke-dasharray': '3 2', opacity: 0.8 });
+        return t + p('M258,540 L306,540 L305,550 L259,550Z', { fill: cor.hex, stroke: c, 'stroke-width': 0.8 }) + flor(296, 545, 4, '#fff', '#ffd23f') + elip(266, 560, 6, 2, { fill: '#fff', opacity: 0.25 });
     }
     return '';
   }
