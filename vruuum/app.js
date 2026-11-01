@@ -2,7 +2,7 @@
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.0';
+  var APP_VERSION = '0.2.0';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -124,10 +124,9 @@
     jogs = pref.carros.slice(0, pref.jogadores).map(function (c) { return { cor: D.CORES[c.cor], piloto: D.PILOTOS[c.piloto] }; });
     D.preparar(estado, jogs, pref.lingua);
     tela('jogo'); redimensionar();
-    $('pausa').hidden = true; pausado = false; ponteiros = {};
-    $('aviseVirar').hidden = !(TOQUE && H > W * 1.15);
-    setTimeout(function () { $('aviseVirar').hidden = true; }, 5000);
-    Som.musica(true);
+    $('pausa').hidden = true; pausado = false; ponteiros = {}; pularPend = [false, false];
+    lerBordas(); telaCheia(true);
+    Som.proxima(); Som.musica(true);
     if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request('screen').then(function (l) { trava = l; }).catch(function () { /* sem trava de tela: segue normal */ });
     if (!rodando) { rodando = true; ultimo = performance.now(); requestAnimationFrame(quadro); }
   }
@@ -144,7 +143,7 @@
       var max = estado.pista.cfg.velMax;
       Som.motor(estado.jogadores.map(function (j) { return estado.fase === 'contagem' ? 0.05 : Math.min(1.5, j.vel / max); }));
     }
-    D.desenhar(ctx, W, H, estado, { toque: TOQUE && pref.volante !== 'inclinar' || (TOQUE && pref.jogadores === 2), jogadores: jogs });
+    D.desenhar(ctx, W, H, estado, { toque: TOQUE, jogadores: jogs, margem: bordas });
     if (estado.fase === 'fim') { acabar(); return; }
     requestAnimationFrame(quadro);
   }
@@ -154,7 +153,6 @@
     if (ev.tipo === 'estrela' && ev.ar) Som.tocar('estrelaAr');
     else if (SONS[ev.tipo]) Som.tocar(ev.tipo);
     if (ev.tipo === 'batida' && navigator.vibrate) try { navigator.vibrate(90); } catch (e) { /* sem vibrar */ }
-    if (ev.tipo === 'chegou' && estado.jogadores.length === 1) Som.musica(false);
     D.evento(ev, estado);
   }
   function buzinar(j) {
@@ -164,16 +162,16 @@
 
   function pausar() {
     if (!rodando || pausado || !estado || estado.fase === 'fim') return;
-    pausado = true; $('pausa').hidden = false; Som.musica(false); Som.motor([]); soltarTrava();
+    pausado = true; $('pausa').hidden = false; Som.motor([]); soltarTrava();
     try { $('btContinuar').focus(); } catch (e) { /* foco opcional */ }
   }
   function continuar() {
     if (!pausado) return;
-    pausado = false; $('pausa').hidden = true; ultimo = performance.now(); Som.musica(true); ponteiros = {};
+    pausado = false; $('pausa').hidden = true; ultimo = performance.now(); ponteiros = {};
     if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request('screen').then(function (l) { trava = l; }).catch(function () {});
   }
   function irMenu() {
-    rodando = false; pausado = false; Som.motor([]); Som.musica(true); soltarTrava();
+    rodando = false; pausado = false; Som.motor([]); Som.musica(true); soltarTrava(); telaCheia(false);
     tela('menu'); marcar(); focarPrimeiro();
   }
   $('btPausa').addEventListener('click', pausar);
@@ -182,7 +180,26 @@
   $('btSair').addEventListener('click', irMenu);
   $('btMenu').addEventListener('click', irMenu);
   $('btDeNovo').addEventListener('click', function () { iniciarCorrida(); });
-  document.addEventListener('visibilitychange', function () { if (document.hidden) pausar(); });
+  // a música toca o tempo todo; só silencia quando o app fica escondido (outra aba, tela apagada)
+  document.addEventListener('visibilitychange', function () { if (document.hidden) pausar(); Som.dormir(document.hidden); });
+
+  // tela cheia no celular: a barra do navegador não tampa o jogo (deitado ou em pé)
+  function telaCheia(liga) {
+    if (!TOQUE) return;
+    var d = document, el = d.documentElement;
+    try {
+      if (liga && !(d.fullscreenElement || d.webkitFullscreenElement)) { var p = el.requestFullscreen ? el.requestFullscreen({ navigationUI: 'hide' }) : (el.webkitRequestFullscreen && el.webkitRequestFullscreen()); if (p && p.catch) p.catch(function () {}); }
+      else if (!liga && (d.fullscreenElement || d.webkitFullscreenElement)) { var q = d.exitFullscreen ? d.exitFullscreen() : (d.webkitExitFullscreen && d.webkitExitFullscreen()); if (q && q.catch) q.catch(function () {}); }
+    } catch (e) { /* navegador sem tela cheia (iPhone): segue normal */ }
+  }
+  // bordas seguras: recorte da câmera e cantos (principalmente com o celular deitado)
+  var bordas = { t: 0, r: 0, b: 0, l: 0 };
+  function lerBordas() {
+    var s = getComputedStyle($('sondaBorda'));
+    bordas = { t: parseFloat(s.paddingTop) || 0, r: parseFloat(s.paddingRight) || 0, b: parseFloat(s.paddingBottom) || 0, l: parseFloat(s.paddingLeft) || 0 };
+  }
+  window.addEventListener('resize', lerBordas);
+  window.addEventListener('orientationchange', function () { setTimeout(function () { lerBordas(); if (rodando) redimensionar(); }, 300); });
 
   function tempoTxt(s) { var m = Math.floor(s / 60), r = Math.floor(s % 60); return m + ':' + (r < 10 ? '0' : '') + r; }
   function acabar() {
@@ -215,6 +232,8 @@
   }
 
   // ---------- controles ----------
+  var pularPend = [false, false];
+  function pular(j) { if (estado && j < estado.jogadores.length && !pausado) pularPend[j] = true; }
   var teclas = {}, ponteiros = {}, inclinacao = 0, inclinarLigado = false, botoesAntes = [{}, {}];
   function nomeTecla(e) {
     var k = e.key || '', c = e.keyCode || e.which || 0;
@@ -226,7 +245,7 @@
     if (k === ' ' || c === 32) return 'espaco';
     if (k === 'Escape' || k === 'GoBack' || k === 'BrowserBack' || c === 27 || c === 461 || c === 10009) return 'voltar';
     var l = k.toLowerCase();
-    if (l === 'a' || l === 'd' || l === 'w' || l === 's' || l === 'p') return l;
+    if (l === 'a' || l === 'd' || l === 'w' || l === 's' || l === 'p' || l === 'h') return l;
     return '';
   }
   document.addEventListener('keydown', function (e) {
@@ -245,8 +264,9 @@
     if (e.repeat) return;
     teclas[n] = true;
     var dois = estado && estado.jogadores.length === 2;
-    if (n === 'cima' || n === 'ok' || n === 'espaco') buzinar(dois ? 1 : 0);
-    if (n === 'w') buzinar(0);
+    if (n === 'cima' || n === 'ok' || n === 'espaco') pular(dois ? 1 : 0);
+    if (n === 'w') pular(0);
+    if (n === 'h') buzinar(0);
   });
   document.addEventListener('keyup', function (e) { var n = nomeTecla(e); if (n) teclas[n] = false; });
   window.addEventListener('blur', function () { teclas = {}; });
@@ -258,14 +278,42 @@
     for (var k = 0; k < vv.length; k++) { var v = vv[k]; if (x >= v.x && x <= v.x + v.w && y >= v.y && y <= v.y + v.h) return { j: k, dir: x < v.x + v.w / 2 ? -1 : 1 }; }
     return null;
   }
-  function tocou(e) { if (estadoTela !== 'jogo' || pausado) return; e.preventDefault(); var r = ondeToque(e.clientX, e.clientY); if (r) ponteiros[e.pointerId] = r; else delete ponteiros[e.pointerId]; }
-  function soltou(e) { delete ponteiros[e.pointerId]; }
+  // botão ⬆ PULAR de cada vista
+  function noBotaoPulo(x, y) {
+    if (!estado) return -1;
+    var vv = D.vistas(W, H, estado.jogadores.length);
+    for (var k = 0; k < vv.length; k++) { var b = D.botaoPulo(vv[k], D.margemLocal(vv[k], W, H, bordas)); if (Math.pow(x - b.x, 2) + Math.pow(y - b.y, 2) <= Math.pow(b.r * 1.25, 2)) return k; }
+    return -1;
+  }
+  var inicioToque = {};
+  function tocou(e) {
+    if (estadoTela !== 'jogo' || pausado) return;
+    e.preventDefault();
+    var p = ponteiros[e.pointerId];
+    if (p && p.pulo) return;
+    // deslizar o dedo para cima também pula
+    var ini = inicioToque[e.pointerId];
+    if (ini && !ini.pulou && ini.y - e.clientY > Math.min(W, H) * 0.09 && Date.now() - ini.t < 500) { ini.pulou = true; var rr = ondeToque(ini.x, ini.y); if (rr) pular(rr.j); }
+    var r = ondeToque(e.clientX, e.clientY); if (r) ponteiros[e.pointerId] = r; else delete ponteiros[e.pointerId];
+  }
+  function soltou(e) { delete ponteiros[e.pointerId]; delete inicioToque[e.pointerId]; }
   if (window.PointerEvent) {
-    cv.addEventListener('pointerdown', function (e) { try { cv.setPointerCapture(e.pointerId); } catch (x) { /* ok */ } tocou(e); });
-    cv.addEventListener('pointermove', function (e) { if (ponteiros[e.pointerId]) tocou(e); });
+    cv.addEventListener('pointerdown', function (e) {
+      try { cv.setPointerCapture(e.pointerId); } catch (x) { /* ok */ }
+      if (estadoTela !== 'jogo' || pausado) return;
+      var bj = noBotaoPulo(e.clientX, e.clientY);
+      if (bj >= 0) { e.preventDefault(); pular(bj); ponteiros[e.pointerId] = { j: bj, dir: 0, pulo: true }; return; }
+      inicioToque[e.pointerId] = { x: e.clientX, y: e.clientY, t: Date.now() };
+      tocou(e);
+    });
+    cv.addEventListener('pointermove', function (e) { if (ponteiros[e.pointerId] || inicioToque[e.pointerId]) tocou(e); });
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (t) { cv.addEventListener(t, soltou); });
   } else {
-    var porToque = function (e) { e.preventDefault(); ponteiros = {}; Array.prototype.forEach.call(e.touches, function (tq) { var r = ondeToque(tq.clientX, tq.clientY); if (r) ponteiros[tq.identifier] = r; }); };
+    var porToque = function (e) {
+      e.preventDefault();
+      if (e.type === 'touchstart') Array.prototype.forEach.call(e.changedTouches, function (tq) { var bj = noBotaoPulo(tq.clientX, tq.clientY); if (bj >= 0) pular(bj); });
+      ponteiros = {}; Array.prototype.forEach.call(e.touches, function (tq) { if (noBotaoPulo(tq.clientX, tq.clientY) >= 0) return; var r = ondeToque(tq.clientX, tq.clientY); if (r) ponteiros[tq.identifier] = r; });
+    };
     ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(function (t) { cv.addEventListener(t, porToque, { passive: false }); });
   }
   cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
@@ -306,17 +354,39 @@
       if (b[14] && b[14].pressed) ent[alvo].dir -= 1;
       if (b[15] && b[15].pressed) ent[alvo].dir += 1;
       if ((b[13] && b[13].pressed) || (b[1] && b[1].pressed)) ent[alvo].freio = true;
-      var buz = !!(b[0] && b[0].pressed), pausa = !!(b[9] && b[9].pressed);
+      var pul = !!(b[0] && b[0].pressed), buz = !!(b[2] && b[2].pressed), pausa = !!(b[9] && b[9].pressed);
+      if (pul && !botoesAntes[k].pul) pular(alvo);
       if (buz && !botoesAntes[k].buz) buzinar(alvo);
       if (pausa && !botoesAntes[k].pausa) setTimeout(pausar, 0);
-      botoesAntes[k] = { buz: buz, pausa: pausa };
+      botoesAntes[k] = { pul: pul, buz: buz, pausa: pausa };
     }
-    for (k = 0; k < n; k++) ent[k].dir = Math.max(-1, Math.min(1, ent[k].dir));
+    for (k = 0; k < n; k++) { ent[k].dir = Math.max(-1, Math.min(1, ent[k].dir)); ent[k].pular = pularPend[k]; pularPend[k] = false; }
     return ent;
   }
 
+  // ---------- guardar no celular: instalar (atalho) ou baixar o arquivo do jogo ----------
+  var pedidoInstalar = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); pedidoInstalar = e; $('btInstalar').hidden = false; });
+  $('btInstalar').addEventListener('click', function () {
+    if (!pedidoInstalar) return;
+    pedidoInstalar.prompt();
+    pedidoInstalar.userChoice.then(function () { pedidoInstalar = null; $('btInstalar').hidden = true; }).catch(function () {});
+  });
+  var EM_ARQUIVO = !!window.JOGO_EM_ARQUIVO || location.protocol === 'file:' || location.protocol === 'content:';
+  if (EM_ARQUIVO || !window.BaixarJogo) $('guardar').hidden = true;
+  $('btBaixar').addEventListener('click', function () {
+    var aviso = $('baixarAviso');
+    aviso.textContent = t('Preparando o arquivo…', 'Preparing the file…');
+    BaixarJogo.baixar('vruuum.html').then(function () {
+      aviso.textContent = t('Pronto! O arquivo vruuum.html foi para os Downloads. Toque nele para jogar, mesmo sem internet.', 'Done! vruuum.html went to Downloads. Tap it to play, even offline.');
+    }).catch(function () {
+      aviso.textContent = t('Não deu para baixar agora. Abra o jogo com internet e tente de novo.', "Couldn't download now. Open the game online and try again.");
+    });
+  });
+
   // ---------- começo ----------
   $('ver').textContent = 'v' + APP_VERSION;
+  lerBordas();
   $('btSom').textContent = Som.ligado() ? '🔊' : '🔇';
   traduzir();
   if (TV) setTimeout(function () { try { $('btEntrar').focus(); } catch (e) { /* ok */ } }, 200);

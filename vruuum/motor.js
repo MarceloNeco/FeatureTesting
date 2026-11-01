@@ -9,6 +9,8 @@
   var CONTAGEM = 3;        // 3-2-1
   var TURBO = 2.5;         // segundos de turbo
   var PULO = 1.1;          // segundos no ar depois da rampa
+  var PULINHO = 0.75;      // segundos no ar com o botão PULAR
+  var RECARGA = 1.3;       // segundos até poder pular de novo (contando o tempo no ar)
   var RODANDO = 0.9;       // segundos rodopiando depois de bater num carro
   var DEPOIS_DO_FIM = 3;   // segundos de festa depois que todos chegam
   var TOQUE = { estrela: 0.28, cone: 0.24, lama: 0.3, turbo: 0.3, rampa: 0.3 };
@@ -17,7 +19,7 @@
     var pista = P.montar(nivel, semente);
     var n = nJogadores === 2 ? 2 : 1, jogadores = [];
     for (var k = 0; k < n; k++) {
-      jogadores.push({ n: k, x: n === 2 ? (k ? 0.4 : -0.4) : 0, z: 1000, vel: 0, estrelas: 0, turbo: 0, pulo: 0, rodando: 0, tremor: 0, chegou: false, tempo: 0, batidas: 0, mundo: 0, fora: false, empurrao: 0 });
+      jogadores.push({ n: k, x: n === 2 ? (k ? 0.4 : -0.4) : 0, z: 1000, vel: 0, estrelas: 0, turbo: 0, pulo: 0, puloMax: 0, recarga: 0, rodando: 0, tremor: 0, chegou: false, tempo: 0, batidas: 0, mundo: 0, fora: false, empurrao: 0 });
     }
     return {
       pista: pista, jogadores: jogadores,
@@ -37,6 +39,11 @@
     var dir = Math.max(-1, Math.min(1, (ent && ent.dir) || 0));
     if (j.rodando > 0) { j.rodando = Math.max(0, j.rodando - dt); dir = 0; }
     if (j.chegou) dir *= 0.5;
+    // botão PULAR: um pulinho que passa por cima de cone, lama e carrinho
+    if (j.recarga > 0) j.recarga = Math.max(0, j.recarga - dt);
+    if (ent && ent.pular && j.pulo <= 0 && j.recarga <= 0 && j.rodando <= 0 && !j.chegou) {
+      j.pulo = j.puloMax = PULINHO; j.recarga = RECARGA; e.eventos.push({ tipo: 'pulo', j: j.n, manual: true });
+    }
 
     // volante e força da curva (empurra para fora; no nível Criança quase nada)
     var dx = dt * 2 * Math.max(pct, 0.35);
@@ -93,7 +100,7 @@
         } else if (c.tipo === 'turbo') {
           j.turbo = TURBO; e.eventos.push({ tipo: 'turbo', j: j.n });
         } else if (c.tipo === 'rampa') {
-          j.pulo = PULO; e.eventos.push({ tipo: 'pulo', j: j.n });
+          j.pulo = j.puloMax = PULO; e.eventos.push({ tipo: 'pulo', j: j.n });
         }
       }
     }
@@ -157,7 +164,7 @@
     return e;
   }
 
-  var VruuumMotor = { novaCorrida: novaCorrida, atualizar: atualizar, CONTAGEM: CONTAGEM, TURBO: TURBO, PULO: PULO, RODANDO: RODANDO, DEPOIS_DO_FIM: DEPOIS_DO_FIM };
+  var VruuumMotor = { novaCorrida: novaCorrida, atualizar: atualizar, CONTAGEM: CONTAGEM, TURBO: TURBO, PULO: PULO, PULINHO: PULINHO, RECARGA: RECARGA, RODANDO: RODANDO, DEPOIS_DO_FIM: DEPOIS_DO_FIM };
   if (typeof module !== 'undefined' && module.exports) module.exports = VruuumMotor;
   else raiz.VruuumMotor = VruuumMotor;
 })(this);

@@ -133,3 +133,21 @@ test('corrida inteira termina: todos chegam e vem a tela do fim', () => {
   assert.deepEqual(chegadas.map(c => c.lugar).sort(), [1, 2]);
   assert.ok(e.jogadores.every(j => j.tempo > 60 && j.tempo < 200), 'tempo ' + e.jogadores.map(j => j.tempo));
 });
+
+test('botão PULAR: pula por cima do cone, e só pula de novo depois da recarga', () => {
+  const e = M.novaCorrida('normal', 5, 1);
+  e.fase = 'corrida'; e.carros = [];
+  const j = e.jogadores[0];
+  j.estrelas = 5; j.z = 39 * P.SEG; j.vel = 6000;
+  e.pista.segs[45].coisas.push({ tipo: 'cone', x: 0, alt: 0, pego: [false, false] });
+  M.atualizar(e, [{ pular: true }], 1 / 60);
+  assert.ok(e.eventos.some(x => x.tipo === 'pulo' && x.manual));
+  assert.ok(j.pulo > 0);
+  M.atualizar(e, [{ pular: true }], 1 / 60);
+  assert.ok(!e.eventos.some(x => x.tipo === 'pulo'), 'não pula de novo no ar');
+  const ev = correr(e, [{}], 0.5);
+  assert.ok(!ev.some(x => x.tipo === 'cone'), 'passou por cima do cone');
+  correr(e, [{}], 1);
+  M.atualizar(e, [{ pular: true }], 1 / 60);
+  assert.ok(e.eventos.some(x => x.tipo === 'pulo'), 'depois da recarga pula de novo');
+});

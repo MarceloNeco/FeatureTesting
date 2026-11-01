@@ -48,6 +48,19 @@
     return [{ x: 0, y: 0, w: W, h: Math.floor((H - g) / 2) }, { x: 0, y: Math.ceil((H + g) / 2), w: W, h: Math.floor((H - g) / 2) }];
   }
 
+  // bordas seguras (recorte da câmera, cantos arredondados, barra de gestos): só valem para a
+  // vista que encosta naquela borda da tela
+  function margemLocal(v, W, H, m) {
+    m = m || {};
+    return { t: v.y <= 0 ? (m.t || 0) : 0, r: v.x + v.w >= W - 1 ? (m.r || 0) : 0, b: v.y + v.h >= H - 1 ? (m.b || 0) : 0, l: v.x <= 0 ? (m.l || 0) : 0 };
+  }
+  function tamU(v) { return Math.max(12, Math.min(v.w, v.h) / 18); }
+  // botão PULAR (toque): acima da seta da direita, longe do carro; coordenadas da tela inteira
+  function botaoPulo(v, ml) {
+    var u = tamU(v), r = u * 1.7;
+    return { x: v.x + v.w - ml.r - u * 2.6, y: v.y + v.h - ml.b - u * 7.6, r: r };
+  }
+
   // ---------- efeitos ----------
   function geom(v) { var K = Math.min(v.h > v.w ? v.w * 0.58 : v.w / 2, v.h * 0.6); return { K: K, cx: v.w / 2, cy: v.h - K - v.h * 0.05 }; }
   function texto(vs, txt, cor, tam) { vs.parts.push({ tipo: 'txt', txt: txt, cor: cor, tam: tam || 1, x: 0, y: 0, vx: 0, vy: -1.2, vida: 1.1, max: 1.1 }); }
@@ -65,7 +78,7 @@
     else if (ev.tipo === 'cone') texto(vs, t('Ops!', 'Oops!'), '#ff9f1c', 1.2);
     else if (ev.tipo === 'lama') { texto(vs, t('Splash!', 'Splash!'), '#c98a4b', 1.2); for (k = 0; k < 10; k++) vs.parts.push({ tipo: 'gota', cor: '#6b3e1f', x: (Math.random() - 0.5) * 0.4, y: -0.1, vx: (Math.random() - 0.5) * 2, vy: -1.5 - Math.random(), vida: 0.8, max: 0.8 }); }
     else if (ev.tipo === 'turbo') texto(vs, 'TURBO!', '#3ee8ff', 1.6);
-    else if (ev.tipo === 'pulo') texto(vs, t('Uhuuu!', 'Wheee!'), '#c6ff3d', 1.5);
+    else if (ev.tipo === 'pulo') texto(vs, ev.manual ? t('Hop!', 'Hop!') : t('Uhuuu!', 'Wheee!'), '#c6ff3d', ev.manual ? 1.1 : 1.5);
     else if (ev.tipo === 'buzina') texto(vs, t('Bi-bi!', 'Beep-beep!'), '#ff7ac6', 1.1);
     else if (ev.tipo === 'chegou') { vs.chegouT = 0; vs.lugar = ev.lugar; confete(vs, 70, 'cima'); }
   }
@@ -182,20 +195,20 @@
       var cs = porSeg[idx];
       if (cs) for (k2 = 0; k2 < cs.length; k2++) sprite(c, base[cs[k2].tipo], esc, sx + esc * cs[k2].x * LARG, sy, clip, w);
       if (idx === oSeg && outro.z > j.z - JOG_Z * 0.6) {
-        var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / raiz.VruuumMotor.PULO)) * 1400 : 0;
+        var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / (outro.puloMax || raiz.VruuumMotor.PULO))) * 1400 * (outro.puloMax || 1.1) / 1.1 : 0;
         sprite(c, carrosJog[outro.n], esc, sx + esc * outro.x * LARG, sy - esc * lift, clip, w);
       }
     }
 
     desenharCarro(c, j, vs, g, h, w, e);
     desenharEfeitos(c, vs, g, w, h);
-    desenharPlacar(c, e, j, ji, w, h, K, op);
+    desenharPlacar(c, e, j, ji, w, h, K, op, v);
     c.restore();
   }
 
   function desenharCarro(c, j, vs, g, h, w, e) {
     var K = g.K, esc = K / ALTURA_CAM, spr = carrosJog[j.n], cw = spr.w * esc, ch = spr.h * esc;
-    var chao = g.cy + K, lift = j.pulo > 0 ? Math.sin(Math.PI * (1 - j.pulo / raiz.VruuumMotor.PULO)) * K * 0.42 : 0;
+    var chao = g.cy + K, lift = j.pulo > 0 ? Math.sin(Math.PI * (1 - j.pulo / (j.puloMax || raiz.VruuumMotor.PULO))) * K * 0.42 * (j.puloMax || 1.1) / 1.1 : 0;
     if (j.fora && j.vel > 100) lift += Math.random() * K * 0.012;
     if (j.turbo > 0) {
       var tr = Math.min(1, j.turbo), lw = cw * 0.8 / 7;
@@ -239,12 +252,12 @@
     return lw;
   }
 
-  function desenharPlacar(c, e, j, ji, w, h, K, op) {
-    var u = Math.max(12, Math.min(w, h) / 18), pista = e.pista, piloto = op.jogadores[ji].piloto;
-    var topo = u * 0.5 + (op.margemTopo || 0);
+  function desenharPlacar(c, e, j, ji, w, h, K, op, v) {
+    var u = tamU(v), pista = e.pista, piloto = op.jogadores[ji].piloto, ml = margemLocal(v, op.W, op.H, op.margem);
+    var topo = u * 0.5 + ml.t;
     // barra do caminho até a chegada, com os carrinhos
-    var fimPilula = u * 0.5 + pilula(c, u * 0.5, topo, (e.jogadores.length === 2 ? piloto + ' ' : '') + '⭐ ' + j.estrelas, u * 1.15, '#ffd93d');
-    var bx = Math.max(w * 0.3, fimPilula + u * 1.2), bw = Math.min(w * 0.4, w - bx - u * 4.2), by = topo + u * 0.55, bh = u * 0.45;
+    var fimPilula = u * 0.5 + ml.l + pilula(c, u * 0.5 + ml.l, topo, (e.jogadores.length === 2 ? piloto + ' ' : '') + '⭐ ' + j.estrelas, u * 1.15, '#ffd93d');
+    var bx = Math.max(w * 0.3, fimPilula + u * 1.2), bw = Math.min(w * 0.4, w - ml.r - bx - u * 4.2), by = topo + u * 0.55, bh = u * 0.45;
     c.fillStyle = 'rgba(26,20,70,.6)'; c.fillRect(bx, by, bw, bh);
     for (var mm = 0; mm < 4; mm++) { c.fillStyle = TEMAS[pista.mundos[mm]].cor; c.fillRect(bx + bw * mm / 4, by, bw / 4 - 1, bh); }
     c.font = Math.round(u * 0.9) + 'px ' + EMOJI; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('🏁', bx + bw + u * 0.6, by + bh / 2);
@@ -254,7 +267,7 @@
       c.font = Math.round(u * 0.62) + 'px ' + EMOJI; c.fillStyle = '#000'; c.fillText(op.jogadores[o.n].piloto, px, by + bh / 2 + u * 0.03);
     });
     var kmh = Math.round(j.vel / pista.cfg.velMax * 120);
-    pilula(c, u * 0.5, h - u * 2.2, kmh + ' km/h', u * 0.9, j.turbo > 0 ? '#3ee8ff' : '#ffffff');
+    pilula(c, u * 0.5 + ml.l, h - ml.b - u * 2.2, kmh + ' km/h', u * 0.9, j.turbo > 0 ? '#3ee8ff' : '#ffffff');
 
     // contagem e "VAI!"
     var grande = null;
@@ -280,9 +293,19 @@
     // setas de toque
     if (op.toque && !j.chegou) {
       c.globalAlpha = 0.28; c.fillStyle = '#ffffff';
-      var ay = h - u * 3.4, as = u * 1.3;
-      poligono(c, u * 1.2, ay, u * 1.2 + as, ay - as, u * 1.2 + as, ay + as, u * 1.2, ay, '#fff');
-      poligono(c, w - u * 1.2, ay, w - u * 1.2 - as, ay - as, w - u * 1.2 - as, ay + as, w - u * 1.2, ay, '#fff');
+      var ay = h - ml.b - u * 3.4, as = u * 1.3, xl = ml.l + u * 1.2, xr = w - ml.r - u * 1.2;
+      poligono(c, xl, ay, xl + as, ay - as, xl + as, ay + as, xl, ay, '#fff');
+      poligono(c, xr, ay, xr - as, ay - as, xr - as, ay + as, xr, ay, '#fff');
+      c.globalAlpha = 1;
+      var bp = botaoPulo(v, ml), bx2 = bp.x - v.x, by2 = bp.y - v.y, pronto = j.recarga <= 0 && j.pulo <= 0;
+      c.globalAlpha = pronto ? 0.85 : 0.45;
+      c.fillStyle = 'rgba(26,20,70,.55)'; c.beginPath(); c.arc(bx2, by2, bp.r, 0, Math.PI * 2); c.fill();
+      c.lineWidth = u * 0.22; c.strokeStyle = 'rgba(255,255,255,.35)'; c.stroke();
+      if (!pronto) { c.strokeStyle = '#c6ff3d'; c.beginPath(); c.arc(bx2, by2, bp.r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - j.recarga / raiz.VruuumMotor.RECARGA)); c.stroke(); }
+      else { c.strokeStyle = '#c6ff3d'; c.stroke(); }
+      c.fillStyle = '#ffffff'; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.font = '700 ' + Math.round(u * 1.3) + 'px ' + FONTE; c.fillText('⬆', bx2, by2 - u * 0.25);
+      c.font = '700 ' + Math.round(u * 0.55) + 'px ' + FONTE; c.fillText(t('PULAR', 'JUMP'), bx2, by2 + u * 0.8);
       c.globalAlpha = 1;
     }
   }
@@ -292,7 +315,7 @@
     estado.carros.forEach(function (car) { var i = Math.floor(car.z / SEG); (porSeg[i] || (porSeg[i] = [])).push(car); });
     var vv = vistas(W, H, estado.jogadores.length);
     c.fillStyle = '#0b0a1f'; c.fillRect(0, 0, W, H);
-    op.dist = op.dist || (vv.length > 1 ? 110 : 160);
+    op.dist = op.dist || (vv.length > 1 ? 110 : 160); op.W = W; op.H = H;
     vv.forEach(function (v, k) { desenharVista(c, v, estado, k, op); });
     return vv;
   }
@@ -307,5 +330,5 @@
     c.drawImage(spr.img, (cv.width - w) / 2, cv.height * 0.95 - h, w, h);
   }
 
-  raiz.VruuumDesenho = { preparar: preparar, desenhar: desenhar, passo: passo, evento: evento, vistas: vistas, previa: previa, TEMAS: TEMAS, CORES: CORES, PILOTOS: PILOTOS };
+  raiz.VruuumDesenho = { preparar: preparar, desenhar: desenhar, passo: passo, evento: evento, vistas: vistas, margemLocal: margemLocal, botaoPulo: botaoPulo, previa: previa, TEMAS: TEMAS, CORES: CORES, PILOTOS: PILOTOS };
 })(this);
