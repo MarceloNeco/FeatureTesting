@@ -2,6 +2,21 @@
   "app": "rabiscolandia",
   "versoes": [
     {
+      "versao": "0.1.5",
+      "data": "01/Nov/2026",
+      "hora": "18:47:27",
+      "pt": [
+        "O risco agora sai exatamente onde o dedo encosta, em toda a folha (antes, na parte de baixo, saía um pouco acima no começo), em pé, deitado e com zoom.",
+        "22 músicas gravadas com instrumentos de verdade (entraram Life of Riley, Street Party, Sunflower Dance Party e Beachfront Celebration) e três delas para cada música feita pelo app.",
+        "As músicas gravadas tocam direto da internet (mais garantido em todo celular) e o painel 🎵 diz se elas estão tocando neste aparelho."
+      ],
+      "en": [
+        "The stroke now appears exactly where the finger touches, across the whole sheet (before, near the bottom, it showed a bit above at first), standing, lying down and zoomed.",
+        "22 recorded songs with real instruments (new: Life of Riley, Street Party, Sunflower Dance Party and Beachfront Celebration), three of them for each app-made song.",
+        "Recorded songs play straight from the internet (more reliable on every phone) and the 🎵 panel says whether they are playing on this device."
+      ]
+    },
+    {
       "versao": "0.1.4",
       "data": "01/Nov/2026",
       "hora": "18:33:30",

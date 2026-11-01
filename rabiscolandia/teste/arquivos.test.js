@@ -61,3 +61,14 @@ test('nenhum segredo: só a chave publishable do Supabase', () => {
     assert.ok(!/service_role|sb_secret_|sk-[A-Za-z0-9]{20}|AIza[0-9A-Za-z_-]{30}/.test(js), f + ' parece ter segredo');
   }
 });
+
+test('cada música gravada existe e tem crédito em musicas/LICENCAS.md', () => {
+  const som = require('../som.js'), lic = ler('musicas/LICENCAS.md');
+  assert.ok(som.GRAVADAS.length >= 20, 'poucas músicas gravadas');
+  for (const g of som.GRAVADAS) {
+    assert.ok(fs.existsSync(path.join(pasta, g.url)), 'falta o arquivo ' + g.url);
+    assert.ok(lic.includes('`' + path.basename(g.url) + '`'), 'sem crédito em LICENCAS.md: ' + g.url);
+  }
+  // e nenhum mp3 sobrando sem estar na rádio
+  for (const f of fs.readdirSync(path.join(pasta, 'musicas')).filter(f => f.endsWith('.mp3'))) assert.ok(som.GRAVADAS.some(g => g.url === 'musicas/' + f), 'mp3 fora da rádio: ' + f);
+});

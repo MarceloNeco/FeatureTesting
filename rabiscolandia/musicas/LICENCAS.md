@@ -1,6 +1,6 @@
 # Músicas gravadas — licenças
 
-A rádio da Rabiscolândia toca 18 músicas gravadas com instrumentos de verdade, intercaladas com as 4 músicas feitas
+A rádio da Rabiscolândia toca 22 músicas gravadas com instrumentos de verdade, intercaladas com as 4 músicas feitas
 pelo próprio app (`som.js`): duas gravadas, uma do app, duas gravadas… Pedido do dono (01/Nov/2026): músicas "mais
 elaboradas, com mais instrumentos, não Atari", no clima do primeiro LittleBigPlanet (bem-humoradas e acústicas).
 
@@ -47,6 +47,19 @@ A Gymnopédie nº 1 é de Erik Satie (1888, domínio público); a gravação é 
 | `gymnopedie-1.mp3` | "Gymnopedie No 1 (Erik Satie, gravação de Kevin MacLeod)" Kevin MacLeod (incompetech.com), Licensed under Creative Commons: By Attribution | 4063f178ece8764bf8e99e65107d8481e722faf70892bae9094f574b8c0e782a |
 | `disco-lounge.mp3` | "Disco Lounge" Kevin MacLeod (incompetech.com), Licensed under Creative Commons: By Attribution | 931877813688cff3b6bc2219a2a1992800b159a74fbf30365a03208f55eb1fab |
 | `movement-proposition.mp3` | "Movement Proposition" Kevin MacLeod (incompetech.com), Licensed under Creative Commons: By Attribution | e3a4c4ba2118109c78bfd0e538acb04d8bd6ac2d8ddb5617e0a0bfeedec1e5d6 |
+
+### Mais 4 (v0.1.5) — do jogo livre RocketTux
+
+Copiadas do repositório público https://github.com/Tatwi/RocketTux (`data/music/`, commit
+`f8e3265c95a20db7e27585e6677c5115d8b54142`), cujo `data/music/credits.md` diz: Kevin MacLeod (incompetech.com),
+"Licensed under Creative Commons: By Attribution 4.0 License".
+
+| Arquivo | Crédito | Arquivo de origem | SHA-256 do arquivo copiado |
+|---|---|---|---|
+| `life-of-riley.mp3` | "Life of Riley" Kevin MacLeod (incompetech.com), Licensed under Creative Commons: By Attribution 4.0 | snow3.ogg | 39a5b76ce5352d450ee1005770afcf06ad91a75e6ea86181921a623e597e7a52 |
+| `street-party.mp3` | "Street Party" Kevin MacLeod (incompetech.com), Licensed under Creative Commons: By Attribution 4.0 | beach.ogg | 7cbf65c23e0e764d66540ec3ede046fbbd4133322650a971c176ec04dab9f90d |
+| `sunflower-dance-party.mp3` | "Sunflower Dance Party" Kevin MacLeod (incompetech.com), Licensed under Creative Commons: By Attribution 4.0 | forest1.ogg | fa2569c21c462afa7d75a87de00a8851469ccd41dd361f66f70921b2dea7724a |
+| `beachfront-celebration.mp3` | "Beachfront Celebration" Kevin MacLeod (incompetech.com), Licensed under Creative Commons: By Attribution 4.0 | help.ogg | 512a9c640a115376bfc23d995491d69a26ecfc5e9ad034eb80a345baa3d978a9 |
 
 As músicas do LittleBigPlanet em si têm direitos autorais (Sony e os artistas) e não podem entrar no app; estas são
 do mesmo clima, liberadas pelo autor para qualquer uso com crédito.
