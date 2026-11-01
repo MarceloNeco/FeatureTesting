@@ -46,5 +46,6 @@ test('baixar: baixar.js na página e interruptores fora do arquivo', () => {
   const html = ler('index.html');
   assert.match(html, /<script src="baixar.js"><\/script>/);
   assert.match(html, /recursos\.js"[^>]*data-fora-do-arquivo/);
-  assert.match(html, /id="btBaixar"/);
+  assert.match(html, /id="btGuardar"/);
+  assert.ok(!/id="btBaixar"|id="btInstalar"/.test(html), 'um botão só para guardar no celular');
 });
