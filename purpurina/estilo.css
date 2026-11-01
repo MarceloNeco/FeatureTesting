@@ -250,6 +250,7 @@ ul { list-style: none; }
 .tv-musica { position: absolute; right: 2vw; bottom: 2vh; width: 300px; height: 200px; border-radius: 14px; overflow: hidden; z-index: 3; background: #000; }
 .tv-musica[data-fonte="spotify"] { height: 152px; width: 340px; }
 .tv-musica .yt, .tv-musica .sp, .tv-musica iframe { width: 100%; height: 100%; border: 0; }
+.tv-ou { color: var(--muted); font-size: 1.1rem; margin: 2px 0; }
 .tv-desfile { position: absolute; left: 0; right: 0; top: 4vh; text-align: center; z-index: 4; pointer-events: none; }
 .tv-desfile p { font-size: 5vh; font-weight: 700; text-shadow: 0 2px 10px #000; }
 .tv-estrelas { font-size: 9vh !important; letter-spacing: 1vh; }
