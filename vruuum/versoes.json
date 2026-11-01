@@ -2,9 +2,26 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "0.2.0",
+      "data": "01/Nov/2026",
+      "hora": "13:50:00",
+      "pt": [
+        "Botão ⬆ PULAR: um pulinho que passa por cima dos cones, da lama e dos carrinhos (no celular, o botão fica acima da seta da direita; também dá para deslizar o dedo para cima). A rampa continua dando o pulão até as estrelas do ar.",
+        "Músicas novas, bem mais animadas: Turbo Arco-Íris, Doce Velocidade e Pulo Neon, com estrofe, refrão, viradas de bateria e prato. Tocam o tempo todo, uma depois da outra (no menu, na corrida, na pausa e no fim); cada corrida começa uma música nova.",
+        "Celular deitado ou em pé: a corrida abre em tela cheia (a barra do navegador não tampa o jogo) e o placar e os botões ficam longe do recorte da câmera e dos cantos da tela. Saiu o aviso que aparecia por cima do jogo.",
+        "📥 Baixar o jogo (arquivo): baixa um vruuum.html com o jogo inteiro dentro, que abre direto do celular, sem internet. E 📲 Instalar no celular, quando o navegador oferece."
+      ],
+      "en": [
+        "⬆ JUMP button: a hop over cones, mud and cars (on the phone the button sits above the right arrow; you can also swipe up). The ramp still gives the big jump to the stars in the air.",
+        "New, much livelier music: Rainbow Turbo, Sweet Speed and Neon Jump, with verse, chorus, drum fills and cymbals. It plays all the time, one song after another (menu, race, pause and results); every race starts a new song.",
+        "Phone sideways or upright: the race opens full screen (the browser bar doesn't cover the game) and the score and buttons stay clear of the camera cutout and screen corners. The tip that showed over the game is gone.",
+        "📥 Download the game (file): saves a vruuum.html with the whole game inside that opens right on the phone, offline. And 📲 Install on the phone, when the browser offers it."
+      ]
+    },
+    {
       "versao": "0.1.0",
       "data": "01/Nov/2026",
-      "hora": "13:40:00",
+      "hora": "13:18:00",
       "pt": [
         "Nova brincadeira do Bolinho de Chuva: Vruuum!, corrida de carrinho em 3D com curvas e morros. O carro acelera sozinho; é só virar para a esquerda e para a direita.",
         "Pegue estrelas, passe pelo arco-íris para ganhar TURBO, suba na rampa para pular e pegar as estrelas do ar. Desvie dos carrinhos, dos cones e da lama. Ninguém perde: bater só deixa mais lento e derruba umas estrelas.",

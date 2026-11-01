@@ -41,3 +41,10 @@ test('interruptor vruuum no recursos-do-app.json do Feature Tester', () => {
   const r = JSON.parse(fs.readFileSync(path.join(pasta, '..', 'recursos-do-app.json'), 'utf8'));
   assert.ok(r.recursos.some(x => x.id === 'vruuum' && x.pagina === 'vruuum/'));
 });
+
+test('baixar: baixar.js na página e interruptores fora do arquivo', () => {
+  const html = ler('index.html');
+  assert.match(html, /<script src="baixar.js"><\/script>/);
+  assert.match(html, /recursos\.js"[^>]*data-fora-do-arquivo/);
+  assert.match(html, /id="btBaixar"/);
+});
