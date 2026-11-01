@@ -14,10 +14,12 @@
   var RODANDO = 0.9;       // segundos rodopiando depois de bater num carro
   var DEPOIS_DO_FIM = 3;   // segundos de festa depois que todos chegam
   // pontos (ninguém perde a corrida, mas o placar sobe e desce)
-  var PONTOS = { estrela: 100, estrelaAr: 200, turbo: 50, rampa: 50, checkpoint: 500, chegada: 1000, primeiro: 500, cone: -50, batida: -150 };
+  var PONTOS = { estrela: 100, estrelaAr: 200, turbo: 50, rampa: 50, checkpoint: 500, chegada: 1000, cone: -50, batida: -150 };
+  var PONTOS_LUGAR = [800, 400, 200];   // 1º, 2º e 3º lugar na chegada
   var TOQUE = { estrela: 0.28, cone: 0.24, lama: 0.3, turbo: 0.3, rampa: 0.3 };
 
-  function novaCorrida(nivel, semente, nJogadores) {
+  // rivais (personagens): configs = [{ id, veic, mod: { vel, curva } }]
+  function novaCorrida(nivel, semente, nJogadores, configs) {
     var pista = P.montar(nivel, semente);
     var n = nJogadores === 2 ? 2 : 1, jogadores = [];
     for (var k = 0; k < n; k++) {
@@ -26,7 +28,11 @@
     return {
       pista: pista, jogadores: jogadores,
       carros: pista.carros.map(function (c) { return { z: c.z, x: c.x, vel: c.vel, tipo: c.tipo }; }),
-      fase: 'contagem', contagem: CONTAGEM, t: 0, depoisDoFim: 0, eventos: []
+      fase: 'contagem', contagem: CONTAGEM, t: 0, depoisDoFim: 0, eventos: [],
+      rivais: (configs || []).map(function (cf, k) {
+        var faixa = P.FAIXAS[(k + 1) % 3];
+        return { r: k, id: cf.id, veic: cf.veic, cor: cf.cor, mod: cf.mod || {}, x: faixa, faixa: faixa, z: 1000 + (k % 2 ? -1 : 1) * SEG * (1 + k), vel: 0, garra: 0.94 + ((semente >> k) % 7) * 0.01, chegou: false, tempo: 0, lento: 0, pensa: 0 };
+      })
     };
   }
 
@@ -145,10 +151,67 @@
     if (!j.chegou && j.z >= pista.zChegada) {
       j.chegou = true; j.tempo = e.t;
       var antes = e.jogadores.filter(function (o) { return o !== j && o.chegou; }).length;
+      antes += e.rivais.filter(function (r) { return r.chegou; }).length;
       e.eventos.push({ tipo: 'chegou', j: j.n, lugar: antes + 1 });
-      var bc = bonusTempo(e, j, pista.chegada / 4);
-      somar(e, j, PONTOS.chegada + bc.bonus + (e.jogadores.length === 2 && antes === 0 ? PONTOS.primeiro : 0), 'chegada');
+      var bc = bonusTempo(e, j, pista.chegada / 4), concorrentes = e.jogadores.length + e.rivais.length;
+      somar(e, j, PONTOS.chegada + bc.bonus + (concorrentes > 1 && antes < 3 ? PONTOS_LUGAR[antes] : 0), 'chegada');
     }
+  }
+
+  // ---------- rivais ----------
+  function bloqueado(e, i0, i1, x) {   // tem cone, lama ou carrinho nessa faixa entre os pedaços i0 e i1?
+    var pista = e.pista;
+    for (var i = i0; i <= i1; i++) {
+      var s = pista.segs[i]; if (!s) continue;
+      for (var k = 0; k < s.coisas.length; k++) { var c = s.coisas[k]; if ((c.tipo === 'cone' || c.tipo === 'lama') && Math.abs(c.x - x) < 0.3) return true; }
+    }
+    for (k = 0; k < e.carros.length; k++) { var ci = Math.floor(e.carros[k].z / SEG); if (ci >= i0 && ci <= i1 && Math.abs(e.carros[k].x - x) < 0.4) return true; }
+    return false;
+  }
+  function moverRival(e, rv, dt) {
+    var pista = e.pista, cfg = pista.cfg, max = cfg.velMax * (rv.mod.vel || 1);
+    var lider = e.jogadores.reduce(function (a, j) { return j.z > a.z ? j : a; }, e.jogadores[0]);
+    // fica por perto dos jogadores: quem dispara segura, quem fica para trás acelera (corrida sempre disputada)
+    var d = (rv.z - lider.z) / SEG, f = d > 30 ? 0.84 : d < -30 ? 1.12 : 1 - d * 0.004;
+    var alvo = rv.chegou ? max * 0.3 : max * rv.garra * f;
+    if (rv.lento > 0) { rv.lento -= dt; alvo *= 0.55; }
+    rv.vel += Math.max(-max * 0.8 * dt, Math.min(max * 0.45 * dt, alvo - rv.vel));
+    var i = Math.floor(rv.z / SEG);
+    // decide a faixa um pouco antes: foge de cone, lama e carrinho (às vezes se distrai)
+    rv.pensa -= dt;
+    if (rv.pensa <= 0) {
+      rv.pensa = 0.25;
+      if (bloqueado(e, i + 3, i + 14, rv.faixa) && Math.random() < 0.8) {
+        var livres = P.FAIXAS.filter(function (fx) { return !bloqueado(e, i + 3, i + 14, fx); });
+        if (livres.length) rv.faixa = livres.sort(function (a, b) { return Math.abs(a - rv.x) - Math.abs(b - rv.x); })[0];
+      } else if (Math.random() < 0.02) rv.faixa = P.FAIXAS[Math.floor(Math.random() * 3)];
+    }
+    var dx = rv.faixa - rv.x; rv.x += Math.max(-dt * 1.3, Math.min(dt * 1.3, dx));
+    var zAntes = rv.z; rv.z = Math.min(pista.comprimento - SEG, rv.z + rv.vel * dt);
+    // se não desviou a tempo, o cone/lama segura (só o rival, a pista dele é a mesma de todos)
+    for (var k = Math.floor(zAntes / SEG); k <= Math.floor(rv.z / SEG); k++) {
+      var s = pista.segs[k]; if (!s) continue;
+      for (var q = 0; q < s.coisas.length; q++) { var c = s.coisas[q]; if ((c.tipo === 'cone' || c.tipo === 'lama') && Math.abs(c.x - rv.x) < 0.25 && (k * SEG + SEG / 2) > zAntes && (k * SEG + SEG / 2) <= rv.z) rv.lento = 0.8; }
+    }
+    // encostou num jogador: empurrãozinho dos dois lados
+    e.jogadores.forEach(function (j) {
+      if (j.pulo > 0 || Math.abs(j.z - rv.z) > SEG * 0.6 || Math.abs(j.x - rv.x) > 0.38) return;
+      var lado = j.x <= rv.x ? -1 : 1; j.x += lado * 0.07; rv.x -= lado * 0.05;
+      if (j.empurrao <= 0) { j.empurrao = 0.5; e.eventos.push({ tipo: 'tum', j: j.n }); }
+    });
+    if (!rv.chegou && rv.z >= pista.zChegada) { rv.chegou = true; rv.tempo = e.t; }
+  }
+  // posição de cada jogador na corrida (contando os rivais): quem chegou antes, depois quem está mais na frente
+  function posicoes(e) {
+    var todos = e.jogadores.map(function (j) { return { j: j, z: j.z, fim: j.chegou ? j.tempo : Infinity }; })
+      .concat(e.rivais.map(function (r) { return { z: r.z, fim: r.chegou ? r.tempo : Infinity }; }));
+    todos.sort(function (a, b) { return a.fim !== b.fim ? a.fim - b.fim : b.z - a.z; });
+    todos.forEach(function (o, k) {
+      if (!o.j) return;
+      if (o.j.lugar && o.j.lugar !== k + 1 && !o.j.chegou && e.t - (o.j.tLugar || 0) > 0.8) { e.eventos.push({ tipo: 'lugar', j: o.j.n, lugar: k + 1, subiu: k + 1 < o.j.lugar }); o.j.tLugar = e.t; }
+      o.j.lugar = k + 1;
+    });
+    e.total = todos.length;
   }
 
   function atualizar(e, entradas, dt) {
@@ -179,6 +242,9 @@
       }
     }
 
+    e.rivais.forEach(function (rv) { moverRival(e, rv, dt); });
+    posicoes(e);
+
     if (e.jogadores.every(function (j) { return j.chegou; })) {
       e.depoisDoFim += dt;
       if (e.depoisDoFim >= DEPOIS_DO_FIM) { e.fase = 'fim'; e.eventos.push({ tipo: 'fim' }); }
@@ -186,7 +252,7 @@
     return e;
   }
 
-  var VruuumMotor = { PONTOS: PONTOS, novaCorrida: novaCorrida, atualizar: atualizar, CONTAGEM: CONTAGEM, TURBO: TURBO, PULO: PULO, PULINHO: PULINHO, RECARGA: RECARGA, RODANDO: RODANDO, DEPOIS_DO_FIM: DEPOIS_DO_FIM };
+  var VruuumMotor = { PONTOS: PONTOS, PONTOS_LUGAR: PONTOS_LUGAR, novaCorrida: novaCorrida, atualizar: atualizar, CONTAGEM: CONTAGEM, TURBO: TURBO, PULO: PULO, PULINHO: PULINHO, RECARGA: RECARGA, RODANDO: RODANDO, DEPOIS_DO_FIM: DEPOIS_DO_FIM };
   if (typeof module !== 'undefined' && module.exports) module.exports = VruuumMotor;
   else raiz.VruuumMotor = VruuumMotor;
 })(this);

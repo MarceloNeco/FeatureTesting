@@ -61,9 +61,12 @@
 
   var lingua = 'pt', base = null, carrosJog = [], portais = [], largada = null, chegada = null;
   var ALT_VOO = 6500;               // altura do voo acima da estrada (quem vai de avião, jato ou helicóptero)
-  var VOA = [], VEIC = [], INFO = [];   // por jogador: voa?, a ficha do veículo e o piloto (bichinho ou selfie)
+  var VOA = [], VEIC = [], INFO = [], RIV = [], porSegR = {};   // RIV: desenho, ficha e piloto de cada rival   // por jogador: voa?, a ficha do veículo e o piloto (bichinho ou selfie)
   var Cab = function () { return raiz.VruuumCabeca; };
-  function infoPiloto(cor, piloto, foto) { return { emoji: piloto, foto: foto || null, cor: cor, camisa: V() ? V().tom(cor, -0.4) : '#3a2f73' }; }
+  function infoPiloto(cor, piloto, foto, pers) {
+    var P2 = raiz.VruuumPersonagens, p = pers && P2 ? P2.achar(pers) : null;
+    return { emoji: piloto, foto: p ? null : (foto || null), personagem: p, cor: cor, camisa: V() ? V().tom(cor, -0.4) : '#3a2f73' };
+  }
   // o piloto vivo: de costas, e de vez em quando vira, olha e sorri
   function pilotoVivo(c, vv, x0, y0, cw, ch, info, semente, periodo) { if (Cab()) Cab().desenhar(c, vv, x0, y0, cw, ch, info, Date.now() / 1000, semente, periodo); }
   var V = function () { return raiz.VruuumVeiculos; };
@@ -74,6 +77,7 @@
   var VS = [];   // estado de cada vista (fundo andando, inclinação, partículas, faixas de texto)
   var porSeg = {};
 
+  function ordinalEn(n) { return n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'; }
   function milhar(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, lingua === 'en' ? ',' : '.'); }
   function t(pt, en) { return lingua === 'en' ? en : pt; }
   function misturar(a, b, f) {
@@ -87,9 +91,10 @@
     ESTILO = visual === 'colorido' || visual === 'neon' ? visual : 'misto';
     base = S.basicos();
     carrosJog = jogadores.map(function (j) { return S.carroJogador(j.cor, null, j.veic); });
-    INFO = jogadores.map(function (j) { return infoPiloto(j.cor, j.piloto, j.foto); });
+    INFO = jogadores.map(function (j) { return infoPiloto(j.cor, j.piloto, j.foto, j.personagem); });
     VEIC = jogadores.map(function (j) { return V() ? V().achar(j.veic) : null; });
     VOA = jogadores.map(function (j) { return !!(V() && V().voa(j.veic)); });
+    RIV = (estado.rivais || []).map(function (r) { return { spr: S.carroJogador(r.cor, null, r.veic), veic: V() ? V().achar(r.veic) : null, voa: !!(V() && V().voa(r.veic)), info: infoPiloto(r.cor, '', null, r.id) }; });
     portais = estado.pista.mundos.map(function (m) { var tm = TEMAS[m]; return S.arco(tm.emoji + ' ' + t(tm.nome[0], tm.nome[1]), tm.cor, '#ffffff', false); });
     largada = S.arco(t('🚦 VAI! 🚦', '🚦 GO! 🚦'), '#ff4fa3', '#ffffff', false);
     chegada = S.arco(t('🏁 CHEGADA 🏁', '🏁 FINISH 🏁'), '#1a1446', '#ffffff', true);
@@ -133,6 +138,7 @@
     if (ev.tipo === 'vai') { var tm0 = TEMAS[estado.pista.mundos[0]]; VS.forEach(function (v) { v.faixa = { txt: tm0.emoji + ' ' + t(tm0.nome[0], tm0.nome[1]), ate: 2.6, cor: tm0.cor }; }); return; }
     if (ev.tipo === 'mundo') { VS.forEach(function (v, k) { if (k === ev.j && !(v.faixa && v.faixaCheck > 0)) { var tm = TEMAS[ev.nome]; v.faixa = { txt: tm.emoji + ' ' + t(tm.nome[0], tm.nome[1]) + '!', ate: 2.6, cor: tm.cor }; } }); return; }
     if (!vs) return;
+    if (ev.tipo === 'lugar') { texto(vs, (ev.subiu ? '⬆ ' : '⬇ ') + ev.lugar + (lingua === 'en' ? ordinalEn(ev.lugar) : 'º'), ev.subiu ? '#c6ff3d' : '#ff9f1c', 1.2); return; }
     if (ev.tipo === 'pontos') { if (ev.motivo !== 'checkpoint' && ev.motivo !== 'chegada') texto(vs, (ev.p > 0 ? '+' : '') + ev.p, ev.p > 0 ? '#ffd93d' : '#ff6b6b', ev.p >= 200 ? 1.3 : 1); return; }
     if (ev.tipo === 'checkpoint') { var tmC = TEMAS[estado.pista.mundos[ev.numero]]; vs.faixa = { txt: 'CHECKPOINT +' + milhar(500 + ev.bonus) + ' · ' + tmC.emoji + ' ' + t(tmC.nome[0], tmC.nome[1]), ate: 2.8, cor: '#c6ff3d' }; confete(vs, 30, 'cima'); vs.faixaCheck = 2.6; return; }
     if (ev.tipo === 'estrela') { if (ev.ar) confete(vs, 8); }
@@ -348,6 +354,14 @@
         var tx = sx + esc * cs[k2].x * LARG;
         if (voa) { sprite(c, base[sprCeu(cs[k2].tipo)], esc, tx, syAr - escY * 200, 0, w); if (nS2 || s.tunel) luzesAviao(c, tx, syAr - escY * 200, esc, idx); }
         else { sprite(c, base[cs[k2].tipo], esc, tx, sy, clip, w); if ((nS2 || s.tunel) && sy <= clip + 2) lanternasTransito(c, cs[k2].tipo, tx, sy, esc); }
+      }
+      var rs = porSegR[idx];   // rivais neste pedaço (no céu se forem de avião)
+      if (rs) for (k2 = 0; k2 < rs.length; k2++) {
+        var rv = e.rivais[rs[k2]], rd = RIV[rs[k2]]; if (!rd || rv.z < j.z - JOG_Z * 0.6) continue;
+        var rX = sx + esc * rv.x * LARG, rY = rd.voa ? syAr : sy, rW = rd.spr.w * esc, rH = rd.spr.h * esc;
+        sprite(c, rd.spr, esc, rX, rY, rd.voa || voa ? 0 : clip, w);
+        if (rW > 24 && (rd.voa || voa || rY <= clip)) pilotoVivo(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info, 10 + rs[k2] * 2.1, 6);
+        if (!rd.voa && (nS2 || s.tunel) && rY <= clip + 2) { c.save(); c.globalCompositeOperation = 'lighter'; luz(c, rX - rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7); luz(c, rX + rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7); c.restore(); }
       }
       if (idx === oSeg && outro.z > j.z - JOG_Z * 0.6) {
         var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / (outro.puloMax || raiz.VruuumMotor.PULO))) * 1400 * (outro.puloMax || 1.1) / 1.1 : 0;
@@ -572,6 +586,11 @@
       c.beginPath(); c.arc(px, by + bh / 2, u * 0.55, 0, Math.PI * 2); c.fillStyle = op.jogadores[o.n].cor; c.fill(); c.lineWidth = o.n === ji ? u * 0.14 : u * 0.06; c.strokeStyle = '#fff'; c.stroke();
       c.font = Math.round(u * 0.62) + 'px ' + EMOJI; c.fillStyle = '#000'; c.fillText(op.jogadores[o.n].piloto, px, by + bh / 2 + u * 0.03);
     });
+    (e.rivais || []).forEach(function (rv, k) {   // rivais na barra do caminho
+      var pr = Math.min(1, rv.z / pista.zChegada), rx = bx + bw * pr;
+      c.beginPath(); c.arc(rx, by + bh / 2, u * 0.28, 0, Math.PI * 2); c.fillStyle = rv.cor || '#fff'; c.fill(); c.lineWidth = u * 0.05; c.strokeStyle = 'rgba(0,0,0,.6)'; c.stroke();
+    });
+    if (e.total > 1 && j.lugar) pilula(c, u * 0.5 + ml.l, topo + u * 1.9, '🏁 ' + j.lugar + (lingua === 'en' ? ordinalEn(j.lugar) : 'º') + ' / ' + e.total, u * 0.95, j.lugar === 1 ? '#c6ff3d' : '#ffffff');
     var kmh = Math.round(j.vel / pista.cfg.velMax * 120);
     pilula(c, u * 0.5 + ml.l, h - ml.b - u * 2.2, kmh + ' km/h', u * 0.9, j.turbo > 0 ? '#3ee8ff' : '#ffffff');
 
@@ -593,7 +612,7 @@
     if (vs.chegouT >= 0) {
       var tc = K * 0.2 * Math.min(1, vs.chegouT * 3);
       c.font = '700 ' + Math.round(tc) + 'px ' + FONTE + ',' + EMOJI; c.textAlign = 'center'; c.textBaseline = 'middle';
-      var tx = e.jogadores.length === 2 ? (vs.lugar === 1 ? t('🥇 Chegou primeiro!', '🥇 First place!') : t('🏁 Chegou!', '🏁 Finished!')) : t('🏁 Chegou!', '🏁 Finished!');
+      var tx = (e.total || 1) < 2 ? t('🏁 Chegou!', '🏁 Finished!') : vs.lugar === 1 ? t('🥇 1º lugar!', '🥇 1st place!') : vs.lugar === 2 ? t('🥈 2º lugar!', '🥈 2nd place!') : vs.lugar === 3 ? t('🥉 3º lugar!', '🥉 3rd place!') : t('🏁 Chegou em ', '🏁 Finished ') + vs.lugar + (lingua === 'en' ? ordinalEn(vs.lugar) : 'º') + '!';
       c.lineWidth = tc * 0.1; c.strokeStyle = '#1a1446'; c.strokeText(tx, w / 2, h * 0.32); c.fillStyle = '#ffd166'; c.fillText(tx, w / 2, h * 0.32);
     }
     // setas de toque
@@ -617,7 +636,8 @@
   }
 
   function desenhar(c, W, H, estado, op) {
-    porSeg = {};
+    porSeg = {}; porSegR = {};
+    (estado.rivais || []).forEach(function (r, k) { var i = Math.floor(r.z / SEG); (porSegR[i] || (porSegR[i] = [])).push(k); });
     estado.carros.forEach(function (car) { var i = Math.floor(car.z / SEG); (porSeg[i] || (porSeg[i] = [])).push(car); });
     var vv = vistas(W, H, estado.jogadores.length);
     c.fillStyle = '#0b0a1f'; c.fillRect(0, 0, W, H);
@@ -633,7 +653,7 @@
     if (!cachePrevia[k]) cachePrevia[k] = S.carroJogador(cor, null, veic, 360);
     return cachePrevia[k];
   }
-  function previa(cv, cor, piloto, veic, foto) {
+  function previa(cv, cor, piloto, veic, foto, pers) {
     var c = cv.getContext('2d'), W = cv.width, H = cv.height, vv = V() ? V().achar(veic) : null, voa = !!(V() && V().voa(veic)), tt = Date.now() / 1000;
     var spr = spritePrevia(cor, veic);
     var g = c.createLinearGradient(0, 0, 0, H), neon = ESTILO !== 'colorido';
@@ -665,17 +685,17 @@
     c.save(); c.translate(W / 2, H * 0.94 + (voa ? Math.sin(tt * 2.2) * H * 0.02 - H * 0.06 : Math.sin(tt * 9) * 1.2));
     if (voa) c.rotate(Math.sin(tt * 0.9) * 0.08);
     extrasAntes(c, vv, cw, ch, tt); c.drawImage(spr.img, -cw / 2, -ch, cw, ch);
-    pilotoVivo(c, vv, -cw / 2, -ch, cw, ch, infoPiloto(cor, piloto, foto), 1.2, 4.5);   // na garagem vira mais vezes
+    pilotoVivo(c, vv, -cw / 2, -ch, cw, ch, infoPiloto(cor, piloto, foto, pers), 1.2, 4.5);   // na garagem vira mais vezes
     extrasDepois(c, vv, cw, ch, tt, false);
     c.restore();
   }
   // miniatura parada (cartões da garagem)
-  function miniatura(cv, cor, piloto, veic, foto) {
+  function miniatura(cv, cor, piloto, veic, foto, pers) {
     var c = cv.getContext('2d'), spr = spritePrevia(cor, veic), W = cv.width, H = cv.height;
     c.clearRect(0, 0, W, H);
     var esc = Math.min(W * 0.9 / spr.w, H * 0.9 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
     c.drawImage(spr.img, (W - cw) / 2, H * 0.95 - ch, cw, ch);
-    if (Cab()) Cab().desenhar(c, V().achar(veic), (W - cw) / 2, H * 0.95 - ch, cw, ch, infoPiloto(cor, piloto, foto), 50, 0, 1000);   // parado, de costas
+    if (Cab()) Cab().desenhar(c, V().achar(veic), (W - cw) / 2, H * 0.95 - ch, cw, ch, infoPiloto(cor, piloto, foto, pers), 50, 0, 1000);   // parado, de costas
   }
 
   function definirEstilo(v) { ESTILO = v === 'colorido' || v === 'neon' ? v : 'misto'; }

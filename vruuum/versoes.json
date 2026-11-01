@@ -2,6 +2,21 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "1.1.0",
+      "data": "01/Nov/2026",
+      "hora": "18:36:00",
+      "pt": [
+        "Rivais de verdade: 3 personagens correm com você (2 quando são 2 jogadores), ultrapassam, desviam de cone, lama e carrinho (às vezes erram) e empurram quando encostam. Ficam por perto para a corrida ser disputada. Aparece a sua posição (🏁 2º / 4) e, no fim, a classificação. 1º lugar ganha +800 pontos, 2º +400 e 3º +200. Dá para correr sem rivais no menu.",
+        "12 personagens de domínio público, desenhados aqui, para escolher como piloto ou aparecer como rival: Emília e Visconde (Sítio do Picapau Amarelo, de Monteiro Lobato), Saci, Cuca, Curupira e Iara (folclore), Chapeuzinho Vermelho, Pinóquio, Alice, Robin Hood, Sherlock Holmes e Papai Noel. De costas e, de vez em quando, virando para sorrir.",
+        "Personagens de empresas (Mario, Sonic, Disney, DreamWorks, filmes) não podem entrar: têm dono."
+      ],
+      "en": [
+        "Real rivals: 3 characters race with you (2 with 2 players), overtake, dodge cones, mud and cars (sometimes they miss) and bump when they touch. They stay close so the race is a real contest. Your position shows (🏁 2nd / 4) and the standings appear at the end. 1st place gets +800 points, 2nd +400, 3rd +200. You can race without rivals in the menu.",
+        "12 public-domain characters, drawn here, to pick as your driver or meet as rivals: Emília and the Viscount (Monteiro Lobato's Yellow Woodpecker Farm), Saci, Cuca, Curupira and Iara (Brazilian folklore), Little Red Riding Hood, Pinocchio, Alice, Robin Hood, Sherlock Holmes and Santa. Facing the road and now and then turning to smile.",
+        "Company-owned characters (Mario, Sonic, Disney, DreamWorks, movies) can't be used: they have owners."
+      ]
+    },
+    {
       "versao": "1.0.0",
       "data": "01/Nov/2026",
       "hora": "18:26:00",
