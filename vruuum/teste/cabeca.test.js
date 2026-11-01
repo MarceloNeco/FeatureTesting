@@ -14,15 +14,16 @@ test('o piloto fica quase sempre de costas e vira por 2 s a cada período', () =
   assert.ok(C.estado(1, 0, 7).sorriso > 0, 'sorri quando olha para trás');
 });
 
-test('a cabeça gira de verdade: de costas (0) até de frente (±π), sem pulos, e volta', () => {
+test('a cabeça gira de verdade: de costas (0) até olhar por cima do ombro (±GIRO_MAX), sem pulos, e volta', () => {
   let antes = C.estado(0, 0, 7).giro, maiorPasso = 0, chegouNaFrente = false;
   for (let t = 0.01; t < 2.2; t += 0.01) {
     const g = C.estado(t, 0, 7).giro;
-    assert.ok(Math.abs(g) <= Math.PI + 1e-9);
+    assert.ok(Math.abs(g) <= C.GIRO_MAX + 1e-9);
     maiorPasso = Math.max(maiorPasso, Math.abs(g - antes)); antes = g;
-    if (Math.abs(Math.abs(g) - Math.PI) < 1e-6) chegouNaFrente = true;
+    if (Math.abs(Math.abs(g) - C.GIRO_MAX) < 1e-6) chegouNaFrente = true;
   }
-  assert.ok(chegouNaFrente, 'fica de frente');
+  assert.ok(chegouNaFrente, 'olha para trás');
+  assert.ok(C.GIRO_MAX > Math.PI * 0.6 && C.GIRO_MAX < Math.PI * 0.85, 'de três quartos, não de coruja');
   assert.ok(maiorPasso < 0.2, 'gira aos poucos (maior passo ' + maiorPasso.toFixed(2) + ' rad em 10 ms)');
   assert.equal(C.estado(2.5, 0, 7).giro, 0, 'voltou a ficar de costas');
 });

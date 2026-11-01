@@ -56,8 +56,7 @@
     if (pers) pers.frente(c, x, y, r);
     else if (foto && foto.img) {
       c.save(); c.beginPath(); c.arc(x, y, r * 1.02, 0, Math.PI * 2); c.clip();
-      c.drawImage(foto.img, x - r * 1.02, y - r * 1.02, r * 2.04, r * 2.04); c.restore();
-      c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = Math.max(1, r * 0.07); c.beginPath(); c.arc(x, y, r * 1.02, 0, Math.PI * 2); c.stroke();
+      c.drawImage(foto.img, x - r * 1.02, y - r * 1.02, r * 2.04, r * 2.04); c.restore();   // sem aro: no giro ele virava uma risca
     } else {
       c.font = Math.round(s * 1.08) + 'px ' + EMOJI; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(piloto, x, y + s * 0.04);
     }
@@ -70,13 +69,16 @@
   }
 
   // de tempos em tempos (periodo, em s) vira para trás por 2 s: a cabeça GIRA (em 3D) até ficar de frente,
-  // sorri e gira de volta. giro: 0 = de costas, ±π = de frente; uma vez vira por um lado, na outra pelo outro.
+  // sorri e gira de volta. giro: 0 = de costas; vai até ±GIRO_MAX (uns 130°): olha POR CIMA DO OMBRO, mostrando
+  // o rosto de três quartos, como uma pessoa de verdade (180° com o corpo de costas fica esquisito, "de coruja").
+  // Uma vez vira por um lado, na outra pelo outro.
+  var GIRO_MAX = Math.PI * 0.72;
   function suave(x) { return x * x * (3 - 2 * x); }
   function estado(t, semente, periodo) {
     var dur = 2, tt = t + semente, local = (tt % periodo + periodo) % periodo, lado = Math.abs(Math.floor(tt / periodo)) % 2 ? -1 : 1;
     if (local > dur) return { giro: 0, frente: false, sorriso: 0 };
     var p = local / dur, a = p < 0.25 ? suave(p / 0.25) : p < 0.75 ? 1 : 1 - suave((p - 0.75) / 0.25);
-    return { giro: lado * a * Math.PI, frente: a > 0.5, sorriso: p >= 0.25 && p < 0.75 ? (p - 0.25) / 0.5 * 2 : 0 };
+    return { giro: lado * a * GIRO_MAX, frente: a > 0.5, sorriso: p >= 0.25 && p < 0.75 ? (p - 0.25) / 0.5 * 2 : 0 };
   }
 
   function caminho(c, jan, x0, y0, W, H) {
@@ -172,7 +174,7 @@
     return N;
   }
   // desenha a cabeça inteira em (cx, cy), raio r, no giro dado
-  function cabeca3d(c, cx, cy, r, pc, pf, giro, inclina) {
+  function cabeca3d(c, cx, cy, r, pc, pf, giro, inclina, ombro) {
     var esc = r / R0, M = Math.ceil(TS * esc) + 4;
     if (!rascunho || rascunho.width < M) rascunho = tela(Math.max(M, 64), Math.max(M, 64));
     var s = rascunho.getContext('2d'), o = M / 2;
@@ -189,7 +191,8 @@
     g.addColorStop(0, 'rgba(255,255,255,.22)'); g.addColorStop(0.45, 'rgba(255,255,255,0)'); g.addColorStop(0.8, 'rgba(0,0,0,.06)'); g.addColorStop(1, 'rgba(0,0,0,.32)');
     s.fillStyle = g; s.beginPath(); s.arc(o, o, r * 1.01, 0, Math.PI * 2); s.fill();
     s.globalCompositeOperation = 'source-over';
-    c.save(); c.translate(cx + Math.sin(giro) * r * 0.06, cy); if (inclina) c.rotate(inclina);
+    var f = giro / GIRO_MAX;   // a cabeça vai um pouco para o lado do ombro e desce, como quem olha para trás
+    c.save(); c.translate(cx + f * r * ombro, cy + Math.abs(f) * r * 0.06); c.rotate(f * 0.1 + (inclina || 0));
     c.drawImage(rascunho, 0, 0, M, M, -o, -o, M, M);
     c.restore();
   }
@@ -214,7 +217,7 @@
       var tw = 1 - 0.14 * Math.abs(Math.sin(e.giro));
       elipse(c, cx + Math.sin(e.giro) * r * 0.12, cy + r * 1.55, r * 1.5 * tw, r * 0.85, 0, info.camisa || '#3a2f73');
     }
-    cabeca3d(c, cx, cy, r, pc, pf, e.giro, inclina);
+    cabeca3d(c, cx, cy, r, pc, pf, e.giro, inclina, v.aberto ? 0.32 : v.capacete ? 0 : 0.14);
     c.restore();
     if (e.sorriso > 0) brilhinho(c, cx, cy, r, e.sorriso);
     if (!v.capacete && !v.aberto) {   // reflexo do vidro por cima
@@ -224,7 +227,7 @@
     }
   }
 
-  var VruuumCabeca = { desenhar: desenhar, estado: estado, PERFIS: PERFIS };
+  var VruuumCabeca = { desenhar: desenhar, estado: estado, PERFIS: PERFIS, GIRO_MAX: GIRO_MAX };
   if (typeof module !== 'undefined' && module.exports) module.exports = VruuumCabeca;
   else raiz.VruuumCabeca = VruuumCabeca;
 })(this);
