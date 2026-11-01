@@ -557,7 +557,7 @@
           if (area.y + area.h > D.y + D.h) c.drawImage(img, 0, img.height - 1, img.width, 1, x, D.y + D.h - 1, D.w, area.y + area.h - D.y - D.h + 1);
           c.restore();
         }
-        if (!calmo && fundoVivo()) { c.save(); c.translate(D.x, D.y); try { raiz.DesenhoFundos.vivo(c, fundo.v, D.w, D.h, t); } catch (e) { /* segue sem a parte viva */ } c.restore(); }
+        if (fundoVivo()) { c.save(); c.translate(D.x, D.y); try { raiz.DesenhoFundos.vivo(c, fundo.v, D.w, D.h, calmo ? 0 : t); } catch (e) { /* segue sem a parte viva */ } c.restore(); }
       } else if (fundo.tipo === 'foto' && fundoImg) {
         c.fillStyle = '#fff'; c.fillRect(area.x, area.y, area.w, area.h);
         var q = Math.max(D.w / fundoImg.width, D.h / fundoImg.height); c.drawImage(fundoImg, D.x + (D.w - fundoImg.width * q) / 2, D.y + (D.h - fundoImg.height * q) / 2, fundoImg.width * q, fundoImg.height * q);
@@ -662,7 +662,7 @@
       if (!sujo && t - ultimoQuadro < 0.032) return;          // só animação: ~30 quadros por segundo poupa bateria
       ultimoQuadro = t; sujo = false;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.fillStyle = '#d9d4ef'; ctx.fillRect(0, 0, tela.width, tela.height);   // "mesa" em volta do mundo
+      ctx.fillStyle = '#d9d4ef'; ctx.fillRect(0, 0, tela.width, tela.height);   // "mesa" em volta do mundo (com menos movimento, a parte viva do fundo fica parada em t = 0)
       ctx.setTransform(dpr * vista.s, 0, 0, dpr * vista.s, dpr * vista.ox, dpr * vista.oy);
       var a0 = F.aMundo(vista, 0, 0), a1 = F.aMundo(vista, larg, alt);
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip(); cena(ctx, t, false, { x: a0.x, y: a0.y, w: a1.x - a0.x, h: a1.y - a0.y }); ctx.restore();
