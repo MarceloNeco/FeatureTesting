@@ -125,10 +125,13 @@ mostra as mãos e o volante (`maos.js`, MediaPipe Hand Landmarker no próprio ap
 
 ## Música
 
-A "rádio" do jogo (`som.js`) intercala dois tipos de rock, sem parar:
+A "rádio" do jogo (`som.js`) toca dois tipos de rock, sem parar:
 
-- **Gravadas** (`musicas/*.mp3`, ~10 MB): 3 de rock de guitarra do **Kevin MacLeod** (incompetech.com): Volatile
-  Reaction (a primeira, já no menu), Heroic Age e Unholy Knight, licença **CC BY 4.0**; e 3 do jogo de kart
+- **Gravadas** (`musicas/*.mp3`, 26 músicas, ~47 MB): rock de verdade, com bateria, baixo e guitarra. 18 do
+  **Kevin MacLeod** (incompetech.com), licença **CC BY 4.0**: Volatile Reaction, Heroic Age, Unholy Knight e, desde a
+  1.3.0, Metalmania, Ready Aim Fire, Summon the Rawk, Noise Attack, RetroFuture Nasty, Hotrock, Neolith, Iron Bacon,
+  Take the Lead, Exhilarate, Cool Hard Facts, Bet You Can, Pump, Breakdown e What You Want; 5 do **HoliznaCC0**
+  (álbum "Rock Montage": Jams, Punk, Americana, Grunge, Classic), **CC0** (domínio público); e 3 do jogo de kart
   **SuperTuxKart**: Kart Grand Prix (Weirwood), Lava (Kalsan) e Las Dunas Champions (ALBatross), licença **CC BY-SA**
   (quem copiar mantém a mesma licença). O menu mostra a música tocando com autor e licença. Detalhes em
   `musicas/LICENCAS.md`.
@@ -136,9 +139,10 @@ A "rádio" do jogo (`som.js`) intercala dois tipos de rock, sem parar:
   solo com eco, baixo com drive, bateria completa e coro de "Ei!", em 3 músicas próprias: Trovão na Pista
   (138 bpm), Pedal no Fundo (152 bpm) e Motor de Fogo (168 bpm).
 
-A rádio toca duas gravadas e uma feita pelo jogo, sem parar (menu, corrida, pausa e fim); cada corrida começa a próxima. Só silenciam com o app escondido
-ou no 🔊. Sem internet: as gravadas ficam guardadas no aparelho depois da primeira abertura (cache próprio
-`vruuum-musicas-v1`, que não baixa de novo a cada versão); se uma não estiver guardada, a rádio pula para a próxima.
+A rádio sorteia a ordem das gravadas a cada vez que o jogo abre e põe uma feita pelo jogo a cada 8 gravadas, sem parar (menu, corrida, pausa e fim); cada corrida começa a próxima. Só silenciam com o app escondido
+ou no 🔊. Sem internet: as gravadas ficam guardadas no aparelho depois da primeira abertura, uma por vez, em segundo plano
+(no 4G ou com economia de dados, só 6; as outras na primeira vez que tocam; cache próprio `vruuum-musicas-v1`, que
+não baixa de novo a cada versão); se uma não estiver guardada, a rádio pula para a próxima.
 No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para o arquivo continuar pequeno.
 
 ## Instalar, baixar e jogar sem internet
@@ -161,7 +165,7 @@ No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para
 | `veiculos.js` | a garagem: os 9 veículos (desenho, nome, grupo, velocidade e curva), testada no Node. |
 | `sprites.js` | todos os desenhos, feitos em código uma vez num canvas escondido. |
 | `desenho.js` | a estrada em 3D (pseudo-3D por pedaços), céu, fundo, enfeites, carros, efeitos, placar e tela dividida. |
-| `musicas/` | as 3 músicas gravadas (MP3, CC BY-SA) e `LICENCAS.md`. |
+| `musicas/` | as 26 músicas gravadas (MP3: CC BY 4.0, CC BY-SA e CC0) e `LICENCAS.md`. |
 | `rock.js` | a banda de rock e as 3 músicas (partitura em `MUSICAS`), testadas no Node. |
 | `som.js` | motor, buzina e efeitos sintetizados (WebAudio); liga e desliga a música do `rock.js`. |
 | `app.js` | menu, controles, tela cheia, bordas seguras, laço da corrida, pausa, resultado, recorde, instalar e baixar. `APP_VERSION` aqui. |

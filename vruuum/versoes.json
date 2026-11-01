@@ -2,6 +2,21 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "1.3.0",
+      "data": "01/Nov/2026",
+      "hora": "23:05:00",
+      "pt": [
+        "Mais 20 rocks gravados de verdade, com bateria, baixo e guitarra: 15 do Kevin MacLeod (Metalmania, Ready Aim Fire, Summon the Rawk, Noise Attack, RetroFuture Nasty, Hotrock, Neolith, Iron Bacon, Take the Lead, Exhilarate, Cool Hard Facts, Bet You Can, Pump, Breakdown e What You Want; CC BY 4.0) e 5 do álbum Rock Montage do HoliznaCC0 (domínio público). Agora são 29 músicas: 26 gravadas e as 3 feitas pelo jogo, que continuam.",
+        "A rádio sorteia a ordem a cada vez que o jogo abre e toca uma das feitas pelo jogo só a cada 8 gravadas. Todas com o volume igualado.",
+        "Sem internet: com Wi‑Fi, as músicas ficam guardadas no aparelho aos poucos, em segundo plano; no 4G, só 6, e as outras na primeira vez que tocam."
+      ],
+      "en": [
+        "20 more real recorded rock songs, with drums, bass and guitar: 15 by Kevin MacLeod (Metalmania, Ready Aim Fire, Summon the Rawk, Noise Attack, RetroFuture Nasty, Hotrock, Neolith, Iron Bacon, Take the Lead, Exhilarate, Cool Hard Facts, Bet You Can, Pump, Breakdown and What You Want; CC BY 4.0) and 5 from HoliznaCC0's Rock Montage album (public domain). Now there are 29 songs: 26 recorded plus the 3 made by the game, which stay.",
+        "The radio shuffles the order every time the game opens and plays one of the game-made songs only every 8 recorded ones. All with matched volume.",
+        "Offline: on Wi‑Fi, the songs are saved on the device little by little in the background; on mobile data only 6, and the others the first time they play."
+      ]
+    },
+    {
       "versao": "1.2.1",
       "data": "01/Nov/2026",
       "hora": "22:20:00",
