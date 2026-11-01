@@ -70,7 +70,7 @@
   function ids(cat, semNenhum) { return cat.opcoes.map(function (x) { return x.id; }).filter(function (id) { return !semNenhum || id !== 'nenhum'; }); }
   function cores(cat) { return P.CORES[cat.cores].map(function (x) { return x.id; }); }
 
-  /* Surpresa: sorteia tudo, mas com bom senso — pele, cabelo e olhos ficam (é a personagem dela),
+  /* Surpresa: sorteia tudo, mas com bom senso — pele, cabelo, mechas e olhos ficam (é a personagem dela),
      roupa e maquiagem combinando, acessório às vezes sim, às vezes não. Cenário fica. */
   function surpresa(e0, r) {
     r = r || Math.random;
@@ -96,7 +96,7 @@
     e.base = r() < 0.6 ? um(ids(P.categoria('base'), true), r) : 'nenhum';
     e.glitter = r() < 0.45 ? um(ids(P.categoria('glitter'), true), r) : 'nenhum'; e.glitterCor = um(cores(P.categoria('glitter')), r);
     e.adesivo = r() < 0.4 ? um(ids(P.categoria('adesivo'), true), r) : 'nenhum';
-    ['cabeca', 'laco', 'brincos', 'colar', 'oculos', 'bolsa'].forEach(function (id) {
+    ['cabeca', 'laco', 'brincos', 'colar', 'oculos', 'bolsa', 'pulseira', 'anel', 'broche'].forEach(function (id) {
       var cat = P.categoria(id); e[id] = r() < 0.45 ? um(ids(cat, true), r) : 'nenhum'; e[id + 'Cor'] = r() < 0.5 ? um(['dourado', 'prata'], r) : corDoDia();
     });
     if (e.cabeca === 'chapeu' || e.cabeca === 'gorro') e.laco = 'nenhum';
@@ -146,7 +146,7 @@
   // frase curta do visual, para leitor de tela (aria-label do desenho)
   function resumo(e, lingua) {
     var L = lingua === 'en' ? 'en' : 'pt', partes = [];
-    ['vestido', 'blusa', 'saia', 'calca', 'sapatos', 'cabeca', 'laco', 'oculos', 'colar', 'brincos', 'bolsa', 'batom', 'sombra', 'glitter', 'adesivo'].forEach(function (id) {
+    ['vestido', 'blusa', 'saia', 'calca', 'sapatos', 'cabeca', 'laco', 'oculos', 'colar', 'brincos', 'pulseira', 'anel', 'broche', 'bolsa', 'batom', 'sombra', 'cilios', 'glitter', 'adesivo', 'mechas'].forEach(function (id) {
       if (!visivel(e, id)) return;
       var op = P.opcao(id, e[id]), cat = P.categoria(id), c = cat.cores ? P.cor(cat.cores, e[id + 'Cor']) : null;
       if (op) partes.push((op[L] + (c && id !== 'glitter' ? ' ' + c[L].toLowerCase() : '')).toLowerCase());

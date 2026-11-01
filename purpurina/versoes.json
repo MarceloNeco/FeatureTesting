@@ -2,6 +2,27 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.2.0",
+      "data": "01/Nov/2026",
+      "hora": "14:21:48",
+      "pt": [
+        "🔍 Zoom no rosto: na maquiagem a tela chega perto sozinha para ver os detalhes; nas joias, chega perto do colar ou das mãos. O botão 🔍 lá em cima liga e o 🧍 volta a mostrar a personagem inteira.",
+        "Nova aba 💎 Joias: 13 brincos (pérola, diamante, pingente longo, lua, borboleta, cereja…), 14 colares (diamantes, medalhão, miçangas, concha, duas correntes…), pulseiras (berloques, relógio, pérolas, várias, da amizade), anéis (com pedra, coração, flor, estrela, nas duas mãos) e broches. E um diadema de joias nas coroas.",
+        "Cílios: 8 estilos (naturais, longos, de boneca, gatinho, volume, em cima e embaixo, arco-íris e com strass).",
+        "Cabelo: 18 penteados (novos: liso com franja, black power, dois puffs, rabo de lado, trança de lado, meio preso, joãozinho, longo de sereia, dois coquinhos e tranças box) e mechas coloridas (pontas, na frente ou arco-íris).",
+        "Roupas: novos vestidos (longo de gala, jardineira, macacão, tomara que caia balonê, casaco longo e de fada com asas), blusas (moletom, camisa, ombro a ombro, blusa de laço, colete), saias (balonê, em camadas, jeans), calças (bermuda, jogger, rasgadinha), sapatos (de boneca, patins, chinelo, galocha) e estampas (arco-íris e oncinha).",
+        "2 desafios novos: 💎 Noite das joias e 🤪 Dia do cabelo maluco."
+      ],
+      "en": [
+        "🔍 Face zoom: for makeup the screen zooms in by itself to show the details; for jewelry it zooms to the necklace or the hands. The 🔍 button at the top zooms in and 🧍 shows the whole character again.",
+        "New 💎 Jewelry tab: 13 earrings (pearl, diamond, chandelier, moon, butterfly, cherries…), 14 necklaces (diamonds, locket, beads, shell, layered chains…), bracelets (charms, watch, pearls, stacked, friendship), rings (gemstone, heart, flower, star, on both hands) and brooches. Plus a jeweled headband among the crowns.",
+        "Lashes: 8 styles (natural, long, doll, cat-eye, volume, top and bottom, rainbow and rhinestones).",
+        "Hair: 18 hairdos (new: straight with bangs, afro, two puffs, side ponytail, side braid, half-up, pixie, mermaid hair, space buns and box braids) and colored highlights (tips, front or rainbow).",
+        "Clothes: new dresses (evening gown, pinafore, jumpsuit, strapless bubble, long coat and fairy dress with wings), tops (hoodie, button shirt, off-shoulder, bow blouse, vest), skirts (bubble, tiered, denim), pants (bermuda, joggers, ripped jeans), shoes (Mary Janes, roller skates, flip-flops, rain boots) and patterns (rainbow and leopard).",
+        "2 new challenges: 💎 Jewelry night and 🤪 Crazy hair day."
+      ]
+    },
+    {
       "versao": "0.1.0",
       "data": "01/Nov/2026",
       "hora": "14:11:39",

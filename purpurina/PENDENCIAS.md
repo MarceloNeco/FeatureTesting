@@ -10,3 +10,4 @@ Situação: 🟡 aberta · 🔵 em andamento · ⏸ aguardando o dono · ✅ fei
 | 4 | Pintar a maquiagem com o dedo (passar o pincel no rosto em vez de só tocar no estilo). | ideia (o que esses jogos têm de melhor) | 🟡 |
 | 5 | Tela cheia não existe no iPhone (Safari): lá a barra do navegador pode aparecer; instalado na tela inicial, abre sem a barra. | v0.1.0 | 🟡 |
 | 6 | Casca para TV LG (`tv-lg-purpurina/`) e atalho `solverone.com.br/tv/purpurina`, se a família quiser brincar na TV. | ideia | 🟡 |
+| 7 | Pedido do dono depois da 0.1: mais cílios, estilos de roupa e de cabelo, zoom no rosto, brincos, colares e joias. | dono, 01/Nov/2026 | ✅ v0.2.0 (8 cílios, 18 penteados + mechas, roupas e sapatos novos, aba 💎 Joias com brincos, colares, pulseiras, anéis e broches, zoom automático e botão 🔍) |

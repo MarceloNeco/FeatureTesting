@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.0';
+  var APP_VERSION = '0.2.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -142,6 +142,7 @@
     if (d) { estado = baseDesafio(d); grupoAtual = 'roupa'; Som.proxima(); }
     else { estado = livre; grupoAtual = grupoAtual || 'eu'; }
     dicasAntes = d ? V.avaliar(estado, d).dicas : [];
+    vista = INTEIRA.slice(); zoomLigado = false;
     ir('estudio');
   }
   function mudar(novo, catId) {
@@ -156,12 +157,12 @@
   function desenharTudo() {
     var d = desafioAtual();
     $('titulo').textContent = d ? d.ico + ' ' + N(d) : t('🎨 Brincar livre', '🎨 Free play');
-    desenharGrupos(); desenharBoneca(); desenharOpcoes(); desenharDicas(false);
+    desenharGrupos(); desenharBoneca(); desenharOpcoes(); desenharDicas(false); zoom(zoomLigado, false);
     $('btDesfazer').disabled = !hist.tem();
   }
   function desenharBoneca() {
     var el = $('boneca');
-    el.innerHTML = B.svg(estado, { id: 'palco', anim: !CALMO });
+    el.innerHTML = B.svg(estado, { id: 'palco', anim: !CALMO, area: vista });
     el.setAttribute('aria-label', V.resumo(estado, pref.lingua));
   }
   function desenharDicas(comSom) {
@@ -179,6 +180,34 @@
     dicasAntes = r.dicas;
   }
 
+  /* ---------- zoom ----------
+     O palco mostra a personagem inteira ou chega perto (rosto, busto, mãos ou cabeça). Liga sozinho ao escolher
+     uma parte que tem zoom (maquiagem, joias, olhos…) e desliga nas roupas e no cenário; o 🔍 liga e desliga na mão.
+     A animação só muda o viewBox do SVG (barato, sem redesenhar). */
+  var INTEIRA = [0, 0, 400, 720], vista = INTEIRA.slice(), zoomLigado = false, animZoom = 0;
+  function catAtual() { return P.categoria(catPorGrupo[grupoAtual] || catsDoGrupo(grupoAtual)[0].id); }
+  function alvoZoom() { var c = catAtual(); return P.ZOOM[(c && c.zoom) || 'rosto']; }
+  function zoom(liga, animar) {
+    zoomLigado = !!liga;
+    var b = $('btZoom'); b.setAttribute('aria-pressed', String(zoomLigado)); b.textContent = zoomLigado ? '🧍' : '🔍';
+    b.setAttribute('aria-label', zoomLigado ? t('Ver a personagem inteira', 'See the whole character') : t('Chegar perto (zoom)', 'Zoom in'));
+    var de = vista.slice(), para = zoomLigado ? alvoZoom().slice() : INTEIRA.slice(), id = ++animZoom;
+    if (de.join() === para.join()) return;
+    var svg = $('boneca').querySelector('svg');
+    if (!animar || CALMO || !svg) { vista = para; if (svg) svg.setAttribute('viewBox', vista.join(' ')); return; }
+    var ini = performance.now(), dur = 380;
+    (function passo(agora) {
+      if (id !== animZoom) return;
+      var k = Math.min(1, (agora - ini) / dur), e = 1 - Math.pow(1 - k, 3);
+      vista = de.map(function (v, i) { return v + (para[i] - v) * e; });
+      var s = $('boneca').querySelector('svg'); if (s) s.setAttribute('viewBox', vista.map(function (v) { return Math.round(v * 10) / 10; }).join(' '));
+      if (k < 1) requestAnimationFrame(passo); else vista = para;
+    })(ini);
+  }
+  // ao trocar de parte: zoom automático conforme a parte
+  function zoomDaParte() { var c = catAtual(); zoom(!!(c && c.zoom), true); }
+  $('btZoom').addEventListener('click', function () { Som.tocar('clique'); zoom(!zoomLigado, true); });
+
   // o quadro de dicas recolhe com um toque (para ver a personagem inteira)
   $('btDicas').addEventListener('click', function () { var ul = $('dicas'); ul.hidden = !ul.hidden; $('btDicas').setAttribute('aria-expanded', String(!ul.hidden)); Som.tocar('clique'); desenharDicas(false); });
 
@@ -192,7 +221,7 @@
       var i = document.createElement('span'); i.className = 'i'; i.textContent = g.ico;
       var tx = document.createElement('span'); tx.className = 't'; tx.textContent = N(g);
       b.appendChild(i); b.appendChild(tx);
-      b.addEventListener('click', function () { grupoAtual = g.id; Som.tocar('aba'); desenharGrupos(); desenharOpcoes(); });
+      b.addEventListener('click', function () { grupoAtual = g.id; Som.tocar('aba'); desenharGrupos(); desenharOpcoes(); zoomDaParte(); });
       caixa.appendChild(b);
     });
     var cats = catsDoGrupo(grupoAtual), cc = $('cats'); cc.innerHTML = '';
@@ -201,7 +230,7 @@
     cats.forEach(function (c) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'cat-bt'; b.textContent = c.ico + ' ' + N(c);
       b.setAttribute('aria-pressed', String(c.id === catPorGrupo[grupoAtual]));
-      b.addEventListener('click', function () { catPorGrupo[grupoAtual] = c.id; Som.tocar('clique'); desenharGrupos(); desenharOpcoes(); $('opcoes').scrollTop = 0; });
+      b.addEventListener('click', function () { catPorGrupo[grupoAtual] = c.id; Som.tocar('clique'); desenharGrupos(); desenharOpcoes(); $('opcoes').scrollTop = 0; zoomDaParte(); });
       cc.appendChild(b);
     });
   }
@@ -244,12 +273,13 @@
   // ---------- efeitos na personagem: pincel, faíscas, giro ----------
   var ALVO = { base: [200, 200, 1], blush: [250, 252, 1], sombra: [236, 192, 1], delineado: [236, 205, 1], cilios: [236, 195, 1], batom: [200, 272, 1], glitter: [200, 180, 1], adesivo: [266, 250, 1],
     pele: [200, 205, 1], cabelo: [200, 130, 1], olhos: [200, 214, 1], vestido: [200, 480], blusa: [200, 400], saia: [200, 490], calca: [200, 540], estampa: [200, 400], sapatos: [200, 646],
-    cabeca: [200, 110, 1], laco: [250, 130, 1], brincos: [284, 236, 1], colar: [200, 350], oculos: [200, 214, 1], bolsa: [290, 515], cenario: [200, 360] };
+    cabeca: [200, 110, 1], laco: [250, 130, 1], brincos: [284, 236, 1], colar: [200, 350], oculos: [200, 214, 1], bolsa: [290, 515], cenario: [200, 360],
+    mechas: [200, 140, 1], pulseira: [120, 487], anel: [111, 508], broche: [174, 388] };
   var PINCEL = { base: '🧽', blush: '🖌️', sombra: '🖌️', delineado: '✏️', cilios: '🖌️', batom: '💄', glitter: '✨', adesivo: '💟' };
   function naTela(x, y, cabeca) {
     if (cabeca) { x = 200 + (x - 200) * 1.12; y = 297 + (y - 297) * 1.12 + 14; }   // mesma conta do grupo da cabeça em boneca.js
-    var r = $('boneca').getBoundingClientRect(), s = Math.min(r.width / 400, r.height / 720);
-    return [(r.width - 400 * s) / 2 + x * s, (r.height - 720 * s) / 2 + y * s];
+    var r = $('boneca').getBoundingClientRect(), v = vista, s = Math.min(r.width / v[2], r.height / v[3]);
+    return [(r.width - v[2] * s) / 2 + (x - v[0]) * s, (r.height - v[3] * s) / 2 + (y - v[1]) * s];
   }
   function faiscas(x, y, qtd, emojis) {
     if (CALMO) return;
