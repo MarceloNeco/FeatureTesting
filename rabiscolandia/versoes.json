@@ -2,6 +2,19 @@
   "app": "rabiscolandia",
   "versoes": [
     {
+      "versao": "0.1.1",
+      "data": "01/Nov/2026",
+      "hora": "17:15:49",
+      "pt": [
+        "23 desenhos novos para colorir e pintar por números, todos originais: ursinho na padaria, piquenique do coelhinho, gatinho na chuva, banho de espuma, hora de dormir, aniversário, acampamento, casinha na árvore, Natal, unicórnio, dinossauro, foguete, gatinha sereia, castelo e muito mais — cada um com colinha e outras cores.",
+        "O contorno agora respeita o que fica na frente: o braço passa por cima do corpo sem linha atravessando, e o balde enche certinho essas partes."
+      ],
+      "en": [
+        "23 new pictures to color and paint by numbers, all original: bear at the bakery, bunny picnic, kitty in the rain, bubble bath, bedtime, birthday, camping, tree house, Christmas, unicorn, dinosaur, rocket, mermaid kitty, castle and more — each with a cheat sheet and other color sets.",
+        "Outlines now respect what is in front: an arm goes over the body with no line crossing it, and the bucket fills those parts properly."
+      ]
+    },
+    {
       "versao": "0.1.0",
       "data": "01/Nov/2026",
       "hora": "17:10:17",

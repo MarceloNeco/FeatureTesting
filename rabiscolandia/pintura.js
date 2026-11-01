@@ -53,16 +53,25 @@
   function pathsDe(pag) {
     if (cachePaths[pag.id]) return cachePaths[pag.id];
     var formas = pag.formas.map(function (f) { return new Path2D(f.d); });
-    var linhas = new Path2D();
-    pag.formas.forEach(function (f) { linhas.addPath(new Path2D(f.d)); });
-    (pag.linhas || []).forEach(function (l) { linhas.addPath(new Path2D(l)); });
-    return (cachePaths[pag.id] = { formas: formas, contorno: linhas });
+    var detalhes = new Path2D(); (pag.linhas || []).forEach(function (l) { detalhes.addPath(new Path2D(l)); });
+    return (cachePaths[pag.id] = { formas: formas, detalhes: detalhes });
+  }
+  /* contorno NA ORDEM de pintura: cada forma apaga o contorno que ficou embaixo dela e desenha o seu, assim o
+     contorno das partes escondidas (o corpo atrás do braço, o morro atrás da árvore) não aparece. Precisa de um
+     canvas só para o contorno (transparente), porque "apagar" levaria junto o que estivesse embaixo. */
+  function contornoEmOrdem(c, pag, cor) {
+    var p = pathsDe(pag);
+    c.lineWidth = CONTORNO; c.lineJoin = 'round'; c.lineCap = 'round'; c.strokeStyle = cor || '#2b2b2b';
+    p.formas.forEach(function (f) { c.globalCompositeOperation = 'destination-out'; c.fill(f); c.globalCompositeOperation = 'source-over'; c.stroke(f); });
+    c.stroke(p.detalhes);
   }
   /* desenha a página na caixa 0..1000 do contexto atual: cores = paleta (colinha) ou null (só contorno) */
   function desenharPagina(ctx, pag, cores, comContorno) {
     var p = pathsDe(pag);
-    if (cores) pag.formas.forEach(function (f, i) { ctx.fillStyle = cores[f.n - 1]; ctx.fill(p.formas[i]); });
-    if (comContorno !== false) { ctx.lineWidth = CONTORNO; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.strokeStyle = '#2b2b2b'; ctx.stroke(p.contorno); }
+    // pintar cada forma e logo em seguida o contorno dela: a forma de cima cobre o contorno escondido
+    ctx.lineWidth = CONTORNO; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.strokeStyle = '#2b2b2b';
+    pag.formas.forEach(function (f, i) { ctx.fillStyle = cores ? cores[f.n - 1] : '#ffffff'; ctx.fill(p.formas[i]); if (comContorno !== false) ctx.stroke(p.formas[i]); });
+    if (comContorno !== false) ctx.stroke(p.detalhes);
   }
   function miniaturaPagina(pag, px, cores) {
     var c = document.createElement('canvas'); c.width = c.height = px;
@@ -306,7 +315,7 @@
       var c = document.createElement('canvas'); c.width = PAG.w; c.height = PAG.h;
       var x = c.getContext('2d', { willReadFrequently: true });
       x.scale(ESC, ESC);
-      x.lineWidth = CONTORNO * 0.8; x.lineJoin = 'round'; x.lineCap = 'round'; x.strokeStyle = '#000'; x.stroke(pathsDe(pag).contorno);
+      contornoEmOrdem(x, pag, '#000');
       var d = x.getImageData(0, 0, PAG.w, PAG.h).data, m = new Uint8Array(PAG.w * PAG.h);
       for (var i = 0; i < m.length; i++) m[i] = d[i * 4 + 3] > 90 ? 1 : 0;
       mascara = { id: pag.id, m: m };
@@ -564,6 +573,21 @@
       } else { c.fillStyle = fundo.tipo === 'cor' ? fundo.v : '#ffffff'; c.fillRect(area.x, area.y, area.w, area.h); }
     }
 
+    /* contorno numa camada própria, do tamanho do canvas onde vai aparecer (nítido em qualquer zoom). Guardada
+       enquanto a vista não muda; no zoom com os dedos é refeita a cada quadro (dezenas de formas: leve). */
+    var camada = null;
+    function camadaContorno(c) {
+      var m = c.getTransform(), w = c.canvas.width, h = c.canvas.height, chave = [pag.id, w, h, m.a, m.d, m.e, m.f].join('|');
+      if (!camada || camada.chave !== chave) {
+        var cv = camada && camada.c.width === w && camada.c.height === h ? camada.c : document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        var x = cv.getContext('2d'); x.setTransform(m.a, m.b, m.c, m.d, m.e, m.f); x.translate(PAG.x, PAG.y); x.scale(ESC, ESC);
+        contornoEmOrdem(x, pag);
+        camada = { c: cv, chave: chave };
+      }
+      c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(camada.c, 0, 0); c.restore();
+    }
+
     /* ---------- desenhar a cena ---------- */
     function cena(c, t, paraFoto, area) {
       desenharFundo(c, t, area);
@@ -589,7 +613,7 @@
       Object.keys(quadros).forEach(function (k) { var n = +k; c.drawImage(quadros[k], (n % NTX) * TS, Math.floor(n / NTX) * TS); });
       var tv = calmo ? 0 : t;
       vivos.forEach(function (v) { c.save(); desenharVivo(c, v, tv); c.restore(); });
-      if (p) { c.save(); c.translate(PAG.x, PAG.y); c.scale(ESC, ESC); c.lineWidth = CONTORNO; c.lineJoin = 'round'; c.lineCap = 'round'; c.strokeStyle = '#2b2b2b'; c.stroke(p.contorno); c.restore(); }
+      if (p) camadaContorno(c);
       if (raiz.DesenhoAdesivos) adesivos.forEach(function (a) { try { raiz.DesenhoAdesivos.desenhar(c, calmo ? { tipo: a.tipo, v: a.v, x: a.x, y: a.y, s: a.s, mov: 'parado', fase: a.fase } : a, tv); } catch (e) { /* adesivo desconhecido */ } });
     }
     function numerosNaTela(c) {

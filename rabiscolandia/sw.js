@@ -3,7 +3,7 @@
    da mão (MediaPipe em ../baguncolandia/libs/, só baixa quando alguém liga a mão): cópia primeiro.
    Cache com o nome do app: só apaga caches "rabiscolandia-" (nunca os dos outros apps da mesma origem).
    Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
-var VERSAO = '0.1.0';
+var VERSAO = '0.1.1';
 var CACHE = 'rabiscolandia-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'folha.js', 'paginas.js', 'fundos.js', 'adesivos.js', 'som.js', 'pintura.js', 'mao.js', 'app.js', 'sala.js', 'tv.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 self.addEventListener('install', function (e) {

@@ -15,7 +15,7 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/rabiscoland
   adesivo e o 🏞️ fundo, e uma faixa de cores. Tocar no pincel de novo abre todos os pincéis:
   canetinha, lápis, giz de cera, pincel macio, spray e os **✨ vivos**, que mexem sozinhos — 🌈 arco-íris que corre,
   💡 neon que pisca, ✨ purpurina que brilha e 🐛 minhoca que dança (com carinha!).
-- **📚 Livro de colorir**: escolha um desenho; o 🪣 balde enche a área sem passar do contorno, e todos os pincéis
+- **📚 Livro de colorir**: 23 desenhos originais em 7 temas (bichinhos, casa, passeio, festa, fantasia, natureza, veículos); escolha um; o 🪣 balde enche a área sem passar do contorno, e todos os pincéis
   funcionam. **👀 Colinha** mostra como pode ficar; **🎨** troca para outras cores (noite, outono, doce…) — a colinha e
   as cores da faixa mudam juntas.
 - **🔢 Pintar por números**: escolha a cor numerada embaixo e toque nas áreas com o mesmo número (a área da cor

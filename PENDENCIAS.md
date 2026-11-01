@@ -38,3 +38,4 @@ reaproveitados). Criada em 31/Out/2026, com autorização do dono.
 - **01/Nov/2026:** Purpurina 0.7.0 — bolsas seguradas na mão com mais detalhe e aviso de versão nova.
 - **01/Nov/2026:** Vruuum! 0.7.0 e 0.8.0 — garagem com 9 veículos e voo pelo céu; piloto de costas que vira e sorri; selfie com rosto achado sem internet (MediaPipe), guardada só no aparelho.
 - **01/Nov/2026:** card e pasta `rabiscolandia/` (Rabiscolândia 0.1.0: desenhar, livro de colorir, pintar por números, adesivos animados, paisagens, música, mão na câmera e TV com celular de controle); interruptor `rabiscolandia` no `recursos-do-app.json`; modelo da mão `hand_landmarker.task` em `baguncolandia/libs/mediapipe/`. Aberto o #12.
+- **01/Nov/2026:** Rabiscolândia 0.1.1 — 23 desenhos de colorir originais e contorno na ordem certa (partes escondidas sem linha atravessando).
