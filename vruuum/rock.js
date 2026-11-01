@@ -253,7 +253,11 @@
       prox += 60 / m.bpm / 4;
       if (++passo >= 16) {
         passo = 0;
-        if (++barra >= lista.length) { faixa = (faixa + 1) % MUSICAS.length; lista = expandir(MUSICAS[faixa]); barra = 0; }
+        if (++barra >= lista.length) {
+          // fim da música: quem toca a lista (som.js) escolhe a próxima; sem lista, segue a próxima daqui
+          if (VruuumRock.aoFim) { var espera = Math.max(0, (prox - ac.currentTime) * 1000) + 200; desligar(); barra = 0; setTimeout(VruuumRock.aoFim, espera); return; }
+          faixa = (faixa + 1) % MUSICAS.length; lista = expandir(MUSICAS[faixa]); barra = 0;
+        }
       }
     }
   }
@@ -263,10 +267,15 @@
     prox = ac.currentTime + 0.06; timer = setInterval(agendar, 25);
   }
   function desligar() { if (timer) { clearInterval(timer); timer = null; } }
+  // começa a música i do início
+  function comecar(i) {
+    desligar(); faixa = ((i % MUSICAS.length) + MUSICAS.length) % MUSICAS.length; lista = expandir(MUSICAS[faixa]); barra = 0; passo = 0;
+    ligar();
+  }
   function proxima() {
     faixa = (faixa + 1) % MUSICAS.length; lista = expandir(MUSICAS[faixa]); barra = 0; passo = 0;
     if (ac) prox = Math.max(prox, ac.currentTime + 0.06);
   }
 
-  raiz.VruuumRock = { preparar: preparar, ligar: ligar, desligar: desligar, proxima: proxima, MUSICAS: MUSICAS, expandir: expandir, _tocar: function (m, b, p, t) { tocar(m, b, p, t); } };
+  var VruuumRock = raiz.VruuumRock = { aoFim: null, preparar: preparar, ligar: ligar, desligar: desligar, proxima: proxima, comecar: comecar, MUSICAS: MUSICAS, expandir: expandir, _tocar: function (m, b, p, t) { tocar(m, b, p, t); } };
 })(this);
