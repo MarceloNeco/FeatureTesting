@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Purpurina — Bolinho de Chuva · SolverONE</title>
 <link rel="icon" href="icone-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -109,8 +109,12 @@
   <div class="painel">
     <div id="grupos" class="grupos" role="tablist"></div>
     <div id="cats" class="cats"></div>
+    <button id="btMais" class="mais-bt" type="button" hidden data-t="⬇ mais|⬇ more"></button>
     <div id="opcoes" class="opcoes-painel">
-      <button id="btTirar" class="tirar-bt" type="button" hidden></button>
+      <div class="tirar-linha">
+        <button id="btTirar" class="tirar-bt" type="button" hidden></button>
+        <button id="btTirarTudo" class="tirar-bt" type="button" hidden></button>
+      </div>
       <div id="cores" class="cores" role="group"></div>
       <div id="estilos" class="estilos" role="group"></div>
     </div>
@@ -147,6 +151,7 @@
     <h2 id="janelaTitulo"></h2>
     <p id="janelaTexto"></p>
     <img id="janelaImg" alt="" hidden>
+    <video id="janelaVideo" playsinline loop muted autoplay hidden></video>
     <div id="janelaBotoes" class="janela-botoes"></div>
   </div>
 </div>

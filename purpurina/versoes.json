@@ -2,6 +2,33 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.4.0",
+      "data": "01/Nov/2026",
+      "hora": "15:42:22",
+      "pt": [
+        "Girar ficou de verdade: em vez de espremer a personagem, ela passa por 16 posições desenhadas — frente, três-quartos (o rosto vira de leve), perfil de verdade (testa, nariz, boca e queixo de lado, um olho, a orelha com o brinco e o cabelo caindo atrás) e costas. A cabeça nunca fica espremida.",
+        "💅 Unhas: esmalte liso, francesinha, com glitter, bolinhas, arco-íris, degradê e coraçãozinho, em todas as cores (com zoom nas mãos). Descalça, as unhas dos pés também ficam pintadas.",
+        "👟 Muitos sapatos novos (28 ao todo): de princesa, salto alto, salto médio, salto baixinho, plataforma, anabela, rasteirinha, chinelo com flor, tamanco de furinhos, mocassim, sapato social, tênis de cano alto, de luzinha e de glitter, bota de cano alto, bota de neve, sapatilha de ponta e descalça. Ao escolher sapatos, a tela chega perto dos pés.",
+        "💇 30 penteados (12 novos): franja cortina, ondas no ombro, rabo alto, trança coroa, coque bagunçado, cachinhos curtos, ondas longas, franjinha, chiquinhas baixas, dreads, ondas de lado e cachos longos.",
+        "🚫 Todas as partes que dá para tirar têm a bolinha com a diagonal (cílios, sapatos, blusa, estampa…) e o botão 🚫 Tirar. E 🚫 Tirar toda a maquiagem / todas as joias / todos os acessórios de uma vez.",
+        "🔄 Reiniciar: ao tocar em Brincar livre dá para escolher continuar o visual ou começar do zero; no estúdio, o 🔄 tira maquiagem, roupas e acessórios ou começa tudo do zero (e ↩ desfaz).",
+        "📸 Foto em alta resolução, com luz de estúdio, e 🎬 Vídeo girando: um vídeo da personagem dando duas voltas para salvar ou compartilhar.",
+        "Mais cores (rosé, nude, marrom, vinho, turquesa e laranja) e desenho com luz e sombra mais suaves (testa, pálpebra, nariz, boca e fios de cabelo).",
+        "Mais fácil para as crianças: as partes de cada aba (Brincos, Colares, Pulseiras…) viraram botões quadradinhos que aparecem todos de uma vez, sem nada escondido para o lado; as bolinhas de cor ficaram menores, e um botão ⬇ mais avisa quando há mais opções embaixo."
+      ],
+      "en": [
+        "Spinning is for real now: instead of squeezing the character, she turns through 16 drawn positions — front, three-quarter (the face turns a little), a true profile (forehead, nose, mouth and chin from the side, one eye, the ear with the earring and the hair falling behind) and back. The head is never squeezed.",
+        "💅 Nails: plain polish, French tips, glitter, polka dots, rainbow, ombré and little hearts, in every color (with zoom on the hands). Barefoot, the toenails are painted too.",
+        "👟 Lots of new shoes (28 in all): princess shoes, high heels, mid heels, kitten heels, platforms, wedges, strappy flats, flower flip-flops, holey clogs, loafers, oxfords, high-top, light-up and glitter sneakers, knee-high boots, snow boots, pointe shoes and barefoot. Choosing shoes zooms to the feet.",
+        "💇 30 hairdos (12 new): curtain bangs, shoulder waves, high ponytail, crown braid, messy bun, short curls, long waves, baby bangs, low pigtails, locs, side-swept waves and long ringlets.",
+        "🚫 Every part you can take off has the no-sign option (lashes, shoes, top, pattern…) and the 🚫 Remove button. Plus 🚫 Remove all makeup / all jewelry / all accessories at once.",
+        "🔄 Start over: Free play asks whether to keep the last look or start from scratch; in the studio, 🔄 removes makeup, clothes and accessories or resets everything (↩ undoes).",
+        "📸 High-resolution photo with studio light, and 🎬 Spinning video: the character turns twice, ready to save or share.",
+        "More colors (rose gold, nude, brown, burgundy, turquoise and orange) and softer light and shadow (forehead, eyelids, nose, lips and hair strands).",
+        "Easier for kids: the parts of each tab (Earrings, Necklaces, Bracelets…) are now square buttons that all show at once, nothing hidden to the side; the color dots are smaller, and a ⬇ more button shows when there are more options below."
+      ]
+    },
+    {
       "versao": "0.3.0",
       "data": "01/Nov/2026",
       "hora": "15:29:46",

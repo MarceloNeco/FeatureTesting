@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.3.0';
+  var APP_VERSION = '0.4.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -51,7 +51,7 @@
     ignorar++; history.go(-passos); mostrar('menu');
   }
   window.addEventListener('popstate', function () {
-    if (ignorar) { ignorar--; return; }
+    if (ignorar) { ignorar--; if (aposFechar) { var fn = aposFechar; aposFechar = null; fn(); } return; }
     if (janelaAberta) { fecharJanela(); return; }
     if (pilha.length) mostrar(pilha.pop());
   });
@@ -60,21 +60,24 @@
   if (window.SolverRecursos && !SolverRecursos.ligado('purpurina', true)) { mostrar('desligado'); traduzir(); return; }
 
   // ---------- janela (foto, confirmar) ----------
-  function abrirJanela(o) {
+  var aposFechar = null;
+  function abrirJanela(o, mesma) {
     $('janelaTitulo').textContent = o.titulo || ''; $('janelaTexto').textContent = o.texto || ''; $('janelaTexto').hidden = !o.texto;
     var img = $('janelaImg'); img.hidden = !o.img; if (o.img) { img.src = o.img; img.alt = o.alt || ''; }
     var caixa = $('janelaBotoes'); caixa.innerHTML = '';
     o.botoes.forEach(function (b) {
       var bt = document.createElement('button'); bt.type = 'button'; bt.className = b.classe || 'medio'; bt.textContent = b.t;
-      bt.addEventListener('click', function () { if (b.ficar) { b.fn(); return; } fecharPeloBotao(); if (b.fn) b.fn(); });
+      bt.addEventListener('click', function () { if (b.ficar) { b.fn(); return; } fecharPeloBotao(b.fn); });
       caixa.appendChild(bt);
     });
-    $('janela').hidden = false; janelaAberta = true;
-    try { history.pushState({ janela: 1 }, ''); } catch (e) { /* ok */ }
+    var vid = $('janelaVideo'); vid.hidden = !o.video; if (o.video) { vid.src = o.video; try { vid.play(); } catch (e) { /* ok */ } } else vid.removeAttribute('src');
+    $('janela').hidden = false;
+    if (!(mesma && janelaAberta)) { janelaAberta = true; try { history.pushState({ janela: 1 }, ''); } catch (e) { /* ok */ } }
     setTimeout(function () { var p = caixa.querySelector('button'); if (p) p.focus(); }, 30);
   }
-  function fecharJanela() { $('janela').hidden = true; janelaAberta = false; var img = $('janelaImg'); if (img.src && img.src.indexOf('blob:') === 0) URL.revokeObjectURL(img.src); img.removeAttribute('src'); }
-  function fecharPeloBotao() { if (!janelaAberta) return; fecharJanela(); ignorar++; history.back(); }
+  function fecharJanela() { $('janela').hidden = true; janelaAberta = false; var v = $('janelaVideo'); try { v.pause(); } catch (e) { /* ok */ } if (v.src && v.src.indexOf('blob:') === 0) URL.revokeObjectURL(v.src); v.removeAttribute('src'); var img = $('janelaImg'); if (img.src && img.src.indexOf('blob:') === 0) URL.revokeObjectURL(img.src); img.removeAttribute('src'); }
+  // fecha a janela e só depois (quando o navegador terminar de voltar no histórico) faz a ação escolhida
+  function fecharPeloBotao(depois) { if (!janelaAberta) return; fecharJanela(); ignorar++; aposFechar = depois || null; history.back(); }
   $('janela').addEventListener('click', function (e) { if (e.target === $('janela')) fecharPeloBotao(); });
 
   var tRecado = 0;
@@ -97,7 +100,14 @@
   $('btLingua').addEventListener('click', function () { pref.lingua = pref.lingua === 'en' ? 'pt' : 'en'; salvarPref(); traduzir(); Som.tocar('clique'); });
   $('btSom').addEventListener('click', function () { Som.iniciar(); var lig = Som.alternar(); $('btSom').textContent = lig ? '🔊' : '🔇'; });
   $('btAjuda').addEventListener('click', function () { var a = $('ajuda'); a.hidden = !a.hidden; $('btAjuda').setAttribute('aria-expanded', String(!a.hidden)); });
-  $('btLivre').addEventListener('click', function () { Som.tocar('aba'); comecar(null); });
+  $('btLivre').addEventListener('click', function () {
+    Som.tocar('aba');
+    if (V.iguais(livre, V.novo())) { comecar(null); return; }
+    abrirJanela({ titulo: t('🎨 Brincar livre', '🎨 Free play'), texto: t('Quer continuar o visual de antes ou começar tudo do zero?', 'Do you want to keep your last look or start from scratch?'), botoes: [
+      { t: t('✨ Começar do zero', '✨ Start from scratch'), classe: 'grande', fn: function () { hist.limpar(); livre = V.novo(); gravar('purpurina.atual', livre); comecar(null); } },
+      { t: t('👗 Continuar o visual', '👗 Keep my look'), fn: function () { comecar(null); } }
+    ] });
+  });
   $('btDesafios').addEventListener('click', function () { Som.tocar('aba'); ir('desafios'); });
   $('btLooks').addEventListener('click', function () { Som.tocar('aba'); ir('looks'); });
 
@@ -212,6 +222,19 @@
   $('btZoom').addEventListener('click', function () { Som.tocar('clique'); zoom(!zoomLigado, true); });
 
 
+ // "⬇ mais": aparece quando há opções escondidas embaixo; um toque rola para baixo
+  function conferirMais() {
+    var o = $('opcoes'), tem = o.scrollHeight - o.scrollTop - o.clientHeight > 24;
+    $('btMais').hidden = !tem;
+  }
+  $('opcoes').addEventListener('scroll', conferirMais, { passive: true });
+  window.addEventListener('resize', function () { if (atual === 'estudio') conferirMais(); });
+  $('btMais').addEventListener('click', function () { var o = $('opcoes'); Som.tocar('clique'); try { o.scrollBy({ top: o.clientHeight * 0.75, behavior: 'smooth' }); } catch (e) { o.scrollTop += o.clientHeight * 0.75; } });
+
+  // qual opção é "sem nada" (a bolinha com a diagonal) em cada parte; null = não dá para ficar sem (ex.: pele)
+  function semNada(cat) { if (!cat.opcoes) return null; if (cat.opcoes[0].id === 'nenhum') return 'nenhum'; if (cat.id === 'estampa') return 'liso'; return null; }
+  var TIRAR_TUDO = { make: { pt: 'Tirar toda a maquiagem', en: 'Remove all makeup' }, joias: { pt: 'Tirar todas as joias', en: 'Remove all jewelry' }, acess: { pt: 'Tirar todos os acessórios', en: 'Remove all accessories' } };
+
   // abas (grupos), partes (categorias) e opções
   function catsDoGrupo(g) { return P.CATEGORIAS.filter(function (c) { return c.grupo === g; }); }
   function desenharGrupos() {
@@ -229,7 +252,10 @@
     if (!catPorGrupo[grupoAtual]) catPorGrupo[grupoAtual] = cats[0].id;
     cc.hidden = cats.length < 2;
     cats.forEach(function (c) {
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'cat-bt'; b.textContent = c.ico + ' ' + N(c);
+      // botão quadradinho (desenho em cima, nome embaixo): todas as partes ficam à vista, nada escondido para o lado
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'cat-bt';
+      var ci = document.createElement('span'); ci.className = 'i'; ci.textContent = c.ico; var ct = document.createElement('span'); ct.textContent = N(c);
+      b.appendChild(ci); b.appendChild(ct);
       b.setAttribute('aria-pressed', String(c.id === catPorGrupo[grupoAtual]));
       b.addEventListener('click', function () { catPorGrupo[grupoAtual] = c.id; Som.tocar('clique'); desenharGrupos(); desenharOpcoes(); $('opcoes').scrollTop = 0; zoomDaParte(); });
       cc.appendChild(b);
@@ -240,9 +266,13 @@
     var cores = $('cores'), estilos = $('estilos'); cores.innerHTML = ''; estilos.innerHTML = '';
     cores.hidden = !cat.cores; estilos.hidden = !cat.opcoes;
     // ✕ Tirar: aparece sempre que a peça está colocada e dá para ficar sem ela
-    var podeTirar = !!(cat.opcoes && cat.opcoes[0].id === 'nenhum' && estado[cat.id] !== 'nenhum'), tb = $('btTirar');
+    var sem = semNada(cat), podeTirar = !!(sem && estado[cat.id] !== sem), tb = $('btTirar');
     tb.hidden = !podeTirar;
-    if (podeTirar) { var opAtual = P.opcao(cat.id, estado[cat.id]); tb.textContent = t('✕ Tirar: ', '✕ Remove: ') + N(opAtual); tb.onclick = function () { mudar(V.aplicar(estado, cat.id, 'nenhum'), cat.id); Som.tocar('desfazer'); }; }
+    if (podeTirar) { var opAtual = P.opcao(cat.id, estado[cat.id]); tb.textContent = '🚫 ' + t('Tirar: ', 'Remove: ') + N(opAtual); tb.onclick = function () { mudar(V.aplicar(estado, cat.id, sem), cat.id); Som.tocar('desfazer'); }; }
+    // 🚫 Tirar todos (maquiagem, joias ou acessórios inteiros de uma vez)
+    var tt = $('btTirarTudo'), daAba = TIRAR_TUDO[grupoAtual], postas = daAba ? catsDoGrupo(grupoAtual).filter(function (c) { var s0 = semNada(c); return s0 && estado[c.id] !== s0; }) : [];
+    tt.hidden = postas.length < 2;
+    if (!tt.hidden) { tt.textContent = '🚫 ' + N(daAba); tt.onclick = function () { var e = estado; postas.forEach(function (c) { e = V.aplicar(e, c.id, semNada(c)); }); mudar(e, null); Som.tocar('desfazer'); recado(N(daAba) + ' ✓'); }; }
     cores.setAttribute('aria-label', t('Cores', 'Colors') + ' — ' + N(cat));
     estilos.setAttribute('aria-label', N(cat));
     if (cat.cores) {
@@ -259,11 +289,13 @@
     }
     if (cat.opcoes) {
       cat.opcoes.forEach(function (op, k) {
-        var b = document.createElement('button'); b.type = 'button'; b.className = 'op-bt' + (op.id === 'nenhum' ? ' nenhum' : '') + (cat.id === 'cenario' ? ' fundo' : '');
+        var ehNada = op.id === semNada(cat);
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'op-bt' + (ehNada ? ' nenhum' : '') + (cat.id === 'cenario' ? ' fundo' : '');
         var vis = document.createElement('span'); vis.className = 'mini-svg';
-        if (op.id === 'nenhum') vis.textContent = '🚫';
+        if (ehNada) vis.textContent = '🚫';
         else {
           var e = V.aplicar(estado, cat.id, op.id);
+          if (cat.id === 'sapatos' || cat.id === 'unhas') e = Object.assign({}, e, { vestido: 'nenhum', saia: 'nenhum', calca: 'shorts' });   // para o sapato aparecer inteiro
           vis.innerHTML = cat.id === 'cenario' ? B.svg(e, { id: 'm' + k, soFundo: true, cortar: true }) : B.svg(e, { id: 'm' + k, fundo: false, area: cat.area });
         }
         var nome = document.createElement('span'); nome.textContent = N(op);
@@ -271,13 +303,14 @@
         b.setAttribute('aria-pressed', String(estado[cat.id] === op.id && V.visivel(estado, cat.id) || (op.id === 'nenhum' && estado[cat.id] === 'nenhum')));
         // tocar de novo na peça que já está colocada tira a peça (quando dá para ficar sem ela)
         b.addEventListener('click', function () {
-          var tirar = op.id !== 'nenhum' && estado[cat.id] === op.id && cat.opcoes[0].id === 'nenhum' && V.visivel(estado, cat.id);
-          mudar(V.aplicar(estado, cat.id, tirar ? 'nenhum' : op.id), cat.id);
+          var sem0 = semNada(cat), tirar = !!sem0 && op.id !== sem0 && estado[cat.id] === op.id && V.visivel(estado, cat.id);
+          mudar(V.aplicar(estado, cat.id, tirar ? sem0 : op.id), cat.id);
           if (tirar) recado(t('Tirou: ', 'Removed: ') + N(op));
         });
         estilos.appendChild(b);
       });
     }
+    setTimeout(conferirMais, 30);
   }
 
   // ---------- efeitos na personagem: pincel, faíscas, giro ----------
@@ -404,11 +437,22 @@
     var q = naTela(200, 360); faiscas(q[0], q[1], 16, ['✨', '🎲', '💖', '⭐']);
     voltaNoPalco();
   });
+  // 🔄 Reiniciar: tirar maquiagem, roupa e acessórios (a personagem continua) ou tudo do zero. Dá para desfazer (↩).
   $('btRecomecar').addEventListener('click', function () {
-    var d = desafioAtual(), e = d ? baseDesafio(d) : V.novo();
-    if (!d) ['pele', 'cabelo', 'cabeloCor', 'olhos', 'cenario'].forEach(function (k) { e[k] = estado[k]; });
-    mudar(e, null); Som.tocar('desfazer');
-    recado(t('Tudo limpinho! A personagem continua. ↩ desfaz.', 'All fresh! Your character stays. ↩ undoes.'));
+    var d = desafioAtual();
+    function limpo(tudo) {
+      var e = d ? baseDesafio(d) : V.novo();
+      if (!tudo) ['pele', 'cabelo', 'cabeloCor', 'mechas', 'mechasCor', 'olhos'].forEach(function (k) { e[k] = estado[k]; });
+      else ['pele', 'cabelo', 'cabeloCor', 'mechas', 'mechasCor', 'olhos'].forEach(function (k) { e[k] = P.PADRAO[k]; });
+      e.cenario = d ? d.cenario : (tudo ? P.PADRAO.cenario : estado.cenario);
+      mudar(e, null); Som.tocar('desfazer');
+      recado(t('Pronto, começou de novo! ↩ desfaz.', 'Done, starting over! ↩ undoes.'));
+    }
+    abrirJanela({ titulo: t('🔄 Reiniciar', '🔄 Start over'), texto: t('O que você quer tirar?', 'What do you want to reset?'), botoes: [
+      { t: t('🧼 Maquiagem, roupas e acessórios', '🧼 Makeup, clothes and accessories'), classe: 'grande', fn: function () { limpo(false); } },
+      { t: t('✨ Tudo do zero (personagem também)', '✨ Everything (character too)'), fn: function () { limpo(true); } },
+      { t: t('Cancelar', 'Cancel') }
+    ] });
   });
   $('btGuardar').addEventListener('click', guardarLook);
   $('btGuardarDesfile').addEventListener('click', guardarLook);
@@ -450,7 +494,7 @@
   // ---------- foto do visual ----------
   function carimbo() { var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + '-' + z(d.getHours()) + 'h' + z(d.getMinutes()); }
   function fazerFoto() {
-    var Wf = 800, Hf = 1440, faixa = 120;
+    var Wf = 1080, Hf = 1944, faixa = 150;
     var svg = B.svg(estado, { id: 'foto', largura: Wf, altura: Hf });
     var fonte = document.fonts && document.fonts.load ? document.fonts.load('700 56px Fredoka').catch(function () {}) : Promise.resolve();
     return fonte.then(function () {
@@ -459,13 +503,16 @@
         img.onload = function () {
           var cv = document.createElement('canvas'); cv.width = Wf; cv.height = Hf + faixa;
           var c = cv.getContext('2d'); c.drawImage(img, 0, 0, Wf, Hf);
+          // luz de estúdio: centro mais claro e bordas um pouco mais escuras (vinheta)
+          var v = c.createRadialGradient(Wf / 2, Hf * 0.42, Wf * 0.25, Wf / 2, Hf * 0.5, Hf * 0.75); v.addColorStop(0, 'rgba(255,255,255,0.10)'); v.addColorStop(0.6, 'rgba(255,255,255,0)'); v.addColorStop(1, 'rgba(40,10,60,0.32)');
+          c.fillStyle = v; c.fillRect(0, 0, Wf, Hf);
           var g = c.createLinearGradient(0, Hf, Wf, Hf + faixa); g.addColorStop(0, '#ff5fb4'); g.addColorStop(1, '#8a4fe0');
           c.fillStyle = g; c.fillRect(0, Hf, Wf, faixa);
-          c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '700 56px Fredoka, sans-serif';
+          c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '700 72px Fredoka, sans-serif';
           var d = desafioAtual();
-          c.fillText('✨ Purpurina ✨', Wf / 2, Hf + 46);
-          c.font = '500 30px Fredoka, sans-serif';
-          c.fillText(d ? N(d) : t('Meu visual', 'My look'), Wf / 2, Hf + 94);
+          c.fillText('✨ Purpurina ✨', Wf / 2, Hf + 58);
+          c.font = '500 38px Fredoka, sans-serif';
+          c.fillText(d ? N(d) : t('Meu visual', 'My look'), Wf / 2, Hf + 118);
           cv.toBlob(function (b) { if (b) ok(b); else erro(new Error('sem imagem')); }, 'image/png');
         };
         img.onerror = erro;
@@ -486,9 +533,72 @@
         recado(t('A foto foi para a pasta Downloads (ou Arquivos).', 'The photo went to your Downloads (or Files).'));
       } }];
       if (podeCompartilhar) botoes.push({ t: t('📤 Compartilhar', '📤 Share'), ficar: true, fn: function () { navigator.share({ files: [arquivo], title: 'Purpurina' }).catch(function () { /* cancelou */ }); } });
+      if (VIDEO_OK) botoes.push({ t: t('🎬 Vídeo girando', '🎬 Spinning video'), ficar: true, fn: video });
       botoes.push({ t: t('Fechar', 'Close') });
       abrirJanela({ titulo: t('📸 Que foto linda!', '📸 What a lovely photo!'), img: url, alt: V.resumo(estado, pref.lingua), botoes: botoes });
     }).catch(function () { recado(t('Não deu para tirar a foto agora. Tente de novo.', "Couldn't take the photo now. Try again.")); });
+  }
+
+  /* ---------- vídeo da personagem girando ----------
+     Desenha 48 quadros (uma volta) num canvas e grava com o MediaRecorder do próprio navegador: duas voltas e
+     uma paradinha de frente, uns 4 segundos. Tudo no aparelho; nada vai para a internet. MP4 quando o navegador
+     sabe gravar (melhor para o WhatsApp), senão WebM. */
+  var VIDEO_OK = !!(window.MediaRecorder && window.HTMLCanvasElement && HTMLCanvasElement.prototype.captureStream);
+  function tipoVideo() {
+    var l = ['video/mp4;codecs=avc1.42E01E', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+    for (var i = 0; i < l.length; i++) if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(l[i])) return l[i];
+    return '';
+  }
+  function fazerVideo(andamento) {
+    var Wv = 540, Hv = 972, faixa = 76, QUADROS = 48, e = V.copiar(estado), imgs = [], d = desafioAtual();
+    function carregar(i) {
+      return new Promise(function (ok, erro) {
+        var img = new Image(); img.onload = function () { ok(img); }; img.onerror = erro;
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(B.svg(e, { id: 'v' + i, largura: Wv, altura: Hv, angulo: i * 360 / QUADROS }));
+      });
+    }
+    var cadeia = Promise.resolve();
+    for (var i = 0; i < QUADROS; i++) (function (k) { cadeia = cadeia.then(function () { return carregar(k); }).then(function (img) { imgs[k] = img; andamento(Math.round((k + 1) / QUADROS * 70)); }); })(i);
+    return cadeia.then(function () {
+      return new Promise(function (ok, erro) {
+        var cv = document.createElement('canvas'); cv.width = Wv; cv.height = Hv + faixa;
+        var c = cv.getContext('2d'), mime = tipoVideo(), partes = [];
+        var rec = new MediaRecorder(cv.captureStream(30), mime ? { mimeType: mime, videoBitsPerSecond: 2500000 } : undefined);
+        rec.ondataavailable = function (ev) { if (ev.data && ev.data.size) partes.push(ev.data); };
+        rec.onstop = function () { var tipo = (rec.mimeType || mime || 'video/webm').split(';')[0]; ok({ blob: new Blob(partes, { type: tipo }), ext: tipo.indexOf('mp4') >= 0 ? 'mp4' : 'webm', tipo: tipo }); };
+        rec.onerror = erro;
+        function quadro(k) {
+          c.drawImage(imgs[k % QUADROS], 0, 0, Wv, Hv);
+          var g = c.createLinearGradient(0, Hv, Wv, Hv + faixa); g.addColorStop(0, '#ff5fb4'); g.addColorStop(1, '#8a4fe0');
+          c.fillStyle = g; c.fillRect(0, Hv, Wv, faixa);
+          c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '700 34px Fredoka, sans-serif';
+          c.fillText('✨ Purpurina ✨' + (d ? '  ' + d.ico : ''), Wv / 2, Hv + faixa / 2);
+        }
+        quadro(0); rec.start(200);
+        var total = QUADROS * 2 + 24, k = 0;
+        var tempo = setInterval(function () {
+          quadro(k < QUADROS * 2 ? k : 0); k++; andamento(70 + Math.round(k / total * 30));
+          if (k >= total) { clearInterval(tempo); setTimeout(function () { rec.stop(); }, 150); }
+        }, 1000 / 30);
+      });
+    });
+  }
+  function video() {
+    abrirJanela({ titulo: t('🎬 Preparando o vídeo…', '🎬 Making the video…'), texto: '0%', botoes: [] }, true);
+    fazerVideo(function (pct) { $('janelaTexto').textContent = pct + '%'; }).then(function (r) {
+      var url = URL.createObjectURL(r.blob), nome = 'purpurina-giro-' + carimbo() + '.' + r.ext, arq = null;
+      try { arq = new File([r.blob], nome, { type: r.tipo }); } catch (x) { /* navegador antigo */ }
+      var botoes = [{ t: t('💾 Salvar o vídeo', '💾 Save the video'), classe: 'grande', ficar: true, fn: function () {
+        var a = document.createElement('a'); a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+        recado(t('O vídeo foi para a pasta Downloads (ou Arquivos).', 'The video went to your Downloads (or Files).'));
+      } }];
+      if (arq && navigator.canShare && navigator.canShare({ files: [arq] })) botoes.push({ t: t('📤 Compartilhar', '📤 Share'), ficar: true, fn: function () { navigator.share({ files: [arq], title: 'Purpurina' }).catch(function () { /* cancelou */ }); } });
+      botoes.push({ t: t('Fechar', 'Close') });
+      abrirJanela({ titulo: t('🎬 Seu vídeo girando!', '🎬 Your spinning video!'), video: url, botoes: botoes }, true);
+      Som.tocar('tada');
+    }).catch(function () {
+      abrirJanela({ titulo: t('🎬 Vídeo', '🎬 Video'), texto: t('Este navegador não conseguiu gravar o vídeo. A foto continua funcionando.', "This browser couldn't record the video. Photos still work."), botoes: [{ t: t('Fechar', 'Close') }] }, true);
+    });
   }
 
   // ---------- desfile ----------
