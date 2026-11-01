@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.5.0', APP_UPDATED = '01/11/2026';
+  var APP_VERSION = '0.6.0', APP_UPDATED = '01/11/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -118,7 +118,7 @@
     var rot = ROTULO[res.categoria];
     $('aviso').textContent = T(rot[0], rot[1]) + ' +' + res.pontos;
     efeito(res.categoria);
-    if (res.categoria === 'PERFEITO') efeito('uhul');   // torcida sintetizada (a voz do aparelho soava falsa)
+    if (res.categoria === 'PERFEITO') efeito('uhul');   // "u-huuu!" gravado de verdade (v0.6.0)
     placar();
   }
   function parar() {
