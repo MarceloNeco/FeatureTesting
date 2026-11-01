@@ -2,7 +2,7 @@
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.3.0';
+  var APP_VERSION = '0.3.1';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -147,7 +147,7 @@
 
   var SONS = { estrela: 1, cone: 1, batida: 1, lama: 1, turbo: 1, pulo: 1, perdeu: 1, tum: 1, bip: 1, vai: 1, mundo: 1, chegou: 1 };
   function tratar(ev) {
-    if (ev.tipo === 'vai') mov.fimCalibrar();   // o jeito de segurar no 3-2-1 vira o "meio" do volante
+    if (ev.tipo === 'vai') mov.fimCalibrar();   // no 3-2-1 só descobre o sinal do sensor; o meio é o reto de verdade
     if (ev.tipo === 'estrela' && ev.ar) Som.tocar('estrelaAr');
     else if (SONS[ev.tipo]) Som.tocar(ev.tipo);
     if (ev.tipo === 'batida' && navigator.vibrate) try { navigator.vibrate(90); } catch (e) { /* sem vibrar */ }
