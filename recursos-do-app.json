@@ -27,6 +27,14 @@
       "pagina": "peluqueria/"
     },
     {
+      "id": "vruuum",
+      "nome": {
+        "pt": "Vruuum! (Bolinho de Chuva)",
+        "en": "Vruuum! (Rain Dumpling)"
+      },
+      "pagina": "vruuum/"
+    },
+    {
       "id": "arch-one",
       "nome": {
         "pt": "ArchONE (mapa vivo, protótipo)",
