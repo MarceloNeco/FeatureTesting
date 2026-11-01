@@ -49,7 +49,7 @@ primeira abertura o jogo funciona sem internet.
 ## Suas imagens e suas músicas
 
 - Fotos e itens seus: `meus/LEIA-ME.md` (com a página `marcar.html`, sem programar).
-- Músicas suas (MP3): `musicas/LEIA-ME.md`. Sem elas, tocam a abertura e as 16 músicas de pop dançante que o próprio jogo cria, em sequência, desde a tela de início.
+- Músicas: 17 gravadas, com licença aberta (Kevin MacLeod, CC BY 4.0). Para trocar ou acrescentar as suas: `musicas/LEIA-ME.md`.
 
 ## Mapa dos arquivos
 
@@ -61,8 +61,8 @@ primeira abertura o jogo funciona sem internet.
 | `desenho.js` | desenha no canvas (cenário, item, lugar certo, confete, modo leve) |
 | `cenarios.js`, `itens.js` | leem e validam `cenarios/`, `itens/` e `meus/` |
 | `cenarios/`, `itens/` | os 12 cenários e 12 itens em SVG + listas `.json` |
-| `trilhas.js` | as 16 músicas (pop dançante) e a abertura: partitura de cada compasso, testada no Node |
-| `som.js`, `voz.js` | toca as músicas e os efeitos (torcida do "u-huuu!") no WebAudio; fala |
+| `som.js`, `voz.js` | toca as músicas gravadas de `musicas/` e os efeitos (torcida do "u-huuu!"); fala |
+| `musicas/` | 17 músicas de Kevin MacLeod (CC BY 4.0) e a lista `musicas.json` |
 | `marcar.html`, `marcar.js` | página para marcar o lugar certo nas suas fotos |
 | `tv.js`, `controle.js` | modo TV (código, 1 ou 2 jogadores, pódio) e celular como controle (PARAR, corpo) |
 | `sala.js` | canal TV ↔ celular (Supabase broadcast; `BroadcastChannel` nos testes) |
