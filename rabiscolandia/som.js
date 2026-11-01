@@ -284,19 +284,26 @@
 
   /* ---------- a rádio: músicas GRAVADAS de verdade (instrumentos de verdade, licença livre) intercaladas com as
      feitas aqui pelo navegador. Pedido do dono (01/Nov/2026): "mais instrumentos, mais elaboradas, não Atari",
-     no clima do primeiro LittleBigPlanet. As 6 gravadas são do Kevin MacLeod (CC BY 4.0: o crédito aparece na
-     tela quando cada uma começa, e está em musicas/LICENCAS.md). Ordem: duas gravadas, uma nossa, duas gravadas...
-     Sem o arquivo (sem internet e ainda não guardado), pula para a próxima. */
+     no clima do primeiro LittleBigPlanet, e "várias músicas". As 18 gravadas são do Kevin MacLeod (CC BY: o
+     crédito aparece na tela quando cada uma começa; detalhes em musicas/LICENCAS.md). Ordem: duas gravadas, uma
+     nossa, duas gravadas...
+     À prova de travar (no celular do dono a música "dava um bip e travava"):
+     - o navegador recusou tocar (precisa de um toque): tenta de novo no próximo toque na tela;
+     - o arquivo deu erro ou não anda em 12 s: pula para a próxima;
+     - 3 gravadas seguidas sem tocar (sem internet, por exemplo): segue só com as músicas do app. */
+  var K = 'Kevin MacLeod (incompetech.com)';
+  function gr(arq, nome) { return { url: 'musicas/' + arq + '.mp3', nome: nome, autor: K, licenca: 'CC BY' }; }
   var GRAVADAS = [
-    { url: 'musicas/fluffing-a-duck.mp3', nome: 'Fluffing a Duck', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
-    { url: 'musicas/carefree.mp3', nome: 'Carefree', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
-    { url: 'musicas/sneaky-snitch.mp3', nome: 'Sneaky Snitch', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
-    { url: 'musicas/wallpaper.mp3', nome: 'Wallpaper', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
-    { url: 'musicas/local-forecast-elevator.mp3', nome: 'Local Forecast – Elevator', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
-    { url: 'musicas/investigations.mp3', nome: 'Investigations', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' }
+    gr('pixel-peeker-polka', 'Pixel Peeker Polka'), gr('carefree', 'Carefree'), gr('fluffing-a-duck', 'Fluffing a Duck'),
+    gr('airport-lounge', 'Airport Lounge'), gr('sneaky-snitch', 'Sneaky Snitch'), gr('music-to-delight', 'Music to Delight'),
+    gr('spazzmatica-polka', 'Spazzmatica Polka'), gr('local-forecast-elevator', 'Local Forecast – Elevator'), gr('carpe-diem', 'Carpe Diem'),
+    gr('scheming-weasel', 'Scheming Weasel'), gr('mariachi-snooze', 'Mariachi Snooze'), gr('wallpaper', 'Wallpaper'),
+    gr('gymnopedie-1', 'Gymnopédie nº 1 (Satie)'), gr('who-likes-to-party', 'Who Likes to Party'), gr('investigations', 'Investigations'),
+    gr('batty-mcfaddin', 'Batty McFaddin'), gr('disco-lounge', 'Disco Lounge'), gr('movement-proposition', 'Movement Proposition')
   ];
   var VOL_GRAVADA = 0.42;                      // as gravadas já vêm com o volume igualado; ficam abaixo dos efeitos
-  var lista = [], atual = -1, audio = null, falhas = 0, aoTrocar = null;
+  var lista = [], atual = -1, audio = null, falhasSeguidas = 0, soApp = false, aoTrocar = null, aoAvisar = null;
+  var vigia = null, ultimoT = -1, parado = 0, esperandoToque = false, jaFalhou = false, tentativa = 0;
   function temAudio() { return typeof Audio !== 'undefined' && typeof document !== 'undefined'; }
   function montarLista() {
     var grav = temAudio() ? GRAVADAS.map(function (g) { return { g: g }; }) : [], sint = MUSICAS.map(function (m, k) { return { s: k }; });
@@ -308,25 +315,66 @@
     }
   }
   function nomeDe(it) { return it.g ? it.g.nome + ' — ' + it.g.autor + ' (' + it.g.licenca + ')' : MUSICAS[it.s].nome; }
-  function pararTudo() { parar(); if (ac) calar(); if (audio) { try { audio.pause(); } catch (e) { /* ok */ } } }
+  function pararVigia() { if (vigia) { clearInterval(vigia); vigia = null; } }
+  function pararTudo() { parar(); if (ac) calar(); pararVigia(); if (audio) { try { audio.pause(); } catch (e) { /* ok */ } } }
+  function avisar(o) { if (aoAvisar) { try { aoAvisar(o); } catch (e) { /* ok */ } } }
+  /* uma gravada não tocou: conta, e depois de 3 seguidas fica só com as do app (até a pessoa pedir uma gravada) */
+  function falhou(motivo) {
+    if (jaFalhou) return;                      // erro e vigia juntos: conta uma vez só
+    jaFalhou = true; pararVigia();
+    if (++falhasSeguidas >= 3 && !soApp) { soApp = true; avisar({ tipo: 'soApp', motivo: motivo }); }
+    if (querMusica && !escondida) avancar();
+  }
+  function pedirToque() {
+    // o navegador só deixa tocar depois de um toque: no próximo toque em qualquer lugar, tenta de novo
+    if (esperandoToque || typeof document === 'undefined') return;
+    esperandoToque = true; avisar({ tipo: 'toque' });
+    var tentar = function () {
+      document.removeEventListener('pointerdown', tentar, true); document.removeEventListener('keydown', tentar, true);
+      esperandoToque = false;
+      if (querMusica && !escondida) { retomar(); tocarAtual(); }
+    };
+    document.addEventListener('pointerdown', tentar, true); document.addEventListener('keydown', tentar, true);
+  }
+  function vigiar() {
+    pararVigia(); ultimoT = -1; parado = 0;
+    vigia = setInterval(function () {
+      if (!audio || audio.paused || escondida) return;
+      if (audio.currentTime > ultimoT + 0.05) { ultimoT = audio.currentTime; parado = 0; if (audio.currentTime > 2) falhasSeguidas = 0; return; }
+      if (++parado >= 12) falhou('parada');      // 12 s sem andar (internet ruim, arquivo que não abre): próxima
+    }, 1000);
+  }
   function tocarAtual() {
     if (!lista.length) montarLista();
     if (atual < 0) atual = 0;
     var it = lista[atual];
     if (!querMusica || !ac || escondida) return;
+    if (it.g && soApp) { avancar(); return; }
+    jaFalhou = false; var minha = ++tentativa;   // cada tentativa tem número: aviso atrasado de uma música velha não conta
     if (it.s != null) { faixa = it.s; prox = ac.currentTime + 0.12; comecar(); return; }
-    if (!audio) { audio = new Audio(); audio.preload = 'auto'; audio.addEventListener('ended', avancar); }
+    if (!audio) {
+      audio = new Audio(); audio.preload = 'auto';
+      audio.addEventListener('ended', function () { pararVigia(); avancar(); });
+      audio.addEventListener('error', function () { if (lista[atual] && lista[atual].g && audio.getAttribute('data-url') === lista[atual].g.url) falhou('erro'); });
+    }
     if (audio.getAttribute('data-url') !== it.g.url) { audio.src = it.g.url; audio.setAttribute('data-url', it.g.url); }
     audio.volume = VOL_GRAVADA;
-    var p = audio.play();
-    if (p && p.then) p.then(function () { falhas = 0; }).catch(function () { if (querMusica && !escondida && ++falhas < lista.length) avancar(); });
+    var p;
+    try { p = audio.play(); } catch (e) { p = null; }
+    vigiar();
+    if (p && p.then) p.catch(function (e) {
+      if (minha !== tentativa) return;
+      if (e && e.name === 'NotAllowedError') { pararVigia(); pedirToque(); }   // faltou o toque: não é defeito do arquivo
+      else if (e && e.name !== 'AbortError') falhou('play');
+    });
   }
-  function tocarItem(k) {
+  function tocarItem(k, pedida) {
     if (!lista.length) montarLista();
     atual = ((k % lista.length) + lista.length) % lista.length;
+    if (pedida) { soApp = false; falhasSeguidas = 0; }      // a pessoa escolheu: tenta de novo as gravadas
     pararTudo(); passo = 0;
-    if (audio && lista[atual].g) { try { audio.currentTime = 0; } catch (e) { /* ok */ } audio.removeAttribute('data-url'); }
-    if (aoTrocar && querMusica) { try { aoTrocar(nomeDe(lista[atual]), lista[atual].g || null); } catch (e) { /* ok */ } }
+    if (audio && lista[atual].g) { audio.removeAttribute('data-url'); }
+    if (aoTrocar && querMusica && !(lista[atual].g && soApp)) { try { aoTrocar(nomeDe(lista[atual]), lista[atual].g || null); } catch (e) { /* ok */ } }
     tocarAtual();
   }
   function avancar() { if (querMusica) tocarItem(atual + 1); }
@@ -338,10 +386,18 @@
   }
   function proxima() {
     if (!lista.length) montarLista();
-    if (querMusica) tocarItem(atual + 1);
+    if (querMusica) tocarItem(atual + 1, true);
     else { atual = (atual + 1) % lista.length; passo = 0; }
   }
+  function anterior() { if (!lista.length) montarLista(); if (querMusica) tocarItem(atual - 1, true); else atual = (atual - 1 + lista.length) % lista.length; }
+  /* escolher uma música da lista (chamado no toque: o navegador sempre deixa tocar) */
+  function tocar(i) { querMusica = true; tocarItem(i, true); }
   function nomeAtual() { return querMusica && ac && atual >= 0 ? nomeDe(lista[atual]) : ''; }
+  function listar() {
+    if (!lista.length) montarLista();
+    return lista.map(function (it, i) { return { i: i, nome: it.g ? it.g.nome : MUSICAS[it.s].nome, autor: it.g ? it.g.autor : '', gravada: !!it.g, atual: i === atual && querMusica }; });
+  }
+  function estado() { return { tocando: querMusica, atual: atual, nome: nomeAtual(), soApp: soApp, falhas: falhasSeguidas, esperandoToque: esperandoToque, audio: audio ? { t: audio.currentTime, parado: audio.paused, erro: audio.error && audio.error.code, pronto: audio.readyState } : null }; }
 
   // página escondida (outra aba, tela apagada): silencia tudo; ao voltar, a música continua de onde parou
   function vigiarTela() {
@@ -351,7 +407,7 @@
     document.addEventListener('visibilitychange', function () {
       escondida = !!document.hidden;
       if (!ac) return;
-      if (escondida) { parar(); suspender(); if (audio) { try { audio.pause(); } catch (e) { /* ok */ } } }
+      if (escondida) { parar(); suspender(); pararVigia(); if (audio) { try { audio.pause(); } catch (e) { /* ok */ } } }
       else { retomar(); if (querMusica) tocarAtual(); }
     });
   }
@@ -409,7 +465,12 @@
     musica: musica,
     musicaLigada: function () { return querMusica; },
     proxima: proxima,
+    anterior: anterior,
+    tocar: tocar,
+    listar: listar,
+    estado: estado,
     aoTrocar: function (fn) { aoTrocar = fn; },
+    aoAvisar: function (fn) { aoAvisar = fn; },
     GRAVADAS: GRAVADAS,
     nomeAtual: nomeAtual,
     efeitos: efeitos,
