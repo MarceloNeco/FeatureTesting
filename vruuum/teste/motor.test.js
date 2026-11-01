@@ -151,3 +151,14 @@ test('botão PULAR: pula por cima do cone, e só pula de novo depois da recarga'
   M.atualizar(e, [{ pular: true }], 1 / 60);
   assert.ok(e.eventos.some(x => x.tipo === 'pulo'), 'depois da recarga pula de novo');
 });
+
+test('jeito do veículo: mais rápido corre mais, curva melhor vira mais (na reta da largada)', () => {
+  function rodar(mod, ent, seg) {
+    const e = M.novaCorrida('normal', 5, 1);
+    e.fase = 'corrida'; e.carros = []; e.jogadores[0].mod = mod;
+    for (let k = 0; k < seg * 60; k++) M.atualizar(e, [ent], 1 / 60);
+    return e.jogadores[0];
+  }
+  assert.ok(rodar({ vel: 1.1, curva: 1 }, {}, 3).vel > rodar({ vel: 1, curva: 1 }, {}, 3).vel);
+  assert.ok(rodar({ vel: 1, curva: 1.12 }, { dir: 1 }, 0.3).x > rodar({ vel: 1, curva: 1 }, { dir: 1 }, 0.3).x);
+});

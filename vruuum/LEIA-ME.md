@@ -30,6 +30,23 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 | 🚗 Normal | mais rápido, curvas que puxam para fora, mais cones e carrinhos |
 | 🚀 Turbo | o mais rápido, curvas fortes, muito trânsito |
 
+## Garagem e veículos
+
+- O veículo escolhido fica **sempre à vista**: em pé, preso no topo da tela enquanto as opções rolam; deitado, de um
+  lado, com as opções do outro. O botão 🏁 Correr fica preso embaixo. Com 2 jogadores, abas Jogador 1 e Jogador 2.
+- **9 veículos**, todos à mostra (desenhados em código no `veiculos.js`, vistos de trás, sem marca nem logotipo):
+
+| Grupo | Veículos |
+|---|---|
+| 🚗 Carros | Clássico, GT Redondo (traseira redonda), Superesportivo (largo, aerofólio), Kart, Monstrão |
+| 🏍️ Moto | Moto (deita nas curvas) |
+| ✈️ No céu | Aviãozinho (hélice), Jato (fogo azul no turbo), Helicóptero (rotor girando) |
+
+- Cada um tem um jeito (barrinhas de velocidade e curvas), com diferenças pequenas, de no máximo uns 10%.
+- **Quem voa** segue um caminho de luzes no céu, com a estrada lá embaixo. Os obstáculos mudam: pássaros (no lugar dos
+  cones), nuvem de tempestade (lama), anel dourado (turbo), corrente de ar (rampa), balões e aviões (trânsito). As
+  regras são as mesmas; só o desenho muda. Com 2 jogadores dá para misturar um carro e um avião.
+
 ## Controles
 
 | Onde | Como |
@@ -75,6 +92,7 @@ No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para
 | `estilo.css` | visual, paleta Bolinho de Chuva, fonte Fredoka. |
 | `pista.js` | **puro**: monta a estrada com semente (retas, curvas, morros, mundos), espalha estrelas, cones, lama, turbos, rampas, enfeites e o trânsito. Níveis em `NIVEIS`. |
 | `motor.js` | **puro**: regras da corrida (volante, curva, acelerar, grama, coisas da pista, batidas, chegada) e lista de eventos para som e efeitos. |
+| `veiculos.js` | a garagem: os 9 veículos (desenho, nome, grupo, velocidade e curva), testada no Node. |
 | `sprites.js` | todos os desenhos, feitos em código uma vez num canvas escondido. |
 | `desenho.js` | a estrada em 3D (pseudo-3D por pedaços), céu, fundo, enfeites, carros, efeitos, placar e tela dividida. |
 | `musicas/` | as 3 músicas gravadas (MP3, CC BY-SA) e `LICENCAS.md`. |

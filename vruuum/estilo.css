@@ -37,9 +37,6 @@ a { color: var(--ciano); }
 .opcao.crianca { color: var(--lima); } .opcao.normal { color: var(--ciano); } .opcao.turbo { color: var(--rosa); }
 .opcao.crianca[aria-pressed="true"] { border-color: var(--lima); } .opcao.normal[aria-pressed="true"] { border-color: var(--ciano); } .opcao.turbo[aria-pressed="true"] { border-color: var(--rosa); }
 
-.pilotos { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
-.piloto { background: var(--card); border: 1px solid var(--borda); border-radius: 20px; padding: 10px 12px 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(320px, 92vw); }
-.previa { width: 100%; max-width: 240px; height: auto; border-radius: 14px; }
 .tecla { font-size: .85rem; opacity: .8; }
 .cores, .bichos { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
 .cor { width: 44px; height: 44px; border-radius: 50%; border: 3px solid rgba(255,255,255,.25); }
@@ -76,3 +73,36 @@ a { color: var(--ciano); }
 .tv .opcao, .tv .medio { font-size: 1.4rem; }
 .tv .cor, .tv .bicho { width: 56px; height: 56px; }
 @media (prefers-reduced-motion: reduce) { .estrada-fundo { animation: none; } }
+
+/* ---------- garagem: o veículo sempre à vista ---------- */
+.garagem { width: min(1000px, 100%); display: flex; flex-direction: column; gap: 10px; }
+.vitrine { position: sticky; top: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px 0 10px;
+  background: rgba(20,16,56,.97); box-shadow: 0 10px 18px -8px rgba(0,0,0,.6); border-radius: 0 0 18px 18px; }
+.previa { height: min(27vh, calc((100vw - 40px) * 0.607), 280px); width: auto; aspect-ratio: 56 / 34; border-radius: 20px; box-shadow: 0 0 0 2px var(--borda), 0 14px 30px rgba(0,0,0,.45); }
+.nome-veic { font-size: 1.35rem; font-weight: 700; color: #fff; }
+.fichas { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 4px 8px; align-items: center; width: min(100%, 460px); color: var(--muted); font-size: .85rem; }
+.barra { height: 10px; background: rgba(255,255,255,.12); border-radius: 99px; overflow: hidden; }
+.barra i { display: block; height: 100%; background: linear-gradient(90deg, var(--lima), var(--ouro), var(--rosa)); border-radius: 99px; transition: width .3s; }
+.abas { display: flex; gap: 6px; }
+.aba { border-radius: 14px; padding: 6px 14px; background: var(--card); font-weight: 600; border: 3px solid transparent; }
+.aba[aria-selected="true"] { border-color: var(--ouro); background: rgba(255,209,102,.16); }
+.opcoes-garagem { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.titulo-garagem { font-size: 1.05rem; color: #fff; }
+.veiculos { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.grupo-veic h3 { font-size: .95rem; color: var(--muted); font-weight: 600; margin: 0 0 6px 4px; text-align: left; }
+.cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.cartao-veic { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px 8px; border-radius: 16px; background: var(--card); border: 3px solid transparent; }
+.cartao-veic canvas { width: 96px; height: 64px; }
+.cartao-veic span { font-size: .85rem; font-weight: 600; }
+.cartao-veic[aria-pressed="true"] { border-color: var(--ouro); background: rgba(255,209,102,.16); box-shadow: 0 0 18px rgba(255,209,102,.35); }
+.cartao-veic.ar span::after { content: ' ✈'; font-size: .75rem; opacity: .7; }
+.barra-correr { position: sticky; bottom: 0; z-index: 4; width: 100%; display: flex; justify-content: center; padding: 14px 0 calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(11,10,31,0) 0%, rgba(11,10,31,.92) 45%); }
+/* deitado: o veículo de um lado, as opções do outro, os dois sempre à vista */
+@media (orientation: landscape) and (min-width: 640px) {
+  .garagem { flex-direction: row; align-items: flex-start; }
+  .vitrine { flex: 0 0 44%; top: 6px; background: none; }
+  .previa { height: min(52vh, calc(42vw * 0.607)); }
+  .opcoes-garagem { flex: 1; min-width: 0; }
+}
+@media (max-width: 520px) { #menu { padding-top: calc(58px + env(safe-area-inset-top)); } }
