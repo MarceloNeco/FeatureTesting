@@ -2,6 +2,21 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "0.9.1",
+      "data": "01/Nov/2026",
+      "hora": "18:17:00",
+      "pt": [
+        "A tela não gira mais no meio da corrida: começou deitado, fica deitado; começou em pé, fica em pé (inclinar muito o celular para virar o carro trocava a posição). Destrava ao voltar para o menu.",
+        "Tela mais bem aproveitada: horizonte mais alto, mais estrada à vista, o veículo maior e mais para cima. Em pé, a estrada sobe pela tela toda (antes ficava quase tudo embaixo, com o alto vazio).",
+        "Mais neon: grade de neon no chão dos dois lados da estrada, pórticos de neon passando por cima (no céu, aros de luz), postes mais altos com braço de luz sobre a pista e montanhas e cidade maiores no fundo."
+      ],
+      "en": [
+        "The screen no longer rotates mid-race: started sideways, stays sideways; started upright, stays upright (tilting the phone hard to steer used to flip it). It unlocks back on the menu.",
+        "Better use of the screen: higher horizon, more road in view, the ride bigger and higher up. Upright, the road climbs the whole screen (before, almost everything sat at the bottom with an empty top).",
+        "More neon: a neon grid on the ground on both sides, neon gantries passing overhead (light hoops in the sky), taller posts with light arms over the road and bigger mountains and city in the background."
+      ]
+    },
+    {
       "versao": "0.9.0",
       "data": "01/Nov/2026",
       "hora": "17:19:00",

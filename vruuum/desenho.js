@@ -108,7 +108,13 @@
   }
 
   // ---------- efeitos ----------
-  function geom(v) { var K = Math.min(v.h > v.w ? v.w * 0.58 : v.w / 2, v.h * 0.6); return { K: K, cx: v.w / 2, cy: v.h - K - v.h * 0.05 }; }
+  // horizonte a ~30% da altura e o veículo com a base a 90%: a tela fica cheia, em pé ou deitado.
+  // K: escala de tamanho e largura; KY: escala da altura (em pé, a estrada se estica para cima, como uma câmera mais alta)
+  function geom(v) {
+    var empe = v.h > v.w, cy = v.h * (empe ? 0.28 : 0.3), KY = v.h * 0.9 - cy;
+    var K = Math.min(empe ? v.w * 0.62 : v.w * 0.5, KY * 1.1);
+    return { K: K, KY: KY, cx: v.w / 2, cy: cy };
+  }
   function texto(vs, txt, cor, tam) { vs.parts.push({ tipo: 'txt', txt: txt, cor: cor, tam: tam || 1, x: 0, y: 0, vx: 0, vy: -1.2, vida: 1.1, max: 1.1 }); }
   function confete(vs, n, lugar) {
     for (var k = 0; k < n; k++) vs.parts.push({ tipo: 'conf', cor: S.ARCO[k % 7], x: (Math.random() - 0.5) * 0.3, y: lugar === 'cima' ? -1.6 : -0.3, vx: (Math.random() - 0.5) * 2.2, vy: lugar === 'cima' ? Math.random() * 0.5 : -1.5 - Math.random() * 1.5, vida: 2 + Math.random(), max: 3, giro: Math.random() * 6 });
@@ -167,7 +173,7 @@
 
   function desenharVista(c, v, e, ji, op) {
     var j = e.jogadores[ji], pista = e.pista, segs = pista.segs, vs = VS[ji];
-    var w = v.w, h = v.h, g = geom(v), K = g.K, cx = g.cx, cy = g.cy;
+    var w = v.w, h = v.h, g = geom(v), K = g.K, KY = g.KY, cx = g.cx, cy = g.cy;
     c.save(); c.beginPath(); c.rect(v.x, v.y, w, h); c.clip(); c.translate(v.x, v.y);
     if (j.tremor > 0 || j.rodando > 0) c.translate((Math.random() - 0.5) * K * 0.025, (Math.random() - 0.5) * K * 0.025);
 
@@ -193,20 +199,22 @@
       c.fillStyle = '#eef3ff'; c.beginPath(); c.arc(w * 0.8, cy * 0.3, K * 0.055, 0, Math.PI * 2); c.fill();
       c.fillStyle = 'rgba(180,195,230,.5)'; c.beginPath(); c.arc(w * 0.8 + K * 0.015, cy * 0.3 - K * 0.01, K * 0.014, 0, Math.PI * 2); c.fill();
     }
-    var altF = Math.min(K * 0.55, cy * 0.9), fundoDe = function (nome) { return neon ? fundoNoite(nome) : base.fundos[nome]; };
+    var altF = Math.min(K * (neon ? 0.85 : 0.6), cy * (neon ? 1.0 : 0.9)), fundoDe = function (nome) { return neon ? fundoNoite(nome) : base.fundos[nome]; };
     if (f < 1) camada(c, fundoDe(pista.mundos[m - 1]), w, cy + 2, altF, vs.fundoX, 1);
     camada(c, fundoDe(pista.mundos[m]), w, cy + 2, altF, vs.fundoX, f);
 
     // estrada, do perto para o longe
     var maxy = h, x = 0, dx = -(segs[baseI].curva * basePct), n, cnt = op.dist, s;
+    // neon: grade no chão dos dois lados da estrada (linhas que correm para o horizonte + linhas atravessadas)
+    var GRADE = [1.8, 2.7, 3.9, 5.6, 8], grade = neon ? GRADE.map(function () { return [[], []]; }) : null;
     for (n = 0; n < op.dist; n++) {
       var i = baseI + n;
       if (i >= segs.length) { cnt = n; break; }
       s = segs[i];
       var z1 = s.p1.z - camZ, z2 = s.p2.z - camZ;
       var sc1 = PROF / z1, sc2 = PROF / z2;
-      var X1 = cx + sc1 * (x - camX) * K, Y1 = cy - sc1 * (s.p1.y - camY) * K, W1 = sc1 * LARG * K;
-      var X2 = cx + sc2 * (x + dx - camX) * K, Y2 = cy - sc2 * (s.p2.y - camY) * K, W2 = sc2 * LARG * K;
+      var X1 = cx + sc1 * (x - camX) * K, Y1 = cy - sc1 * (s.p1.y - camY) * KY, W1 = sc1 * LARG * K;
+      var X2 = cx + sc2 * (x + dx - camX) * K, Y2 = cy - sc2 * (s.p2.y - camY) * KY, W2 = sc2 * LARG * K;
       aX[n] = X1; aY[n] = Y1; aS[n] = sc1; aClip[n] = maxy; aZ[n] = z1;
       x += dx; dx += s.curva;
       if (z1 <= PROF || Y2 >= Y1 || Y2 >= maxy) continue;
@@ -240,7 +248,15 @@
         for (var fx = -1 / 3; fx < 0.5; fx += 2 / 3) poligono(c, X1 + W1 * fx - l1, Y1, X1 + W1 * fx + l1, Y1, X2 + W2 * fx + l2, Y2, X2 + W2 * fx - l2, Y2, ts.faixa);
         c.globalAlpha = 1;
       }
+      if (grade && !s.tunel) {
+        if (s.i % 2 === 0) { c.fillStyle = rgba(ts.borda[0], 0.2); c.fillRect(0, Y1 - 1, Math.max(0, X1 - W1 * 1.12), 1.2); c.fillRect(X1 + W1 * 1.12, Y1 - 1, Math.max(0, w - X1 - W1 * 1.12), 1.2); }
+        for (var gk = 0; gk < GRADE.length; gk++) { grade[gk][0].push(X1 - W1 * GRADE[gk], Y1); grade[gk][1].push(X1 + W1 * GRADE[gk], Y1); }
+      }
       maxy = Y2;
+    }
+    if (grade) {
+      c.strokeStyle = rgba(tm.borda[0], 0.28); c.lineWidth = 1.2;
+      grade.forEach(function (par2) { par2.forEach(function (pts) { if (pts.length < 4) return; c.beginPath(); c.moveTo(pts[0], pts[1]); for (var q = 2; q < pts.length; q += 2) c.lineTo(pts[q], pts[q + 1]); c.stroke(); }); });
     }
 
     // quem voa: névoa sobre o chão lá embaixo (dá a sensação de altura) e a rota no ar, um caminho de luz
@@ -252,7 +268,7 @@
       var trilhos = [[], []];
       for (n = cnt - 2; n >= 0; n--) {
         if (aZ[n] <= PROF) continue;
-        var la = aS[n] * ALT_VOO * K, lb = aS[n + 1] * ALT_VOO * K, LY1 = aY[n] - la, LY2 = aY[n + 1] - lb;
+        var la = aS[n] * ALT_VOO * KY, lb = aS[n + 1] * ALT_VOO * KY, LY1 = aY[n] - la, LY2 = aY[n + 1] - lb;
         var LW1 = aS[n] * LARG * K, LW2 = aS[n + 1] * LARG * K, sg = segs[baseI + n];
         if (LY2 > h + 40) continue;
         trilhos[0].push(aX[n] - LW1, LY1); trilhos[1].push(aX[n] + LW1, LY1);
@@ -279,39 +295,40 @@
     for (n = cnt - 1; n >= 0; n--) {
       if (aZ[n] <= PROF) continue;
       var idx = baseI + n; s = segs[idx];
-      var esc = aS[n] * K, sx = aX[n], sy = aY[n], clip = aClip[n], k2;
-      var syAr = sy - esc * ALT_VOO;   // a altura do voo neste pedaço
+      var esc = aS[n] * K, escY = aS[n] * KY, sx = aX[n], sy = aY[n], clip = aClip[n], k2;
+      var syAr = sy - escY * ALT_VOO;   // a altura do voo neste pedaço
       var tsN = tema(pista.mundos[s.mundo]);
-      if (s.tunel) tunel(c, s, idx, sx, sy, syAr, esc, w, h, voa, tsN);
-      if (neon && !s.tunel && n > 2 && idx % 8 === 0) postesNeon(c, idx, sx, sy, esc, clip, tsN, w);
+      if (s.tunel) tunel(c, s, idx, sx, sy, syAr, esc, w, h, voa, tsN, escY);
+      if (neon && !s.tunel && n > 2 && idx % 8 === 0) postesNeon(c, idx, sx, sy, esc, clip, tsN, w, escY);
+      if (neon && !s.tunel && n > 3 && idx % 48 === 24) portico(c, idx, sx, voa ? syAr : sy, esc, voa ? 0 : clip, tsN, w, escY, voa);
       for (k2 = 0; n > 3 && k2 < s.enfeites.length; k2++) {   // enfeite colado na câmera taparia a tela
         var en = s.enfeites[k2], arco = en.tipo === 'portal' || en.tipo === 'chegada' || en.tipo === 'largada', spr = en.tipo === 'portal' ? portais[en.mundo] : en.tipo === 'chegada' ? chegada : en.tipo === 'largada' ? largada : enfeiteSpr(en.tipo);
         if (!spr) continue;
-        if (voa && arco) sprite(c, spr, esc, sx + esc * en.x * LARG, syAr + esc * 1900, 0, w);   // no céu, o portal fica na altura do voo
+        if (voa && arco) sprite(c, spr, esc, sx + esc * en.x * LARG, syAr + escY * 1900, 0, w);   // no céu, o portal fica na altura do voo
         else sprite(c, spr, esc, sx + esc * en.x * LARG, sy, clip, w);
       }
       if (voa && n > 3 && idx % 6 === 0) {   // nuvens dos lados, em alturas diferentes
         var hz = hash(idx), lado = hz < 0.5 ? -1 : 1, tm2 = tema(pista.mundos[s.mundo]);
-        sprite(c, base[tm2.noite || ESTILO === 'neon' ? 'nuvemNoite' : 'nuvemFofa'], esc, sx + esc * lado * (2.2 + hash(idx + 7) * 1.6) * LARG, syAr + esc * (hash(idx + 3) - 0.35) * 2600, 0, w);
+        sprite(c, base[tm2.noite || ESTILO === 'neon' ? 'nuvemNoite' : 'nuvemFofa'], esc, sx + esc * lado * (2.2 + hash(idx + 7) * 1.6) * LARG, syAr + escY * (hash(idx + 3) - 0.35) * 2600, 0, w);
       }
       for (k2 = 0; k2 < s.coisas.length; k2++) {
         var co = s.coisas[k2];
         if (co.pego[ji]) continue;
         var alt = co.alt;
         if (co.tipo === 'estrela') alt += Math.sin(e.t * 5 + idx) * 80;
-        if (voa) sprite(c, base[neon && co.tipo === 'estrela' ? 'estrelaNeon' : sprCeu(co.tipo)], esc, sx + esc * co.x * LARG, syAr - esc * (alt + (co.tipo === 'anel' || co.tipo === 'turbo' ? -150 : 0)), 0, w);
-        else sprite(c, base[neon && ITEM_NEON[co.tipo] ? ITEM_NEON[co.tipo] : co.tipo], esc, sx + esc * co.x * LARG, sy - esc * alt, clip, w);
+        if (voa) sprite(c, base[neon && co.tipo === 'estrela' ? 'estrelaNeon' : sprCeu(co.tipo)], esc, sx + esc * co.x * LARG, syAr - escY * (alt + (co.tipo === 'anel' || co.tipo === 'turbo' ? -150 : 0)), 0, w);
+        else sprite(c, base[neon && ITEM_NEON[co.tipo] ? ITEM_NEON[co.tipo] : co.tipo], esc, sx + esc * co.x * LARG, sy - escY * alt, clip, w);
       }
       var cs = porSeg[idx];
       if (cs) for (k2 = 0; k2 < cs.length; k2++) {
         var tx = sx + esc * cs[k2].x * LARG;
-        if (voa) { sprite(c, base[sprCeu(cs[k2].tipo)], esc, tx, syAr - esc * 200, 0, w); if (neon || s.tunel) luzesAviao(c, tx, syAr - esc * 200, esc, idx); }
+        if (voa) { sprite(c, base[sprCeu(cs[k2].tipo)], esc, tx, syAr - escY * 200, 0, w); if (neon || s.tunel) luzesAviao(c, tx, syAr - escY * 200, esc, idx); }
         else { sprite(c, base[cs[k2].tipo], esc, tx, sy, clip, w); if ((neon || s.tunel) && sy <= clip + 2) lanternasTransito(c, cs[k2].tipo, tx, sy, esc); }
       }
       if (idx === oSeg && outro.z > j.z - JOG_Z * 0.6) {
         var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / (outro.puloMax || raiz.VruuumMotor.PULO))) * 1400 * (outro.puloMax || 1.1) / 1.1 : 0;
         var oVoa = !!VOA[outro.n];   // o outro pode estar voando enquanto eu vou de carro (e vice-versa)
-        var oSpr = carrosJog[outro.n], oX = sx + esc * outro.x * LARG, oY = (oVoa ? syAr : sy) - esc * lift;
+        var oSpr = carrosJog[outro.n], oX = sx + esc * outro.x * LARG, oY = (oVoa ? syAr : sy) - escY * lift;
         sprite(c, oSpr, esc, oX, oY, oVoa || voa ? 0 : clip, w);
         if (oSpr.w * esc > 24 && (oVoa || voa || oY <= clip)) pilotoVivo(c, VEIC[outro.n], oX - oSpr.w * esc / 2, oY - oSpr.h * esc, oSpr.w * esc, oSpr.h * esc, INFO[outro.n], outro.n * 3.3, 7);
       }
@@ -326,24 +343,24 @@
   // ---------- túnel ----------
   // no chão: molduras encaixadas uma na frente da outra (cada pedaço pinta tudo FORA da sua abertura),
   // com faixas de luz correndo; na entrada, uma parede grande em volta da boca. No céu: anéis de luz.
-  function tunel(c, s, idx, sx, sy, syAr, esc, w, h, voa, ts) {
+  function tunel(c, s, idx, sx, sy, syAr, esc, w, h, voa, ts, escY) {
     var meia = esc * LARG * 1.32, x1 = sx - meia, x2 = sx + meia, neon = ESTILO === 'neon', tt = Date.now() / 1000;
     var aceso = ((idx - tt * 26) % 18 + 18) % 18 < 3;   // luz que corre pelo túnel
     var corA = neon ? ts.borda[(Math.floor(idx / 3)) % 2] : '#ffd166';
     c.save(); c.globalCompositeOperation = 'source-over';
     if (voa) {   // tubo de anéis de luz em volta da rota no céu
       if (idx % 3 === 0) {
-        var yT = syAr - esc * 2400, yB = syAr + esc * 900, lw = Math.max(1.2, esc * 60);
+        var yT = syAr - escY * 2400, yB = syAr + escY * 900, lw = Math.max(1.2, esc * 60);
         c.globalCompositeOperation = 'lighter';
         c.strokeStyle = rgba(corA, aceso ? 0.35 : 0.14); c.lineWidth = lw * 4; c.strokeRect(x1, yT, x2 - x1, yB - yT);
         c.strokeStyle = rgba(corA, aceso ? 1 : 0.55); c.lineWidth = lw; c.strokeRect(x1, yT, x2 - x1, yB - yT);
       }
       c.restore(); return;
     }
-    var alto = esc * 2700, yT2 = sy - alto, yB2 = sy + 1;
+    var alto = escY * 2700, yT2 = sy - alto, yB2 = sy + 1;
     var parede = neon ? (idx % 2 ? '#0b0a19' : '#0e0c20') : (idx % 2 ? '#4a4f5c' : '#454a57');
     var fx1 = -10, fx2 = w + 10, fy = -10;
-    if (s.entrada) { fx1 = sx - meia * 3.4; fx2 = sx + meia * 3.4; fy = sy - esc * 7000; parede = neon ? '#14112a' : '#6b7080'; }
+    if (s.entrada) { fx1 = sx - meia * 3.4; fx2 = sx + meia * 3.4; fy = sy - escY * 7000; parede = neon ? '#14112a' : '#6b7080'; }
     c.fillStyle = parede; c.beginPath(); c.rect(fx1, fy, fx2 - fx1, yB2 - fy); c.rect(x1, yT2, x2 - x1, yB2 - yT2);
     try { c.fill('evenodd'); } catch (e) { c.fill(); }
     if (s.entrada) {   // contorno de luz na boca do túnel
@@ -362,20 +379,41 @@
     c.restore();
   }
   // postes de neon dos dois lados da estrada, piscando devagar
-  function postesNeon(c, idx, sx, sy, esc, clip, ts, w) {
+  function postesNeon(c, idx, sx, sy, esc, clip, ts, w, escY) {
     var tt = Date.now() / 1000;
     [-1, 1].forEach(function (lado, k) {
-      var px = sx + esc * lado * 1.28 * LARG, topo = sy - esc * 1700;
+      var px = sx + esc * lado * 1.28 * LARG, topo = sy - escY * 2600;
       if (px < -50 || px > w + 50 || sy > clip + 4) return;
       var cor = ts.borda[(idx / 8 + k) % 2], pisca = 0.55 + 0.45 * Math.sin(tt * 3 + idx * 0.7 + k);
       c.fillStyle = '#1b1830'; c.fillRect(px - Math.max(0.6, esc * 20), topo, Math.max(1.2, esc * 40), sy - topo);
       c.save(); c.globalCompositeOperation = 'lighter';
-      c.fillStyle = rgba(cor, pisca); c.fillRect(px - Math.max(0.5, esc * 14), topo + esc * 120, Math.max(1, esc * 28), esc * 900);
-      luz(c, px, topo + esc * 500, esc * 900, cor, 0.35 * pisca);
+      c.fillStyle = rgba(cor, pisca); c.fillRect(px - Math.max(0.5, esc * 14), topo + escY * 150, Math.max(1, esc * 28), escY * 1500);
+      luz(c, px, topo + escY * 800, esc * 1100, cor, 0.35 * pisca);
+      c.fillStyle = '#1b1830'; c.fillRect(px - lado * esc * 420, topo, esc * 420, Math.max(1, escY * 50));   // braço por cima da estrada
+      luz(c, px - lado * esc * 400, topo + escY * 40, esc * 380, '#fff2cc', 0.5 * pisca);
       luz(c, px, sy, esc * 700, cor, 0.18 * pisca);   // reflexo no chão
       c.restore();
     });
   }
+  // pórtico de neon atravessando a estrada (no céu, um aro de luz na rota) — enche a parte de cima da tela
+  function portico(c, idx, sx, base0, esc, clip, ts, w, escY, voa) {
+    var meia = esc * LARG * 1.4, x1 = sx - meia, x2 = sx + meia, tt = Date.now() / 1000;
+    var topo = voa ? base0 - escY * 3000 : base0 - escY * 3400, fundo = voa ? base0 + escY * 1000 : base0;
+    if (x2 < -20 || x1 > w + 20 || (!voa && base0 > clip + 4)) return;
+    var cor = ts.borda[(idx / 48 | 0) % 2], outra = ts.borda[((idx / 48 | 0) + 1) % 2], pul = 0.6 + 0.4 * Math.sin(tt * 4 + idx);
+    var lw = Math.max(1.2, esc * 70);
+    c.save();
+    if (!voa) { c.fillStyle = '#17142c'; c.fillRect(x1 - lw, topo, lw * 2, fundo - topo); c.fillRect(x2 - lw, topo, lw * 2, fundo - topo); c.fillRect(x1, topo, x2 - x1, Math.max(2, escY * 260)); }
+    c.globalCompositeOperation = 'lighter';
+    c.strokeStyle = rgba(cor, 0.25 * pul); c.lineWidth = lw * 5;
+    c.beginPath(); c.moveTo(x1, fundo); c.lineTo(x1, topo); c.lineTo(x2, topo); c.lineTo(x2, fundo); if (voa) c.closePath(); c.stroke();
+    c.strokeStyle = rgba(cor, 0.95 * pul); c.lineWidth = lw;
+    c.beginPath(); c.moveTo(x1, fundo); c.lineTo(x1, topo); c.lineTo(x2, topo); c.lineTo(x2, fundo); if (voa) c.closePath(); c.stroke();
+    // luzinhas correndo na barra de cima
+    for (var k = 0; k < 9; k++) { var acesa = ((k + Math.floor(tt * 8)) % 3) === 0; luz(c, x1 + (x2 - x1) * (k + 0.5) / 9, topo + escY * 130, esc * 160, acesa ? outra : cor, acesa ? 0.9 : 0.3); }
+    c.restore();
+  }
+
   // lanternas vermelhas acesas nos carrinhos do trânsito (e luzes piscando nos aviões)
   function lanternasTransito(c, tipo, x, y, esc) {
     var spr = base[tipo]; if (!spr) return;
@@ -393,7 +431,7 @@
 
   function desenharCarro(c, j, vs, g, h, w, e) {
     var K = g.K, esc = K / ALTURA_CAM, spr = carrosJog[j.n], cw = spr.w * esc, ch = spr.h * esc;
-    var chao = g.cy + K, lift = j.pulo > 0 ? Math.sin(Math.PI * (1 - j.pulo / (j.puloMax || raiz.VruuumMotor.PULO))) * K * 0.42 * (j.puloMax || 1.1) / 1.1 : 0;
+    var chao = g.cy + g.KY, lift = j.pulo > 0 ? Math.sin(Math.PI * (1 - j.pulo / (j.puloMax || raiz.VruuumMotor.PULO))) * K * 0.42 * (j.puloMax || 1.1) / 1.1 : 0;
     if (j.fora && j.vel > 100) lift += Math.random() * K * 0.012;
     if (j.turbo > 0) {
       var tr = Math.min(1, j.turbo), lw = cw * 0.8 / 7;
@@ -412,7 +450,7 @@
     if (acesas) {
       c.save(); c.globalCompositeOperation = 'lighter';
       // faróis iluminando a estrada à frente
-      var yF = chao - lift - ch * 0.25, yL = g.cy + K * 0.25;
+      var yF = chao - lift - ch * 0.25, yL = g.cy + g.KY * 0.3;
       [-1, 1].forEach(function (l) {
         var gr2 = c.createLinearGradient(0, yF, 0, yL); gr2.addColorStop(0, 'rgba(255,244,214,.32)'); gr2.addColorStop(1, 'rgba(255,244,214,0)');
         c.fillStyle = gr2; c.beginPath(); c.moveTo(g.cx + l * cw * 0.18, yF); c.lineTo(g.cx + l * cw * 0.34, yF); c.lineTo(g.cx + l * cw * 0.7 + vs.lado * K * 0.2, yL); c.lineTo(g.cx + l * cw * 0.05 + vs.lado * K * 0.2, yL); c.fill();
@@ -474,7 +512,7 @@
   }
 
   function desenharEfeitos(c, vs, g, w, h) {
-    var K = g.K, ox = g.cx, oy = g.cy + K * 0.7;
+    var K = g.K, ox = g.cx, oy = g.cy + g.KY * 0.72;
     vs.parts.forEach(function (p) {
       var px = ox + p.x * K, py = oy + p.y * K, f = Math.min(1, p.vida / (p.max * 0.4));
       c.globalAlpha = Math.max(0, f);

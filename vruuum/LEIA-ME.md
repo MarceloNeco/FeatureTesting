@@ -37,6 +37,11 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
   escuro, só com as luzes. Os veículos têm faróis iluminando a estrada, luz neon por baixo na cor do carro, lanternas
   brilhando e rastro de luz quando estão rápidos; o trânsito tem lanternas acesas. Os itens ficam mais sóbrios: estrela de
   luz sem carinha, portal de turbo em setas de neon e mancha de óleo (no lugar da lama).
+- Ainda no Neon: grade de neon no chão dos dois lados, pórticos de neon por cima da estrada a cada ~50 pedaços (no céu,
+  aros de luz na rota) e postes altos com braço de luz.
+- **Tela**: horizonte a ~30% da altura e base do veículo a 90% (`geom` em `desenho.js`), deitado ou em pé; em pé, a
+  estrada se estica para cima (escala de altura `KY` separada da de largura `K`). Durante a corrida a tela fica **travada**
+  na posição em que começou (`screen.orientation.lock`, no Android em tela cheia ou instalado); destrava no menu.
 - **Colorido**: o visual de dia, com as cores e personagens de antes. Os faróis só acendem dentro dos túneis.
 - **Túneis** (nos dois visuais): de 2 a 4 por corrida (`pista.js`, longe dos portais, da largada e da chegada). No chão,
   paredes com faixas de luz correndo e contorno de luz na entrada; lá dentro as paredes seguram o carro na pista. No céu,
