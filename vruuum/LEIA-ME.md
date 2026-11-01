@@ -42,10 +42,14 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 
 ## Música
 
-Três músicas próprias, bem animadas (Turbo Arco-Íris 150 bpm, Doce Velocidade 140, Pulo Neon 160), com estrofe,
-refrão, viradas e prato, feitas na hora pelo `som.js`. Tocam **o tempo todo**, uma depois da outra: menu, corrida,
-pausa e tela final. Cada corrida começa uma música nova. Só silenciam quando o app fica escondido (outra aba, tela
-apagada) ou no 🔊 do menu. O navegador só deixa tocar depois do primeiro toque (tela "Toque para ligar o motor").
+Banda de **rock pesado** feita na hora pelo `rock.js` (WebAudio): guitarra base distorcida dobrada (esquerda e
+direita), guitarra solo com eco, baixo com drive, bateria completa (bumbo, caixa, chimbal, prato, tons e viradas),
+coro de "Ei!" no refrão e um compressor no fim, como num estúdio. Três músicas próprias, com riffs e melodias
+compostos aqui: **Trovão na Pista** (138 bpm, riff em pedal), **Pedal no Fundo** (152 bpm, boogie em 12 compassos)
+e **Motor de Fogo** (168 bpm, galope). Cada uma tem introdução de riff que vai crescendo, estrofe, refrão, solo e
+final. Tocam **o tempo todo**, uma depois da outra: menu, corrida, pausa e tela final; cada corrida começa uma
+música nova. Só silenciam quando o app fica escondido (outra aba, tela apagada) ou no 🔊 do menu. O navegador só
+deixa tocar depois do primeiro toque (tela "Toque para ligar o motor").
 
 ## Instalar, baixar e jogar sem internet
 
@@ -66,7 +70,8 @@ apagada) ou no 🔊 do menu. O navegador só deixa tocar depois do primeiro toqu
 | `motor.js` | **puro**: regras da corrida (volante, curva, acelerar, grama, coisas da pista, batidas, chegada) e lista de eventos para som e efeitos. |
 | `sprites.js` | todos os desenhos, feitos em código uma vez num canvas escondido. |
 | `desenho.js` | a estrada em 3D (pseudo-3D por pedaços), céu, fundo, enfeites, carros, efeitos, placar e tela dividida. |
-| `som.js` | música, motor, buzina e efeitos sintetizados (WebAudio). |
+| `rock.js` | a banda de rock e as 3 músicas (partitura em `MUSICAS`), testadas no Node. |
+| `som.js` | motor, buzina e efeitos sintetizados (WebAudio); liga e desliga a música do `rock.js`. |
 | `app.js` | menu, controles, tela cheia, bordas seguras, laço da corrida, pausa, resultado, recorde, instalar e baixar. `APP_VERSION` aqui. |
 | `movimento.js` | **puro**: acelerômetro → direção do volante e pulo pelo toquinho (com calibração no 3‑2‑1), testado no Node. |
 | `baixar.js` | monta o `vruuum.html` de arquivo único (genérico: serve para outro jogo do Bolinho de Chuva; scripts com `data-fora-do-arquivo` ficam de fora). |

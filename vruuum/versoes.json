@@ -2,6 +2,19 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "0.4.0",
+      "data": "01/Nov/2026",
+      "hora": "14:14:00",
+      "pt": [
+        "Músicas novas de rock pesado, no clima das grandes músicas de estádio: guitarra distorcida dobrada (uma de cada lado do fone), guitarra solo com eco, baixo pesado, bateria completa com viradas e prato, e coro de \"Ei!\" no refrão.",
+        "São 3 músicas próprias (Trovão na Pista, Pedal no Fundo e Motor de Fogo), cada uma com introdução de riff que vai crescendo, estrofe, refrão, solo e final. Continuam tocando o tempo todo, uma depois da outra."
+      ],
+      "en": [
+        "New hard rock music in the spirit of big stadium anthems: double-tracked distorted rhythm guitar (one on each side of the headphones), lead guitar with echo, heavy bass, full drums with fills and cymbals, and a \"Hey!\" chant in the chorus.",
+        "3 original songs (Thunder on the Track, Pedal to the Metal and Engine of Fire), each with a building riff intro, verse, chorus, solo and ending. They still play all the time, one after another."
+      ]
+    },
+    {
       "versao": "0.3.1",
       "data": "01/Nov/2026",
       "hora": "13:53:00",
