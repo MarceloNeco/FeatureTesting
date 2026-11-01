@@ -42,10 +42,19 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 
 ## Música
 
-Três músicas próprias, bem animadas (Turbo Arco-Íris 150 bpm, Doce Velocidade 140, Pulo Neon 160), com estrofe,
-refrão, viradas e prato, feitas na hora pelo `som.js`. Tocam **o tempo todo**, uma depois da outra: menu, corrida,
-pausa e tela final. Cada corrida começa uma música nova. Só silenciam quando o app fica escondido (outra aba, tela
-apagada) ou no 🔊 do menu. O navegador só deixa tocar depois do primeiro toque (tela "Toque para ligar o motor").
+A "rádio" do jogo (`som.js`) intercala dois tipos de rock, sem parar:
+
+- **Gravadas** (`musicas/*.mp3`): 3 músicas livres do jogo de kart **SuperTuxKart**: Kart Grand Prix (Weirwood),
+  Lava (Kalsan) e Las Dunas Champions (ALBatross), licença **CC BY-SA** (pode usar dando o crédito; quem copiar
+  mantém a mesma licença). O menu mostra a música tocando com autor e licença. Detalhes em `musicas/LICENCAS.md`.
+- **Feitas pelo jogo** (`rock.js`, WebAudio): banda de rock pesado com guitarra base distorcida dobrada, guitarra
+  solo com eco, baixo com drive, bateria completa e coro de "Ei!", em 3 músicas próprias: Trovão na Pista
+  (138 bpm), Pedal no Fundo (152 bpm) e Motor de Fogo (168 bpm).
+
+Tocam **o tempo todo** (menu, corrida, pausa e fim); cada corrida começa a próxima. Só silenciam com o app escondido
+ou no 🔊. Sem internet: as gravadas ficam guardadas no aparelho depois da primeira abertura (cache próprio
+`vruuum-musicas-v1`, que não baixa de novo a cada versão); se uma não estiver guardada, a rádio pula para a próxima.
+No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para o arquivo continuar pequeno.
 
 ## Instalar, baixar e jogar sem internet
 
@@ -66,7 +75,9 @@ apagada) ou no 🔊 do menu. O navegador só deixa tocar depois do primeiro toqu
 | `motor.js` | **puro**: regras da corrida (volante, curva, acelerar, grama, coisas da pista, batidas, chegada) e lista de eventos para som e efeitos. |
 | `sprites.js` | todos os desenhos, feitos em código uma vez num canvas escondido. |
 | `desenho.js` | a estrada em 3D (pseudo-3D por pedaços), céu, fundo, enfeites, carros, efeitos, placar e tela dividida. |
-| `som.js` | música, motor, buzina e efeitos sintetizados (WebAudio). |
+| `musicas/` | as 3 músicas gravadas (MP3, CC BY-SA) e `LICENCAS.md`. |
+| `rock.js` | a banda de rock e as 3 músicas (partitura em `MUSICAS`), testadas no Node. |
+| `som.js` | motor, buzina e efeitos sintetizados (WebAudio); liga e desliga a música do `rock.js`. |
 | `app.js` | menu, controles, tela cheia, bordas seguras, laço da corrida, pausa, resultado, recorde, instalar e baixar. `APP_VERSION` aqui. |
 | `movimento.js` | **puro**: acelerômetro → direção do volante e pulo pelo toquinho (com calibração no 3‑2‑1), testado no Node. |
 | `baixar.js` | monta o `vruuum.html` de arquivo único (genérico: serve para outro jogo do Bolinho de Chuva; scripts com `data-fora-do-arquivo` ficam de fora). |
