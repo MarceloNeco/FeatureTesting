@@ -42,14 +42,19 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 
 ## Música
 
-Banda de **rock pesado** feita na hora pelo `rock.js` (WebAudio): guitarra base distorcida dobrada (esquerda e
-direita), guitarra solo com eco, baixo com drive, bateria completa (bumbo, caixa, chimbal, prato, tons e viradas),
-coro de "Ei!" no refrão e um compressor no fim, como num estúdio. Três músicas próprias, com riffs e melodias
-compostos aqui: **Trovão na Pista** (138 bpm, riff em pedal), **Pedal no Fundo** (152 bpm, boogie em 12 compassos)
-e **Motor de Fogo** (168 bpm, galope). Cada uma tem introdução de riff que vai crescendo, estrofe, refrão, solo e
-final. Tocam **o tempo todo**, uma depois da outra: menu, corrida, pausa e tela final; cada corrida começa uma
-música nova. Só silenciam quando o app fica escondido (outra aba, tela apagada) ou no 🔊 do menu. O navegador só
-deixa tocar depois do primeiro toque (tela "Toque para ligar o motor").
+A "rádio" do jogo (`som.js`) intercala dois tipos de rock, sem parar:
+
+- **Gravadas** (`musicas/*.mp3`): 3 músicas livres do jogo de kart **SuperTuxKart**: Kart Grand Prix (Weirwood),
+  Lava (Kalsan) e Las Dunas Champions (ALBatross), licença **CC BY-SA** (pode usar dando o crédito; quem copiar
+  mantém a mesma licença). O menu mostra a música tocando com autor e licença. Detalhes em `musicas/LICENCAS.md`.
+- **Feitas pelo jogo** (`rock.js`, WebAudio): banda de rock pesado com guitarra base distorcida dobrada, guitarra
+  solo com eco, baixo com drive, bateria completa e coro de "Ei!", em 3 músicas próprias: Trovão na Pista
+  (138 bpm), Pedal no Fundo (152 bpm) e Motor de Fogo (168 bpm).
+
+Tocam **o tempo todo** (menu, corrida, pausa e fim); cada corrida começa a próxima. Só silenciam com o app escondido
+ou no 🔊. Sem internet: as gravadas ficam guardadas no aparelho depois da primeira abertura (cache próprio
+`vruuum-musicas-v1`, que não baixa de novo a cada versão); se uma não estiver guardada, a rádio pula para a próxima.
+No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para o arquivo continuar pequeno.
 
 ## Instalar, baixar e jogar sem internet
 
@@ -70,6 +75,7 @@ deixa tocar depois do primeiro toque (tela "Toque para ligar o motor").
 | `motor.js` | **puro**: regras da corrida (volante, curva, acelerar, grama, coisas da pista, batidas, chegada) e lista de eventos para som e efeitos. |
 | `sprites.js` | todos os desenhos, feitos em código uma vez num canvas escondido. |
 | `desenho.js` | a estrada em 3D (pseudo-3D por pedaços), céu, fundo, enfeites, carros, efeitos, placar e tela dividida. |
+| `musicas/` | as 3 músicas gravadas (MP3, CC BY-SA) e `LICENCAS.md`. |
 | `rock.js` | a banda de rock e as 3 músicas (partitura em `MUSICAS`), testadas no Node. |
 | `som.js` | motor, buzina e efeitos sintetizados (WebAudio); liga e desliga a música do `rock.js`. |
 | `app.js` | menu, controles, tela cheia, bordas seguras, laço da corrida, pausa, resultado, recorde, instalar e baixar. `APP_VERSION` aqui. |

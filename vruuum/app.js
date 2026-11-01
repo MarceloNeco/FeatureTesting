@@ -2,7 +2,7 @@
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.4.0';
+  var APP_VERSION = '0.5.0';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -393,6 +393,8 @@
 
   // ---------- começo ----------
   $('ver').textContent = 'v' + APP_VERSION;
+  // nome da música tocando, com autor e licença (as gravadas são CC BY-SA: o crédito aparece aqui)
+  Som.aoTrocarMusica(function (i) { $('tocando').textContent = '🎵 ' + i.nome + ' — ' + i.autor + (i.licenca ? ' (' + i.licenca + ')' : ''); });
   lerBordas();
   $('btSom').textContent = Som.ligado() ? '🔊' : '🔇';
   traduzir();

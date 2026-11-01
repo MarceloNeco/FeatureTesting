@@ -49,3 +49,17 @@ test('baixar: baixar.js na página e interruptores fora do arquivo', () => {
   assert.match(html, /id="btGuardar"/);
   assert.ok(!/id="btBaixar"|id="btInstalar"/.test(html), 'um botão só para guardar no celular');
 });
+
+test('músicas gravadas: arquivo existe, crédito e licença, e o sw.js guarda todas', () => {
+  const som = ler('som.js'), lic = ler('musicas/LICENCAS.md'), sw = ler('sw.js');
+  const urls = [...som.matchAll(/url: '(musicas\/[^']+\.mp3)'/g)].map(m => m[1]);
+  assert.ok(urls.length >= 3);
+  const swMus = JSON.parse(sw.match(/var MUSICAS = (\[[^\]]*\])/)[1].replace(/'/g, '"'));
+  for (const u of urls) {
+    assert.ok(fs.existsSync(path.join(pasta, u)), 'falta ' + u);
+    assert.ok(lic.includes(u.replace('musicas/', '')), 'sem crédito: ' + u);
+    assert.ok(swMus.includes(u), 'sw.js não guarda ' + u);
+  }
+  for (const f of fs.readdirSync(path.join(pasta, 'musicas'))) if (f.endsWith('.mp3')) assert.ok(urls.includes('musicas/' + f), 'mp3 sem uso: ' + f);
+  assert.match(lic, /CC BY-SA/);
+});

@@ -2,6 +2,21 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "0.5.0",
+      "data": "01/Nov/2026",
+      "hora": "14:23:00",
+      "pt": [
+        "Rock gravado de verdade: 3 músicas livres do jogo de kart SuperTuxKart (Kart Grand Prix, de Weirwood; Lava, de Kalsan; Las Dunas Champions, de ALBatross; licença Creative Commons BY-SA) tocam intercaladas com as 3 de rock do próprio jogo, sem parar.",
+        "O menu mostra a música que está tocando, com o autor e a licença.",
+        "Sem internet: as músicas gravadas são guardadas no aparelho logo depois da primeira abertura (uns 5 MB, uma vez só) e tocam offline. No arquivo baixado tocam só as músicas do próprio jogo."
+      ],
+      "en": [
+        "Real recorded rock: 3 free songs from the kart game SuperTuxKart (Kart Grand Prix by Weirwood; Lava by Kalsan; Las Dunas Champions by ALBatross; Creative Commons BY-SA license) play in turn with the game's own 3 rock songs, non-stop.",
+        "The menu shows the song playing, with its author and license.",
+        "Offline: the recorded songs are saved on the device right after the first visit (about 5 MB, only once) and play offline. The downloaded file plays only the game's own songs."
+      ]
+    },
+    {
       "versao": "0.4.0",
       "data": "01/Nov/2026",
       "hora": "14:14:00",
