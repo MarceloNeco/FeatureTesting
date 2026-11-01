@@ -187,3 +187,28 @@ test('dentro do túnel o carro não atravessa a parede', () => {
   for (let k = 0; k < 120; k++) M.atualizar(e, [{ dir: -1 }], 1 / 60);
   assert.ok(j.x >= -1.1, 'x ' + j.x);
 });
+
+test('pontos: estrela soma, batida tira (nunca abaixo de zero), checkpoint dá bônus por rapidez', () => {
+  const e = M.novaCorrida('normal', 5, 1);
+  e.fase = 'corrida'; e.carros = [];
+  const j = e.jogadores[0];
+  e.pista.segs[40].coisas.push({ tipo: 'estrela', x: 0, alt: P.ALT_CHAO, pego: [false, false] });
+  j.z = 39 * P.SEG; j.vel = 5000;
+  correr(e, [{}], 0.3);
+  assert.equal(j.pontos, M.PONTOS.estrela);
+  e.carros = [{ z: j.z + 1.5 * P.SEG, x: j.x, vel: 1000, tipo: 'carro0' }];
+  j.vel = e.pista.cfg.velMax;
+  correr(e, [{}], 0.3);
+  assert.equal(j.pontos, 0, 'batida tira 150, mas não fica negativo');
+  // checkpoint: atravessa o primeiro portal rápido e devagar
+  function checkpoint(segundos) {
+    const f = M.novaCorrida('normal', 5, 1); f.fase = 'corrida'; f.carros = [];
+    const q = Math.round(f.pista.chegada / 4), g = f.jogadores[0];
+    f.t = segundos; g.z = (q - 1) * P.SEG; g.vel = 6000;
+    const ev = correr(f, [{}], 0.2);
+    return ev.find(x => x.tipo === 'checkpoint');
+  }
+  const rapido = checkpoint(30), devagar = checkpoint(400);
+  assert.ok(rapido && devagar);
+  assert.ok(rapido.bonus > 0 && devagar.bonus === 0, rapido.bonus + ' / ' + devagar.bonus);
+});

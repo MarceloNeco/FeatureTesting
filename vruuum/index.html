@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self' blob:; media-src 'self' blob: mediastream:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Vruuum! — Bolinho de Chuva · SolverONE</title>
 <link rel="icon" href="icone-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -42,6 +42,7 @@
 
   <div id="ajuda" class="ajuda" hidden>
     <p data-t="✈️ Avião, jato e helicóptero voam: a estrada fica lá embaixo e você segue o caminho de luzes no céu, desviando de pássaros, nuvens de tempestade e outros aviões. Os anéis dourados dão TURBO e as correntes de ar levam lá para cima, até as estrelas altas.|✈️ Plane, jet and helicopter fly: the road stays far below and you follow the path of lights in the sky, dodging birds, storm clouds and other planes. Golden rings give TURBO and updrafts lift you up to the high stars."></p>
+    <p data-t="🏆 Pontos: estrela 100, estrela no ar 200, turbo e rampa 50; cada portal de mundo é um CHECKPOINT (500 + bônus por rapidez). Bater tira pontos, mas ninguém perde.|🏆 Points: star 100, star in the air 200, turbo and ramp 50; every world gate is a CHECKPOINT (500 + speed bonus). Crashing takes points away, but nobody loses."></p>
     <p data-t="O carro acelera sozinho. Você vira para a esquerda e para a direita e aperta ⬆ PULAR para passar por cima dos cones, da lama e dos carrinhos. Pegue as ⭐ estrelas, passe pelo 🌈 arco-íris para ganhar TURBO e suba na rampa para um pulão até as estrelas do ar. Ninguém perde: bater só deixa o carro mais lento e derruba umas estrelas.|The car speeds up by itself. Steer left and right and press ⬆ JUMP to hop over cones, mud and cars. Grab the ⭐ stars, drive through the 🌈 rainbow for TURBO and hit the ramp for a big jump to the stars in the air. Nobody loses: crashing only slows you down and drops a few stars."></p>
     <p data-t="👆 Celular ou tablet (deitado ou em pé): segure o lado esquerdo ou direito da tela para virar; toque no botão ⬆ ou deslize o dedo para cima para pular. Com 2 jogadores, cada um no seu pedaço da tela.|👆 Phone or tablet (sideways or upright): hold the left or right side of the screen to steer; tap the ⬆ button or swipe up to jump. With 2 players, each one on their own half."></p>
     <p data-t="📱 Com 1 jogador, o celular também é volante: incline para um lado e o carro vira; dê um toquinho com o celular para cima e o carro pula. Celular retinho = carro reto.|📱 With 1 player, the phone is also a steering wheel: tilt it and the car turns; give the phone a little flick up and the car jumps. Phone level = car straight."></p>
@@ -68,9 +69,19 @@
   <div class="grupo">
     <p class="rotulo" data-t="Visual|Look"></p>
     <div class="opcoes" role="group">
+      <button class="opcao visual-misto" type="button" data-visual="misto" data-t="🔀 Misto|🔀 Mixed"></button>
       <button class="opcao visual-neon" type="button" data-visual="neon" data-t="🌃 Neon|🌃 Neon"></button>
       <button class="opcao" type="button" data-visual="colorido" data-t="🌈 Colorido|🌈 Colorful"></button>
     </div>
+  </div>
+
+  <div class="grupo">
+    <p class="rotulo" data-t="Como dirigir|How to steer"></p>
+    <div class="opcoes" role="group">
+      <button class="opcao" type="button" data-controle="toque" data-t="👆 Tela e celular|👆 Screen and phone"></button>
+      <button class="opcao" type="button" data-controle="maos" data-t="🙌 Mãos na câmera|🙌 Hands on camera"></button>
+    </div>
+    <p id="dicaMaos" class="dica" hidden data-t="Fique de frente para a câmera, com as duas mãos no ar como num volante. Mão direita para baixo vira para a direita, mão esquerda para baixo vira para a esquerda. As duas mãos para cima rápido: pula. As duas lá embaixo: freia. Na TV: ligue o celular, tablet ou notebook na TV (espelhar a tela ou cabo) com a câmera virada para quem joga. O vídeo não sai do aparelho.|Face the camera with both hands up like holding a wheel. Right hand down turns right, left hand down turns left. Both hands up fast: jump. Both hands low: brake. On a TV: connect the phone, tablet or laptop to the TV (screen mirroring or cable) with the camera facing the players. The video never leaves the device."></p>
   </div>
 
   <div id="garagem" class="garagem">
@@ -100,7 +111,7 @@
   <div class="barra-correr">
     <button id="btCorrer" class="grande" type="button" data-t="🏁 Correr!|🏁 Race!"></button>
   </div>
-  <p class="recorde-menu"><span data-t="Recorde de estrelas neste nível|Star record on this level"></span>: <b id="recordeMenu">0</b></p>
+  <p class="recorde-menu"><span data-t="Recorde de pontos neste nível|Points record on this level"></span>: <b id="recordeMenu">0</b></p>
   <div id="guardar" class="guardar">
     <button id="btGuardar" class="medio" type="button" data-t="📲 Guardar no celular|📲 Save on the phone"></button>
     <p id="guardarAviso" class="dica" aria-live="polite" data-t="Para jogar sem internet, com ícone na tela. Sem login.|To play offline, with an icon on the home screen. No login."></p>
@@ -111,6 +122,11 @@
 
 <section id="jogo" class="tela">
   <canvas id="tela"></canvas>
+  <div id="camMaos" class="cam-maos" hidden aria-hidden="true">
+    <video id="videoMaos" playsinline muted></video>
+    <canvas id="maosTela" width="240" height="180"></canvas>
+    <p id="maosAviso"></p>
+  </div>
   <button id="btPausa" class="mini pausa" type="button" aria-label="Pausar / Pause">⏸</button>
   <div id="pausa" class="pausa-painel" hidden>
     <h2 data-t="Pausa|Paused"></h2>
@@ -123,8 +139,8 @@
 <section id="fim" class="tela">
   <h2 class="logo pequeno" data-t="🏁 Fim da corrida!|🏁 Race over!"></h2>
   <div id="resultado" class="resultado" aria-live="polite"></div>
-  <p id="novoRecorde" class="recorde-novo" hidden data-t="🎉 Novo recorde de estrelas!|🎉 New star record!"></p>
-  <p class="recorde-menu"><span data-t="Recorde|Record"></span>: <b id="recordeFim">0</b> ⭐</p>
+  <p id="novoRecorde" class="recorde-novo" hidden data-t="🎉 Novo recorde de pontos!|🎉 New points record!"></p>
+  <p class="recorde-menu"><span data-t="Recorde|Record"></span>: <b id="recordeFim">0</b> pts</p>
   <button id="btDeNovo" class="grande" type="button" data-t="🔁 Correr de novo|🔁 Race again"></button>
   <button id="btMenu" class="medio" type="button" data-t="🏠 Menu|🏠 Menu"></button>
 </section>
@@ -168,6 +184,7 @@
 <script src="rock.js"></script>
 <script src="som.js"></script>
 <script src="movimento.js"></script>
+<script src="maos.js"></script>
 <script src="selfie.js"></script>
 <script src="baixar.js"></script>
 <script src="../recursos.js" data-app="feature-tester" data-fora-do-arquivo></script>

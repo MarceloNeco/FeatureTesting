@@ -13,13 +13,15 @@
   var RECARGA = 1.3;       // segundos até poder pular de novo (contando o tempo no ar)
   var RODANDO = 0.9;       // segundos rodopiando depois de bater num carro
   var DEPOIS_DO_FIM = 3;   // segundos de festa depois que todos chegam
+  // pontos (ninguém perde a corrida, mas o placar sobe e desce)
+  var PONTOS = { estrela: 100, estrelaAr: 200, turbo: 50, rampa: 50, checkpoint: 500, chegada: 1000, primeiro: 500, cone: -50, batida: -150 };
   var TOQUE = { estrela: 0.28, cone: 0.24, lama: 0.3, turbo: 0.3, rampa: 0.3 };
 
   function novaCorrida(nivel, semente, nJogadores) {
     var pista = P.montar(nivel, semente);
     var n = nJogadores === 2 ? 2 : 1, jogadores = [];
     for (var k = 0; k < n; k++) {
-      jogadores.push({ n: k, x: n === 2 ? (k ? 0.4 : -0.4) : 0, z: 1000, vel: 0, estrelas: 0, turbo: 0, pulo: 0, puloMax: 0, recarga: 0, rodando: 0, tremor: 0, chegou: false, tempo: 0, batidas: 0, mundo: 0, fora: false, empurrao: 0 });
+      jogadores.push({ n: k, x: n === 2 ? (k ? 0.4 : -0.4) : 0, z: 1000, vel: 0, estrelas: 0, pontos: 0, tCheck: 0, turbo: 0, pulo: 0, puloMax: 0, recarga: 0, rodando: 0, tremor: 0, chegou: false, tempo: 0, batidas: 0, mundo: 0, fora: false, empurrao: 0 });
     }
     return {
       pista: pista, jogadores: jogadores,
@@ -28,6 +30,16 @@
     };
   }
 
+  function somar(e, j, p, motivo) {
+    var antes = j.pontos; j.pontos = Math.max(0, j.pontos + p);
+    if (j.pontos !== antes) e.eventos.push({ tipo: 'pontos', j: j.n, p: j.pontos - antes, motivo: motivo });
+  }
+  // bônus de tempo: quanto mais rápido no trecho, mais pontos (alvo = trecho em velocidade quase cheia)
+  function bonusTempo(e, j, segs) {
+    var alvo = segs * SEG / (e.pista.cfg.velMax * ((j.mod && j.mod.vel) || 1)) * 1.2, tempo = e.t - j.tCheck;
+    j.tCheck = e.t;
+    return { tempo: tempo, bonus: Math.max(0, Math.round((alvo - tempo) * 30)) };
+  }
   function perder(e, j, q) {
     q = Math.min(q, j.estrelas);
     if (q > 0) { j.estrelas -= q; e.eventos.push({ tipo: 'perdeu', j: j.n, q: q }); }
@@ -87,6 +99,7 @@
         if (c.tipo === 'estrela') {
           if ((c.alt > P.ALT_CHAO) !== noAr) continue;   // estrela do ar só para quem pulou
           c.pego[j.n] = true; j.estrelas++; e.eventos.push({ tipo: 'estrela', j: j.n, ar: noAr });
+          somar(e, j, noAr ? PONTOS.estrelaAr : PONTOS.estrela, 'estrela');
           continue;
         }
         if (noAr) continue;                               // no ar passa por cima de tudo
@@ -94,14 +107,14 @@
         if (c.tipo === 'cone') {
           if (j.rodando > 0) continue;
           j.vel *= 0.5; j.batidas++; j.tremor = 0.4;
-          e.eventos.push({ tipo: 'cone', j: j.n }); perder(e, j, cfg.perdeCone);
+          e.eventos.push({ tipo: 'cone', j: j.n }); perder(e, j, cfg.perdeCone); somar(e, j, PONTOS.cone, 'cone');
         } else if (c.tipo === 'lama') {
           if (j.vel > max * 0.3) j.vel *= 0.6;
           j.tremor = 0.7; e.eventos.push({ tipo: 'lama', j: j.n });
         } else if (c.tipo === 'turbo') {
-          j.turbo = TURBO; e.eventos.push({ tipo: 'turbo', j: j.n });
+          j.turbo = TURBO; e.eventos.push({ tipo: 'turbo', j: j.n }); somar(e, j, PONTOS.turbo, 'turbo');
         } else if (c.tipo === 'rampa') {
-          j.pulo = j.puloMax = PULO; e.eventos.push({ tipo: 'pulo', j: j.n });
+          j.pulo = j.puloMax = PULO; e.eventos.push({ tipo: 'pulo', j: j.n }); somar(e, j, PONTOS.rampa, 'rampa');
         }
       }
     }
@@ -112,7 +125,7 @@
         var car = e.carros[k];
         if (Math.abs(car.x - j.x) < 0.42 && j.z > car.z - SEG * 0.8 && j.z < car.z + SEG * 0.4 && j.vel > car.vel) {
           j.vel = car.vel * 0.6; j.z = car.z - SEG * 0.9; j.rodando = RODANDO; j.batidas++;
-          e.eventos.push({ tipo: 'batida', j: j.n }); perder(e, j, cfg.perdeCarro);
+          e.eventos.push({ tipo: 'batida', j: j.n }); perder(e, j, cfg.perdeCarro); somar(e, j, PONTOS.batida, 'batida');
           break;
         }
       }
@@ -120,13 +133,21 @@
 
     // mudou de mundo?
     var m = P.achar(pista, j.z).mundo;
-    if (m !== j.mundo) { j.mundo = m; e.eventos.push({ tipo: 'mundo', j: j.n, mundo: m, nome: pista.mundos[m] }); }
+    if (m !== j.mundo) {
+      j.mundo = m; e.eventos.push({ tipo: 'mundo', j: j.n, mundo: m, nome: pista.mundos[m] });
+      // cada portal de mundo é um CHECKPOINT: 500 pontos + bônus de tempo
+      var bt = bonusTempo(e, j, pista.chegada / 4);
+      e.eventos.push({ tipo: 'checkpoint', j: j.n, numero: m, tempo: bt.tempo, bonus: bt.bonus });
+      somar(e, j, PONTOS.checkpoint + bt.bonus, 'checkpoint');
+    }
 
     // chegada
     if (!j.chegou && j.z >= pista.zChegada) {
       j.chegou = true; j.tempo = e.t;
       var antes = e.jogadores.filter(function (o) { return o !== j && o.chegou; }).length;
       e.eventos.push({ tipo: 'chegou', j: j.n, lugar: antes + 1 });
+      var bc = bonusTempo(e, j, pista.chegada / 4);
+      somar(e, j, PONTOS.chegada + bc.bonus + (e.jogadores.length === 2 && antes === 0 ? PONTOS.primeiro : 0), 'chegada');
     }
   }
 
@@ -165,7 +186,7 @@
     return e;
   }
 
-  var VruuumMotor = { novaCorrida: novaCorrida, atualizar: atualizar, CONTAGEM: CONTAGEM, TURBO: TURBO, PULO: PULO, PULINHO: PULINHO, RECARGA: RECARGA, RODANDO: RODANDO, DEPOIS_DO_FIM: DEPOIS_DO_FIM };
+  var VruuumMotor = { PONTOS: PONTOS, novaCorrida: novaCorrida, atualizar: atualizar, CONTAGEM: CONTAGEM, TURBO: TURBO, PULO: PULO, PULINHO: PULINHO, RECARGA: RECARGA, RODANDO: RODANDO, DEPOIS_DO_FIM: DEPOIS_DO_FIM };
   if (typeof module !== 'undefined' && module.exports) module.exports = VruuumMotor;
   else raiz.VruuumMotor = VruuumMotor;
 })(this);

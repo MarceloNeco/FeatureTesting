@@ -189,3 +189,10 @@ button:focus-visible, input:focus-visible, .carta:focus-visible { outline: 3px s
 .grade-ad:has(.vivo) { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
 .ico-borracha { display: grid; place-items: center; line-height: 0; }
 .ico-borracha svg { width: 36px; height: 36px; }
+/* ---------- painel de músicas ---------- */
+.lista-musicas { display: grid; gap: 6px; }
+.musica-item { display: flex; align-items: center; gap: 10px; text-align: left; background: var(--card); border: 2px solid transparent; border-radius: 14px; padding: 6px 12px; }
+.musica-item .ico { font-size: 1.5rem; }
+.musica-item .txt { display: grid; }
+.musica-item small { color: var(--muted); font-size: .78rem; }
+.musica-item[aria-pressed="true"] { border-color: var(--ouro); background: var(--card2); }
