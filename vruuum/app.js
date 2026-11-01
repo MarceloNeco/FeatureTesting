@@ -2,7 +2,7 @@
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.9.0';
+  var APP_VERSION = '0.9.1';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -313,10 +313,24 @@
     if (!TOQUE) return;
     var d = document, el = d.documentElement;
     try {
-      if (liga && !(d.fullscreenElement || d.webkitFullscreenElement)) { var p = el.requestFullscreen ? el.requestFullscreen({ navigationUI: 'hide' }) : (el.webkitRequestFullscreen && el.webkitRequestFullscreen()); if (p && p.catch) p.catch(function () {}); }
-      else if (!liga && (d.fullscreenElement || d.webkitFullscreenElement)) { var q = d.exitFullscreen ? d.exitFullscreen() : (d.webkitExitFullscreen && d.webkitExitFullscreen()); if (q && q.catch) q.catch(function () {}); }
+      if (liga && !(d.fullscreenElement || d.webkitFullscreenElement)) {
+        var p = el.requestFullscreen ? el.requestFullscreen({ navigationUI: 'hide' }) : (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
+        if (p && p.then) p.then(travarTela).catch(function () {}); else travarTela();
+      } else if (liga) travarTela();
+      else if (!liga) {
+        destravarTela();
+        if (d.fullscreenElement || d.webkitFullscreenElement) { var q = d.exitFullscreen ? d.exitFullscreen() : (d.webkitExitFullscreen && d.webkitExitFullscreen()); if (q && q.catch) q.catch(function () {}); }
+      }
     } catch (e) { /* navegador sem tela cheia (iPhone): segue normal */ }
   }
+  // durante a corrida a tela não gira: inclinar o celular para virar o carro não pode trocar deitado/em pé
+  function travarTela() {
+    try {
+      var o = screen.orientation;
+      if (o && o.lock && o.type) { var t2 = o.lock(o.type); if (t2 && t2.catch) t2.catch(function () {}); }
+    } catch (e) { /* o navegador não deixa travar: segue normal */ }
+  }
+  function destravarTela() { try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) { /* ok */ } }
   // bordas seguras: recorte da câmera e cantos (principalmente com o celular deitado)
   var bordas = { t: 0, r: 0, b: 0, l: 0 };
   function lerBordas() {
@@ -328,7 +342,7 @@
 
   function tempoTxt(s) { var m = Math.floor(s / 60), r = Math.floor(s % 60); return m + ':' + (r < 10 ? '0' : '') + r; }
   function acabar() {
-    rodando = false; Som.motor([]); soltarTrava();
+    rodando = false; Som.motor([]); soltarTrava(); destravarTela();
     var total = 0;
     estado.pista.segs.forEach(function (s) { s.coisas.forEach(function (c) { if (c.tipo === 'estrela') total++; }); });
     var js = estado.jogadores, melhor = Math.max.apply(null, js.map(function (j) { return j.estrelas; }));

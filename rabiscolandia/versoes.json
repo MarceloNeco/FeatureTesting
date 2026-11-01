@@ -2,6 +2,32 @@
   "app": "rabiscolandia",
   "versoes": [
     {
+      "versao": "0.1.3",
+      "data": "01/Nov/2026",
+      "hora": "18:21:20",
+      "pt": [
+        "🎵 Música de verdade: a rádio agora intercala 6 músicas gravadas com instrumentos de verdade (cordas, fagote, ukulele, assobio, piano de jazz), bem-humoradas, no clima do primeiro LittleBigPlanet, com as 4 músicas feitas pelo app. O nome e o autor aparecem quando cada uma começa.",
+        "A borracha agora apaga também os adesivos e os desenhos animados assim que encosta em qualquer parte deles (antes só no meio), com um somzinho.",
+        "Ícone novo da borracha: uma borracha de escola rosa e azul, no lugar da esponja."
+      ],
+      "en": [
+        "🎵 Real music: the radio now mixes 6 recorded songs with real instruments (strings, bassoon, ukulele, whistling, jazz piano), playful, in the spirit of the first LittleBigPlanet, with the 4 songs made by the app. Name and author show up when each one starts.",
+        "The eraser now also erases stickers and animated drawings as soon as it touches any part of them (before, only the middle), with a little sound.",
+        "New eraser icon: a pink and blue school eraser instead of the sponge."
+      ]
+    },
+    {
+      "versao": "0.1.2",
+      "data": "01/Nov/2026",
+      "hora": "18:06:52",
+      "pt": [
+        "Adesivos mais fáceis de achar: as categorias viraram uma faixa pequena de ícones no alto (como o teclado de emojis) e todos os adesivos já aparecem logo embaixo; tocar num ícone pula para a categoria. Os adesivos animados se mexem dentro do painel."
+      ],
+      "en": [
+        "Stickers are easier to find: categories became a small row of icons at the top (like the emoji keyboard) and all stickers show right below; tapping an icon jumps to that category. Animated stickers move inside the panel."
+      ]
+    },
+    {
       "versao": "0.1.1",
       "data": "01/Nov/2026",
       "hora": "17:15:49",
