@@ -37,10 +37,19 @@ test('aparelho com o vetor ao contrário (iPhone antigo): a calibração acerta 
   assert.ok(rodar(Mv.criar(), inv, 0, 25) > 0.9);
 });
 
-test('o jeito de segurar no 3-2-1 vira o "meio"', () => {
+test('celular retinho não puxa para lado nenhum, mesmo se estava torto no 3-2-1 (bug da 0.3.0)', () => {
+  for (const [f, ang] of [[emPe, 0], [deitado90, 90], [noColo, 0]]) {
+    const mv = Mv.criar();
+    mv.calibrar(); for (let i = 0; i < 30; i++) mv.ler(f(12), null, ang, i * 16); mv.fimCalibrar();   // ainda ajeitando nas mãos
+    for (let i = 0; i < 30; i++) mv.ler(f(0), null, ang, 1000 + i * 16);                              // agora retinho
+    assert.equal(mv.direcao(), 0, f.name);
+  }
+});
+
+test('deitado na mesa, tela para cima, retinho: não vira', () => {
   const mv = Mv.criar();
-  mv.calibrar(); for (let i = 0; i < 30; i++) mv.ler(emPe(15), null, 0, i * 16); mv.fimCalibrar();
-  for (let i = 0; i < 30; i++) mv.ler(emPe(15), null, 0, 1000 + i * 16);
+  mv.calibrar(); for (let i = 0; i < 10; i++) mv.ler({ x: 0.3, y: 0.2, z: G }, null, 90, i * 16); mv.fimCalibrar();
+  for (let i = 0; i < 30; i++) mv.ler({ x: 0.4, y: -0.3, z: G }, null, 90, 500 + i * 16);
   assert.equal(mv.direcao(), 0);
 });
 

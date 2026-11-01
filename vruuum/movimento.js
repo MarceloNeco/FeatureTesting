@@ -2,14 +2,16 @@
    toquinho do celular para cima faz pular. Funciona com o celular deitado ou em pé, segurando
    na mão como um volante ou mais deitado no colo.
    Como: a gravidade (accelerationIncludingGravity) passada para o "jeito da tela" (pelo ângulo da
-   tela); o lado da tela para onde a gravidade escorrega é a direção. No 3-2-1 o jogo grava como a
-   pessoa está segurando (o "meio"), então qualquer jeito confortável vale. O pulo é um tranco
+   tela); o lado da tela para onde a gravidade escorrega é a direção. O meio do volante é o RETO de
+   verdade (a gravidade), não o jeito de segurar no 3-2-1: assim o celular retinho nunca puxa para um
+   lado (o dono viu o carro ir sozinho para a direita na 0.3.0). No 3-2-1 só se descobre se o aparelho
+   dá o vetor ao contrário (iPhone antigo). O pulo é um tranco
    forte no eixo de cima/baixo da tela (aceleração sem a gravidade).
    Puro: as contas rodam no Node (testes); o app só repassa os eventos devicemotion. */
 (function (raiz) {
   'use strict';
-  var ZONA_MORTA = 0.06;   // inclinação pequena (mão tremendo) não vira
-  var CHEIO = 0.32;        // ~19° de inclinação = volante todo virado
+  var ZONA_MORTA = 0.09;   // até ~5° (mão tremendo, celular quase reto) não vira
+  var CHEIO = 0.36;        // ~21° de inclinação = volante todo virado
   var TRANCO = 11;         // m/s² no eixo da tela para contar como "toquinho para cima"
   var ESPERA_PULO = 600;   // ms entre dois pulos pelo tranco
 
@@ -23,14 +25,14 @@
   }
 
   function criar() {
-    var meio = 0, sinal = 1, soma = 0, somaSinal = 0, amostras = 0, calibrando = false, pronto = false;
+    var sinal = 1, soma = 0, somaSinal = 0, amostras = 0, calibrando = false, pronto = false;
     var lado = 0, alisado = 0, ultimoPulo = -1e9, puloPendente = false, temSensor = false, baixa = null;
     return {
       // durante o 3-2-1: grava o jeito de segurar
       calibrar: function () { calibrando = true; soma = 0; somaSinal = 0; amostras = 0; },
       fimCalibrar: function () {
         calibrando = false;
-        if (amostras) { meio = soma / amostras; sinal = somaSinal >= 0 ? 1 : -1; pronto = true; }
+        if (amostras) { sinal = somaSinal >= 0 ? 1 : -1; pronto = true; }
       },
       // um evento devicemotion (ou números de teste): g = com gravidade, l = sem gravidade (pode faltar)
       ler: function (g, l, angulo, agora) {
@@ -40,7 +42,7 @@
         var s = t.x / mag;
         if (calibrando) { soma += s; somaSinal += t.y + t.z; amostras++; }
         // alguns aparelhos (iPhone antigo) dão o vetor ao contrário: o sinal vem da calibração
-        var d = -(s - meio) * sinal;
+        var d = -s * sinal;
         alisado += (d - alisado) * 0.35;
         var m = Math.abs(alisado) < ZONA_MORTA ? 0 : (alisado - (alisado > 0 ? ZONA_MORTA : -ZONA_MORTA)) / (CHEIO - ZONA_MORTA);
         lado = pronto ? Math.max(-1, Math.min(1, m)) : 0;
