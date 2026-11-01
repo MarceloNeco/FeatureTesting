@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.6.2', APP_UPDATED = '01/11/2026';
+  var APP_VERSION = '0.6.3', APP_UPDATED = '01/11/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -28,7 +28,7 @@
   function tela(id) { document.querySelectorAll('.tela').forEach(function (s) { s.classList.toggle('ativa', s.id === id); }); }
 
   var app = { modo: 'inicio', rodada: null, pausado: false, resto: 0, espera: 0, resultado: null, trava: null };
-  window.PeluqueriaApp = { tela: tela, T: T, aoTocar: function (el, fn) { aoTocar(el, fn); }, get lingua() { return pref.lingua; }, estado: function () { return app.rodada; },
+  window.PeluqueriaApp = { tela: tela, T: T, aoTocar: function (el, fn) { aoTocar(el, fn); }, emBotao: emBotao, get lingua() { return pref.lingua; }, estado: function () { return app.rodada; },
     /* para tv.js e controle.js (v0.4.0) */
     catalogo: function () { var u = pref.minhas && temMinhas(); return { cenarios: catalogo.cenarios.jogo.concat(u ? catalogo.cenarios.meus : []), itens: catalogo.itens.jogo.concat(u ? catalogo.itens.meus : []) }; },
     pref: function () { return pref; }, gravarPref: function () { gravar(CHAVE_PREF, pref); },
@@ -155,7 +155,9 @@
   }
   $('btPausa').addEventListener('click', pausar);
   $('btSeguir').addEventListener('click', continuar);
-  aoTocar($('palco'), function (ev) { ev.preventDefault(); parar(); });
+  /* tocar em QUALQUER lugar da tela para o item (v0.6.3), menos nos botões (🏠, ⏸, ▶), em qualquer aparelho */
+  function emBotao(el) { while (el && el !== document) { if (el.tagName === 'BUTTON' || el.tagName === 'INPUT' || el.tagName === 'LABEL') return true; el = el.parentNode; } return false; }
+  aoTocar($('rodada'), function (ev) { if (emBotao(ev.target)) return; ev.preventDefault(); parar(); });
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') { pausar(); if (som) som.parar(); }
     else if (som && musicaLigada && app.modo !== 'jogo') { som.ligar(); som.musica(app.modo === 'contagem' ? pref.nivel : app.modo === 'fim' ? 'fim' : 'inicio'); }
@@ -177,9 +179,9 @@
       return;
     }
     var k = ev.key;
-    if (ev.repeat) { if (k === ' ' || k === 'Enter') ev.preventDefault(); return; }   // OK/Enter segurado não para a próxima queda
+    if (ev.repeat) { if (k === ' ' || k === 'Enter' || k === 'Select' || ev.keyCode === 13 || ev.keyCode === 23) ev.preventDefault(); return; }   // OK/Enter segurado não para a próxima queda
     if (k === 'Escape' || k === 'p' || k === 'P') { ev.preventDefault(); if (app.pausado) continuar(); else pausar(); return; }
-    if (k === ' ' || k === 'Enter') {
+    if (k === ' ' || k === 'Enter' || k === 'Select' || ev.keyCode === 13 || ev.keyCode === 23) {   // 23: botão do meio do controle (Fire TV / Android TV)
       ev.preventDefault();
       if (app.pausado) continuar(); else parar();
     }

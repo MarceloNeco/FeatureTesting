@@ -155,9 +155,15 @@
   }
 
   /* ---------- controle remoto da TV ---------- */
+  /* TV de toque, tablet como TV ou controle com ponteiro (Magic Remote da LG): tocar na tela da rodada para o item
+     do jogador daquele lado (v0.6.3) */
+  A.aoTocar($('tvJogo'), function (ev) {
+    if (tv.fase !== 'jogo' || A.emBotao(ev.target)) return;
+    ev.preventDefault(); parar(ev.target && ev.target.id === 'tvPalco1' ? 1 : 0, 0);
+  });
   document.addEventListener('keydown', function (ev) {
     if (!tv.aberta || A.modo() !== 'tv') return;
-    var k = ev.key, ok = k === 'Enter' || k === ' ', voltar = k === 'Escape' || k === 'Backspace' || ev.keyCode === 461;
+    var k = ev.key, ok = k === 'Enter' || k === ' ' || k === 'Select' || ev.keyCode === 13 || ev.keyCode === 23, voltar = k === 'Escape' || k === 'Backspace' || ev.keyCode === 461;
     if (ok || voltar || k === 'ArrowLeft' || k === 'ArrowRight') ev.preventDefault();
     if (ev.repeat && ok) return;
     if (tv.fase === 'lobby') {
