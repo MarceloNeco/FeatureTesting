@@ -2,6 +2,25 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.3.0",
+      "data": "01/Nov/2026",
+      "hora": "15:29:46",
+      "pt": [
+        "🔄 Girar a personagem: arraste o dedo para os lados em cima dela para ver de frente, de lado e de costas (de costas aparece o cabelo por trás). Um toque nela ou no ↻ dá uma volta inteira com rastro de luz, e no desfile ela dá uma voltinha sozinha. O 🙂 volta para a frente.",
+        "✕ Tirar: em cima das opções aparece o botão para tirar a peça colocada (tiara, brinco, colar, maquiagem…). Tocar de novo na peça escolhida também tira.",
+        "Mãos com dedos e polegar. O anel aparece só na frente do dedo, e a pulseira só na frente do pulso.",
+        "Cabelo: as mechas do lado agora ficam por fora do rosto, sem cobrir as bochechas.",
+        "Desafios: as dicas saíram de cima da personagem e viraram uma faixa fininha logo abaixo dela, com etiquetas que ficam verdes ✅ quando a dica é cumprida."
+      ],
+      "en": [
+        "🔄 Spin the character: drag sideways on her to see her front, side and back (from behind you see her hair). One tap on her or on ↻ does a full turn with a light trail, and on the runway she spins by herself. 🙂 turns her to the front.",
+        "✕ Remove: above the options there is a button to take off the piece you put on (tiara, earring, necklace, makeup…). Tapping the chosen piece again also removes it.",
+        "Hands with fingers and a thumb. The ring shows only on the front of the finger, and the bracelet only on the front of the wrist.",
+        "Hair: the side locks now stay outside the face, without covering the cheeks.",
+        "Challenges: the tips no longer sit on top of the character; they are a thin strip right below her, with labels that turn green ✅ when a tip is done."
+      ]
+    },
+    {
       "versao": "0.2.0",
       "data": "01/Nov/2026",
       "hora": "14:21:48",

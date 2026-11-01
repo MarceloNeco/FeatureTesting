@@ -47,3 +47,21 @@ test('miniatura (área), só cenário e foto (tamanho)', () => {
 test('espelhar troca só o x', () => {
   assert.equal(B.espelhar('M100,50 L150,60 Q120,70 130,80Z'), 'M300,50 L250,60 Q280,70 270,80Z');
 });
+
+test('giro: frente, lado e costas desenham; de costas não tem rosto', () => {
+  const e = Object.assign(V.novo(), { brincos: 'coracao', anel: 'pedra', pulseira: 'micangas', oculos: 'sol', vestido: 'fada' });
+  for (let a = 0; a < 360; a += 15) {
+    const s = B.svg(e, { id: 'g', angulo: a });
+    assert.equal(bemFormado(s), '', 'ângulo ' + a); assert.ok(!/NaN|undefined/.test(s), 'ângulo ' + a);
+  }
+  const frente = B.svg(e, { id: 'f', angulo: 0 }), costas = B.svg(e, { id: 'c', angulo: 180 });
+  assert.match(frente, /olhoE/); assert.ok(!/clip-path="url\(#c-olho/.test(costas), 'de costas sem olhos');
+  assert.match(B.svg(e, { id: 'l', angulo: 90 }), /scale\(0\.3 1\)/, 'de lado fica fininho');
+});
+
+test('anel e pulseira: só a parte da frente (arco aberto, sem círculo inteiro)', () => {
+  const e = Object.assign(V.novo(), { anel: 'simples', pulseira: 'simples' });
+  const s = B.svg(e, { id: 'j' });
+  assert.match(s, /A13\.5,4\.8 0 0 0/, 'pulseira em meio arco');
+  assert.ok(!/<ellipse cx="120\.5" cy="487"/.test(s), 'pulseira sem elipse inteira');
+});

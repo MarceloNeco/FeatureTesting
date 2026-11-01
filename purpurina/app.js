@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.2.0';
+  var APP_VERSION = '0.3.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -142,8 +142,8 @@
     if (d) { estado = baseDesafio(d); grupoAtual = 'roupa'; Som.proxima(); }
     else { estado = livre; grupoAtual = grupoAtual || 'eu'; }
     dicasAntes = d ? V.avaliar(estado, d).dicas : [];
-    vista = INTEIRA.slice(); zoomLigado = false;
-    ir('estudio');
+    vista = INTEIRA.slice(); zoomLigado = false; angulo = 0; animGiro++;
+    ir('estudio'); setTimeout(mostrarDicaGiro, 600);
   }
   function mudar(novo, catId) {
     if (V.iguais(novo, estado)) return;
@@ -151,6 +151,7 @@
   }
   function aposMudar() {
     if (!modo) { livre = estado; gravar('purpurina.atual', estado); }
+    if (angulo) { girarPara(0, 300); }
     desenharBoneca(); desenharOpcoes(); desenharDicas(true);
     $('btDesfazer').disabled = !hist.tem();
   }
@@ -162,14 +163,16 @@
   }
   function desenharBoneca() {
     var el = $('boneca');
-    el.innerHTML = B.svg(estado, { id: 'palco', anim: !CALMO, area: vista });
+    el.innerHTML = B.svg(estado, { id: 'palco', anim: !CALMO && !angulo, area: vista, angulo: angulo });
+    $('btFrente').hidden = !angulo;
     el.setAttribute('aria-label', V.resumo(estado, pref.lingua));
   }
   function desenharDicas(comSom) {
     var d = desafioAtual(), ul = $('dicas');
     $('dicasCaixa').hidden = !d; if (!d) return;
     var r = V.avaliar(estado, d); ul.innerHTML = '';
-    $('btDicas').textContent = '💡 ' + t('Dicas', 'Tips') + ' ' + r.cumpridas + '/3 ' + (ul.hidden ? '▸' : '▾');
+    $('dicasTitulo').textContent = '💡 ' + r.cumpridas + '/3';
+    $('dicasCaixa').setAttribute('aria-label', t('Dicas do desafio', 'Challenge tips') + ': ' + r.cumpridas + '/3');
     d.dicas.forEach(function (x, i) {
       var li = document.createElement('li'), m = document.createElement('span'), s = document.createElement('span');
       li.className = r.dicas[i] ? 'ok' : ''; m.className = 'marca'; m.textContent = r.dicas[i] ? '✅' : '⚪'; s.textContent = N(x);
@@ -208,8 +211,6 @@
   function zoomDaParte() { var c = catAtual(); zoom(!!(c && c.zoom), true); }
   $('btZoom').addEventListener('click', function () { Som.tocar('clique'); zoom(!zoomLigado, true); });
 
-  // o quadro de dicas recolhe com um toque (para ver a personagem inteira)
-  $('btDicas').addEventListener('click', function () { var ul = $('dicas'); ul.hidden = !ul.hidden; $('btDicas').setAttribute('aria-expanded', String(!ul.hidden)); Som.tocar('clique'); desenharDicas(false); });
 
   // abas (grupos), partes (categorias) e opções
   function catsDoGrupo(g) { return P.CATEGORIAS.filter(function (c) { return c.grupo === g; }); }
@@ -238,6 +239,10 @@
     var cat = P.categoria(catPorGrupo[grupoAtual] || catsDoGrupo(grupoAtual)[0].id);
     var cores = $('cores'), estilos = $('estilos'); cores.innerHTML = ''; estilos.innerHTML = '';
     cores.hidden = !cat.cores; estilos.hidden = !cat.opcoes;
+    // ✕ Tirar: aparece sempre que a peça está colocada e dá para ficar sem ela
+    var podeTirar = !!(cat.opcoes && cat.opcoes[0].id === 'nenhum' && estado[cat.id] !== 'nenhum'), tb = $('btTirar');
+    tb.hidden = !podeTirar;
+    if (podeTirar) { var opAtual = P.opcao(cat.id, estado[cat.id]); tb.textContent = t('✕ Tirar: ', '✕ Remove: ') + N(opAtual); tb.onclick = function () { mudar(V.aplicar(estado, cat.id, 'nenhum'), cat.id); Som.tocar('desfazer'); }; }
     cores.setAttribute('aria-label', t('Cores', 'Colors') + ' — ' + N(cat));
     estilos.setAttribute('aria-label', N(cat));
     if (cat.cores) {
@@ -264,7 +269,12 @@
         var nome = document.createElement('span'); nome.textContent = N(op);
         b.appendChild(vis); b.appendChild(nome);
         b.setAttribute('aria-pressed', String(estado[cat.id] === op.id && V.visivel(estado, cat.id) || (op.id === 'nenhum' && estado[cat.id] === 'nenhum')));
-        b.addEventListener('click', function () { mudar(V.aplicar(estado, cat.id, op.id), cat.id); });
+        // tocar de novo na peça que já está colocada tira a peça (quando dá para ficar sem ela)
+        b.addEventListener('click', function () {
+          var tirar = op.id !== 'nenhum' && estado[cat.id] === op.id && cat.opcoes[0].id === 'nenhum' && V.visivel(estado, cat.id);
+          mudar(V.aplicar(estado, cat.id, tirar ? 'nenhum' : op.id), cat.id);
+          if (tirar) recado(t('Tirou: ', 'Removed: ') + N(op));
+        });
         estilos.appendChild(b);
       });
     }
@@ -309,10 +319,78 @@
     Som.tocar(cat.grupo === 'roupa' ? 'roupa' : cat.grupo === 'eu' ? 'clique' : 'brilho');
     faiscas(q[0], q[1], cat.grupo === 'fundo' ? 12 : 7);
   }
-  $('boneca').addEventListener('click', function () {
-    var el = $('boneca'); el.classList.remove('girar'); void el.offsetWidth; el.classList.add('girar');
-    Som.tocar('brilho'); var q = naTela(200, 360); faiscas(q[0], q[1], 8);
+  /* ---------- girar a personagem ----------
+     Arrastar o dedo para os lados gira (frente, lado, costas). Um toque (ou o ↻) dá uma volta inteira com
+     rastro de luz: a cada poucos quadros, uma cópia do desenho fica para trás e vai sumindo (efeito
+     estroboscópico, sem piscar a tela). Quem pediu menos movimento vê a volta em 4 paradas, sem rastro. */
+  var angulo = 0, animGiro = 0, arraste = null, pedidoQuadro = 0;
+  function redesenharGiro() { if (pedidoQuadro) return; pedidoQuadro = requestAnimationFrame(function () { pedidoQuadro = 0; desenharBoneca(); }); }
+  function girarPara(alvo, dur) {
+    var id = ++animGiro, de = angulo, ini = performance.now();
+    var dif = ((alvo - de) % 360 + 540) % 360 - 180;   // pelo caminho mais curto
+    (function passo(agora) {
+      if (id !== animGiro) return;
+      var k = Math.min(1, (agora - ini) / dur);
+      angulo = de + dif * (1 - Math.pow(1 - k, 3)); if (k >= 1) angulo = ((alvo % 360) + 360) % 360;
+      desenharBoneca(); if (k < 1) requestAnimationFrame(passo);
+    })(ini);
+  }
+  // volta inteira com rastro (vale para o palco e para a passarela do desfile)
+  function volta(alvoEl, rastroEl, desenhar, pronto) {
+    var id = ++animGiro, ini = performance.now(), dur = 1700, quadro = 0;
+    function limpar() { rastroEl.innerHTML = ''; }
+    if (CALMO) {
+      [90, 180, 270, 0].forEach(function (a, i) { setTimeout(function () { if (id === animGiro) desenhar(a); if (i === 3 && pronto) pronto(); }, (i + 1) * 450); });
+      return;
+    }
+    Som.tocar('surpresa'); limpar();
+    (function passo(agora) {
+      if (id !== animGiro) { limpar(); return; }
+      var k = Math.min(1, (agora - ini) / dur), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      desenhar(k >= 1 ? 0 : e * 360);
+      if (++quadro % 3 === 0 && k < 1) {
+        var atualSvg = alvoEl.querySelector('svg');
+        if (atualSvg) {
+          var f = document.createElement('div'); f.className = 'fantasma'; f.appendChild(atualSvg.cloneNode(true));
+          rastroEl.appendChild(f);
+          while (rastroEl.children.length > 4) rastroEl.removeChild(rastroEl.firstChild);
+          Array.prototype.forEach.call(rastroEl.children, function (c, i, l) { c.style.opacity = String(0.08 + 0.12 * (i + 1) * (4 / l.length) / 2); });
+        }
+      }
+      if (k < 1) requestAnimationFrame(passo); else { setTimeout(limpar, 120); Som.tocar('brilho'); if (pronto) pronto(); }
+    })(ini);
+  }
+  function voltaNoPalco() {
+    volta($('boneca'), $('rastro'), function (a) { angulo = a; desenharBoneca(); }, function () { var q = naTela(200, 360); faiscas(q[0], q[1], 10); });
+  }
+  var bonecaEl = $('boneca');
+  bonecaEl.addEventListener('pointerdown', function (ev) {
+    try { bonecaEl.setPointerCapture(ev.pointerId); } catch (x) { /* ok */ }
+    animGiro++; $('rastro').innerHTML = '';
+    arraste = { x: ev.clientX, a: angulo, mexeu: false };
   });
+  bonecaEl.addEventListener('pointermove', function (ev) {
+    if (!arraste) return;
+    var dx = ev.clientX - arraste.x;
+    if (Math.abs(dx) > 6) arraste.mexeu = true;
+    if (!arraste.mexeu) return;
+    angulo = ((arraste.a - dx * 1.1) % 360 + 360) % 360; redesenharGiro();
+  });
+  function soltar() {
+    if (!arraste) return;
+    var foiToque = !arraste.mexeu; arraste = null;
+    if (foiToque) voltaNoPalco();
+    else if (angulo < 12 || angulo > 348) girarPara(0, 200);   // quase de frente: encaixa
+  }
+  bonecaEl.addEventListener('pointerup', soltar);
+  bonecaEl.addEventListener('pointercancel', function () { arraste = null; });
+  $('btGirar').addEventListener('click', voltaNoPalco);
+  $('btFrente').addEventListener('click', function () { Som.tocar('clique'); girarPara(0, 350); });
+  var dicaGiroMostrada = false;
+  function mostrarDicaGiro() {
+    if (dicaGiroMostrada) return; dicaGiroMostrada = true;
+    var d = $('dicaGiro'); d.hidden = false; setTimeout(function () { d.hidden = true; }, 3500);
+  }
 
   // ---------- botões do estúdio ----------
   $('btCasa').addEventListener('click', function () { Som.tocar('clique'); irMenu(); });
@@ -324,7 +402,7 @@
     var novo = V.surpresa(estado); var d = desafioAtual(); if (d) novo.cenario = d.cenario;
     mudar(novo, null); Som.tocar('surpresa');
     var q = naTela(200, 360); faiscas(q[0], q[1], 16, ['✨', '🎲', '💖', '⭐']);
-    var el = $('boneca'); el.classList.remove('girar'); void el.offsetWidth; el.classList.add('girar');
+    voltaNoPalco();
   });
   $('btRecomecar').addEventListener('click', function () {
     var d = desafioAtual(), e = d ? baseDesafio(d) : V.novo();
@@ -424,7 +502,13 @@
   function desfilar() {
     var d = desafioAtual(), r = d ? V.avaliar(estado, d) : null;
     ir('desfile');
-    $('passarela').innerHTML = B.svg(estado, { id: 'desfile', anim: !CALMO });
+    var pas = $('passarela');
+    pas.classList.add('entrando'); pas.innerHTML = B.svg(estado, { id: 'desfile', anim: !CALMO });
+    setTimeout(function () {
+      if (atual !== 'desfile') return;
+      pas.classList.remove('entrando');
+      volta(pas, $('rastroDesfile'), function (a) { pas.innerHTML = B.svg(estado, { id: 'desfile', anim: !CALMO && !a, angulo: a }); });
+    }, 1500);
     $('desfileTitulo').textContent = d ? d.ico + ' ' + N(d) : t('💖 Que visual incrível!', '💖 What an amazing look!');
     var est = $('desfileEstrelas'); est.innerHTML = '';
     var n = r ? r.estrelas : 0;

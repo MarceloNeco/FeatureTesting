@@ -42,7 +42,8 @@
   <div id="ajuda" class="ajuda" hidden>
     <p data-t="Monte o visual da sua personagem: escolha a pele, o cabelo, as mechas e os olhos, faça a maquiagem (base, blush, sombra, delineado, cílios, batom, glitter e adesivos), vista roupas e sapatos, coloque joias (brincos, colares, pulseiras, anéis e broches) e acessórios. Toque numa aba embaixo (👧 💄 👗 💎 👑 🏞️), depois numa parte e numa opção. As bolinhas coloridas trocam a cor.|Style your character: pick skin, hair, highlights and eyes, do the makeup (foundation, blush, eyeshadow, eyeliner, lashes, lipstick, glitter and stickers), choose clothes and shoes, add jewelry (earrings, necklaces, bracelets, rings and brooches) and accessories. Tap a tab at the bottom (👧 💄 👗 💎 👑 🏞️), then a part and an option. The colored dots change the color."></p>
     <p data-t="🔍 Zoom: na maquiagem e nas joias a tela chega perto sozinha (rosto, colar ou mãos). O botão 🔍 lá em cima chega perto e o 🧍 volta a mostrar a personagem inteira.|🔍 Zoom: for makeup and jewelry the screen zooms in by itself (face, necklace or hands). The 🔍 button at the top zooms in and 🧍 shows the whole character again."></p>
-    <p data-t="↩ desfaz a última troca, 🎲 sorteia um visual surpresa e 🔄 começa de novo. 📸 tira uma foto para guardar no celular e 💖 guarda o look nos favoritos. Toque na personagem para ela girar!|↩ undoes the last change, 🎲 picks a surprise look and 🔄 starts over. 📸 takes a photo to save on the phone and 💖 saves the look to favorites. Tap the character to make her twirl!"></p>
+    <p data-t="↩ desfaz a última troca, 🎲 sorteia um visual surpresa e 🔄 começa de novo. 📸 tira uma foto para guardar no celular e 💖 guarda o look nos favoritos. Para tirar uma peça (uma tiara, um brinco…), toque em ✕ Tirar em cima das opções, ou toque de novo na peça escolhida.|↩ undoes the last change, 🎲 picks a surprise look and 🔄 starts over. 📸 takes a photo to save on the phone and 💖 saves the look to favorites. To take something off (a tiara, an earring…), tap ✕ Remove above the options, or tap the chosen piece again."></p>
+    <p data-t="🔄 Girar: arraste o dedo para os lados em cima da personagem para ver de frente, de lado e de costas. Um toque nela (ou no ↻) dá uma volta inteira com rastro de luz; o 🙂 volta para a frente.|🔄 Spin: drag sideways on the character to see her front, side and back. One tap on her (or on ↻) does a full turn with a light trail; 🙂 turns her to the front again."></p>
     <p data-t="⭐ Desafios: monte o visual para o tema, siga as 3 dicas e toque em ✨ Desfilar! Ninguém perde: todo desfile ganha pelo menos 1 estrela.|⭐ Challenges: style a look for the theme, follow the 3 tips and tap ✨ Runway! Nobody loses: every show gets at least 1 star."></p>
   </div>
   <div id="menuBoneca" class="menu-boneca" aria-hidden="true"></div>
@@ -87,12 +88,18 @@
     <button id="btRecomecar" class="mini" type="button" aria-label="Começar de novo / Start over">🔄</button>
   </div>
   <div id="palco" class="palco">
+    <div id="rastro" class="rastro" aria-hidden="true"></div>
     <div id="boneca" class="boneca" role="img"></div>
-    <div id="dicasCaixa" class="dicas" hidden>
-      <button id="btDicas" class="dicas-titulo" type="button" aria-expanded="true" aria-controls="dicas"></button>
-      <ul id="dicas"></ul>
+    <div class="giro">
+      <button id="btFrente" class="mini" type="button" hidden aria-label="Virar de frente / Face front">🙂</button>
+      <button id="btGirar" class="mini" type="button" aria-label="Girar a personagem / Spin the character">↻</button>
     </div>
+    <p id="dicaGiro" class="dica-giro" hidden data-t="👆 Arraste para os lados para girar|👆 Drag sideways to spin"></p>
     <div id="efeitos" class="efeitos" aria-hidden="true"></div>
+  </div>
+  <div id="dicasCaixa" class="dicas" hidden>
+    <span id="dicasTitulo" class="dicas-titulo"></span>
+    <ul id="dicas"></ul>
   </div>
   <div class="acoes">
     <button id="btFoto" class="medio" type="button" data-t="📸 Foto|📸 Photo"></button>
@@ -103,6 +110,7 @@
     <div id="grupos" class="grupos" role="tablist"></div>
     <div id="cats" class="cats"></div>
     <div id="opcoes" class="opcoes-painel">
+      <button id="btTirar" class="tirar-bt" type="button" hidden></button>
       <div id="cores" class="cores" role="group"></div>
       <div id="estilos" class="estilos" role="group"></div>
     </div>
@@ -110,7 +118,10 @@
 </section>
 
 <section id="desfile" class="tela">
-  <div id="passarela" class="passarela" aria-hidden="true"></div>
+  <div class="passarela" aria-hidden="true">
+    <div id="rastroDesfile" class="rastro"></div>
+    <div id="passarela" class="passarela-boneca"></div>
+  </div>
   <div class="placar">
     <p id="desfileTitulo" class="desfile-titulo"></p>
     <p id="desfileEstrelas" class="desfile-estrelas" aria-live="polite"></p>
