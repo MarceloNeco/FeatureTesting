@@ -1,4 +1,4 @@
-/* Desenho Meu — o MOTOR de desenho (navegador). Recebe o <canvas> da tela e cuida de tudo que aparece nele:
+/* Rabiscolândia — o MOTOR de desenho (navegador). Recebe o <canvas> da tela e cuida de tudo que aparece nele:
    camadas, pincéis, balde de tinta, pintar por números, adesivos, fundos, desfazer, zoom e foto.
 
    Camadas, de baixo para cima:

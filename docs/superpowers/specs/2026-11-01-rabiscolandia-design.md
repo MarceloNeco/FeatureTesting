@@ -1,4 +1,4 @@
-# Desenho Meu — desenho (sexta brincadeira do Bolinho de Chuva)
+# Rabiscolândia — desenho (sexta brincadeira do Bolinho de Chuva)
 
 Pedido do dono (01/Nov/2026, por voz): app de desenho para crianças, "mistura de Bobbie Goods e Happy Color",
 otimizado para celular e iPad, desenhar na TV com a mão (mão aberta = cursor; mão fechada = "pegou" e desenha),
@@ -8,8 +8,8 @@ fundos para pintar em cima, zoom com os dedos (e botão de zoom na TV), em pé e
 
 ## Onde mora
 
-`FeatureTesting/desenho-meu/` (como Purpurina, Vruuum!, Peluqueria), cartão em `solverone.com.br/bolinho-de-chuva`,
-cartão de TV em `solverone.com.br/kids` e atalho `solverone.com.br/tv/desenho`. Interruptor `data-recurso="desenho-meu"`.
+`FeatureTesting/rabiscolandia/` (como Purpurina, Vruuum!, Peluqueria), cartão em `solverone.com.br/bolinho-de-chuva`,
+cartão de TV em `solverone.com.br/kids` e atalho `solverone.com.br/tv/rabiscolandia`. Interruptor `data-recurso="rabiscolandia"`.
 Sem login, sem banco, sem coleta: tudo no aparelho. Funciona sem internet depois de aberto uma vez (`sw.js`).
 
 ## O que entra na 0.1.0
@@ -41,7 +41,7 @@ Sem login, sem banco, sem coleta: tudo no aparelho. Funciona sem internet depois
 
 ## Decisões e suposições (para o dono confirmar)
 
-- Nome: "Desenho Meu" (o dono disse "alguma coisa assim"). Troca de nome é só texto.
+- Nome: "Rabiscolândia" (o dono disse "alguma coisa assim"). Troca de nome é só texto.
 - "Dobra de tamanho" foi entendido como a **folha** que cresce ao deitar (o desenho inteiro continua à vista e a tela
   toda vira papel), não como o desenho ficar maior e sair da tela.
 - Na TV, o jeito mais simples continua sendo **espelhar** a tela do celular/iPad (o modo 🖐 funciona no próprio

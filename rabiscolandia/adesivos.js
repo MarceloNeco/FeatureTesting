@@ -1,4 +1,4 @@
-/* Desenho Meu — adesivos (carimbos): emojis e adesivos ANIMADOS desenhados em código.
+/* Rabiscolândia — adesivos (carimbos): emojis e adesivos ANIMADOS desenhados em código.
    Uma função faz tudo: DesenhoAdesivos.desenhar(ctx, a, t)
      a = { tipo: 'emoji' | 'vivo', v: '🐶' ou o id do vivo, x, y, s, mov, fase }
        (x, y) centro; s tamanho (altura aproximada, nas unidades do contexto); mov = id de MOVIMENTOS;

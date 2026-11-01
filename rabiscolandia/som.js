@@ -1,4 +1,4 @@
-/* Desenho Meu — música e sons feitos na hora pelo navegador (WebAudio). Nenhum arquivo de áudio.
+/* Rabiscolândia — música e sons feitos na hora pelo navegador (WebAudio). Nenhum arquivo de áudio.
    Mesmo motor da Purpurina (som.js de lá), com músicas e timbres próprios para DESENHAR: alegres mas
    tranquilas, porque criança desenha por muito tempo. Quatro músicas compostas aqui (nenhuma copiada):
    caixinha de música, marimba, ukulele com assobio e um lo-fi fofo com sininhos.

@@ -1,5 +1,5 @@
-/* Desenho Meu — a "sala": canal por onde a TV e os celulares trocam mensagens pequenas. Mesmo jeito da
-   Purpurina e da Peluqueria (Supabase Realtime broadcast, canal "desenho-<código>", com a URL e a chave
+/* Rabiscolândia — a "sala": canal por onde a TV e os celulares trocam mensagens pequenas. Mesmo jeito da
+   Purpurina e da Peluqueria (Supabase Realtime broadcast, canal "rabisco-<código>", com a URL e a chave
    publishable da plataforma — públicas por desenho: não dão acesso a tabela nenhuma). O supabase-js é o da
    Bagunçolândia (../baguncolandia/libs/supabase.js), carregado só quando alguém abre a TV ou conecta o celular.
    Com ?teste (ou ?local), o canal é um BroadcastChannel do próprio navegador (testes sem internet).
@@ -60,7 +60,7 @@
     return carregando;
   }
   function abrirLocal(codigo, aoReceber) {
-    var bc = new BroadcastChannel('desenho-' + codigo), r = receber(aoReceber);
+    var bc = new BroadcastChannel('rabisco-' + codigo), r = receber(aoReceber);
     bc.onmessage = function (ev) { r(ev.data); };
     return Promise.resolve({ mandar: function (m) { try { bc.postMessage(m); } catch (e) { /* canal fechado */ } }, fechar: function () { try { bc.close(); } catch (e) { /* ok */ } } });
   }
@@ -68,7 +68,7 @@
     return carregarLib().then(function () {
       if (!sb) sb = raiz.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: 30 } }, auth: { persistSession: false, autoRefreshToken: false } });
       return new Promise(function (ok, falha) {
-        var pronto = false, r = receber(aoReceber), canal = sb.channel('desenho-' + codigo, { config: { broadcast: { self: false } } });
+        var pronto = false, r = receber(aoReceber), canal = sb.channel('rabisco-' + codigo, { config: { broadcast: { self: false } } });
         canal.on('broadcast', { event: 'm' }, function (x) { r(x.payload); });
         canal.subscribe(function (st) {
           if (st === 'SUBSCRIBED' && !pronto) {

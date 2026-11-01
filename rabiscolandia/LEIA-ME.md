@@ -1,4 +1,4 @@
-# Desenho Meu — desenhar, colorir e pintar por números
+# Rabiscolândia — desenhar, colorir e pintar por números
 
 Sexta brincadeira da família **Bolinho de Chuva** (Feature Tester · SolverONE), junto com a Bagunçolândia, a
 Peluqueria, a Dança na Sala, o Vruuum! e a Purpurina. App de desenho para crianças que mistura o **livro de colorir**
@@ -6,8 +6,8 @@ Peluqueria, a Dança na Sala, o Vruuum! e a Purpurina. App de desenho para crian
 adesivos animados, paisagens, música e **desenho com a mão** na frente da câmera — no celular, no iPad e na TV.
 Sem login, e **sem internet** depois de aberto uma vez.
 
-Endereço (depois do merge): https://solverone.com.br/FeatureTesting/desenho-meu/ · também pelo cartão em
-`solverone.com.br/bolinho-de-chuva`, e na TV por `solverone.com.br/tv/desenho` (ou o cartão em `solverone.com.br/kids`).
+Endereço (depois do merge): https://solverone.com.br/FeatureTesting/rabiscolandia/ · também pelo cartão em
+`solverone.com.br/bolinho-de-chuva`, e na TV por `solverone.com.br/tv/rabiscolandia` (ou o cartão em `solverone.com.br/kids`).
 
 ## Como brincar
 
@@ -50,9 +50,9 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/desenho-meu
 
 ## 📺 Na TV, com o celular de controle
 
-1. Na TV, abra **solverone.com.br/tv/desenho** (ou o cartão em `solverone.com.br/kids`) e aperte **OK**. Aparece um
+1. Na TV, abra **solverone.com.br/tv/rabiscolandia** (ou o cartão em `solverone.com.br/kids`) e aperte **OK**. Aparece um
    **código de 4 letras**.
-2. No celular: Desenho Meu → **📺 Na TV** → **🎮 Controlar a TV** → código e nome. Até **4 celulares** desenham juntos,
+2. No celular: Rabiscolândia → **📺 Na TV** → **🎮 Controlar a TV** → código e nome. Até **4 celulares** desenham juntos,
    cada um com a sua mira colorida e o seu pincel.
 3. Três jeitos de mirar: **👆 Dedo** (a área branca é a TV em miniatura; encostou, desenhou), **📱 Mexer o celular**
    (aponte como controle de videogame; segure **✏️** para desenhar; **🎯** centraliza) e **🖐 Mão na câmera** (o celular
@@ -65,8 +65,8 @@ o mesmo canal das irmãs): só a posição da mira (de 0 a 1), "apertado" e coma
 
 ## O que fica guardado (só neste aparelho)
 
-`desenhomeu.pref` (idioma, música, efeitos, desenhos terminados, nome no controle) e o banco IndexedDB
-`desenho-meu` (Meus desenhos: miniatura, estado e a pintura em quadradinhos PNG; a foto de fundo, se houver, vai
+`rabiscolandia.pref` (idioma, música, efeitos, desenhos terminados, nome no controle) e o banco IndexedDB
+`rabiscolandia` (Meus desenhos: miniatura, estado e a pintura em quadradinhos PNG; a foto de fundo, se houver, vai
 diminuída junto). Nada vai para a internet; não há login, cookie nem coleta.
 
 ## Mapa dos arquivos
@@ -85,11 +85,11 @@ diminuída junto). Nada vai para a internet; não há login, cookie nem coleta.
 | `sala.js` | canal TV ↔ celular; confere toda mensagem. |
 | `tv.js` | modo TV (código, até 4 miras) e celular-controle (dedo, giroscópio, mão). |
 | `app.js` | telas, barra, painéis, colinha, Meus desenhos, mão na tela, foto, instalar, teclado/TV. `APP_VERSION` aqui. |
-| `sw.js` | cache `desenho-meu-v…` para funcionar sem internet. `VERSAO` aqui. |
+| `sw.js` | cache `rabiscolandia-v…` para funcionar sem internet. `VERSAO` aqui. |
 | `versoes.json` | novidades de cada versão (PT e EN). |
-| `teste/` | testes no Node: `node --test desenho-meu/teste/*.test.js` (rodar da raiz do repositório). |
+| `teste/` | testes no Node: `node --test rabiscolandia/teste/*.test.js` (rodar da raiz do repositório). |
 
-Depende de: `../recursos.js` (interruptor `data-recurso="desenho-meu"`), `../baguncolandia/libs/mediapipe/`
+Depende de: `../recursos.js` (interruptor `data-recurso="rabiscolandia"`), `../baguncolandia/libs/mediapipe/`
 (biblioteca da mão + `hand_landmarker.task`) e `../baguncolandia/libs/supabase.js` (TV) — **não apague** essas pastas.
 
 A cada versão: subir `APP_VERSION` (`app.js`), `VERSAO` (`sw.js`) e a entrada nova do `versoes.json` (os testes
@@ -97,5 +97,5 @@ avisam se diferirem). Arquivo novo entra na lista do `sw.js`.
 
 ## Testar no computador
 
-Na raiz do repositório: `python3 -m http.server 8000` e abra http://localhost:8000/desenho-meu/ . Com `?teste`, a TV e
+Na raiz do repositório: `python3 -m http.server 8000` e abra http://localhost:8000/rabiscolandia/ . Com `?teste`, a TV e
 o controle conversam por um canal do próprio navegador (abra duas abas: uma com `?tv=auto&teste`, outra com `?teste`).

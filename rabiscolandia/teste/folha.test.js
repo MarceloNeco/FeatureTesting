@@ -1,4 +1,4 @@
-// Folha esperta do Desenho Meu: node --test desenho-meu/teste/folha.test.js (da raiz do repositório)
+// Folha esperta da Rabiscolândia: node --test rabiscolandia/teste/folha.test.js (da raiz do repositório)
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const F = require('../folha.js');

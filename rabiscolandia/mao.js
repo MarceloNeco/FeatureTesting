@@ -1,4 +1,4 @@
-/* Desenho Meu — desenhar com a MÃO na frente da câmera.
+/* Rabiscolândia — desenhar com a MÃO na frente da câmera.
    Mão aberta ✋ = mira (o pincel anda sem pintar); mão fechada ✊ = "pegou" e desenha.
    Duas partes:
    1. Regra pura (testada no Node): classificar(pontos) diz se a mão está aberta ou fechada, e o Rastreador

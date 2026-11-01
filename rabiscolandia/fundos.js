@@ -1,4 +1,4 @@
-/* Desenho Meu — paisagens (fundos) desenhadas em código, para a criança pintar por cima.
+/* Rabiscolândia — paisagens (fundos) desenhadas em código, para a criança pintar por cima.
    Duas funções:
      parado(ctx, id, W, H)     a parte que NÃO mexe; o app desenha UMA vez e guarda numa imagem
      vivo(ctx, id, W, H, t)    SÓ o que se mexe (ondas, bolhas, neve…), por cima, a cada quadro; t em segundos

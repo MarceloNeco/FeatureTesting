@@ -1,7 +1,7 @@
-/* Desenho Meu — telas, barra de ferramentas, painéis, colinha, Meus desenhos, mão na câmera, foto e instalar.
+/* Rabiscolândia — telas, barra de ferramentas, painéis, colinha, Meus desenhos, mão na câmera, foto e instalar.
    O desenho em si é do motor (pintura.js); a folha esperta (girar, zoom) é da folha.js; a TV é do tv.js.
-   Guarda só neste aparelho: preferências em localStorage ("desenhomeu.pref") e os desenhos em IndexedDB
-   (banco "desenho-meu"). Nada vai para a internet. */
+   Guarda só neste aparelho: preferências em localStorage ("rabiscolandia.pref") e os desenhos em IndexedDB
+   (banco "rabiscolandia"). Nada vai para a internet. */
 (function () {
   'use strict';
   var APP_VERSION = '0.1.0';
@@ -23,12 +23,12 @@
 
   function ler(k, padrao) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : padrao; } catch (e) { return padrao; } }
   function gravar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
-  var pref = ler('desenhomeu.pref', null) || {};
+  var pref = ler('rabiscolandia.pref', null) || {};
   if (pref.lingua !== 'en' && pref.lingua !== 'pt') pref.lingua = (navigator.language || 'pt').slice(0, 2) === 'pt' ? 'pt' : 'en';
   if (typeof pref.musica !== 'boolean') pref.musica = true;
   if (typeof pref.efeitos !== 'boolean') pref.efeitos = true;
   pref.feitas = pref.feitas || {};
-  function salvarPref() { gravar('desenhomeu.pref', pref); }
+  function salvarPref() { gravar('rabiscolandia.pref', pref); }
 
   // ---------- idioma ----------
   function t(pt, en) { return pref.lingua === 'en' ? en : pt; }
@@ -63,7 +63,7 @@
   Array.prototype.forEach.call(document.querySelectorAll('.voltar'), function (b) { b.addEventListener('click', voltar); });
   function focarPrimeiro() { if (TOQUE && !TV) return; var el = document.querySelector('.tela.ativa button:not([hidden]):not(:disabled)'); if (el) el.focus(); }
 
-  if (window.SolverRecursos && !SolverRecursos.ligado('desenho-meu', true)) { mostrar('desligado'); $('desligado').hidden = false; traduzir(); return; }
+  if (window.SolverRecursos && !SolverRecursos.ligado('rabiscolandia', true)) { mostrar('desligado'); $('desligado').hidden = false; traduzir(); return; }
 
   // ---------- aviso rápido e janela ----------
   var tAviso = null;
@@ -148,7 +148,7 @@
     if (banco) return banco;
     banco = new Promise(function (ok, falha) {
       if (!window.indexedDB) { falha(new Error('sem-indexeddb')); return; }
-      var r = indexedDB.open('desenho-meu', 1);
+      var r = indexedDB.open('rabiscolandia', 1);
       r.onupgradeneeded = function () { r.result.createObjectStore('desenhos', { keyPath: 'id' }); };
       r.onsuccess = function () { ok(r.result); }; r.onerror = function () { falha(r.error); };
     });
@@ -261,10 +261,10 @@
     Som.efeito('foto');
     motor.foto(2048).then(function (blob) {
       if (!blob) return;
-      var url = URL.createObjectURL(blob), nome = 'desenho-meu-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.png';
+      var url = URL.createObjectURL(blob), nome = 'rabiscolandia-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.png';
       var botoes = [{ t: t('💾 Salvar no aparelho', '💾 Save to device'), ficar: true, fn: function () { var a = document.createElement('a'); a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove(); aviso(t('Salvo! Veja em Downloads.', 'Saved! Check Downloads.')); } }];
       var arq = null; try { arq = new File([blob], nome, { type: 'image/png' }); } catch (e) { /* navegador velho */ }
-      if (arq && navigator.canShare && navigator.canShare({ files: [arq] })) botoes.push({ t: t('📤 Compartilhar', '📤 Share'), ficar: true, fn: function () { navigator.share({ files: [arq], title: 'Desenho Meu' }).catch(function () {}); } });
+      if (arq && navigator.canShare && navigator.canShare({ files: [arq] })) botoes.push({ t: t('📤 Compartilhar', '📤 Share'), ficar: true, fn: function () { navigator.share({ files: [arq], title: 'Rabiscolândia' }).catch(function () {}); } });
       botoes.push({ t: t('Fechar', 'Close') });
       abrirJanela({ titulo: t('📸 Seu desenho', '📸 Your drawing'), img: url, alt: t('Seu desenho', 'Your drawing'), botoes: botoes });
     });

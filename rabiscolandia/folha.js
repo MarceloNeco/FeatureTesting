@@ -1,4 +1,4 @@
-/* Desenho Meu — a "folha esperta" (puro: sem DOM; testado no Node).
+/* Rabiscolândia — a "folha esperta" (puro: sem DOM; testado no Node).
    O desenho mora num MUNDO de 8192 × 8192 unidades (a pintura só gasta memória onde foi pintada: pintura.js). A tela mostra um pedaço dele pela VISTA
    { s, ox, oy }: um ponto (x, y) do mundo aparece na tela em (ox + x·s, oy + y·s) — s é quantos pixels de
    tela (CSS) vale uma unidade do mundo. Como o mundo é bem maior que a tela, a folha "não acaba": em volta

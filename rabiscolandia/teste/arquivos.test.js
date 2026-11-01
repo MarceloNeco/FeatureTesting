@@ -1,4 +1,4 @@
-// Testes de arquivos do Desenho Meu: node --test desenho-meu/teste/*.test.js (rodar da raiz do repositório)
+// Testes de arquivos da Rabiscolândia: node --test rabiscolandia/teste/*.test.js (rodar da raiz do repositório)
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('fs');
@@ -28,7 +28,7 @@ test('index.html: CSP sem script inline, scripts existem, interruptor e textos P
   assert.match(html, /Content-Security-Policy/);
   assert.ok(!/<script(?![^>]*src)[^>]*>/.test(html), 'script inline');
   for (const m of html.matchAll(/<script src="([^"]+)"/g)) assert.ok(fs.existsSync(path.join(pasta, m[1])), m[1]);
-  assert.match(html, /data-recurso="desenho-meu"/);
+  assert.match(html, /data-recurso="rabiscolandia"/);
   for (const m of html.matchAll(/data-t="([^"]*)"/g)) assert.equal(m[1].split('|').length, 2, 'texto sem as duas línguas: ' + m[1]);
 });
 
@@ -44,9 +44,9 @@ test('textos t(pt, en) do app e da TV sempre nas duas línguas', () => {
   }
 });
 
-test('interruptor desenho-meu no recursos-do-app.json do Feature Tester', () => {
+test('interruptor rabiscolandia no recursos-do-app.json do Feature Tester', () => {
   const r = JSON.parse(fs.readFileSync(path.join(pasta, '..', 'recursos-do-app.json'), 'utf8'));
-  assert.ok(r.recursos.some(x => x.id === 'desenho-meu' && x.pagina === 'desenho-meu/'));
+  assert.ok(r.recursos.some(x => x.id === 'rabiscolandia' && x.pagina === 'rabiscolandia/'));
 });
 
 test('modelo da mão existe na pasta compartilhada da Bagunçolândia', () => {

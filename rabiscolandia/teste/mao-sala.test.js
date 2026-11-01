@@ -1,4 +1,4 @@
-// Regra da mão e validação da sala: node --test desenho-meu/teste/mao-sala.test.js
+// Regra da mão e validação da sala: node --test rabiscolandia/teste/mao-sala.test.js
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const M = require('../mao.js');

@@ -1,4 +1,4 @@
-# Desenho Meu — créditos e licenças
+# Rabiscolândia — créditos e licenças
 
 | O quê | De onde | Licença |
 |---|---|---|

@@ -1,4 +1,4 @@
-# Desenho Meu — pendências
+# Rabiscolândia — pendências
 
 Situação: 🟡 aberta · 🔵 em andamento · ⏸ aguardando o dono · ✅ feita (versão)
 

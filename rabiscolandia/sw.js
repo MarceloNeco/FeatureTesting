@@ -1,16 +1,16 @@
-/* Desenho Meu — service worker: guarda a pasta no aparelho para abrir sem internet.
+/* Rabiscolândia — service worker: guarda a pasta no aparelho para abrir sem internet.
    Código (html, js, css, json): rede primeiro com 4 s de espera, senão a cópia; fonte, imagens e a biblioteca
    da mão (MediaPipe em ../baguncolandia/libs/, só baixa quando alguém liga a mão): cópia primeiro.
-   Cache com o nome do app: só apaga caches "desenho-meu-" (nunca os dos outros apps da mesma origem).
+   Cache com o nome do app: só apaga caches "rabiscolandia-" (nunca os dos outros apps da mesma origem).
    Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
 var VERSAO = '0.1.0';
-var CACHE = 'desenho-meu-v' + VERSAO;
+var CACHE = 'rabiscolandia-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'folha.js', 'paginas.js', 'fundos.js', 'adesivos.js', 'som.js', 'pintura.js', 'mao.js', 'app.js', 'sala.js', 'tv.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return Promise.all(ARQUIVOS.map(function (a) { return c.add(a).catch(function () {}); })); }).then(function () { return self.skipWaiting(); }));
 });
 self.addEventListener('activate', function (e) {
-  e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('desenho-meu-') === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
+  e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('rabiscolandia-') === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
 });
 self.addEventListener('fetch', function (e) {
   var req = e.request; if (req.method !== 'GET') return;

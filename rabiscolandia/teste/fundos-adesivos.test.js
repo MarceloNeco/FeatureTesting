@@ -1,4 +1,4 @@
-// Fundos e adesivos do Desenho Meu: node --test desenho-meu/teste/fundos-adesivos.test.js (da raiz do repositório)
+// Fundos e adesivos da Rabiscolândia: node --test rabiscolandia/teste/fundos-adesivos.test.js (da raiz do repositório)
 // Confere o catálogo e que todo desenho roda num "contexto de mentira" sem erro, sem NaN e com save/restore em par.
 const test = require('node:test');
 const assert = require('node:assert/strict');

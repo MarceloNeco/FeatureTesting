@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; font-src 'self'; connect-src 'self' data: blob: https://*.supabase.co wss://*.supabase.co; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Desenho Meu — Bolinho de Chuva · SolverONE</title>
+<title>Rabiscolândia — Bolinho de Chuva · SolverONE</title>
 <link rel="icon" href="icone-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icone-192.png">
@@ -13,7 +13,7 @@
 <meta name="description" content="Desenhar, colorir e pintar por números, com pincéis vivos, adesivos animados, paisagens, música e até desenhar com a mão na frente da câmera ou na TV. / Draw, color and paint by numbers with live brushes, animated stickers, landscapes, music — even draw with your hand in front of the camera or on the TV.">
 <link rel="stylesheet" href="estilo.css">
 <!--
-  Desenho Meu — sexta brincadeira da família Bolinho de Chuva (SolverONE · Feature Tester).
+  Rabiscolândia — sexta brincadeira da família Bolinho de Chuva (SolverONE · Feature Tester).
   Desenhar livre, livro de colorir (contorno), pintar por números, adesivos animados, fundos, música,
   mão na câmera (MediaPipe, no aparelho) e TV com o celular de controle.
   Sem login, sem banco, sem cookie: tudo fica no aparelho. Nada de script inline: a CSP acima não permite.
@@ -22,22 +22,22 @@
 </head>
 <body>
 
-<section id="entrada" class="tela ativa" data-recurso="desenho-meu">
+<section id="entrada" class="tela ativa" data-recurso="rabiscolandia">
   <div class="rabiscos" aria-hidden="true"></div>
-  <h1 class="logo"><span>D</span><span>e</span><span>s</span><span>e</span><span>n</span><span>h</span><span>o</span> <span>M</span><span>e</span><span>u</span></h1>
+  <h1 class="logo" aria-label="Rabiscolândia"><span>R</span><span>a</span><span>b</span><span>i</span><span>s</span><span>c</span><span>o</span><span>l</span><span>â</span><span>n</span><span>d</span><span>i</span><span>a</span></h1>
   <p class="sub" data-t="desenhar, colorir e pintar por números — com a mão, no celular, no tablet e na TV|draw, color and paint by numbers — with your hand, on phone, tablet and TV"></p>
   <button id="btEntrar" class="grande" type="button" data-t="🎨 Toque para começar!|🎨 Tap to start!"></button>
   <p class="dica" data-t="Aumente o volume para ouvir a música 🎵|Turn the volume up for the music 🎵"></p>
 </section>
 
-<section id="menu" class="tela" data-recurso="desenho-meu">
+<section id="menu" class="tela" data-recurso="rabiscolandia">
   <div class="faixa">
     <button id="btLingua" class="mini" type="button" aria-label="Idioma / Language">EN</button>
     <button id="btMusica" class="mini" type="button" aria-label="Música / Music">🎵</button>
     <button id="btEfeitos" class="mini" type="button" aria-label="Sons / Sounds">🔊</button>
     <button id="btAjuda" class="mini" type="button" aria-label="Como brincar / How to play" aria-expanded="false">❓</button>
   </div>
-  <h1 class="logo pequeno"><span>D</span><span>e</span><span>s</span><span>e</span><span>n</span><span>h</span><span>o</span> <span>M</span><span>e</span><span>u</span></h1>
+  <h1 class="logo pequeno" aria-label="Rabiscolândia"><span>R</span><span>a</span><span>b</span><span>i</span><span>s</span><span>c</span><span>o</span><span>l</span><span>â</span><span>n</span><span>d</span><span>i</span><span>a</span></h1>
   <div id="ajuda" class="ajuda" hidden>
     <p data-t="🎨 Desenhar livre: escolha o pincel, a cor e o tamanho embaixo e desenhe com o dedo. Os pincéis ✨ vivos mexem sozinhos: arco-íris que corre, neon que pisca, purpurina que brilha e minhoca que dança.|🎨 Free drawing: pick a brush, a color and a size at the bottom and draw with your finger. The ✨ live brushes move by themselves: running rainbow, glowing neon, sparkling glitter and a dancing worm."></p>
     <p data-t="📚 Livro de colorir: escolha um desenho e pinte com qualquer pincel ou com o balde 🪣, que enche a área sem passar do contorno. 👀 mostra a colinha (como pode ficar) e 🎨 troca as cores da colinha.|📚 Coloring book: pick a picture and paint with any brush or the bucket 🪣, which fills the area without crossing the outline. 👀 shows the cheat sheet and 🎨 changes its colors."></p>
@@ -62,7 +62,7 @@
   <p id="versao" class="versao"></p>
 </section>
 
-<section id="livro" class="tela" data-recurso="desenho-meu">
+<section id="livro" class="tela" data-recurso="rabiscolandia">
   <div class="cabeca">
     <button class="voltar mini" type="button" aria-label="Voltar / Back">←</button>
     <h2 id="livroTitulo"></h2>
@@ -71,7 +71,7 @@
   <div id="livroGrade" class="grade"></div>
 </section>
 
-<section id="meus" class="tela" data-recurso="desenho-meu">
+<section id="meus" class="tela" data-recurso="rabiscolandia">
   <div class="cabeca">
     <button class="voltar mini" type="button" aria-label="Voltar / Back">←</button>
     <h2 data-t="🖼️ Meus desenhos|🖼️ My drawings"></h2>
@@ -81,7 +81,7 @@
   <p class="dica pequena" data-t="Ficam só neste aparelho (até 40). Para guardar para sempre, use 📸 e salve no celular.|Kept only on this device (up to 40). To keep them forever, use 📸 and save to the phone."></p>
 </section>
 
-<section id="tvEscolha" class="tela" data-recurso="desenho-meu">
+<section id="tvEscolha" class="tela" data-recurso="rabiscolandia">
   <div class="cabeca">
     <button class="voltar mini" type="button" aria-label="Voltar / Back">←</button>
     <h2 data-t="📺 Desenhar na TV|📺 Draw on the TV"></h2>
@@ -93,8 +93,8 @@
       <button id="btTVMao" class="medio" type="button" data-t="🖐 Desenhar com a mão|🖐 Draw with your hand"></button>
     </div>
     <div class="cartao">
-      <h3 data-t="A TV abre o Desenho Meu|The TV opens Desenho Meu"></h3>
-      <p data-t="Na TV, abra solverone.com.br/tv/desenho. Ela mostra um código. Aqui, toque em Controlar a TV e digite o código. O celular vira o controle: deslizar o dedo, mexer o celular ou a mão na câmera.|On the TV, open solverone.com.br/tv/desenho. It shows a code. Here, tap Control the TV and type the code. The phone becomes the remote: slide your finger, move the phone or your hand in the camera."></p>
+      <h3 data-t="A TV abre a Rabiscolândia|The TV opens Rabiscolândia"></h3>
+      <p data-t="Na TV, abra solverone.com.br/tv/rabiscolandia. Ela mostra um código. Aqui, toque em Controlar a TV e digite o código. O celular vira o controle: deslizar o dedo, mexer o celular ou a mão na câmera.|On the TV, open solverone.com.br/tv/rabiscolandia. It shows a code. Here, tap Control the TV and type the code. The phone becomes the remote: slide your finger, move the phone or your hand in the camera."></p>
       <div class="linha-menu">
         <button id="btSouTV" class="medio" type="button" data-t="📺 Esta é a TV|📺 This is the TV"></button>
         <button id="btSouControle" class="medio rosa" type="button" data-t="🎮 Controlar a TV|🎮 Control the TV"></button>
@@ -103,7 +103,7 @@
   </div>
 </section>
 
-<section id="controle" class="tela" data-recurso="desenho-meu">
+<section id="controle" class="tela" data-recurso="rabiscolandia">
   <div class="cabeca">
     <button class="voltar mini" type="button" aria-label="Voltar / Back">←</button>
     <h2 data-t="🎮 Controle da TV|🎮 TV remote"></h2>
@@ -142,7 +142,7 @@
   </div>
 </section>
 
-<section id="pintar" class="tela" data-recurso="desenho-meu">
+<section id="pintar" class="tela" data-recurso="rabiscolandia">
   <div id="topo" class="topo">
     <button id="btSair" class="mini" type="button" aria-label="Início / Home">🏠</button>
     <button id="btDesfazer" class="mini" type="button" aria-label="Desfazer / Undo" disabled>↩</button>
@@ -183,7 +183,7 @@
 </section>
 
 <section id="desligado" class="tela" hidden>
-  <h2 data-t="O Desenho Meu está descansando agora.|Desenho Meu is resting right now."></h2>
+  <h2 data-t="A Rabiscolândia está descansando agora.|Rabiscolândia is resting right now."></h2>
 </section>
 
 <div id="mira" class="mira" hidden aria-hidden="true"><span></span></div>

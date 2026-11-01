@@ -1,4 +1,4 @@
-/* Desenho Meu — TV com o celular de controle.
+/* Rabiscolândia — TV com o celular de controle.
    TV: "📺 Esta é a TV" (ou o endereço com ?tv=auto) abre a folha e mostra um código de 4 letras. Até 4 celulares
    entram com o código; cada um ganha uma mira de uma cor e desenha ao mesmo tempo que os outros.
    Celular: "🎮 Controlar a TV" → código e nome → escolhe como mirar:
@@ -38,7 +38,7 @@
     c.hidden = false; c.innerHTML = '';
     if (txt) { c.textContent = txt; return; }
     var n = Object.keys(tv.jogadores).length;
-    c.appendChild(document.createTextNode(t('📱 No celular: Desenho Meu → 📺 Na TV → 🎮 Controlar · código ', '📱 On the phone: Desenho Meu → 📺 On the TV → 🎮 Control · code ')));
+    c.appendChild(document.createTextNode(t('📱 No celular: Rabiscolândia → 📺 Na TV → 🎮 Controlar · código ', '📱 On the phone: Rabiscolândia → 📺 On the TV → 🎮 Control · code ')));
     var b = document.createElement('b'); b.textContent = tv.codigo; c.appendChild(b);
     if (n) c.appendChild(document.createTextNode(' · ' + Object.keys(tv.jogadores).map(function (k) { return tv.jogadores[k].nome || '🙂'; }).join(', ')));
   }

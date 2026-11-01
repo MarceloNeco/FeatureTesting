@@ -1,4 +1,4 @@
-/* Desenho Meu — desenhos do livro de colorir (e do pintar por números).
+/* Rabiscolândia — desenhos do livro de colorir (e do pintar por números).
    Só dados (nada de tela), para dar para testar no Node e para acrescentar desenhos sem mexer no resto.
    Cada desenho vive numa caixa de 1000 × 1000 e tem:
    - "formas": as áreas que se pintam, na ordem de pintura (a primeira é o fundo da página inteira e as de cima
@@ -236,7 +236,7 @@
     for (s = -1; s <= 1; s += 2) {
       if (tipo === 'urso') {
         // a parte de dentro da orelha é só um risco (como pintura, ficaria fininha demais)
-        f(circ(x + s * 0.72 * R, y - 0.8 * R, Math.max(28, 0.34 * R)), pelo);
+        f(circ(x + s * 0.72 * R, y - 0.8 * R, Math.max(30, 0.34 * R)), pelo);
         l(arco(x + s * 0.75 * R, y - 0.86 * R, 0.17 * R, 175, 365));
       } else if (tipo === 'coelho') {
         // orelha comprida; a parte rosa fica mais para baixo, para sobrar a pontinha para pintar
@@ -1020,7 +1020,7 @@
       f(poliR([[280, 525], [350, 255], [670, 255], [790, 525]], 50), 4);
       f(poliR([[335, 505], [385, 310], [485, 310], [485, 505]], 20), 5);
       f(poliR([[520, 310], [640, 310], [740, 505], [520, 505]], 20), 5);
-      poe(bicho('gato', 600, 445, 88, { pelo: 8, bochecha: 9 }, { corpo: false }));
+      poe(bicho('cachorro', 600, 438, 88, { pelo: 8, claro: 7, orelha: 11, bochecha: 9 }, { corpo: false }));
       f(pilula(100, 690, 900, 690, 24), 3);
       f(ret(110, 500, 780, 200, 70), 4);
       l(reta([[500, 520], [500, 690]])); l(reta([[530, 560], [570, 560]]));
@@ -1084,8 +1084,9 @@
       f(poliR([[440, 760], [580, 760], [560, 822], [460, 822]], 12), 10);
       // cachorrinho sentado com coleira
       f(cobra([[740, 770, 24], [800, 730, 24], [828, 668, 24]]), 6);
-      var coleira = [{ d: pilula(600, 636, 700, 636, 21), n: 11 }, { d: circ(650, 668, 24), n: 9 }];
+      var coleira = [{ d: pilula(598, 658, 702, 658, 24), n: 11 }];
       poe(bicho('cachorro', 650, 525, 115, { pelo: 6, claro: 6, orelha: 7, bochecha: 8 }, { sentado: true, segura: coleira, maos: [[560, 720], [740, 720]] }));
+      l(circ(650, 696, 12));
     });
 
   // ---------- categorias (só as usadas) ----------

@@ -1,4 +1,4 @@
-// Som do Desenho Meu: node --test desenho-meu/teste/som.test.js (da raiz do repositório)
+// Som da Rabiscolândia: node --test rabiscolandia/teste/som.test.js (da raiz do repositório)
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const caminho = require.resolve('../som.js');
