@@ -168,6 +168,11 @@
   $('ctNome').addEventListener('keydown', function (e) { if (e.key === 'Enter') entrar(); });
   $('ctSair').addEventListener('click', sair);
   A.aoTocar($('ctParar'), function (e) { e.preventDefault(); parar(0); });   // também no iPad antigo
+  /* durante a rodada, tocar em qualquer lugar da tela do controle também é PARAR (v0.6.3) */
+  A.aoTocar($('controle'), function (e) {
+    if (ct.fase !== 'jogo' || A.emBotao(e.target) || e.target.tagName === 'VIDEO') return;
+    e.preventDefault(); parar(0);
+  });
   $('ctComecar').addEventListener('click', function () { mandar({ t: 'cmd', id: ct.id, k: ct.k, acao: ct.fase === 'fim' ? 'deNovo' : 'comecar' }); });
   document.querySelectorAll('[data-nivel-tv]').forEach(function (b) { b.addEventListener('click', function () { mandar({ t: 'cmd', id: ct.id, k: ct.k, acao: 'nivel', nivel: b.getAttribute('data-nivel-tv') }); }); });
   $('ctCorpo').addEventListener('click', function () { if (ct.corpo) desligarCorpo(); else ligarCorpo(); });

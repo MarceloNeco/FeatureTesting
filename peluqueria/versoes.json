@@ -2,6 +2,13 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.6.3",
+      "data": "01/Nov/2026",
+      "hora": "19:47:00",
+      "pt": ["Tocar em QUALQUER lugar da tela para o item, em qualquer aparelho: celular, tablet (iPad, Amazon Fire…), TV de toque ou com ponteiro, e também na tela inteira do celular-controle. Só os botões 🏠, pausa e ▶ fazem outra coisa. Controle de TV: OK, Enter ou o botão do meio."],
+      "en": ["Tap ANYWHERE on the screen to stop the item, on any device: phone, tablet (iPad, Amazon Fire…), touch or pointer TV, and the whole phone-controller screen too. Only the 🏠, pause and ▶ buttons do something else. TV remote: OK, Enter or the center button."]
+    },
+    {
       "versao": "0.6.2",
       "data": "01/Nov/2026",
       "hora": "19:43:00",
