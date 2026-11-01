@@ -4,7 +4,7 @@
    (banco "rabiscolandia"). Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.4';
+  var APP_VERSION = '0.1.5';
   var $ = function (id) { return document.getElementById(id); };
   var F = window.DesenhoFolha, P = window.DesenhoPaginas || { LISTA: [], CATEGORIAS: [] }, Pt = window.DesenhoPintura;
   var Som = window.DesenhoSom || { iniciar: function () {}, musica: function () {}, musicaLigada: function () { return false; }, efeito: function () {}, efeitos: function () {}, efeitosLigados: function () { return false; }, proxima: function () {}, nomeAtual: function () { return ''; } };
@@ -466,6 +466,12 @@
     var prx = document.createElement('button'); prx.type = 'button'; prx.className = 'mini'; prx.textContent = '⏭'; prx.setAttribute('aria-label', t('Próxima música', 'Next song'));
     prx.addEventListener('click', function () { garantirMusica(); Som.proxima(); setTimeout(function () { renderPainel('musica'); }, 50); });
     ctl.appendChild(lig); ctl.appendChild(ant); ctl.appendChild(prx); corpo.appendChild(ctl);
+    // diagnóstico em linguagem de gente: as músicas gravadas (instrumentos de verdade) estão tocando neste aparelho?
+    var es = Som.estado ? Som.estado() : null, diag = document.createElement('p'); diag.className = 'dica';
+    if (es && es.gravadasOk > 0) diag.textContent = t('✅ As músicas gravadas (🎻 instrumentos de verdade) estão tocando neste aparelho.', '✅ Recorded songs (🎻 real instruments) are playing on this device.');
+    else if (es && es.esperandoToque) diag.textContent = t('👆 Toque em qualquer lugar da tela para a música começar.', '👆 Tap anywhere on the screen to start the music.');
+    else if (es && (es.soApp || es.ultimoErro)) diag.textContent = t('⚠️ As músicas gravadas não abriram aqui (', '⚠️ Recorded songs did not open here (') + es.ultimoErro + t('). Tocando as do app. Toque numa 🎻 para tentar de novo.', '). Playing the app songs. Tap a 🎻 to try again.');
+    if (diag.textContent) corpo.appendChild(diag);
     var agora = document.createElement('p'); agora.className = 'dica'; agora.textContent = pref.musica && Som.nomeAtual() ? t('Tocando agora: ', 'Now playing: ') + Som.nomeAtual() : t('Toque numa música para ouvir.', 'Tap a song to listen.'); corpo.appendChild(agora);
     var l = document.createElement('div'); l.className = 'lista-musicas';
     (Som.listar ? Som.listar() : []).forEach(function (m) {
