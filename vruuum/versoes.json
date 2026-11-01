@@ -2,6 +2,21 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "0.8.0",
+      "data": "01/Nov/2026",
+      "hora": "17:02:00",
+      "pt": [
+        "O piloto agora fica de costas, olhando a estrada: aparece a nuca, as orelhas e o pelo de cada bichinho (no kart e na moto, o capacete). De vez em quando ele vira para trás, olha para você e sorri, e volta a olhar para a frente.",
+        "📸 Selfie no carrinho: na garagem, toque no 📸, tire uma selfie ou escolha uma foto. O jogo acha o rosto sozinho, sem internet, e mostra um círculo que dá para arrastar e aumentar. O seu rosto vira o piloto do carro, da moto ou do avião; de costas aparece o seu cabelo, com a cor tirada da foto.",
+        "A foto fica só neste aparelho e nunca vai para a internet. Dá para apagar a qualquer hora em 📸 → Apagar minha foto. Cada jogador tem a sua."
+      ],
+      "en": [
+        "The driver now faces the road: you see the back of the head, the ears and fur of each animal (a helmet on the kart and motorbike). Every now and then they turn around, look at you and smile, then face forward again.",
+        "📸 Selfie in the car: in the garage, tap 📸 and take a selfie or pick a photo. The game finds the face by itself, offline, and shows a circle you can drag and resize. Your face becomes the driver of the car, bike or plane; from behind you see your hair, in the color taken from the photo.",
+        "The photo stays only on this device and never goes online. You can delete it any time in 📸 → Delete my photo. Each player has their own."
+      ]
+    },
+    {
       "versao": "0.7.0",
       "data": "01/Nov/2026",
       "hora": "16:47:00",

@@ -20,6 +20,7 @@
     c.fillStyle = 'rgba(255,255,255,.08)'; for (var k = 1; k < 4; k++) c.fillRect(x + w * 0.1, y + h * k / 4, w * 0.8, h * 0.04);
   }
   function piloto(c, emoji, x, y, tam, clipFn) {
+    if (!emoji) return;   // na corrida o piloto é desenhado por cima, animado (cabeca.js)
     c.save(); if (clipFn) { c.beginPath(); clipFn(); c.clip(); }
     c.font = Math.round(tam) + 'px ' + EMOJI; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(emoji, x, y);
     c.restore();
@@ -82,6 +83,7 @@
     // piloto de capacete grande
     caixa(c, W * 0.3, H * 0.34, W * 0.4, H * 0.36, W * 0.08, tom(cor, -0.2));   // macacão
     circ(c, W * 0.5, H * 0.24, W * 0.2, '#f5f5f5'); circ(c, W * 0.5, H * 0.24, W * 0.2 * 0.92, cor);
+    caixa(c, W * 0.47, H * 0.04, W * 0.06, H * 0.4, W * 0.03, '#ffffff'); circ(c, W * 0.44, H * 0.17, W * 0.03, 'rgba(255,255,255,.5)');   // listra do capacete (nuca)
     piloto(c, emoji, W * 0.5, H * 0.26, H * 0.26);
     caixa(c, W * 0.18, H * 0.6, W * 0.64, H * 0.18, H * 0.05, cor);    // banco/carenagem
     caixa(c, W * 0.18, H * 0.6, W * 0.64, H * 0.05, H * 0.025, tom(cor, 0.35));
@@ -119,6 +121,7 @@
     circ(c, W * 0.05, H * 0.43, W * 0.05, '#222'); circ(c, W * 0.95, H * 0.43, W * 0.05, '#222');   // luvas
     linha(c, [W * 0.02, H * 0.44, W * 0.98, H * 0.44], '#3a3a44', W * 0.025);   // guidão
     circ(c, W * 0.5, H * 0.14, W * 0.2, '#f5f5f5'); circ(c, W * 0.5, H * 0.14, W * 0.18, cor);
+    caixa(c, W * 0.46, H * 0.01, W * 0.08, H * 0.26, W * 0.04, '#ffffff'); circ(c, W * 0.43, H * 0.09, W * 0.035, 'rgba(255,255,255,.5)');
     piloto(c, emoji, W * 0.5, H * 0.16, H * 0.17);
     caixa(c, W * 0.4, H * 0.5, W * 0.2, H * 0.03, H * 0.01, '#fff');   // listra da jaqueta
     lanterna(c, W * 0.42, H * 0.58, W * 0.16, H * 0.04, H * 0.015);
@@ -178,15 +181,15 @@
   }
 
   var LISTA = [
-    { id: 'classico', grupo: 'terra', nome: ['Clássico', 'Classic'], w: 800, h: 640, vel: 1, curva: 1, desenhar: function (c, W, H, cor, e) { S.carroTras(c, W, H, cor, e, true); } },
-    { id: 'gt', grupo: 'terra', nome: ['GT Redondo', 'Round GT'], w: 820, h: 600, vel: 1.04, curva: 1.03, desenhar: gt },
-    { id: 'super', grupo: 'terra', nome: ['Superesportivo', 'Supercar'], w: 920, h: 560, vel: 1.08, curva: 0.95, desenhar: superesportivo },
-    { id: 'kart', grupo: 'terra', nome: ['Kart', 'Kart'], w: 720, h: 600, vel: 0.96, curva: 1.12, desenhar: kart },
-    { id: 'monstrao', grupo: 'terra', nome: ['Monstrão', 'Monster Truck'], w: 960, h: 920, vel: 0.95, curva: 0.98, desenhar: monstrao },
-    { id: 'moto', grupo: 'moto', nome: ['Moto', 'Motorbike'], w: 520, h: 760, vel: 1.03, curva: 1.1, desenhar: moto },
-    { id: 'aviao', grupo: 'ar', nome: ['Aviãozinho', 'Little Plane'], w: 1500, h: 760, vel: 1, curva: 1.05, desenhar: aviao, helice: true },
-    { id: 'jato', grupo: 'ar', nome: ['Jato', 'Jet'], w: 1300, h: 700, vel: 1.1, curva: 0.92, desenhar: jato, fogo: true },
-    { id: 'heli', grupo: 'ar', nome: ['Helicóptero', 'Helicopter'], w: 1100, h: 900, vel: 0.95, curva: 1.12, desenhar: helicoptero, rotor: true }
+    { id: 'classico', janela: { poli: [0.24, 0.43, 0.31, 0.16, 0.69, 0.16, 0.76, 0.43] }, cab: [0.5, 0.37, 0.3], grupo: 'terra', nome: ['Clássico', 'Classic'], w: 800, h: 640, vel: 1, curva: 1, desenhar: function (c, W, H, cor, e) { S.carroTras(c, W, H, cor, e, true); } },
+    { id: 'gt', janela: { poli: [0.34, 0.4, 0.37, 0.25, 0.44, 0.19, 0.56, 0.19, 0.63, 0.25, 0.66, 0.4] }, cab: [0.5, 0.36, 0.23], grupo: 'terra', nome: ['GT Redondo', 'Round GT'], w: 820, h: 600, vel: 1.04, curva: 1.03, desenhar: gt },
+    { id: 'super', janela: { poli: [0.38, 0.37, 0.41, 0.25, 0.59, 0.25, 0.62, 0.37] }, cab: [0.5, 0.35, 0.18], grupo: 'terra', nome: ['Superesportivo', 'Supercar'], w: 920, h: 560, vel: 1.08, curva: 0.95, desenhar: superesportivo },
+    { id: 'kart', janela: { elipse: [0.5, 0.24, 0.184, 0.221] }, cab: [0.5, 0.25, 0.34], capacete: true, grupo: 'terra', nome: ['Kart', 'Kart'], w: 720, h: 600, vel: 0.96, curva: 1.12, desenhar: kart },
+    { id: 'monstrao', janela: { poli: [0.29, 0.07, 0.71, 0.07, 0.71, 0.22, 0.29, 0.22] }, cab: [0.5, 0.17, 0.14], grupo: 'terra', nome: ['Monstrão', 'Monster Truck'], w: 960, h: 920, vel: 0.95, curva: 0.98, desenhar: monstrao },
+    { id: 'moto', janela: { elipse: [0.5, 0.14, 0.18, 0.123] }, cab: [0.5, 0.15, 0.22], capacete: true, grupo: 'moto', nome: ['Moto', 'Motorbike'], w: 520, h: 760, vel: 1.03, curva: 1.1, desenhar: moto },
+    { id: 'aviao', janela: { elipse: [0.5, 0.44, 0.075, 0.1] }, cab: [0.5, 0.47, 0.16], grupo: 'ar', nome: ['Aviãozinho', 'Little Plane'], w: 1500, h: 760, vel: 1, curva: 1.05, desenhar: aviao, helice: true },
+    { id: 'jato', janela: { elipse: [0.5, 0.43, 0.06, 0.09] }, cab: [0.5, 0.46, 0.14], grupo: 'ar', nome: ['Jato', 'Jet'], w: 1300, h: 700, vel: 1.1, curva: 0.92, desenhar: jato, fogo: true },
+    { id: 'heli', janela: { elipse: [0.5, 0.48, 0.16, 0.15] }, cab: [0.5, 0.52, 0.21], grupo: 'ar', nome: ['Helicóptero', 'Helicopter'], w: 1100, h: 900, vel: 0.95, curva: 1.12, desenhar: helicoptero, rotor: true }
   ];
   var GRUPOS = [
     { id: 'terra', nome: ['🚗 Carros', '🚗 Cars'] },
