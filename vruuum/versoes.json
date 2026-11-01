@@ -2,6 +2,23 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "0.9.0",
+      "data": "01/Nov/2026",
+      "hora": "17:19:00",
+      "pt": [
+        "Visual Neon (o novo padrão, mais sóbrio): a corrida é à noite, com céu estrelado e lua, asfalto escuro, bordas da estrada em linhas de neon brilhando, faixas acesas e postes de neon piscando. A paisagem fica no escuro, só com as luzes acesas.",
+        "Túneis: de 2 a 4 por corrida. No chão, túnel escuro com contorno de luz na entrada e faixas de neon correndo pelas paredes (as paredes seguram o carro na pista). No céu, um túnel de anéis de luz para atravessar voando.",
+        "Veículos iluminados: faróis clareando a estrada à frente, luz neon por baixo na cor do carro, lanternas brilhando e rastro de luz em alta velocidade. O trânsito anda com as lanternas acesas e os aviões piscam as luzes das asas.",
+        "No neon, os itens ficam mais sóbrios: estrela de luz (sem carinha), portal de turbo em setas de neon e mancha de óleo no lugar da lama. Quem preferir o jeito antigo escolhe 🌈 Colorido no menu."
+      ],
+      "en": [
+        "Neon look (the new default, more grown-up): the race happens at night, with a starry sky and moon, dark asphalt, glowing neon road edges, lit lane lines and blinking neon posts. The scenery sits in the dark, only the lights are on.",
+        "Tunnels: 2 to 4 per race. On the ground, a dark tunnel with a lit entrance and neon strips racing along the walls (the walls keep the car on the road). In the sky, a tunnel of light rings to fly through.",
+        "Lit-up rides: headlights lighting the road ahead, neon underglow in the car's color, glowing taillights and light trails at high speed. Traffic drives with taillights on and planes blink their wing lights.",
+        "In neon, items look more grown-up: a star of light (no face), a turbo gate of neon chevrons and an oil slick instead of mud. Prefer the old look? Pick 🌈 Colorful in the menu."
+      ]
+    },
+    {
       "versao": "0.8.0",
       "data": "01/Nov/2026",
       "hora": "17:02:00",

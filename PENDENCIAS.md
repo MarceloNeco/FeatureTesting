@@ -16,7 +16,7 @@ reaproveitados). Criada em 31/Out/2026, com autorização do dono.
 | 7 | Dança na Sala: `supabase-js` vem do jsDelivr sem `integrity`; a diretriz pede hospedar no repositório ou fixar a versão com `integrity` | Revisão do código (31/Out/2026) | ⏸ aguardando o dono |
 | 8 | ArchONE (mapa vivo) publicado aqui como protótipo F0 por decisão do dono (31/Out/2026); sai daqui quando o portal próprio `arch-one` nascer (F1 do mapa vivo, `rootify-one/docs/specs/mapa-vivo-plano-f1.md`). Até lá, mudanças são feitas no original (`rootify-one/docs/specs/mapa-vivo/prototipo/`) e copiadas para `arch-one/` | Dono, 31/Out/2026 | 🔵 em andamento · protótipo no ar; portal próprio aguarda o "pode criar" |
 | 9 | Peluqueria: fases 2 a 5 (TV com dois jogadores, palma e braços, minha foto + Gemini, Spotify) e fotos realistas — detalhe em `peluqueria/PENDENCIAS.md` | Dono, 31/Out/2026 | 🔵 em andamento · fases 1 a 3 entregues (v0.4.0: TV, celular-controle, corpo, 2 jogadores); faltam 4 (foto + Gemini) e 5 (Spotify), que dependem da chave e do Client ID do dono |
-| 10 | Vruuum! (corrida de carrinho): testar com as crianças no celular, no tablet e na TV LG; depois, ideias de TV com o celular como volante e casca LG — detalhe em `vruuum/PENDENCIAS.md` | Dono, 01/Nov/2026 | 🔵 em andamento · v0.8.0 entregue (garagem, 9 veículos, voo, selfie e piloto animado) |
+| 10 | Vruuum! (corrida de carrinho): testar com as crianças no celular, no tablet e na TV LG; depois, ideias de TV com o celular como volante e casca LG — detalhe em `vruuum/PENDENCIAS.md` | Dono, 01/Nov/2026 | 🔵 em andamento · v0.9.0 entregue (garagem, 9 veículos, voo, selfie, piloto animado, visual neon e túneis) |
 | 11 | Purpurina (vestir e maquiar): testar com as crianças no celular e no tablet, deitado e em pé; depois, ajustes e ideias (pintar com o dedo, mais penteados, TV) — detalhe em `purpurina/PENDENCIAS.md` | Dono, 01/Nov/2026 | 🔵 em andamento · v0.7.0 entregue (bolsas seguradas, aviso de versão nova; antes: foto de estúdio, TV, YouTube e Spotify) |
 
 ## Histórico das entregas
@@ -36,3 +36,4 @@ reaproveitados). Criada em 31/Out/2026, com autorização do dono.
 - **01/Nov/2026:** Purpurina 0.6.0 — volume, sombra macia, fundo desfocado e foto de estúdio renderizada.
 - **01/Nov/2026:** Purpurina 0.7.0 — bolsas seguradas na mão com mais detalhe e aviso de versão nova.
 - **01/Nov/2026:** Vruuum! 0.7.0 e 0.8.0 — garagem com 9 veículos e voo pelo céu; piloto de costas que vira e sorri; selfie com rosto achado sem internet (MediaPipe), guardada só no aparelho.
+- **01/Nov/2026:** Vruuum! 0.9.0 — visual Neon (padrão) com túneis, faróis, luz neon por baixo e postes piscando; Colorido continua como opção.

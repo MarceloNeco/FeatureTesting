@@ -30,6 +30,18 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 | 🚗 Normal | mais rápido, curvas que puxam para fora, mais cones e carrinhos |
 | 🚀 Turbo | o mais rápido, curvas fortes, muito trânsito |
 
+## Visual: 🌃 Neon ou 🌈 Colorido
+
+- **Neon** (padrão, escolhido no menu em "Visual"): os mesmos mundos à noite, com céu estrelado e lua, asfalto escuro,
+  bordas da estrada em neon (cada mundo com suas cores), faixas acesas e postes de neon piscando. A paisagem fica no
+  escuro, só com as luzes. Os veículos têm faróis iluminando a estrada, luz neon por baixo na cor do carro, lanternas
+  brilhando e rastro de luz quando estão rápidos; o trânsito tem lanternas acesas. Os itens ficam mais sóbrios: estrela de
+  luz sem carinha, portal de turbo em setas de neon e mancha de óleo (no lugar da lama).
+- **Colorido**: o visual de dia, com as cores e personagens de antes. Os faróis só acendem dentro dos túneis.
+- **Túneis** (nos dois visuais): de 2 a 4 por corrida (`pista.js`, longe dos portais, da largada e da chegada). No chão,
+  paredes com faixas de luz correndo e contorno de luz na entrada; lá dentro as paredes seguram o carro na pista. No céu,
+  um tubo de anéis de luz em volta da rota.
+
 ## Garagem e veículos
 
 - O veículo escolhido fica **sempre à vista**: em pé, preso no topo da tela enquanto as opções rolam; deitado, de um

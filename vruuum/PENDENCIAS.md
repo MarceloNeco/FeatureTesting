@@ -20,3 +20,4 @@ Situação: 🟡 aberta · 🔵 em andamento · ⏸ aguardando o dono · ✅ fei
 | 14 | Ideias para depois: mais veículos (barco na água, foguete no espaço), escolher o mundo, peças para personalizar (rodas, aerofólio, adesivos). | v0.7.0 | 🟡 |
 | 15 | Dono: selfie que reconhece o rosto sem internet e põe o rosto no carrinho; piloto de costas que de vez em quando vira e sorri. | dono, 01/Nov/2026 | ✅ v0.8.0 (testar a selfie no celular de verdade, com a câmera da frente) |
 | 16 | Selfie: a primeira vez baixa o motor de visão (~14 MB) da pasta da Bagunçolândia; sem internet nessa primeira vez, o círculo fica para ajustar à mão. | v0.8.0 | 🟡 (aviso já aparece na tela) |
+| 17 | Dono: túneis, carros brilhantes com farol, luzes e neon piscando, menos infantil e mais sóbrio (referências de aviões em neon). | dono, 01/Nov/2026 | ✅ v0.9.0 (visual Neon como padrão; Colorido continua no menu) |
