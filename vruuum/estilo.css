@@ -136,3 +136,7 @@ a { color: var(--ciano); }
 .cam-maos video { display: none; }
 .cam-maos canvas { width: 100%; height: auto; border-radius: 12px; border: 2px solid rgba(43,244,255,.7); box-shadow: 0 0 14px rgba(43,244,255,.45); background: #000; }
 .cam-maos p { font-size: .8rem; margin-top: 2px; text-shadow: 0 1px 4px #000; }
+.bicho.pers canvas { width: 40px; height: 40px; }
+.classificacao { width: min(420px, 100%); background: var(--card); border-radius: 16px; padding: 10px 14px; text-align: left; display: grid; gap: 4px; }
+.classificacao li { list-style: none; display: flex; gap: 8px; align-items: center; }
+.classificacao li.eu { color: var(--ouro); font-weight: 700; }

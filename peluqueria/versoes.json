@@ -2,6 +2,21 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.5.0",
+      "data": "01/Nov/2026",
+      "hora": "18:35:00",
+      "pt": [
+        "Música de verdade: saiu a música sintetizada e entraram 17 músicas gravadas, com licença aberta (Kevin MacLeod, incompetech.com, CC BY 4.0) — pop dançante, disco e funk. Abertura: \"Show Your Moves\"; cada rodada toca uma diferente.",
+        "Volume igualado em todas, sem distorcer. O menu mostra a música que está tocando e o autor.",
+        "Ao sair da página, a música para na hora (nada continua tocando) e volta de onde parou."
+      ],
+      "en": [
+        "Real music: the synthesized music is gone and 17 recorded, openly licensed tracks are in (Kevin MacLeod, incompetech.com, CC BY 4.0) — dance pop, disco and funk. Opening: \"Show Your Moves\"; each round plays a different one.",
+        "Even volume across all tracks, no distortion. The menu shows the track playing and its author.",
+        "Leaving the page stops the music at once (nothing keeps playing) and it resumes where it stopped."
+      ]
+    },
+    {
       "versao": "0.4.1",
       "data": "01/Nov/2026",
       "hora": "22:18:00",

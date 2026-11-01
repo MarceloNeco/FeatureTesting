@@ -1,22 +1,20 @@
-# Suas músicas na Peluqueria
+# Músicas da Peluqueria
 
-Sem nada aqui, o jogo toca a trilha animada que ele mesmo cria (sem arquivo e sem direito autoral).
-Se você quiser tocar músicas suas:
+Desde a v0.5.0 o jogo toca **músicas gravadas de verdade**, com licença aberta: 17 músicas de Kevin MacLeod
+(incompetech.com), licença **CC BY 4.0** (pode usar em tudo, dando o crédito — o jogo mostra o crédito no menu e
+no `CREDITOS.md`). Uma é a **abertura** (toca em laço no menu); as outras tocam **uma por rodada**, embaralhadas.
 
-1. No GitHub, abra a pasta `peluqueria/musicas/`, clique em **Add file → Upload files** e envie os arquivos
-   **MP3** (nomes simples, sem espaço nem acento: `festa.mp3`, `pulo-pulo.mp3`). Clique em **Commit changes**.
-2. Abra o arquivo `musicas.json` nesta pasta, clique no lápis ✏️ e liste as músicas assim:
+A lista fica em `musicas.json`, uma linha por música:
 
 ```json
-[
-  { "nome": "Festa", "arquivo": "festa.mp3" },
-  { "nome": "Pulo pulo", "arquivo": "pulo-pulo.mp3" }
-]
+{ "titulo": "Show Your Moves", "arquivo": "abertura-show-your-moves.mp3", "bpm": 136, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0", "abertura": true }
 ```
 
-3. Clique em **Commit changes**. Na próxima rodada o jogo sorteia uma delas e toca em laço; os efeitos e a
-   voz continuam. Para voltar à trilha do jogo, deixe a lista vazia: `[]`.
-
-**Atenção:** o repositório é público. Só coloque aqui música que você tem o direito de publicar (feita por
-você, comprada com licença para isso ou de domínio público). Cada MP3 fica guardado no aparelho na primeira
-vez que toca.
+- `abertura: true` só em uma (a do menu). `bpm` faz o nome do jogo pulsar no ritmo.
+- Para **trocar ou acrescentar** uma música sua: envie o MP3 para esta pasta pelo GitHub (**Add file → Upload
+  files**, nome simples, sem espaço nem acento), acrescente uma linha igual no `musicas.json` e clique em
+  **Commit changes**. Para tirar uma, apague a linha.
+- **Atenção:** o repositório é público. Só música que você pode publicar (feita por você, domínio público,
+  Creative Commons com crédito no `CREDITOS.md`). Música famosa de rádio (Katy Perry, Dua Lipa…) **não pode**.
+- Dica: arquivos de 2 a 3 MB (MP3 128 kbps) carregam rápido no celular. Cada música fica guardada no aparelho na
+  primeira vez que toca; a abertura já vem guardada.

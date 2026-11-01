@@ -1,1 +1,19 @@
-[]
+[
+  {"titulo": "Show Your Moves", "arquivo": "abertura-show-your-moves.mp3", "bpm": 136, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0", "abertura": true},
+  {"titulo": "Raving Energy (faster)", "arquivo": "raving-energy-faster.mp3", "bpm": 134, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Getting it Done", "arquivo": "getting-it-done.mp3", "bpm": 135, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Feelin Good", "arquivo": "feelin-good.mp3", "bpm": 131, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Disco con Tutti", "arquivo": "disco-con-tutti.mp3", "bpm": 115, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Funky Chunk", "arquivo": "funky-chunk.mp3", "bpm": 115, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Electro Cabello", "arquivo": "electro-cabello.mp3", "bpm": 117, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Beachfront Celebration", "arquivo": "beachfront-celebration.mp3", "bpm": 120, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Stringed Disco", "arquivo": "stringed-disco.mp3", "bpm": 118, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Laserpack", "arquivo": "laserpack.mp3", "bpm": 128, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Pookatori and Friends", "arquivo": "pookatori-and-friends.mp3", "bpm": 124, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Digital Lemonade", "arquivo": "digital-lemonade.mp3", "bpm": 120, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Voxel Revolution", "arquivo": "voxel-revolution.mp3", "bpm": 122, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Enter the Party", "arquivo": "enter-the-party.mp3", "bpm": 120, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Aurea Carmina", "arquivo": "aurea-carmina.mp3", "bpm": 115, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Brightly Fancy", "arquivo": "brightly-fancy.mp3", "bpm": 131, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"},
+  {"titulo": "Disco Medusae", "arquivo": "disco-medusae.mp3", "bpm": 115, "autor": "Kevin MacLeod", "fonte": "incompetech.com", "licenca": "CC BY 4.0"}
+]

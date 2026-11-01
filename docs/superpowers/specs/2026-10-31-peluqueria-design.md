@@ -203,7 +203,20 @@ o som ligado/desligado e o "Minhas imagens". **Nenhuma imagem é salva nem expor
 - Botões com no mínimo 44 px; o resultado de cada queda também vai para uma região `aria-live` (leitor de
   tela). Com `prefers-reduced-motion`: sem confete, sem pulos e sem tremida; só cor e texto.
 
-## 6. Música e sons (`trilhas.js` + `som.js`)
+## 6. Música e sons (`som.js` + `musicas/`)
+
+- **v0.5.0 (dono: "a música distorce, é pesada, artificial; quero fontes abertas, mais sofisticadas", nota 0,6):**
+  a música sintetizada (`trilhas.js`) saiu. Entraram **17 músicas gravadas** de Kevin MacLeod (incompetech.com,
+  CC BY 4.0; o FreePD, de domínio público, fechou), escolhidas por estilo (pop dançante, disco, funk, 110–136 BPM):
+  abertura "Show Your Moves" em laço no menu; 16 de rodada, embaralhadas, uma por rodada, emendando quando acaba.
+  Tratadas com ffmpeg: volume igualado (loudnorm em 2 passadas, −14 LUFS, pico −1,5 dB), rodada cortada em até
+  2:30 com final suave, MP3 128 kbps (~2,4 MB cada; ~40 MB no total). Tocadas por `<audio>` ligado ao WebAudio
+  (volume e mudo também no iPhone). Ao sair da página: pausa + contexto suspenso (nada continua soando); ao
+  voltar, continua de onde parou. Arquivo que não carrega é pulado. O menu mostra música, autor e licença.
+  Efeitos curtos seguem sintetizados. A abertura já vem no cache do service worker; as outras entram no primeiro
+  uso.
+
+### Histórico (até a v0.4.1, substituído)
 
 - **10 músicas próprias** (v0.2.0, pedido do dono: "estilo pop animado, tipo Last Friday Night ou Hallucinate,
   nada infantil"), em `trilhas.js` (partitura pura, testada no Node) e tocadas por `som.js` no WebAudio: pop

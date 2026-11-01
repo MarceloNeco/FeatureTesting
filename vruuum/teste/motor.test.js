@@ -212,3 +212,33 @@ test('pontos: estrela soma, batida tira (nunca abaixo de zero), checkpoint dá b
   assert.ok(rapido && devagar);
   assert.ok(rapido.bonus > 0 && devagar.bonus === 0, rapido.bonus + ' / ' + devagar.bonus);
 });
+
+test('rivais: correm junto, desviam, contam na posição e na chegada', () => {
+  const cfgs = [{ id: 'saci', veic: 'kart', mod: { vel: 1 } }, { id: 'emilia', veic: 'gt', mod: { vel: 1 } }, { id: 'noel', veic: 'super', mod: { vel: 1 } }];
+  const e = M.novaCorrida('crianca', 9, 1, cfgs);
+  assert.equal(e.rivais.length, 3);
+  const ev = correr(e, [{}], 400, 1 / 30);
+  assert.equal(e.fase, 'fim');
+  assert.ok(e.rivais.every(r => r.z > e.pista.zChegada * 0.8), 'rivais andaram até perto do fim');
+  const chegada = ev.find(x => x.tipo === 'chegou');
+  assert.ok(chegada.lugar >= 1 && chegada.lugar <= 4);
+  assert.equal(e.total, 4);
+  assert.ok(e.jogadores[0].lugar >= 1 && e.jogadores[0].lugar <= 4);
+  // ficam por perto: nenhum rival terminou mais de 40 s longe do jogador
+  for (const r of e.rivais) if (r.chegou) assert.ok(Math.abs(r.tempo - e.jogadores[0].tempo) < 40, 'rival longe demais');
+});
+
+test('rival desvia do cone na faixa dele (quase sempre)', () => {
+  let desviou = 0;
+  for (let k = 0; k < 20; k++) {
+    const e = M.novaCorrida('normal', 5, 1, [{ id: 'saci', veic: 'kart', mod: {} }]);
+    e.fase = 'corrida'; e.carros = [];
+    const rv = e.rivais[0]; rv.z = 30 * P.SEG; rv.x = rv.faixa = 0; rv.vel = 5000;
+    e.jogadores[0].z = 30 * P.SEG;
+    for (let i = 36; i < 44; i++) e.pista.segs[i].coisas = [];
+    e.pista.segs[40].coisas.push({ tipo: 'cone', x: 0, alt: 0, pego: [false, false] });
+    correr(e, [{}], 1.2);
+    if (Math.abs(rv.x) > 0.3 || rv.lento <= 0) desviou++;
+  }
+  assert.ok(desviou >= 12, 'desviou ' + desviou + ' de 20');
+});
