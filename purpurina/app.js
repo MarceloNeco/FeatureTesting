@@ -4,12 +4,15 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.10.1';
+  var APP_VERSION = '0.10.2';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
-  var TV = /[?&]tv=auto\b/.test(location.search);
-  if (TV) document.documentElement.classList.add('tv');
   var TOQUE = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
+  /* modo TV: ?tv=auto (cartão da página Kids, solverone.com.br/tv/purpurina). Tablet ou celular de toque que abriu
+     esse endereço (ex.: tablet Amazon Fire) não é TV: abre a brincadeira normal. ?tv=sim força o modo TV. */
+  var TELEVISAO = /AFT|SMART-?TV|SmartTV|Tizen|Web0S|webOS|NetCast|BRAVIA|Android TV|GoogleTV|CrKey|HbbTV|AppleTV|Roku|Viera|Philips|Hisense|VIDAA/i.test(navigator.userAgent || '');
+  var TV = /[?&]tv=sim\b/.test(location.search) || (/[?&]tv=auto\b/.test(location.search) && (!TOQUE || TELEVISAO));
+  if (TV) document.documentElement.classList.add('tv');
   var CALMO = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   var MAX_LOOKS = 30;
 
