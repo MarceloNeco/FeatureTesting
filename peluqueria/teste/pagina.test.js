@@ -29,6 +29,7 @@ async function abrir(browser, url, opcoes = {}) {
   await pg.goto(url);
   if (opcoes.semDebug) await pg.waitForFunction(() => !document.getElementById('btJogar').disabled, null, { timeout: 15000 });
   else await pg.waitForFunction(() => window.PeluqueriaDebug && window.PeluqueriaDebug.pronto, null, { timeout: 15000 });
+  if (!opcoes.semEntrar && await pg.isVisible('#btEntrar')) await pg.click('#btEntrar');   // tela de entrada (toque para começar)
   pg.erros = () => erros.filter(e => !IGNORAR.test(e));
   return pg;
 }
@@ -192,7 +193,7 @@ async function comecar(pg, nivel) {
     const cel = await ctxTV.newPage(); const errosCel = [];
     cel.on('console', m => { const t = m.text() + ' @' + (m.location() && m.location().url); if (m.type() === 'error' && !IGNORAR.test(t)) errosCel.push(t); }); cel.on('pageerror', e => errosCel.push(e.message));
     await cel.setViewportSize({ width: 390, height: 844 });
-    await cel.goto(base + '?teste'); await cel.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
+    await cel.goto(base + '?teste'); await cel.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto); await cel.click('#btEntrar');
     await cel.click('#btControle');
     await cel.fill('#ctCodigo', codigo.toLowerCase()); await cel.fill('#ctNome', 'Ana'); await cel.click('#ctEntrar');
     await tv.waitForFunction(() => /Ana/.test(document.getElementById('tvJogadores').textContent), null, { timeout: 5000 });
@@ -221,7 +222,7 @@ async function comecar(pg, nivel) {
     await D(tv, (c) => new BroadcastChannel('peluqueria-' + c).postMessage({ t: 'cmd', acao: 'apagar', id: 'x' }), codigo);
     // segundo celular durante a rodada não entra; no lobby entra e a tela divide
     const cel2 = await ctxTV.newPage(); await cel2.setViewportSize({ width: 390, height: 844 });
-    await cel2.goto(base + '?teste'); await cel2.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
+    await cel2.goto(base + '?teste'); await cel2.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto); await cel2.click('#btEntrar');
     await cel2.click('#btControle'); await cel2.fill('#ctCodigo', codigo); await cel2.fill('#ctNome', 'Bia'); await cel2.click('#ctEntrar');
     await tv.waitForTimeout(400);
     confere(!/Bia/.test(await tv.textContent('#tvJogadores')), 'durante a rodada ninguém novo entra');
@@ -251,7 +252,7 @@ async function comecar(pg, nivel) {
     confere(await D(tv, () => PeluqueriaTVDebug.resultados(0)) === r0 && await tv.isVisible('#tvJogo'), 'sem a senha do celular, ninguém se passa pelo jogador');
     await tv.keyboard.press('Escape'); await tv.waitForTimeout(100);
     const cel3 = await ctxTV.newPage(); await cel3.setViewportSize({ width: 390, height: 844 });
-    await cel3.goto(base + '?teste'); await cel3.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
+    await cel3.goto(base + '?teste'); await cel3.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto); await cel3.click('#btEntrar');
     await cel3.click('#btControle'); await cel3.fill('#ctCodigo', codigo); await cel3.fill('#ctNome', 'Caio'); await cel3.click('#ctEntrar');
     await cel3.waitForTimeout(3500);
     confere(/2 jogadores/.test(await cel3.textContent('#ctStatus')), 'terceiro celular vê "TV com 2 jogadores" (não "Conectado")', await cel3.textContent('#ctStatus'));
@@ -259,16 +260,17 @@ async function comecar(pg, nivel) {
     await tv.waitForTimeout(2000);
     confere(!/Bia/.test(await tv.textContent('#tvJogadores')), 'quem fecha a aba libera a vaga');
     confere(/Caio/.test(await tv.textContent('#tvJogadores')), 'o celular que esperava entra na vaga livre');
-    await cel3.close(); await tv.waitForTimeout(400);
+    await cel3.close(); await tv.waitForFunction(() => !/Caio/.test(document.getElementById('tvJogadores').textContent), null, { timeout: 5000 });   // espera a TV liberar a vaga
     await D(tv, (c) => new BroadcastChannel('peluqueria-' + c).postMessage({ t: 'join', id: 'fantasma1', k: 'fantasmasenha12', nome: 'Fantasma' }), codigo);
     await tv.waitForTimeout(300);
     confere(/Fantasma/.test(await tv.textContent('#tvJogadores')), 'celular novo entra');
-    await tv.waitForTimeout(2500);
-    confere(!/Fantasma/.test(await tv.textContent('#tvJogadores')) && /Ana/.test(await tv.textContent('#tvJogadores')), 'celular que some (sem sinal) sai do lobby; quem está ativo fica');
+    await tv.waitForFunction(() => !/Fantasma/.test(document.getElementById('tvJogadores').textContent), null, { timeout: 6000 }).catch(() => {});
+    confere(!/Fantasma/.test(await tv.textContent('#tvJogadores')), 'celular que some (sem sinal) sai do lobby');
+    confere(/Ana/.test(await tv.textContent('#tvJogadores')), 'quem está ativo (mandando sinal) fica');
     await tv.click('#tvSair');
     confere(await tv.isVisible('#inicio'), '🏠 no lobby da TV volta ao início');
     await tv.close();
-    await cel.waitForTimeout(2500);
+    await cel.waitForFunction(() => /não encontrada|not found/i.test(document.getElementById('ctStatus').textContent), null, { timeout: 6000 }).catch(() => {});
     confere(/não encontrada|not found/i.test(await cel.textContent('#ctStatus')), 'celular percebe quando a TV some', await cel.textContent('#ctStatus'));
     confere(errosTV.length === 0 && errosCel.length === 0, 'TV e celular sem erros', errosTV.concat(errosCel));
     await ctxTV.close();
@@ -276,7 +278,7 @@ async function comecar(pg, nivel) {
 
   const pdb = await abrir(browser, base + '?debug&teste');
   await passo(pdb, 500);
-  confere(/v0\.4\.0/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(/v0\.4\.1/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
 
   /* ---------- revisão final ---------- */
@@ -336,17 +338,20 @@ async function comecar(pg, nivel) {
     const pmp = await ctxA.newPage();
     await pmp.route('**/musicas/musicas.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: '[{"nome":"X","arquivo":"quebrada.mp3"}]' }));
     await pmp.route('**/musicas/quebrada.mp3', r => r.fulfill({ status: 404, body: '' }));
-    await pmp.goto(base + '?teste'); await pmp.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto);
+    await pmp.goto(base + '?teste'); await pmp.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto); await pmp.click('#btEntrar');
     await pmp.click('#btJogar'); await pmp.waitForTimeout(1500);
     confere(await D(pmp, () => PeluqueriaSom.fonte()) === 'jogo', 'MP3 que falha cai na trilha do jogo', await D(pmp, () => PeluqueriaSom.fonte()));
   }
 
   // abertura especial na tela de início; uma música diferente a cada rodada; música segue no fim
   {
-    const pi = await abrir(browser, base + '?teste');
+    const pi = await abrir(browser, base + '?teste', { semEntrar: true });
+    confere(await pi.isVisible('#entrada') && !(await pi.isVisible('#inicio')), 'abre na tela de entrada (toque para começar)');
     confere(await D(pi, () => PeluqueriaSom.fonte()) === '', 'sem som antes do primeiro toque');
+    await pi.click('#btEntrar');
+    confere(await D(pi, () => PeluqueriaSom.fonte()) === 'jogo' && (await D(pi, () => PeluqueriaSom.posicao().faixa)) === 'abertura', 'o toque na entrada já toca a música de abertura');
+    confere(await pi.isVisible('#inicio') && await D(pi, () => document.activeElement.id) === 'btJogar', 'e mostra o menu com as luzes');
     await pi.click('#btMaluco');
-    confere(await D(pi, () => PeluqueriaSom.fonte()) === 'jogo' && (await D(pi, () => PeluqueriaSom.posicao().faixa)) === 'abertura', 'primeiro toque toca a música de abertura');
     confere((await D(pi, () => PeluqueriaTrilhas.FAIXAS.length)) >= 15, 'pelo menos 15 músicas carregadas');
     confere(await D(pi, () => { const r = PeluqueriaSom._recursos(); return r.eco && r.estereo; }), 'som com eco de ambiente e estéreo');
     const rodada = async () => {
@@ -371,7 +376,7 @@ async function comecar(pg, nivel) {
     const feixes = await D(pv, () => [...document.querySelectorAll('#inicio .feixe')].map(e => getComputedStyle(e).animationName));
     confere(feixes.length >= 2 && feixes.every(n => n && n !== 'none'), 'holofotes girando na abertura', feixes);
     confere(await D(pv, () => document.querySelectorAll('#inicio .flutuantes img').length) >= 6, 'itens flutuando na abertura');
-    await D(pv, () => { window.__batidas = 0; new MutationObserver(() => { if (document.querySelector('.logo').classList.contains('bate')) window.__batidas++; }).observe(document.querySelector('.logo'), { attributes: true }); });
+    await D(pv, () => { window.__batidas = 0; new MutationObserver(() => { if (document.querySelector('#inicio .logo').classList.contains('bate')) window.__batidas++; }).observe(document.querySelector('#inicio .logo'), { attributes: true }); });
     await pv.click('#btNormal'); await pv.waitForTimeout(2500);
     confere(await D(pv, () => window.__batidas) >= 3, 'nome do jogo pulsa na batida da música', await D(pv, () => window.__batidas));
     await pv.screenshot({ path: '/tmp/peluqueria-abertura.png' });
@@ -428,7 +433,7 @@ async function comecar(pg, nivel) {
   const p3 = await ctx3.newPage();
   await p3.route('**/meus/cenarios.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'foto', nome: 'Foto', arquivo: 'foto.svg', largura: 1000, altura: 1000, lugares: { cabeca: { x: 0.5, y: 0.27, tam: 0.4 } } }]) }));
   await p3.route('**/meus/foto.svg', r => r.fulfill({ status: 200, contentType: 'image/svg+xml', body: gato }));
-  await p3.goto(base + '?teste'); await p3.waitForFunction(() => window.PeluqueriaDebug && window.PeluqueriaDebug.pronto);
+  await p3.goto(base + '?teste'); await p3.waitForFunction(() => window.PeluqueriaDebug && window.PeluqueriaDebug.pronto); await p3.click('#btEntrar');
   confere(await p3.isVisible('#btMinhas'), 'meus/ com imagem boa mostra "Minhas imagens"');
   await p3.click('#btMinhas');
   confere((await p3.getAttribute('#btMinhas', 'aria-pressed')) === 'true', '"Minhas imagens" liga');

@@ -3,7 +3,7 @@
    cópia primeiro (os MP3 só entram no cache na primeira vez que tocam). Cache com o nome do app: só
    apaga caches "peluqueria-" (nunca os dos outros apps da mesma origem).
    Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
-var VERSAO = '0.4.0';
+var VERSAO = '0.4.1';
 var CACHE = 'peluqueria-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'cenarios.js', 'itens.js', 'desenho.js', 'trilhas.js', 'som.js', 'voz.js', 'gesto.js', 'partida.js', 'sala.js', 'esqueleto.js', 'tv.js', 'controle.js', '../baguncolandia/libs/supabase.js', 'musicas/musicas.json', 'marcar.html', 'marcar.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', 'meus/cenarios.json', 'meus/itens.json', 'cenarios/cenarios.json', 'itens/itens.json', 'cenarios/bebe.svg', 'cenarios/boneco-de-neve.svg', 'cenarios/cachorro.svg', 'cenarios/cavalo.svg', 'cenarios/coruja.svg', 'cenarios/gato.svg', 'cenarios/leao.svg', 'cenarios/pinguim.svg', 'cenarios/robo.svg', 'cenarios/sapo.svg', 'cenarios/tubarao.svg', 'cenarios/vovo.svg', 'itens/balao.svg', 'itens/bigode.svg', 'itens/boca-tubarao.svg', 'itens/bone.svg', 'itens/brinco.svg', 'itens/capacete-viking.svg', 'itens/cartola.svg', 'itens/chapeu-pirata.svg', 'itens/coroa.svg', 'itens/flor.svg', 'itens/fone.svg', 'itens/gravata-borboleta.svg', 'itens/laco.svg', 'itens/medalha.svg', 'itens/microfone.svg', 'itens/nariz-palhaco.svg', 'itens/oculos-escuros.svg', 'itens/papagaio.svg', 'itens/passarinho.svg', 'itens/peruca-oculos.svg', 'itens/pirulito.svg', 'itens/sorvete.svg', '../recursos.js'];
 self.addEventListener('install', function (e) {

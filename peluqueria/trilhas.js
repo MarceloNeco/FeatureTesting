@@ -204,63 +204,91 @@
   }
   function andamento(f, nivel, i) { return f.bpm + (AJUSTE[nivel] || 0) + (i || 0); }
 
-  /* ---------- abertura: rock elétrico rápido (tela de início) ----------
-     Guitarra distorcida em semicolcheias alternando uma nota pedal (a do acorde) com notas que sobem e
-     descem — técnica de riff de rock; as notas são próprias. Começa só com a guitarra, entra a bateria com
-     virada de tons e explode com acordes "power", baixo e melodia de sintetizador. Toca em laço. */
-  var ABERTURA = { id: 'abertura', nome: { pt: 'Abertura Peluqueria', en: 'Peluqueria Opening' }, bpm: 138, tom: 52, modo: 'menor', acordes: [0, 5, 3, 6], semente: 7 };
-  var ESTRUTURA_ABERTURA = [['riff', 4], ['entrada', 4], ['tudo', 8], ['ponte', 4], ['tudo2', 8]];
+  /* ---------- abertura (v0.4.1): a música mais chamativa, na tela de início ----------
+     Rock-pop elétrico a 136 BPM em mi menor, sequência épica i–VI–III–VII. Começa JÁ com tudo (2 compassos de
+     "explosão": bumbo, virada de caixa e tons, chiado subindo) e cai num refrão com MELODIA COMPOSTA nota a nota
+     (gancho de 8 compassos: frase, resposta, parte alta e fechamento), guitarra distorcida alternando nota
+     pedal, acordes cheios, baixo em oitavas, palmas e caixa no 2 e 4. Ponte mais leve, subida, e o último refrão
+     um tom acima com segunda voz. Em laço, volta direto ao refrão. Melodia própria, nada copiado. */
+  var ABERTURA = { id: 'abertura', nome: { pt: 'Abertura Peluqueria', en: 'Peluqueria Opening' }, bpm: 136, tom: 52, modo: 'menor', acordes: [0, 5, 2, 6], lead: 'saw', semente: 7 };
+  var ESTRUTURA_ABERTURA = [['explosao', 2], ['refrao', 8], ['ponte', 4], ['subida', 2], ['refrao2', 8]];
+  // gancho: [grau, duração em semicolcheias]; cada compasso soma 16
+  var GANCHO = [
+    [[7, 2], [7, 1], [9, 1], [10, 2], [9, 2], [7, 2], [6, 2], [7, 4]],
+    [[7, 2], [9, 2], [10, 2], [12, 2], [11, 4], [10, 2], [9, 2]],
+    [[10, 2], [10, 1], [11, 1], [12, 2], [11, 2], [10, 2], [9, 2], [10, 4]],
+    [[9, 2], [10, 2], [11, 2], [13, 2], [12, 4], [11, 4]],
+    [[14, 4], [12, 2], [14, 2], [13, 2], [12, 2], [11, 4]],
+    [[12, 2], [11, 2], [10, 2], [11, 2], [12, 4], [9, 4]],
+    [[10, 2], [11, 2], [12, 2], [14, 2], [13, 2], [12, 2], [11, 2], [10, 2]],
+    [[11, 3], [10, 1], [9, 2], [8, 2], [7, 8]]
+  ];
   var RIFF = [[2, 3, 4, 3, 2, 3, 4, 5], [4, 5, 6, 5, 4, 5, 6, 7], [2, 3, 4, 6, 4, 3, 2, 1], [7, 6, 5, 4, 3, 4, 5, 6]];
-  var melAbertura = null;
   function compassosAbertura() { return ESTRUTURA_ABERTURA.reduce(function (a, s) { return a + s[1]; }, 0); }
-  function proximaAbertura(c) { return (c + 1) % compassosAbertura(); }
+  function proximaAbertura(c) { var n = c + 1; return n < compassosAbertura() ? n : 2; }   // em laço: volta ao refrão
   function abertura(c) {
-    var f = ABERTURA, n = 0, sec = null, ev = [], add = function (o) { ev.push(o); };
+    var n = 0, sec = null, ev = [], add = function (o) { ev.push(o); };
     for (var k = 0; k < ESTRUTURA_ABERTURA.length; k++) { var q = ESTRUTURA_ABERTURA[k]; if (c < n + q[1]) { sec = { nome: q[0], i: c - n, len: q[1] }; break; } n += q[1]; }
-    if (!sec) sec = { nome: 'tudo2', i: 0, len: 8 };
-    var nome = sec.nome, cheio = nome === 'tudo' || nome === 'tudo2', fimSec = sec.i === sec.len - 1;
-    var ac = nome === 'riff' ? 0 : f.acordes[sec.i % 4], variante = RIFF[sec.i % 4];
-    if (!melAbertura) { melAbertura = []; var rnd = aleatorio(f.semente), ant = 11; ant = frase(f, RITMOS[4], [f.acordes[0], f.acordes[1]], rnd, 9, 16, ant, false, 0, melAbertura); ant = frase(f, RITMOS[5], [f.acordes[2], f.acordes[3]], rnd, 9, 16, ant, false, 32, melAbertura); ant = frase(f, RITMOS[4], [f.acordes[0], f.acordes[1]], rnd, 10, 17, ant, false, 64, melAbertura); frase(f, RITMOS[2], [f.acordes[2], f.acordes[3]], rnd, 9, 16, ant, true, 96, melAbertura); }
-
-    // guitarra: pedal nos passos pares, nota que anda nos ímpares (na ponte, só colcheias e mais baixa)
-    for (var t = 0; t < 16; t += nome === 'ponte' ? 2 : 1) {
-      var d = t % 2 === 0 ? ac : ac + variante[(t - 1) / 2 | 0];
-      add({ t: t, tipo: 'guitarra', nota: grau(f, d), dur: 1, vol: nome === 'riff' ? 0.55 + 0.15 * sec.i : nome === 'ponte' ? 0.4 : 0.75 });
-    }
-    if (nome === 'riff' && sec.i === 0) add({ t: 0, tipo: 'riser', dur: 64, vol: 0.45 });
-    if (nome === 'riff' && fimSec) for (var r = 8; r < 16; r++) add({ t: r, tipo: 'caixa', dur: 1, vol: 0.3 + 0.08 * (r - 8) });
+    if (!sec) sec = { nome: 'refrao', i: 0, len: 8 };
+    var nome = sec.nome, cheio = nome === 'refrao' || nome === 'refrao2', fimSec = sec.i === sec.len - 1;
+    var tom = ABERTURA.tom + (nome === 'refrao2' ? 2 : 0), f = { tom: tom, modo: ABERTURA.modo, acordes: ABERTURA.acordes, id: 'abertura' };
+    var ac = ABERTURA.acordes[sec.i % 4];
+    var i4 = function (lista, vol) { lista.forEach(function (t) { add({ t: t, tipo: 'bumbo', dur: 1, vol: vol || 1 }); }); };
 
     // bateria
-    if (nome === 'entrada') {
-      [0, 4, 8, 12].forEach(function (x) { add({ t: x, tipo: 'bumbo', dur: 1, vol: 1 }); });
-      [0, 2, 4, 6, 8, 10, 12, 14].forEach(function (x) { add({ t: x, tipo: 'chimbal', dur: 1, vol: 0.35 }); });
-      if (sec.i >= 2) [4, 12].forEach(function (x) { add({ t: x, tipo: 'caixa', dur: 1, vol: 0.8 }); });
+    if (nome === 'explosao') {
+      i4([0, 4, 8, 12]);
+      for (var r = sec.i === 0 ? 8 : 0; r < 16; r++) add({ t: r, tipo: 'caixa', dur: 1, vol: 0.35 + 0.6 * (sec.i * 16 + r - 8) / 23 });
+      if (sec.i === 0) add({ t: 0, tipo: 'riser', dur: 32, vol: 0.55 });
+      if (sec.i === 1) [8, 10, 12, 14].forEach(function (t, k2) { add({ t: t, tipo: 'tom', dur: 2, vol: 0.85, altura: 1 - k2 / 4 }); });
+      [0, 2, 4, 6, 8, 10, 12, 14].forEach(function (t) { add({ t: t, tipo: 'chimbal', dur: 1, vol: 0.35 }); });
     }
     if (cheio) {
-      [0, 3, 8, 10].forEach(function (x) { add({ t: x, tipo: 'bumbo', dur: 1, vol: 1 }); });
-      [4, 12].forEach(function (x) { add({ t: x, tipo: 'caixa', dur: 1, vol: 0.95 }); });
-      [0, 2, 4, 6, 8, 10, 12].forEach(function (x) { add({ t: x, tipo: 'chimbal', dur: 1, vol: 0.4 }); });
+      i4(sec.i % 2 ? [0, 4, 8, 12, 14] : [0, 4, 8, 12]);
+      [4, 12].forEach(function (t) { add({ t: t, tipo: 'caixa', dur: 1, vol: 0.95 }); add({ t: t, tipo: 'palma', dur: 1, vol: 0.7 }); });
+      [0, 2, 4, 6, 8, 10, 12].forEach(function (t) { add({ t: t, tipo: 'chimbal', dur: 1, vol: 0.4 }); });
       add({ t: 14, tipo: 'aberto', dur: 2, vol: 0.5 });
-      if (sec.i === 0 || sec.i === 4) add({ t: 0, tipo: 'crash', dur: 8, vol: 0.8 });
+      if (sec.i === 0 || sec.i === 4) add({ t: 0, tipo: 'crash', dur: 8, vol: 0.85 });
+      if (fimSec) [12, 13, 14, 15].forEach(function (t, k3) { add({ t: t, tipo: 'tom', dur: 1, vol: 0.8, altura: 1 - k3 / 4 }); });
     }
-    if (nome === 'ponte') [0, 8].forEach(function (x) { add({ t: x, tipo: 'bumbo', dur: 1, vol: 0.9 }); });
-    if (fimSec && nome !== 'riff') [8, 9, 10, 11, 12, 13, 14, 15].forEach(function (x, k2) { add({ t: x, tipo: 'tom', dur: 1, vol: 0.7 + 0.04 * k2, altura: 1 - k2 / 8 }); });   // virada de tons, do agudo ao grave
+    if (nome === 'ponte') { i4([0, 8], 0.9); add({ t: 8, tipo: 'caixa', dur: 1, vol: 0.8 }); [0, 4, 8, 12].forEach(function (t) { add({ t: t, tipo: 'chimbal', dur: 1, vol: 0.3 }); }); }
+    if (nome === 'subida') {
+      i4(sec.i === 0 ? [0, 4, 8, 12] : [0, 2, 4, 6, 8, 10, 12, 14], 0.9);
+      for (var s2 = 0; s2 < 16; s2++) add({ t: s2, tipo: 'caixa', dur: 1, vol: 0.25 + 0.7 * (sec.i * 16 + s2) / 31 });
+      if (sec.i === 0) add({ t: 0, tipo: 'riser', dur: 32, vol: 0.5 });
+    }
 
-    // acordes "power" (tônica, quinta, oitava), baixo e melodia
-    if (cheio || nome === 'ponte') {
-      var raiz = grau(f, ac), pw = [raiz, raiz + 7, raiz + 12];
-      if (nome === 'ponte') add({ t: 0, tipo: 'power', notas: pw, dur: 16, vol: 0.5 });
-      else { add({ t: 0, tipo: 'power', notas: pw, dur: 6, vol: 0.55 }); add({ t: 8, tipo: 'power', notas: pw, dur: 6, vol: 0.55 }); }
+    // guitarra: nota pedal (a do acorde) alternando com notas que andam
+    if (nome !== 'ponte' || sec.i % 2 === 0) {
+      var variante = RIFF[sec.i % 4], raizG = nome === 'explosao' ? 0 : ac;
+      for (var t = 0; t < 16; t += cheio ? 1 : 2) {
+        var d = t % 2 === 0 ? raizG : raizG + variante[(t - 1) / 2 | 0];
+        add({ t: t, tipo: 'guitarra', nota: grau(f, d), dur: 1, vol: cheio ? 0.5 : 0.6 });
+      }
     }
-    if (cheio || nome === 'entrada') for (var b2 = 0; b2 < 16; b2 += 2) add({ t: b2, tipo: 'baixo', nota: grau(f, ac) - 24 + (b2 % 8 === 6 ? 12 : 0), dur: 2, vol: 0.85 });
-    if (cheio) {
-      var base = (sec.i % 8) * 16;
-      melAbertura.forEach(function (m) { if (m.s >= base && m.s < base + 16) {
-        add({ t: m.s - base, tipo: 'lead', nota: grau(f, m.d), dur: m.dur, vol: 0.75 });
-        if (nome === 'tudo2') add({ t: m.s - base, tipo: 'lead', nota: grau(f, m.d) + 12, dur: m.dur, vol: 0.3 });
-      } });
+    // acordes e "power" de guitarra
+    if (nome !== 'explosao') {
+      var filtro = nome === 'subida' ? 0.4 + 0.6 * (sec.i + 1) / 2 : nome === 'ponte' ? 0.55 : 1;
+      add({ t: 0, tipo: 'acorde', notas: vozes(f, ac), dur: 16, vol: cheio ? 0.5 : 0.45, filtro: filtro, estilo: 'tapete' });
+      if (cheio) [2, 6, 10, 14].forEach(function (t2) { add({ t: t2, tipo: 'acorde', notas: tetrade(f, ac + 7).slice(0, 3), dur: 1, vol: 0.35, filtro: 1, estilo: 'stab' }); });
+      var raiz = grau(f, ac); add({ t: 0, tipo: 'power', notas: [raiz, raiz + 7, raiz + 12], dur: cheio ? 6 : 14, vol: cheio ? 0.35 : 0.4 });
     }
-    return { secao: nome, tom: f.tom, eventos: ev };
+    // baixo em oitavas
+    if (cheio || nome === 'explosao' || nome === 'subida') for (var b2 = 0; b2 < 16; b2 += 2) add({ t: b2, tipo: 'baixo', nota: grau(f, nome === 'explosao' ? 0 : ac) - 24 + (b2 % 4 === 2 ? 12 : 0), dur: 2, vol: 0.85 });
+    if (nome === 'ponte') add({ t: 0, tipo: 'baixo', nota: grau(f, ac) - 24, dur: 14, vol: 0.8 });
+
+    // melodia composta
+    var linha = cheio ? GANCHO[sec.i] : nome === 'ponte' ? GANCHO[4 + sec.i] : null;
+    if (linha) {
+      var pos = 0;
+      linha.forEach(function (nn) {
+        var vol = nome === 'ponte' ? 0.45 : 0.85;
+        add({ t: pos, tipo: 'lead', nota: grau(f, nn[0]), dur: nn[1], vol: vol });
+        if (nome === 'refrao2') { add({ t: pos, tipo: 'lead', nota: grau(f, nn[0]) + 12, dur: nn[1], vol: 0.3 }); add({ t: pos, tipo: 'harmonia', nota: grau(f, nn[0] - 2), dur: nn[1], vol: 0.4 }); }
+        pos += nn[1];
+      });
+    }
+    return { secao: nome, tom: tom, swing: 0, eventos: ev };
   }
 
   return { ABERTURA: ABERTURA, ESTRUTURA_ABERTURA: ESTRUTURA_ABERTURA, abertura: abertura, compassosAbertura: compassosAbertura, proximaAbertura: proximaAbertura,

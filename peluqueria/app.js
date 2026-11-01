@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.4.0', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.4.1', APP_UPDATED = '01/11/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -263,6 +263,8 @@
   $('ver').textContent = 'v' + APP_VERSION + ' · ' + APP_UPDATED;
   traduzir(); marcarNivel(); marcarSom(); marcarMinhas();
   $('btJogar').disabled = true; $('btTV').disabled = true; $('btControle').disabled = true;
+  /* entrada: o navegador só deixa tocar som depois de um toque; este toque já solta a música de abertura */
+  $('btEntrar').addEventListener('click', function () { ligarMusica(); tela('inicio'); $('btJogar').focus(); });
   $('btTV').addEventListener('click', function () { if (window.PeluqueriaTV) PeluqueriaTV.abrir(); });
   $('btControle').addEventListener('click', function () { if (window.PeluqueriaControle) PeluqueriaControle.abrir(); });
   Promise.all([PeluqueriaCenarios.carregar(), PeluqueriaItens.carregar()]).then(function (v) {
@@ -270,7 +272,7 @@
     $('btMinhas').hidden = !temMinhas();
     flutuantes(catalogo.itens.jogo);
     $('btJogar').disabled = false;
-    if (app.modo === 'inicio') $('btJogar').focus();
+    if (app.modo === 'inicio') ($('entrada').classList.contains('ativa') ? $('btEntrar') : $('btJogar')).focus();
     $('btTV').disabled = false; $('btControle').disabled = false;
     if (TV && window.PeluqueriaTV) PeluqueriaTV.abrir();   // ?tv=auto (/kids, /tv/peluqueria, app da LG): abre a TV
     if (TESTE) window.PeluqueriaDebug.pronto = true;

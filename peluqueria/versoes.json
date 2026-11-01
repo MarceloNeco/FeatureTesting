@@ -2,6 +2,19 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.4.1",
+      "data": "01/Nov/2026",
+      "hora": "22:18:00",
+      "pt": [
+        "Nova música de abertura, a mais animada: começa já com tudo (bateria, virada e chiado subindo), refrão com melodia composta nota a nota, guitarra, acordes cheios, e o último refrão sobe de tom.",
+        "Tela de entrada \"🎵 Toque para começar a festa!\": o navegador só deixa tocar som depois de um toque, então esse toque já solta a música e mostra o menu com as luzes. Na TV, a música começa no primeiro botão do controle."
+      ],
+      "en": [
+        "New opening track, the liveliest one: starts at full blast (drums, fill and riser), a chorus with a hand-composed melody, guitar, big chords, and the last chorus goes up a key.",
+        "Entry screen \"🎵 Tap to start the party!\": browsers only allow sound after a tap, so that tap starts the music and shows the menu with the lights. On the TV, music starts with the first remote button."
+      ]
+    },
+    {
       "versao": "0.4.0",
       "data": "31/Out/2026",
       "hora": "19:56:00",

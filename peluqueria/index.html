@@ -22,7 +22,15 @@
 </head>
 <body>
 
-<section id="inicio" class="tela ativa" data-recurso="peluqueria">
+<section id="entrada" class="tela ativa" data-recurso="peluqueria">
+  <div class="luzes" aria-hidden="true"><div class="feixe a"></div><div class="feixe b"></div><div class="feixe c"></div><div class="brilhos"></div></div>
+  <h1 class="logo">Peluqueria</h1>
+  <p class="sub" data-t="o provador maluco da família|the family's crazy fitting room"></p>
+  <button id="btEntrar" class="grande entrar" type="button" data-t="🎵 Toque para começar a festa!|🎵 Tap to start the party!"></button>
+  <p class="dica" data-t="Aumente o volume 🔊|Turn the volume up 🔊"></p>
+</section>
+
+<section id="inicio" class="tela" data-recurso="peluqueria">
   <div class="luzes" aria-hidden="true"><div class="feixe a"></div><div class="feixe b"></div><div class="feixe c"></div><div class="brilhos"></div></div>
   <div id="flutuantes" class="flutuantes" aria-hidden="true"></div>
   <div class="faixa">
@@ -80,6 +88,7 @@
   <div id="codigo" class="codigo" aria-live="polite">····</div>
   <div id="tvJogadores" class="tv-jogadores" aria-live="polite"></div>
   <p class="tv-nivel"><span data-t="Nível|Level"></span>: <b id="tvNivel"></b></p>
+  <p class="tv-passo pequeno" data-t="🔊 A música começa no primeiro botão do controle.|🔊 Music starts with the first button on the remote."></p>
   <p class="tv-passo pequeno" data-t="Até 2 celulares. Sem celular, aperte OK no controle da TV para jogar sozinho.|Up to 2 phones. No phone? Press OK on the TV remote to play alone."></p>
   <button id="tvComecar" class="grande" type="button" data-t="Começar (OK)|Start (OK)"></button>
   <p id="tvAviso" class="tv-passo pequeno"></p>
