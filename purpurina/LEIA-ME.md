@@ -30,8 +30,12 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
 - **⭐ Desafios** (10): Festa na praia, Baile de princesa, Show de pop star, Piquenique no jardim, Festa do pijama,
   Dia de neve, Festa de aniversário, Sereia no fundo do mar, Noite das joias e Dia do cabelo maluco. Cada um começa com a personagem dela e o cenário do
   tema, e mostra **3 dicas** que ganham ✅ na hora. No desfile, cada dica cumprida vale uma estrela; **ninguém
-  perde** (sempre pelo menos 1 ⭐). A melhor nota de cada desafio fica guardada no aparelho. O quadro de dicas
-  recolhe com um toque.
+  perde** (sempre pelo menos 1 ⭐). A melhor nota de cada desafio fica guardada no aparelho. As dicas ficam numa
+  faixa logo abaixo da personagem (nunca por cima dela).
+- **🔄 Girar**: arrastar o dedo para os lados em cima da personagem gira ela (frente, lado, costas). Um toque nela
+  ou no **↻** dá uma volta inteira com rastro de luz (cópias do desenho que vão sumindo; não pisca a tela). O **🙂** volta
+  para a frente. No desfile ela dá uma volta sozinha. Com "reduzir movimento" no aparelho, a volta é em 4 paradas.
+- **✕ Tirar**: em cima das opções, aparece sempre que a peça está colocada; tocar de novo na peça escolhida também tira.
 - O botão **Voltar do celular** volta uma tela (ou fecha a janela da foto) em vez de sair do jogo.
 
 ## Controles
@@ -68,7 +72,7 @@ estrofe, refrão, sininhos, palmas, viradas e prato, feitas na hora pelo `som.js
 | `estilo.css` | visual, em pé × deitado, bordas seguras, animações (respeita "reduzir movimento"). |
 | `pecas.js` | **só dados**: paletas, abas, categorias, opções (com `tags`), áreas de zoom (`ZOOM`, e `zoom` em cada parte), padrão e os desafios. Peça nova entra aqui. |
 | `visual.js` | **puro**: regras (vestido × blusa/saia/calça, nunca sem roupa), surpresa, desfazer, limpar look antigo, dicas e estrelas. |
-| `boneca.js` | o desenho em SVG da personagem, das roupas, acessórios e dos 8 cenários (tudo em código). Peça nova = um `case` aqui. |
+| `boneca.js` | o desenho em SVG da personagem (com giro: `opcoes.angulo`, frente/lado/costas), das roupas, acessórios e dos 8 cenários (tudo em código). Peça nova = um `case` aqui. |
 | `som.js` | músicas e efeitos sintetizados (WebAudio). |
 | `app.js` | telas, Voltar do celular, estúdio, zoom do palco, pincel e faíscas, foto, looks, desfile, confete, teclado/TV, instalar e baixar. `APP_VERSION` aqui. |
 | `baixar.js` | **cópia idêntica** do `vruuum/baixar.js` (o teste confere): monta o `.html` de arquivo único. |
