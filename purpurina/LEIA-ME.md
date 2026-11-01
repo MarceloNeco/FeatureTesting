@@ -11,9 +11,9 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
 ## Como brincar
 
 - Toque em **✨ Toque para brilhar!** (o navegador só deixa tocar som depois de um toque).
-- **🎨 Brincar livre**: o estúdio. Embaixo ficam 6 abas: **👧 Eu** (pele, 18 penteados, mechas, olhos), **💄 Maquiagem**
-  (base, blush, sombra, delineado, 8 estilos de cílios, batom, glitter, adesivos), **👗 Roupas** (13 vestidos, 11 blusas,
-  8 saias, 9 calças, 9 estampas, 10 sapatos), **💎 Joias** (13 brincos, 14 colares, pulseiras, anéis e broches),
+- **🎨 Brincar livre**: o estúdio. Embaixo ficam 6 abas: **👧 Eu** (pele, 30 penteados, mechas, olhos), **💄 Maquiagem**
+  (base, blush, sombra, delineado, cílios, 💅 unhas, batom, glitter, adesivos), **👗 Roupas** (13 vestidos, 11 blusas,
+  8 saias, 9 calças, 9 estampas, 28 sapatos), **💎 Joias** (13 brincos, 14 colares, pulseiras, anéis e broches),
   **👑 Acessórios** (coroas, chapéus e diadema, laços, óculos, bolsas) e **🏞️ Cenário** (8 lugares). Cada parte tem
   estilos (com miniatura do resultado) e bolinhas de cor.
 - **🔍 Zoom**: ao escolher uma parte da maquiagem, dos olhos ou dos brincos, o palco chega perto do rosto sozinho; no
@@ -32,10 +32,15 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
   tema, e mostra **3 dicas** que ganham ✅ na hora. No desfile, cada dica cumprida vale uma estrela; **ninguém
   perde** (sempre pelo menos 1 ⭐). A melhor nota de cada desafio fica guardada no aparelho. As dicas ficam numa
   faixa logo abaixo da personagem (nunca por cima dela).
-- **🔄 Girar**: arrastar o dedo para os lados em cima da personagem gira ela (frente, lado, costas). Um toque nela
+- **🔄 Girar**: arrastar o dedo para os lados em cima da personagem gira ela por 16 posições desenhadas (frente, três-quartos, perfil e costas; nada é espremido). Um toque nela
   ou no **↻** dá uma volta inteira com rastro de luz (cópias do desenho que vão sumindo; não pisca a tela). O **🙂** volta
   para a frente. No desfile ela dá uma volta sozinha. Com "reduzir movimento" no aparelho, a volta é em 4 paradas.
-- **✕ Tirar**: em cima das opções, aparece sempre que a peça está colocada; tocar de novo na peça escolhida também tira.
+- **🚫 Tirar**: toda parte que dá para tirar tem a bolinha com a diagonal; em cima das opções aparece **🚫 Tirar: …** quando
+  a peça está colocada, e **🚫 Tirar toda a maquiagem / todas as joias / todos os acessórios**. Tocar de novo na peça escolhida também tira.
+- **🔄 Reiniciar**: Brincar livre pergunta se quer continuar o visual ou começar do zero; no estúdio, o 🔄 tira maquiagem,
+  roupas e acessórios (a personagem continua) ou começa tudo do zero. O ↩ desfaz.
+- **🎬 Vídeo girando** (na janela da foto): grava no aparelho um vídeo de uns 4 s da personagem dando duas voltas (MP4 quando o
+  navegador sabe, senão WebM), para salvar ou compartilhar. A foto sai em 1080×2094 com luz de estúdio.
 - O botão **Voltar do celular** volta uma tela (ou fecha a janela da foto) em vez de sair do jogo.
 
 ## Controles

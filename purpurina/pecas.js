@@ -26,7 +26,11 @@
       c('branco', '#fbf7ff', 'Branco', 'White', ['branco', 'claro']),
       c('preto', '#2f2639', 'Preto', 'Black', ['preto', 'escuro']),
       c('dourado', '#f2c14e', 'Dourado', 'Gold', ['brilho', 'amarelo'], true),
-      c('prata', '#d3dae8', 'Prateado', 'Silver', ['brilho', 'claro'], true)
+      c('prata', '#d3dae8', 'Prateado', 'Silver', ['brilho', 'claro'], true),
+      c('rose', '#e8a598', 'Rosé', 'Rose gold', ['brilho', 'rosa'], true),
+      c('nude', '#e8c4a8', 'Nude', 'Nude', ['claro']), c('marrom', '#8b5a3c', 'Marrom', 'Brown', ['escuro']),
+      c('vinho', '#8e1f45', 'Vinho', 'Burgundy', ['vermelho', 'escuro']), c('turquesa', '#22c3c3', 'Turquesa', 'Turquoise', ['azul', 'verde', 'mar', 'vivo']),
+      c('laranja', '#ff9a2e', 'Laranja', 'Orange', ['laranja', 'vivo'])
     ],
     pele: [
       c('p1', '#ffe5d6', 'Tom 1', 'Tone 1'), c('p2', '#fbd3b8', 'Tom 2', 'Tone 2'), c('p3', '#f1c19c', 'Tom 3', 'Tone 3'),
@@ -90,7 +94,7 @@
     corpo: [70, 300, 260, 300], cintura: [70, 400, 260, 260], pes: [110, 560, 180, 120], tudo: [0, 40, 400, 660], pescoco: [90, 220, 220, 180],
     mao: [80, 456, 84, 76], anel: [80, 470, 70, 62], peito: [140, 340, 120, 100], cabeloTodo: [20, 10, 360, 640] };
   /* zoom do palco por parte (ver app.js): rosto, busto, mãos ou cabeça */
-  var ZOOM = { rosto: [72, 70, 256, 260], busto: [56, 120, 288, 300], maos: [56, 428, 150, 130], cabeca: [30, 20, 340, 430] };
+  var ZOOM = { pes: [96, 520, 208, 170], unhas: [76, 462, 92, 80], rosto: [72, 70, 256, 260], busto: [56, 120, 288, 300], maos: [56, 428, 150, 130], cabeca: [30, 20, 340, 430] };
   var CATEGORIAS = [
     { id: 'pele', grupo: 'eu', ico: '🎨', pt: 'Pele', en: 'Skin', cores: 'pele', area: A.rosto, zoom: 'rosto' },
     { id: 'cabelo', grupo: 'eu', ico: '💇', pt: 'Cabelo', en: 'Hair', cores: 'cabelo', area: A.cabeca, zoom: 'cabeca', opcoes: [
@@ -100,7 +104,13 @@
       o('franja', 'Liso com franja', 'Straight with bangs'), o('afro', 'Black power', 'Afro', ['pop']), o('puffs', 'Dois puffs', 'Two puffs', ['pop']),
       o('lateral', 'Rabo de lado', 'Side ponytail'), o('trancaLado', 'Trança de lado', 'Side braid', ['princesa', 'jardim']),
       o('meio', 'Meio preso', 'Half-up'), o('pixie', 'Joãozinho', 'Pixie cut'), o('sereia', 'Longo de sereia', 'Mermaid hair', ['sereia', 'princesa']),
-      o('coqueDuplo', 'Dois coquinhos', 'Space buns', ['pop']), o('box', 'Tranças box', 'Box braids', ['pop'])
+      o('coqueDuplo', 'Dois coquinhos', 'Space buns', ['pop']), o('box', 'Tranças box', 'Box braids', ['pop']),
+      o('cortina', 'Franja cortina', 'Curtain bangs'), o('lob', 'Ondas no ombro', 'Shoulder waves'), o('rabinhoAlto', 'Rabo alto', 'High ponytail', ['esporte', 'pop']),
+      o('coroaTranca', 'Trança coroa', 'Crown braid', ['princesa', 'jardim']), o('coqueBaguncado', 'Coque bagunçado', 'Messy bun', ['casual']),
+      o('cachosCurtos', 'Cachinhos curtos', 'Short curls'), o('ondasLongas', 'Ondas longas', 'Long waves', ['praia', 'princesa']),
+      o('franjinha', 'Franjinha', 'Baby bangs'), o('chiquinhasBaixas', 'Chiquinhas baixas', 'Low pigtails', ['jardim']),
+      o('dreads', 'Dreads', 'Locs', ['pop']), o('ondasLado', 'Ondas de lado', 'Side-swept waves', ['festa', 'princesa']),
+      o('cacheadoLongo', 'Cachos longos', 'Long ringlets', ['princesa'])
     ] },
     { id: 'mechas', grupo: 'eu', ico: '🌈', pt: 'Mechas', en: 'Highlights', cores: 'cabelo', area: A.cabeloTodo, zoom: 'cabeca', opcoes: [
       NENHUM('Sem mechas', 'No highlights'), o('pontas', 'Pontas coloridas', 'Colored tips', ['pop']), o('frente', 'Mechas na frente', 'Front streaks', ['pop']),
@@ -124,9 +134,14 @@
       NENHUM('Sem delineado', 'No eyeliner'), o('fino', 'Fininho', 'Thin'), o('gatinho', 'Gatinho', 'Cat eye', ['pop']), o('grosso', 'Marcado', 'Bold', ['pop'])
     ] },
     { id: 'cilios', grupo: 'make', ico: '👁️', pt: 'Cílios', en: 'Lashes', cores: 'cilios', area: A.olhos, zoom: 'rosto', opcoes: [
-      o('curtos', 'Naturais', 'Natural'), o('longos', 'Longos', 'Long', ['festa']), o('boneca', 'De boneca', 'Doll lashes', ['princesa', 'pop']),
+      NENHUM('Sem cílios postiços', 'No false lashes'), o('curtos', 'Naturais', 'Natural'), o('longos', 'Longos', 'Long', ['festa']), o('boneca', 'De boneca', 'Doll lashes', ['princesa', 'pop']),
       o('gatinho', 'Gatinho', 'Cat-eye lashes', ['pop']), o('volume', 'Volume', 'Volume', ['festa', 'pop']), o('baixo', 'Em cima e embaixo', 'Top and bottom'),
       o('arco', 'Arco-íris', 'Rainbow lashes', ['pop', 'festa']), o('strass', 'Com strass', 'With rhinestones', ['brilho', 'festa', 'princesa'])
+    ] },
+    { id: 'unhas', grupo: 'make', ico: '💅', pt: 'Unhas', en: 'Nails', cores: 'roupa', area: [86, 478, 66, 56], zoom: 'unhas', opcoes: [
+      NENHUM('Sem esmalte', 'No polish'), o('liso', 'Esmalte liso', 'Plain polish'), o('francesinha', 'Francesinha', 'French tips', ['festa', 'princesa']),
+      o('glitter', 'Com glitter', 'Glitter', ['brilho', 'festa']), o('bolinhas', 'Bolinhas', 'Polka dots', ['pop']), o('arco', 'Arco-íris', 'Rainbow', ['pop', 'festa']),
+      o('degrade', 'Degradê', 'Ombré'), o('coracao', 'Coraçãozinho', 'Little hearts', ['festa', 'aniversario'])
     ] },
     { id: 'batom', grupo: 'make', ico: '💋', pt: 'Batom', en: 'Lipstick', cores: 'batom', area: A.boca, zoom: 'rosto', opcoes: [
       NENHUM('Sem batom', 'No lipstick'), o('cremoso', 'Cremoso', 'Creamy'), o('gloss', 'Gloss', 'Gloss', ['festa']),
@@ -152,7 +167,7 @@
       o('fada', 'De fada (com asas)', 'Fairy dress (with wings)', ['princesa', 'festa', 'jardim'])
     ] },
     { id: 'blusa', grupo: 'roupa', ico: '👚', pt: 'Blusas', en: 'Tops', cores: 'roupa', area: A.corpo, opcoes: [
-      o('camiseta', 'Camiseta', 'T-shirt', ['casual', 'jardim']), o('regata', 'Regata', 'Tank top', ['praia', 'verao', 'pop']),
+      NENHUM('Só o top básico', 'Basic top only'), o('camiseta', 'Camiseta', 'T-shirt', ['casual', 'jardim']), o('regata', 'Regata', 'Tank top', ['praia', 'verao', 'pop']),
       o('babados', 'Com babados', 'Ruffle top', ['jardim', 'festa', 'princesa']), o('sueter', 'Suéter quentinho', 'Cozy sweater', ['inverno']),
       o('jaqueta', 'Jaqueta', 'Jacket', ['pop', 'inverno']), o('pijama', 'Blusa de pijama', 'Pajama top', ['pijama']),
       o('moletom', 'Moletom com capuz', 'Hoodie', ['inverno', 'casual', 'esporte']), o('camisa', 'Camisa', 'Button shirt', ['escola', 'casual']),
@@ -173,17 +188,26 @@
       o('jogger', 'Jogger', 'Joggers', ['esporte', 'casual', 'inverno']), o('rasgada', 'Calça rasgadinha', 'Ripped jeans', ['pop', 'casual'])
     ] },
     { id: 'estampa', grupo: 'roupa', ico: '🎀', pt: 'Estampa', en: 'Pattern', cores: 'roupa', area: A.corpo, opcoes: [
-      o('liso', 'Lisa', 'Plain'), o('bolinhas', 'Bolinhas', 'Polka dots', ['festa', 'pop']), o('listras', 'Listras', 'Stripes', ['praia', 'casual']),
+      o('liso', 'Sem estampa', 'No pattern'), o('bolinhas', 'Bolinhas', 'Polka dots', ['festa', 'pop']), o('listras', 'Listras', 'Stripes', ['praia', 'casual']),
       o('estrelas', 'Estrelinhas', 'Little stars', ['pop', 'pijama']), o('coracoes', 'Coraçõezinhos', 'Little hearts', ['festa', 'pijama']),
       o('flores', 'Florzinhas', 'Little flowers', ['jardim', 'praia']), o('xadrez', 'Xadrez', 'Plaid', ['piquenique', 'escola', 'inverno']),
       o('arcoiris', 'Arco-íris', 'Rainbow stripes', ['pop', 'festa']), o('oncinha', 'Oncinha', 'Leopard', ['pop'])
     ] },
-    { id: 'sapatos', grupo: 'roupa', ico: '👟', pt: 'Sapatos', en: 'Shoes', cores: 'roupa', area: A.pes, opcoes: [
-      o('tenis', 'Tênis', 'Sneakers', ['casual', 'pop', 'esporte']), o('sapatilha', 'Sapatilha', 'Ballet flats', ['bailarina', 'princesa', 'festa', 'jardim']),
+    { id: 'sapatos', grupo: 'roupa', ico: '👟', pt: 'Sapatos', en: 'Shoes', cores: 'roupa', area: [110, 500, 180, 190], zoom: 'pes', opcoes: [
+      NENHUM('Descalça', 'Barefoot'), o('tenis', 'Tênis', 'Sneakers', ['casual', 'pop', 'esporte']), o('sapatilha', 'Sapatilha', 'Ballet flats', ['bailarina', 'princesa', 'festa', 'jardim']),
       o('sandalia', 'Sandália', 'Sandals', ['praia', 'verao', 'jardim']), o('bota', 'Bota', 'Boots', ['inverno', 'pop']),
       o('salto', 'Sapato de cristal', 'Glass slippers', ['princesa', 'festa']), o('pantufa', 'Pantufa', 'Slippers', ['pijama']),
       o('boneca', 'Sapato de boneca', 'Mary Janes', ['festa', 'escola', 'princesa']), o('patins', 'Patins', 'Roller skates', ['pop', 'esporte']),
-      o('chinelo', 'Chinelo', 'Flip-flops', ['praia', 'verao']), o('galocha', 'Galocha', 'Rain boots', ['inverno', 'jardim'])
+      o('chinelo', 'Chinelo', 'Flip-flops', ['praia', 'verao']), o('galocha', 'Galocha', 'Rain boots', ['inverno', 'jardim']),
+      o('princesa', 'Sapato de princesa', 'Princess shoes', ['princesa', 'festa']), o('scarpin', 'Salto alto', 'High heels', ['festa', 'princesa']),
+      o('saltoMedio', 'Salto médio', 'Mid heels', ['festa']), o('saltoBaixo', 'Salto baixinho', 'Kitten heels', ['festa', 'escola']),
+      o('plataforma', 'Sandália plataforma', 'Platform sandals', ['pop', 'verao']), o('anabela', 'Anabela', 'Wedges', ['verao', 'festa', 'praia']),
+      o('rasteirinha', 'Rasteirinha', 'Strappy flats', ['praia', 'verao', 'jardim']), o('chineloFlor', 'Chinelo com flor', 'Flower flip-flops', ['praia', 'verao']),
+      o('clog', 'Tamanco de furinhos', 'Holey clogs', ['casual', 'praia', 'pop']), o('mocassim', 'Mocassim', 'Loafers', ['escola', 'casual']),
+      o('social', 'Sapato social', 'Oxfords', ['escola', 'festa']), o('tenisAlto', 'Tênis cano alto', 'High-top sneakers', ['pop', 'esporte']),
+      o('tenisLuz', 'Tênis de luzinha', 'Light-up sneakers', ['pop', 'festa']), o('tenisGlitter', 'Tênis de glitter', 'Glitter sneakers', ['pop', 'brilho']),
+      o('botaCano', 'Bota de cano alto', 'Knee-high boots', ['inverno', 'pop']), o('botaNeve', 'Bota de neve', 'Snow boots', ['inverno']),
+      o('ponta', 'Sapatilha de ponta', 'Pointe shoes', ['bailarina', 'princesa'])
     ] },
 
     { id: 'cabeca', grupo: 'acess', ico: '👑', pt: 'Coroas e chapéus', en: 'Crowns and hats', cores: 'roupa', area: A.cabeca, zoom: 'cabeca', opcoes: [
@@ -247,7 +271,7 @@
   var PADRAO = {
     pele: 'p3', cabelo: 'ondulado', cabeloCor: 'castanho', mechas: 'nenhum', mechasCor: 'rosa', olhos: 'castanho',
     base: 'nenhum', blush: 'nenhum', blushCor: 'rosa', sombra: 'nenhum', sombraCor: 'lilas', delineado: 'nenhum', delineadoCor: 'preto',
-    cilios: 'curtos', ciliosCor: 'preto', batom: 'nenhum', batomCor: 'rosaclaro', glitter: 'nenhum', glitterCor: 'dourado', adesivo: 'nenhum',
+    cilios: 'curtos', ciliosCor: 'preto', unhas: 'nenhum', unhasCor: 'chiclete', batom: 'nenhum', batomCor: 'rosaclaro', glitter: 'nenhum', glitterCor: 'dourado', adesivo: 'nenhum',
     vestido: 'nenhum', vestidoCor: 'lilas', blusa: 'camiseta', blusaCor: 'rosaclaro', saia: 'nenhum', saiaCor: 'chiclete',
     calca: 'jeans', calcaCor: 'ceu', estampa: 'liso', estampaCor: 'branco', sapatos: 'tenis', sapatosCor: 'branco',
     cabeca: 'nenhum', cabecaCor: 'dourado', laco: 'nenhum', lacoCor: 'chiclete', brincos: 'nenhum', brincosCor: 'dourado', pulseira: 'nenhum', pulseiraCor: 'dourado', anel: 'nenhum', anelCor: 'dourado', broche: 'nenhum', brocheCor: 'dourado',

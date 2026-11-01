@@ -56,7 +56,7 @@ test('giro: frente, lado e costas desenham; de costas não tem rosto', () => {
   }
   const frente = B.svg(e, { id: 'f', angulo: 0 }), costas = B.svg(e, { id: 'c', angulo: 180 });
   assert.match(frente, /olhoE/); assert.ok(!/clip-path="url\(#c-olho/.test(costas), 'de costas sem olhos');
-  assert.match(B.svg(e, { id: 'l', angulo: 90 }), /scale\(0\.3 1\)/, 'de lado fica fininho');
+  assert.match(B.svg(e, { id: 'l', angulo: 90 }), /scale\(0\.62 1\)/, 'de lado o corpo só estreita um pouco');
 });
 
 test('anel e pulseira: só a parte da frente (arco aberto, sem círculo inteiro)', () => {
@@ -64,4 +64,16 @@ test('anel e pulseira: só a parte da frente (arco aberto, sem círculo inteiro)
   const s = B.svg(e, { id: 'j' });
   assert.match(s, /A13\.5,4\.8 0 0 0/, 'pulseira em meio arco');
   assert.ok(!/<ellipse cx="120\.5" cy="487"/.test(s), 'pulseira sem elipse inteira');
+});
+
+test('perfil: de lado desenha a cabeça de perfil para os dois lados', () => {
+  const e = Object.assign(V.novo(), { oculos: 'sol', brincos: 'perola', batom: 'gloss', cilios: 'arco' });
+  for (const a of [70, 90, 110, 250, 270, 290]) { const s = B.svg(e, { id: 'p', angulo: a }); assert.equal(bemFormado(s), ''); assert.match(s, /p-olhoP/, 'olho de perfil em ' + a); }
+  assert.ok(!/p-olhoP\)/.test(B.svg(e, { id: 'p', angulo: 0 })), 'de frente não usa o olho de perfil');
+});
+
+test('unhas pintadas nas mãos e nos pés descalços', () => {
+  const e = Object.assign(V.novo(), { unhas: 'liso', unhasCor: 'vermelho', sapatos: 'nenhum' });
+  const s = B.svg(e, { id: 'u' }), cor = P.cor('roupa', 'vermelho').hex;
+  assert.ok(s.split('fill="' + cor + '"').length - 1 >= 20, 'esperava 10 unhas das mãos + 10 dos pés');
 });

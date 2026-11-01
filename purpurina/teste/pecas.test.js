@@ -102,3 +102,16 @@ test('resumo para leitor de tela em PT e EN', () => {
   assert.match(V.resumo(e, 'pt'), /^Seu visual: .*gloss/);
   assert.match(V.resumo(e, 'en'), /^Your look: /);
 });
+
+test('toda parte que dá para tirar tem a opção 🚫 (nenhum), menos pele, olhos, cabelo e cenário', () => {
+  for (const c of P.CATEGORIAS) {
+    if (['pele', 'olhos', 'cabelo', 'cenario'].includes(c.id)) continue;
+    const ids = c.opcoes.map(o => o.id);
+    assert.ok(ids[0] === 'nenhum' || (c.id === 'estampa' && ids[0] === 'liso'), c.id + ' sem 🚫');
+  }
+});
+
+test('sem blusa e sem sapato continua válido e vestido', () => {
+  let e = V.aplicar(V.novo(), 'blusa', 'nenhum'); e = V.aplicar(e, 'sapatos', 'nenhum');
+  assert.deepEqual(V.limpar(e), e); assert.ok(vestida(e));
+});
