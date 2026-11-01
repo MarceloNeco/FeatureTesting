@@ -60,7 +60,7 @@ primeira abertura o jogo funciona sem internet.
 | `jogo.js` | motor puro: queda, balanço, giro, pontos, multiplicador, estrelas, validação |
 | `desenho.js` | desenha no canvas (cenário, item, lugar certo, confete, modo leve) |
 | `cenarios.js`, `itens.js` | leem e validam `cenarios/`, `itens/` e `meus/` |
-| `cenarios/`, `itens/` | as 10 fotos de bichos (JPEG, créditos no `CREDITOS.md`) e os 16 itens em SVG + listas `.json` |
+| `cenarios/`, `itens/` | 10 fotos de bichos (JPEG, créditos no `CREDITOS.md`) e 12 desenhos (SVG), que o jogo alterna a cada queda; 16 itens em SVG; listas `.json` (`estilo`: `foto` ou `desenho`) |
 | `som.js`, `voz.js` | toca as músicas gravadas de `musicas/` e os efeitos; o "u-huuu!" gravado fica em `efeitos/`; fala |
 | `musicas/` | 17 músicas de Kevin MacLeod (CC BY 4.0) e a lista `musicas.json` |
 | `marcar.html`, `marcar.js` | página para marcar o lugar certo nas suas fotos |

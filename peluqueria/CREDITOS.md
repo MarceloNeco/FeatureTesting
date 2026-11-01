@@ -3,6 +3,7 @@
 | O quê | Origem | Licença |
 |---|---|---|
 | Fonte **Fredoka** (variável, `fontes/fredoka.woff2`) | Google Fonts, The Fredoka Project Authors | SIL Open Font License 1.1 (`fontes/OFL.txt`) |
+| Os 12 desenhos de cenário (cachorro, gato, tubarão, bebê, vovô, coruja, leão, robô, sapo, cavalo, pinguim, boneco de neve) | desenhados em SVG para a SolverONE neste repositório (gerador antigo no histórico do git, v0.5.0) | mesma licença do repositório |
 | Os 16 itens (peruca com óculos, boca de tubarão, coroa, cartola, bigode, nariz de palhaço, óculos escuros, fone, laço, boné, chapéu de pirata, capacete viking, sorvete, pirulito, microfone, gravata-borboleta) | desenhados em SVG para a SolverONE neste repositório | mesma licença do repositório |
 | Efeitos sonoros curtos (acerto, erro, contagem) | sintetizados no WebAudio pelo próprio jogo | mesma licença do repositório |
 | Ícone do jogo | SVG desenhado aqui, exportado para PNG | mesma licença do repositório |

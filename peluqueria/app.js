@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.6.0', APP_UPDATED = '01/11/2026';
+  var APP_VERSION = '0.6.1', APP_UPDATED = '01/11/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -28,7 +28,7 @@
   function tela(id) { document.querySelectorAll('.tela').forEach(function (s) { s.classList.toggle('ativa', s.id === id); }); }
 
   var app = { modo: 'inicio', rodada: null, pausado: false, resto: 0, espera: 0, resultado: null, trava: null };
-  window.PeluqueriaApp = { tela: tela, T: T, get lingua() { return pref.lingua; }, estado: function () { return app.rodada; },
+  window.PeluqueriaApp = { tela: tela, T: T, aoTocar: function (el, fn) { aoTocar(el, fn); }, get lingua() { return pref.lingua; }, estado: function () { return app.rodada; },
     /* para tv.js e controle.js (v0.4.0) */
     catalogo: function () { var u = pref.minhas && temMinhas(); return { cenarios: catalogo.cenarios.jogo.concat(u ? catalogo.cenarios.meus : []), itens: catalogo.itens.jogo.concat(u ? catalogo.itens.meus : []) }; },
     pref: function () { return pref; }, gravarPref: function () { gravar(CHAVE_PREF, pref); },
@@ -46,7 +46,15 @@
     if (!som || musicaLigada) return;
     musicaLigada = true; som.ligar(); som.musica('inicio');
   }
-  document.addEventListener('pointerdown', ligarMusica, true);
+  /* toque que vale em qualquer aparelho (v0.6.1): iPad/iPhone antigo (iOS < 13) não tem pointer events, então
+     em tela de toque escuta o próprio toque; o pointerdown fica só para mouse e caneta (sem contar duas vezes). */
+  function aoTocar(el, fn, captura) {
+    var toque = 'ontouchstart' in window;
+    if (toque) el.addEventListener('touchstart', fn, { passive: false, capture: !!captura });
+    if (window.PointerEvent) el.addEventListener('pointerdown', function (ev) { if (!(toque && ev.pointerType === 'touch')) fn(ev); }, !!captura);
+    else el.addEventListener('mousedown', fn, !!captura);
+  }
+  aoTocar(document, ligarMusica, true);
   document.addEventListener('keydown', ligarMusica, true);
   function falar(pt, en) { if (voz) voz.falar(pt, en); }
 
@@ -147,7 +155,7 @@
   }
   $('btPausa').addEventListener('click', pausar);
   $('btSeguir').addEventListener('click', continuar);
-  $('palco').addEventListener('pointerdown', function (ev) { ev.preventDefault(); parar(); });
+  aoTocar($('palco'), function (ev) { ev.preventDefault(); parar(); });
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') { pausar(); if (som) som.parar(); }
     else if (som && musicaLigada && app.modo !== 'jogo') { som.ligar(); som.musica(app.modo === 'contagem' ? pref.nivel : app.modo === 'fim' ? 'fim' : 'inicio'); }
