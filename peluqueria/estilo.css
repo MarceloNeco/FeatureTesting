@@ -146,3 +146,4 @@ body.marcar { overflow-y: auto; }
 .tv-podio p { flex-basis: 100%; font-size: 2rem; color: var(--ouro); font-weight: 700; }
 
 .entrar { font-size: 1.5rem; padding: 18px 30px; margin-top: 10px; }
+.tocando { opacity: .85; font-size: .78rem; max-width: 90vw; }

@@ -6,7 +6,7 @@
 | MediaPipe Tasks Vision (`../baguncolandia/libs/mediapipe/vision_bundle.mjs`, `vision_wasm_internal.*`) | Google (cópia da Bagunçolândia) | Apache 2.0 (`../baguncolandia/libs/mediapipe/LICENSE`) |
 | Modelo da mão `hand_landmarker.task` (float16, versão 1) em `../baguncolandia/libs/mediapipe/` | Google, `storage.googleapis.com/mediapipe-models/hand_landmarker/` | Apache 2.0 |
 | supabase-js (`../baguncolandia/libs/supabase.js`) | Supabase | MIT (`../baguncolandia/libs/LICENSE-supabase.txt`) |
-| 6 músicas gravadas do **Kevin MacLeod** (`musicas/`): Fluffing a Duck, Carefree, Sneaky Snitch, Wallpaper, Local Forecast – Elevator e Investigations | "by Kevin MacLeod (incompetech.com)"; detalhes e conferência em `musicas/LICENCAS.md` | **CC BY 4.0** — o crédito aparece no app quando cada uma começa e no menu |
+| 18 músicas gravadas do **Kevin MacLeod** (`musicas/`): Fluffing a Duck, Carefree, Sneaky Snitch, Wallpaper, Local Forecast – Elevator, Investigations, Pixel Peeker Polka, Scheming Weasel, Spazzmatica Polka, Carpe Diem, Music to Delight, Airport Lounge, Mariachi Snooze, Batty McFaddin, Who Likes to Party, Gymnopédie nº 1 (Satie), Disco Lounge e Movement Proposition | "by Kevin MacLeod (incompetech.com)"; detalhes e conferência em `musicas/LICENCAS.md` | **CC BY** — o crédito aparece no app quando cada uma começa, no painel 🎵 Músicas e no menu |
 | Emojis dos adesivos | desenhados pelo próprio aparelho (fonte de emoji do sistema) | — |
 
 Desenhos de colorir, paisagens, adesivos animados, ícone, as 4 músicas do app e os sons: **originais, feitos em código** para este

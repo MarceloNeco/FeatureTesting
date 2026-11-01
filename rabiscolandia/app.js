@@ -4,7 +4,7 @@
    (banco "rabiscolandia"). Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.3';
+  var APP_VERSION = '0.1.4';
   var $ = function (id) { return document.getElementById(id); };
   var F = window.DesenhoFolha, P = window.DesenhoPaginas || { LISTA: [], CATEGORIAS: [] }, Pt = window.DesenhoPintura;
   var Som = window.DesenhoSom || { iniciar: function () {}, musica: function () {}, musicaLigada: function () { return false; }, efeito: function () {}, efeitos: function () {}, efeitosLigados: function () { return false; }, proxima: function () {}, nomeAtual: function () { return ''; } };
@@ -37,7 +37,7 @@
     document.documentElement.lang = pref.lingua === 'en' ? 'en' : 'pt-BR';
     Array.prototype.forEach.call(document.querySelectorAll('[data-t]'), function (el) { var p = el.getAttribute('data-t').split('|'); el.textContent = pref.lingua === 'en' ? p[1] : p[0]; });
     $('btLingua').textContent = pref.lingua === 'en' ? 'PT' : 'EN';
-    $('versao').textContent = t('Versão ', 'Version ') + APP_VERSION + t(' · Músicas gravadas: Kevin MacLeod (incompetech.com), CC BY 4.0', ' · Recorded music: Kevin MacLeod (incompetech.com), CC BY 4.0');
+    $('versao').textContent = t('Versão ', 'Version ') + APP_VERSION + t(' · Músicas gravadas: Kevin MacLeod (incompetech.com), CC BY', ' · Recorded music: Kevin MacLeod (incompetech.com), CC BY');
   }
 
   // ---------- telas e o botão Voltar do celular ----------
@@ -95,7 +95,12 @@
   }
   function trocarMusica() { pref.musica = !pref.musica; salvarPref(); aplicarSom(); aviso(pref.musica ? t('🎵 Música ligada', '🎵 Music on') + (Som.nomeAtual() ? ': ' + Som.nomeAtual() : '') : t('🔇 Música desligada', '🔇 Music off')); }
   $('btMusica').addEventListener('click', trocarMusica);
-  $('btMusica2').addEventListener('click', trocarMusica);
+  $('btMusica2').addEventListener('click', function () { abrirPainel('musica'); });
+  if (Som.aoAvisar) Som.aoAvisar(function (o) {
+    if (o.tipo === 'toque') aviso(t('Toque na tela para a música começar 🎵', 'Tap the screen to start the music 🎵'), 3000);
+    if (o.tipo === 'soApp') aviso(t('As músicas gravadas não estão abrindo (internet?). Tocando as do app 🎵', 'Recorded songs are not loading (internet?). Playing the app songs 🎵'), 3500);
+    if (painelAberto === 'musica') renderPainel('musica');
+  });
   $('btEfeitos').addEventListener('click', function () { pref.efeitos = !pref.efeitos; salvarPref(); aplicarSom(); Som.efeito('toque'); });
   document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('button') && !e.target.closest('.cor, .num, .emoji')) Som.efeito('toque'); }, true);
 
@@ -394,9 +399,9 @@
   function renderPainel(qual) {
     painelAberto = qual;
     var corpo = $('painelCorpo'); corpo.innerHTML = '';
-    var titulos = { pinceis: t('🖌️ Pincéis', '🖌️ Brushes'), cores: t('🎨 Cores', '🎨 Colors'), tamanho: t('⭕ Tamanho', '⭕ Size'), adesivos: t('⭐ Adesivos', '⭐ Stickers'), fundos: t('🏞️ Fundo', '🏞️ Background'), variacoes: t('🎨 Outras cores do desenho', '🎨 Other color sets') };
+    var titulos = { pinceis: t('🖌️ Pincéis', '🖌️ Brushes'), cores: t('🎨 Cores', '🎨 Colors'), tamanho: t('⭕ Tamanho', '⭕ Size'), adesivos: t('⭐ Adesivos', '⭐ Stickers'), fundos: t('🏞️ Fundo', '🏞️ Background'), variacoes: t('🎨 Outras cores do desenho', '🎨 Other color sets'), musica: t('🎵 Músicas', '🎵 Music') };
     $('painelTitulo').textContent = titulos[qual] || '';
-    ({ pinceis: painelPinceis, cores: painelCores, tamanho: painelTamanho, adesivos: painelAdesivos, fundos: painelFundos, variacoes: painelVariacoes })[qual](corpo);
+    ({ pinceis: painelPinceis, cores: painelCores, tamanho: painelTamanho, adesivos: painelAdesivos, fundos: painelFundos, variacoes: painelVariacoes, musica: painelMusica })[qual](corpo);
   }
   function fecharPainel(semHistorico) {
     if ($('painel').hidden) return;
@@ -451,6 +456,32 @@
     });
     corpo.appendChild(titulo4(t('Grossura do pincel e tamanho do adesivo', 'Brush thickness and sticker size'))); corpo.appendChild(d);
   }
+  /* 🎵 Músicas: liga/desliga, anterior/próxima e a lista de todas (tocar uma = toque da pessoa, o navegador sempre deixa) */
+  function painelMusica(corpo) {
+    var ctl = document.createElement('div'); ctl.className = 'opcoes';
+    var lig = document.createElement('button'); lig.type = 'button'; lig.className = 'medio'; lig.textContent = pref.musica ? t('🔇 Desligar a música', '🔇 Music off') : t('🎵 Ligar a música', '🎵 Music on');
+    lig.addEventListener('click', function () { trocarMusica(); renderPainel('musica'); });
+    var ant = document.createElement('button'); ant.type = 'button'; ant.className = 'mini'; ant.textContent = '⏮'; ant.setAttribute('aria-label', t('Música anterior', 'Previous song'));
+    ant.addEventListener('click', function () { garantirMusica(); Som.anterior(); setTimeout(function () { renderPainel('musica'); }, 50); });
+    var prx = document.createElement('button'); prx.type = 'button'; prx.className = 'mini'; prx.textContent = '⏭'; prx.setAttribute('aria-label', t('Próxima música', 'Next song'));
+    prx.addEventListener('click', function () { garantirMusica(); Som.proxima(); setTimeout(function () { renderPainel('musica'); }, 50); });
+    ctl.appendChild(lig); ctl.appendChild(ant); ctl.appendChild(prx); corpo.appendChild(ctl);
+    var agora = document.createElement('p'); agora.className = 'dica'; agora.textContent = pref.musica && Som.nomeAtual() ? t('Tocando agora: ', 'Now playing: ') + Som.nomeAtual() : t('Toque numa música para ouvir.', 'Tap a song to listen.'); corpo.appendChild(agora);
+    var l = document.createElement('div'); l.className = 'lista-musicas';
+    (Som.listar ? Som.listar() : []).forEach(function (m) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'musica-item'; b.setAttribute('aria-pressed', m.atual ? 'true' : 'false');
+      var ic = document.createElement('span'); ic.className = 'ico'; ic.textContent = m.atual ? '🔊' : (m.gravada ? '🎻' : '🎹'); b.appendChild(ic);
+      var tx = document.createElement('span'); tx.className = 'txt';
+      var nm = document.createElement('b'); nm.textContent = m.nome; tx.appendChild(nm);
+      var au = document.createElement('small'); au.textContent = m.gravada ? m.autor + ' · CC BY' : t('feita pela Rabiscolândia', 'made by Rabiscolândia'); tx.appendChild(au);
+      b.appendChild(tx);
+      b.addEventListener('click', function () { pref.musica = true; salvarPref(); Som.iniciar(); Som.tocar(m.i); aplicarSom(); setTimeout(function () { renderPainel('musica'); }, 50); });
+      l.appendChild(b);
+    });
+    corpo.appendChild(l);
+  }
+  function garantirMusica() { if (!pref.musica) { pref.musica = true; salvarPref(); aplicarSom(); } }
+
   /* Painel de adesivos no jeito do teclado de emojis do celular (a filha do dono não achou os adesivos quando as
      categorias ocupavam o painel todo): no alto, uma faixa pequena de ícones das categorias e o "como mexe";
      logo embaixo, TODOS os adesivos numa lista só, com o título de cada categoria. Tocar num ícone rola até a

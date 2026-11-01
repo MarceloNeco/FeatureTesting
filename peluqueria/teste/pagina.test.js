@@ -13,6 +13,7 @@ const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
 });
 let falhas = 0;
+function PeluqueriaSomOk(p) { return p && typeof p.faixa === 'number' && p.arquivo !== 'raving-energy-faster.mp3'; }
 function falhou(msg) { console.error('✗ ' + msg); falhas++; process.exitCode = 1; }
 function ok(msg) { console.log('✓ ' + msg); }
 function confere(cond, msg, extra) { if (cond) ok(msg); else falhou(msg + (extra !== undefined ? ' → ' + JSON.stringify(extra) : '')); }
@@ -256,8 +257,8 @@ async function comecar(pg, nivel) {
     await cel3.click('#btControle'); await cel3.fill('#ctCodigo', codigo); await cel3.fill('#ctNome', 'Caio'); await cel3.click('#ctEntrar');
     await cel3.waitForTimeout(3500);
     confere(/2 jogadores/.test(await cel3.textContent('#ctStatus')), 'terceiro celular vê "TV com 2 jogadores" (não "Conectado")', await cel3.textContent('#ctStatus'));
-    await cel2.close();   // Bia fechou a aba: sai na hora, e o Caio, que esperava, pega a vaga
-    await tv.waitForTimeout(2000);
+    await cel2.close();   // Bia fechou a aba: o aviso de saída (ou, se ele se perder, a falta de sinal) libera a vaga, e o Caio, que esperava, entra
+    await tv.waitForFunction(() => !/Bia/.test(document.getElementById('tvJogadores').textContent) && /Caio/.test(document.getElementById('tvJogadores').textContent), null, { timeout: 8000 }).catch(() => {});
     confere(!/Bia/.test(await tv.textContent('#tvJogadores')), 'quem fecha a aba libera a vaga');
     confere(/Caio/.test(await tv.textContent('#tvJogadores')), 'o celular que esperava entra na vaga livre');
     await cel3.close(); await tv.waitForFunction(() => !/Caio/.test(document.getElementById('tvJogadores').textContent), null, { timeout: 5000 });   // espera a TV liberar a vaga
@@ -278,7 +279,7 @@ async function comecar(pg, nivel) {
 
   const pdb = await abrir(browser, base + '?debug&teste');
   await passo(pdb, 500);
-  confere(/v0\.4\.1/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(/v0\.5\.0/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
 
   /* ---------- revisão final ---------- */
@@ -315,34 +316,40 @@ async function comecar(pg, nivel) {
     });
     confere(n <= 4, 'SVG do cenário e do item desenhados poucas vezes (cache por queda)', n);
   }
-  // 5 e 6) música: sem rajada de notas atrasadas; ▶ religa o áudio (iPhone)
+  // sair da página pausa a música na hora; voltar continua; ▶ religa o áudio suspenso (iPhone)
   {
-    const pa = await abrir(browser, base + '?teste', { antes: () => {
-      const par = () => ({ value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {}, cancelScheduledValues() {} });
-      const no = () => ({ connect() {}, start() { window.__notas++; }, stop() {}, gain: par(), frequency: par(), detune: par(), Q: par(), delayTime: par(), type: '', buffer: null });
-      window.__notas = 0; window.__ligou = 0;
-      window.AudioContext = function () { this.currentTime = 0; this.state = 'running'; this.sampleRate = 8000; this.destination = {}; };
-      Object.assign(window.AudioContext.prototype, { createGain: no, createConvolver: no, createStereoPanner: () => Object.assign(no(), { pan: par() }), createOscillator: no, createBiquadFilter: no, createBufferSource: no, createDelay: no, createDynamicsCompressor: () => Object.assign(no(), { threshold: par(), ratio: par(), knee: par(), attack: par(), release: par() }), resume() { window.__ligou++; return Promise.resolve(); }, createBuffer: () => ({ getChannelData: () => new Float32Array(8000) }) });
-    } });
-    await D(pa, () => PeluqueriaDebug.novaRodada('normal'));
-    await pa.waitForTimeout(200);
-    const passos = await D(pa, async () => { const c = PeluqueriaSom._ctx(), p0 = PeluqueriaSom._passos(); c.currentTime += 20; await new Promise(r => setTimeout(r, 120)); return PeluqueriaSom._passos() - p0; });
-    confere(passos <= 3, 'atraso de 20 s não dispara rajada de notas', passos);
-    await pa.click('#btPausa'); await D(pa, () => { PeluqueriaSom._ctx().state = 'suspended'; window.__ligou = 0; });
-    await pa.click('#btSeguir');
-    confere(await D(pa, () => window.__ligou) >= 1, '▶ religa o áudio suspenso');
+    const pa = await abrir(browser, base + '?teste');
+    await pa.waitForTimeout(800);
+    confere(await D(pa, () => PeluqueriaSom.tocando()), 'abertura tocando (arquivo MP3 de verdade)');
+    const t0 = await D(pa, () => PeluqueriaSom._elemento().currentTime);
+    await pa.waitForTimeout(1200);
+    confere((await D(pa, () => PeluqueriaSom._elemento().currentTime)) > t0 + 0.5, 'a música anda (está mesmo tocando)');
+    await D(pa, () => { Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+    await pa.waitForTimeout(300);
+    const t1 = await D(pa, () => PeluqueriaSom._elemento().currentTime);
+    await pa.waitForTimeout(800);
+    confere(!(await D(pa, () => PeluqueriaSom.tocando())) && (await D(pa, () => PeluqueriaSom._elemento().currentTime)) === t1, 'saiu da página: a música para na hora (nada continua tocando)');
+    await D(pa, () => { Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+    await pa.waitForTimeout(400);
+    confere(await D(pa, () => PeluqueriaSom.tocando()) && (await D(pa, () => PeluqueriaSom._elemento().currentTime)) >= t1, 'voltou: continua de onde parou');
+    await pa.click('#btJogar'); await passo(pa, 2200);
+    await pa.click('#btPausa'); await D(pa, () => PeluqueriaSom._ctx().suspend());
+    await pa.click('#btSeguir'); await pa.waitForTimeout(300);
+    confere(await D(pa, () => PeluqueriaSom._ctx().state) === 'running', '▶ religa o áudio suspenso');
+    confere(pa.erros().length === 0, 'música: sem erros', pa.erros());
   }
-  // 4) MP3 do dono que não toca: volta para a trilha do jogo
+  // música que não carrega: pula para a próxima, sem erro
   {
     const ctxA = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'pt-BR' });
-    const pmp = await ctxA.newPage();
-    await pmp.route('**/musicas/musicas.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: '[{"nome":"X","arquivo":"quebrada.mp3"}]' }));
-    await pmp.route('**/musicas/quebrada.mp3', r => r.fulfill({ status: 404, body: '' }));
+    const pmp = await ctxA.newPage(); const errosM = [];
+    pmp.on('pageerror', e => errosM.push(e.message));
+    await pmp.route('**/musicas/raving-energy-faster.mp3', r => r.fulfill({ status: 404, body: '' }));
     await pmp.goto(base + '?teste'); await pmp.waitForFunction(() => window.PeluqueriaDebug && PeluqueriaDebug.pronto); await pmp.click('#btEntrar');
+    await D(pmp, () => PeluqueriaSom._forcarProxima('raving-energy-faster.mp3'));
     await pmp.click('#btJogar'); await pmp.waitForTimeout(1500);
-    confere(await D(pmp, () => PeluqueriaSom.fonte()) === 'jogo', 'MP3 que falha cai na trilha do jogo', await D(pmp, () => PeluqueriaSom.fonte()));
+    const pos = await D(pmp, () => PeluqueriaSom.posicao());
+    confere(PeluqueriaSomOk(pos) && errosM.length === 0, 'música que não carrega é pulada sem erro', pos);
   }
-
   // abertura especial na tela de início; uma música diferente a cada rodada; música segue no fim
   {
     const pi = await abrir(browser, base + '?teste', { semEntrar: true });
@@ -352,8 +359,8 @@ async function comecar(pg, nivel) {
     confere(await D(pi, () => PeluqueriaSom.fonte()) === 'jogo' && (await D(pi, () => PeluqueriaSom.posicao().faixa)) === 'abertura', 'o toque na entrada já toca a música de abertura');
     confere(await pi.isVisible('#inicio') && await D(pi, () => document.activeElement.id) === 'btJogar', 'e mostra o menu com as luzes');
     await pi.click('#btMaluco');
-    confere((await D(pi, () => PeluqueriaTrilhas.FAIXAS.length)) >= 15, 'pelo menos 15 músicas carregadas');
-    confere(await D(pi, () => { const r = PeluqueriaSom._recursos(); return r.eco && r.estereo; }), 'som com eco de ambiente e estéreo');
+    confere((await D(pi, () => PeluqueriaSom.lista().length)) >= 16, '16 músicas de rodada carregadas (além da abertura)');
+    confere(/Kevin MacLeod/.test(await pi.textContent('#tocando')) && /Show Your Moves/.test(await pi.textContent('#tocando')), 'menu mostra a música e o autor (crédito da licença)');
     const rodada = async () => {
       await pi.click('#btJogar'); await pi.waitForTimeout(100);
       const f = await D(pi, () => PeluqueriaSom.posicao().faixa);
