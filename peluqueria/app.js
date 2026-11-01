@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.4.1', APP_UPDATED = '01/11/2026';
+  var APP_VERSION = '0.5.0', APP_UPDATED = '01/11/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -253,6 +253,11 @@
       caixa.appendChild(im);
     });
   }
+  /* crédito da música que está tocando (a licença CC BY pede o nome do autor) */
+  if (som && som.aoTrocar) som.aoTrocar(function (m) {
+    if (!m) return;
+    $('tocando').textContent = '🎵 ' + m.titulo + (m.autor ? ' — ' + m.autor : '') + (m.fonte ? ' (' + m.fonte + ')' : '') + (m.licenca ? ' · ' + m.licenca : '');
+  });
   if (som && som.aoBater) som.aoBater(function () {
     if (app.modo !== 'inicio' && app.modo !== 'fim') return;
     var l = document.querySelector('.tela.ativa .logo') || document.querySelector('#inicio .logo');

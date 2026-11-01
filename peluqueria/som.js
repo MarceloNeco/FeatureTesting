@@ -1,23 +1,23 @@
-/* Peluqueria — música e efeitos sintetizados no WebAudio (nenhum arquivo, nada com direito autoral).
-   Toca as 10 músicas de trilhas.js em sequência (pop dançante de pista), desde a tela de início e pelo jogo
-   todo: bumbo com "respiro" nos acordes (sidechain), palmas, chimbal aberto, baixo pulsando, acordes
-   cheios (vários osciladores levemente desafinados), melodia com eco, chiado subindo e virada na subida.
-   O andamento segue a música, o nível (Criança mais calmo, Maluco mais rápido) e sobe 1 BPM por queda.
-   Se musicas/musicas.json listar MP3s do dono, toca um deles sorteado, em laço, no lugar das músicas.
-   Sem WebAudio, tudo vira silêncio (sem erro). O som só começa depois do primeiro toque (ligar()). */
+/* Peluqueria — música e efeitos.
+   MÚSICA (v0.5.0): músicas GRAVADAS, de verdade, com licença aberta — Kevin MacLeod (incompetech.com),
+   CC BY 4.0 (créditos no menu e no CREDITOS.md). A lista fica em musicas/musicas.json: uma é a abertura (toca em
+   laço no menu) e as outras tocam uma por rodada, embaralhadas, emendando quando uma acaba. O arquivo é tocado
+   pelo navegador (<audio>) e passa pelo WebAudio só para o volume e o "mudo" (no iPhone o volume do <audio> não
+   muda). Ao sair da página, a música e os efeitos param NA HORA (pausa + contexto suspenso) e voltam de onde
+   pararam. Arquivo que não carrega é pulado, sem erro.
+   EFEITOS: curtos e sintetizados no WebAudio (acerto, erro, contagem, torcida do "u-huuu!").
+   O som só começa depois do primeiro toque (regra dos navegadores). */
 (function (root) {
   'use strict';
   var TESTE = /[?&]teste\b/.test((root.location && root.location.search) || '');
-  var ARQ = /^[A-Za-z0-9_-][A-Za-z0-9_.-]{0,60}\.mp3$/;
+  var ARQ = /^[A-Za-z0-9_-][A-Za-z0-9_.-]{0,80}\.mp3$/;
   var Ctx = root.AudioContext || root.webkitAudioContext;
-  var M = root.PeluqueriaTrilhas;
-  var ctx = null, mestre = null, ruido = null, busAcordes = null, busLead = null, sala = null, mudo = false, swing = 0;
-  var nivel = 'inicio', queda = 0, faixa = TESTE ? 0 : Math.floor(Math.random() * M.FAIXAS.length), compasso = 0, passo = 0;
-  var tipo = 'abertura', rodadas = 0, batidas = [], distorcao = null;   // tipo: 'abertura' (tela de início) | 'jogo'
-  var proximo = 0, relogio = 0, tocando = false, contador = 0, eventos = [];
-  var minhas = [], audio = null, fonte = '';   // fonte: '' | 'minhas' | 'jogo'
+  var ctx = null, mestre = null, ruido = null, ganhoMusica = null, mudo = false;
+  var VOLUME = 0.8, VOLUME_MUSICA = 0.75;
+  var abertura = null, lista = [], ordem = [], ponteiro = -1, ruins = {}, forcada = null;
+  var player = null, atual = null, tipo = 'abertura', faixa = -1, tocando = false, fonte = '';
+  var pulso = 0, batidas = [], trocas = [];
   var registro = TESTE ? [] : null;
-  var VOLUME = 0.62;
 
   function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
 
@@ -27,39 +27,22 @@
       if (!ctx) {
         ctx = new Ctx();
         var comp = ctx.createDynamicsCompressor();
-        comp.threshold.value = -16; comp.knee.value = 10; comp.ratio.value = 4; comp.attack.value = 0.005; comp.release.value = 0.15;
+        comp.threshold.value = -10; comp.knee.value = 10; comp.ratio.value = 3; comp.attack.value = 0.005; comp.release.value = 0.2;
         comp.connect(ctx.destination);
         mestre = ctx.createGain(); mestre.gain.value = mudo ? 0 : VOLUME; mestre.connect(comp);
-        busAcordes = ctx.createGain(); busAcordes.gain.value = 1; busAcordes.connect(mestre);
-        busLead = ctx.createGain(); busLead.gain.value = 1; busLead.connect(mestre);
-        var eco = ctx.createDelay(1), volta = ctx.createGain(), molhado = ctx.createGain();
-        eco.delayTime.value = 0.36; volta.gain.value = 0.32; molhado.gain.value = 0.28;
-        busLead.connect(eco); eco.connect(volta); volta.connect(eco); eco.connect(molhado); molhado.connect(mestre);
         var n = ctx.sampleRate, b = ctx.createBuffer(1, n, n), d = b.getChannelData(0);
         for (var k = 0; k < n; k++) d[k] = Math.random() * 2 - 1;
         ruido = b;
-        // eco de ambiente (reverb): resposta de sala gerada aqui (ruído decaindo ~2 s), sem arquivo
-        if (ctx.createConvolver) {
-          var conv = ctx.createConvolver(), len = Math.floor(n * 2.2), ir = ctx.createBuffer(2, len, n);
-          for (var ch = 0; ch < 2; ch++) { var dd = ir.getChannelData(ch); for (var j = 0; j < len; j++) dd[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / len, 3); }
-          conv.buffer = ir; sala = ctx.createGain(); sala.gain.value = 0.22; sala.connect(conv); conv.connect(mestre);
-          busAcordes.connect(sala); busLead.connect(sala);
-        }
+        ligarPlayer();
       }
       if (ctx.state === 'suspended' || ctx.state === 'interrupted') ctx.resume();
     } catch (e) { ctx = null; }
   }
 
-  /* ---------- instrumentos ---------- */
   function env(g, t, ataque, dur, pico) {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(Math.max(0.0002, pico), t + ataque);
     g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(ataque + 0.01, dur));
-  }
-  /* posiciona um som entre a esquerda (-1) e a direita (+1); sem StereoPanner, vai direto */
-  function lado(no, pan) {
-    if (!ctx.createStereoPanner) return no;
-    var p = ctx.createStereoPanner(); p.pan.value = pan; p.connect(no); return p;
   }
   function osc(t, tipo, freq, detune, dur, destino) {
     var o = ctx.createOscillator(); o.type = tipo; o.frequency.setValueAtTime(freq, t);
@@ -69,175 +52,9 @@
   function filtro(tipo, freq, q) { var f = ctx.createBiquadFilter(); f.type = tipo; f.frequency.value = freq; if (q) f.Q.value = q; return f; }
   function ruidoEm(t, dur, f, g) { var s = ctx.createBufferSource(); s.buffer = ruido; s.connect(f); f.connect(g); s.start(t); s.stop(t + dur + 0.02); return s; }
 
-  function bumbo(t, vol) {
-    var g = ctx.createGain(); g.connect(mestre); env(g, t, 0.003, 0.4, 1.1 * vol);
-    var o = osc(t, 'sine', 160, 0, 0.45, g); o.frequency.exponentialRampToValueAtTime(45, t + 0.11);
-    var c = ctx.createGain(); c.connect(mestre); env(c, t, 0.001, 0.02, 0.3 * vol); osc(t, 'square', 1200, 0, 0.03, c);
-    // "respiro" dos acordes a cada bumbo (sidechain), marca do pop de pista
-    busAcordes.gain.cancelScheduledValues(t); busAcordes.gain.setValueAtTime(0.25, t); busAcordes.gain.linearRampToValueAtTime(1, t + 0.2);
-  }
-  function palma(t, vol) {
-    var g = ctx.createGain(); g.connect(mestre); if (sala) g.connect(sala);
-    g.gain.setValueAtTime(0.0001, t);
-    [0, 0.011, 0.022].forEach(function (d) { g.gain.setValueAtTime(0.7 * vol, t + d); g.gain.exponentialRampToValueAtTime(0.08 * vol, t + d + 0.009); });
-    g.gain.setValueAtTime(0.6 * vol, t + 0.031); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
-    ruidoEm(t, 0.22, filtro('bandpass', 1300, 0.9), g);
-  }
-  function chimbal(t, vol, dur) { var g = ctx.createGain(); g.connect(lado(mestre, dur > 0.1 ? -0.3 : 0.3)); env(g, t, 0.002, dur, vol); ruidoEm(t, dur, filtro('highpass', dur > 0.1 ? 7000 : 8500), g); }
-  function caixa(t, vol) {
-    var g = ctx.createGain(); g.connect(mestre); if (sala && vol > 0.5) g.connect(sala); env(g, t, 0.002, 0.13, 0.6 * vol); ruidoEm(t, 0.14, filtro('bandpass', 1900, 0.7), g);
-    var g2 = ctx.createGain(); g2.connect(mestre); env(g2, t, 0.002, 0.08, 0.4 * vol); osc(t, 'triangle', 190, 0, 0.1, g2);
-  }
+
   function crash(t, vol) { var g = ctx.createGain(); g.connect(mestre); env(g, t, 0.003, 1.4, 0.35 * vol); ruidoEm(t, 1.5, filtro('highpass', 4500), g); }
-  function riser(t, dur, vol) {
-    var f = filtro('bandpass', 300, 1.5), g = ctx.createGain(); g.connect(mestre);
-    f.frequency.setValueAtTime(300, t); f.frequency.exponentialRampToValueAtTime(7000, t + dur);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.5 * vol, t + dur); g.gain.linearRampToValueAtTime(0.0001, t + dur + 0.05);
-    ruidoEm(t, dur, f, g);
-  }
-  function baixo(t, nota, dur, vol) {
-    var f = filtro('lowpass', 1800, 4), g = ctx.createGain(); f.connect(g); g.connect(mestre);
-    f.frequency.setValueAtTime(2200, t); f.frequency.exponentialRampToValueAtTime(260, t + Math.min(dur, 0.25));
-    env(g, t, 0.005, dur * 0.95, 0.42 * vol);
-    osc(t, 'sawtooth', hz(nota), 0, dur, f); osc(t, 'square', hz(nota - 12), 0, dur, f);
-  }
-  function acorde(t, notas, dur, vol, abertura, estilo) {
-    var f = filtro('lowpass', estilo === 'stab' ? 3200 : 350 + 5200 * abertura * abertura, 0.8), g = ctx.createGain();
-    f.connect(g); g.connect(busAcordes);
-    var v = vol / notas.length;
-    if (estilo === 'stab') { env(g, t, 0.004, 0.16, 0.5 * v * 3); notas.forEach(function (n) { osc(t, 'sawtooth', hz(n), -6, 0.2, f); osc(t, 'sawtooth', hz(n), 6, 0.2, f); }); }
-    else {
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.32 * v * 3, t + 0.06);
-      g.gain.setValueAtTime(0.32 * v * 3, t + dur - 0.08); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      notas.forEach(function (n) { [-12, 0, 12].forEach(function (d) { osc(t, 'sawtooth', hz(n), d, dur, f); }); });
-    }
-  }
-  function lead(t, nota, dur, vol, timbre) {
-    var g = ctx.createGain(), f; g.connect(busLead);
-    if (timbre === 'pluck') { f = filtro('lowpass', 5000, 3); f.frequency.setValueAtTime(5000, t); f.frequency.exponentialRampToValueAtTime(700, t + 0.18); f.connect(g); env(g, t, 0.003, Math.min(dur, 0.35), 0.22 * vol); osc(t, 'sawtooth', hz(nota), 0, dur, f); osc(t, 'square', hz(nota), 7, dur, f); return; }
-    if (timbre === 'flauta') {   // flauta: seno com vibrato e um sopro de ruído
-      env(g, t, 0.04, dur * 0.95, 0.3 * vol); var fl = osc(t, 'sine', hz(nota), 0, dur, g);
-      var lfo = ctx.createOscillator(), pr = ctx.createGain(); lfo.frequency.value = 5.5; pr.gain.value = hz(nota) * 0.012; lfo.connect(pr); pr.connect(fl.frequency); lfo.start(t + 0.08); lfo.stop(t + dur + 0.05);
-      var gs = ctx.createGain(); gs.connect(busLead); env(gs, t, 0.01, 0.08, 0.05 * vol); ruidoEm(t, 0.1, filtro('bandpass', hz(nota) * 2, 2), gs); return;
-    }
-    if (timbre === 'metal') {    // metais: dente de serra com filtro que abre no ataque
-      f = filtro('lowpass', 900, 2); f.frequency.setValueAtTime(900, t); f.frequency.linearRampToValueAtTime(3600, t + 0.06); f.frequency.linearRampToValueAtTime(2200, t + Math.max(0.1, dur));
-      f.connect(g); env(g, t, 0.03, dur * 0.95, 0.2 * vol); osc(t, 'sawtooth', hz(nota), -6, dur, f); osc(t, 'sawtooth', hz(nota), 6, dur, f); osc(t, 'sawtooth', hz(nota - 12), 0, dur, f); return;
-    }
-    if (timbre === 'sino') { env(g, t, 0.003, Math.max(0.4, dur), 0.25 * vol); osc(t, 'sine', hz(nota), 0, Math.max(0.4, dur), g); var g2 = ctx.createGain(); g2.connect(busLead); env(g2, t, 0.002, 0.25, 0.1 * vol); osc(t, 'sine', hz(nota + 12), 3, 0.3, g2); return; }
-    f = filtro('lowpass', timbre === 'square' ? 2800 : 4200, 1); f.connect(g);
-    env(g, t, 0.01, dur * 0.95, 0.17 * vol);
-    if (timbre === 'square') { osc(t, 'square', hz(nota), 0, dur, f); osc(t, 'square', hz(nota), 9, dur, f); }
-    else { osc(t, 'sawtooth', hz(nota), -9, dur, f); osc(t, 'sawtooth', hz(nota), 9, dur, f); osc(t, 'triangle', hz(nota + 12), 0, dur, f); }
-  }
 
-  var ladoArp = 1;
-  function arpejo(t, nota, dur, vol) {   // notinhas rápidas e curtas, passam pelo "respiro" dos acordes, uma de cada lado
-    var f = filtro('lowpass', 3400, 2), g = ctx.createGain(); f.connect(g); ladoArp = -ladoArp; g.connect(lado(busAcordes, 0.45 * ladoArp));
-    env(g, t, 0.003, Math.min(0.16, dur * 0.9), 0.3 * vol);
-    osc(t, 'square', hz(nota), 0, 0.18, f); osc(t, 'triangle', hz(nota + 12), 4, 0.18, f);
-  }
-  function curvaDistorcao() {
-    if (distorcao) return distorcao;
-    var n = 1024, c = new Float32Array(n);
-    for (var k = 0; k < n; k++) { var x = k * 2 / n - 1; c[k] = Math.tanh(x * 6) * 0.9; }
-    return (distorcao = c);
-  }
-  function guitarra(t, notas, dur, vol, sustenta) {   // dente de serra → distorção → filtro: guitarra elétrica
-    var ws = ctx.createWaveShaper(), f = filtro('lowpass', sustenta ? 3000 : 3800, 1), g = ctx.createGain();
-    ws.curve = curvaDistorcao(); ws.connect(f); f.connect(g); g.connect(mestre);
-    var pre = ctx.createGain(); pre.gain.value = 0.6; pre.connect(ws);
-    if (sustenta) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16 * vol, t + 0.01); g.gain.setValueAtTime(0.14 * vol, t + dur - 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); }
-    else env(g, t, 0.003, Math.min(dur, 0.14), 0.42 * vol);
-    notas.forEach(function (n) { osc(t, 'sawtooth', hz(n), -8, dur, pre); osc(t, 'sawtooth', hz(n), 8, dur, pre); });
-  }
-  function tom(t, vol, altura) {
-    var g = ctx.createGain(); g.connect(mestre); env(g, t, 0.003, 0.3, 0.8 * vol);
-    var o = osc(t, 'sine', 90 + 160 * altura, 0, 0.32, g); o.frequency.exponentialRampToValueAtTime((90 + 160 * altura) * 0.6, t + 0.25);
-  }
-  function tocarEvento(e, t, s16, F) {
-    var d = e.dur * s16;
-    switch (e.tipo) {
-      case 'bumbo': return bumbo(t, e.vol);
-      case 'palma': return palma(t, e.vol);
-      case 'chimbal': return chimbal(t, e.vol * 0.5, 0.04);
-      case 'aberto': return chimbal(t, e.vol * 0.4, 0.18);
-      case 'caixa': return caixa(t, e.vol);
-      case 'crash': return crash(t, e.vol);
-      case 'riser': return riser(t, d, e.vol);
-      case 'baixo': return baixo(t, e.nota, d, e.vol);
-      case 'acorde': return acorde(t, e.notas, d, e.vol, e.filtro, e.estilo);
-      case 'lead': return lead(t, e.nota, d, e.vol, F.lead);
-      case 'harmonia': return lead(t, e.nota, d, e.vol, F.lead === 'sino' ? 'flauta' : F.lead);
-      case 'arpejo': return arpejo(t, e.nota, d, e.vol);
-      case 'guitarra': return guitarra(t, [e.nota], d, e.vol, false);
-      case 'power': return guitarra(t, e.notas, d, e.vol, true);
-      case 'tom': return tom(t, e.vol, e.altura);
-    }
-  }
-
-  /* ---------- sequenciador ---------- */
-  function agendar() {
-    if (!ctx || !tocando) return;
-    if (proximo < ctx.currentTime) proximo = ctx.currentTime + 0.02;   // atrasou (app em segundo plano): pula, sem rajada
-    while (proximo < ctx.currentTime + 0.12) {
-      var ab = tipo === 'abertura', F = ab ? M.ABERTURA : M.FAIXAS[faixa];
-      var s16 = 60 / (ab ? M.ABERTURA.bpm : M.andamento(F, nivel, queda)) / 4;
-      if (passo === 0) { var pt = ab ? M.abertura(compasso) : M.partitura(F, compasso); eventos = pt.eventos; swing = pt.swing || 0; }
-      var quando = proximo + (passo % 2 ? swing * s16 : 0);   // swing: as semicolcheias de contratempo atrasam um pouco
-      for (var k = 0; k < eventos.length; k++) if (eventos[k].t === passo) { try { tocarEvento(eventos[k], quando, s16, F); } catch (e) {} }
-      if (passo % 4 === 0 && batidas.length) avisarBatida(proximo - ctx.currentTime);
-      contador++; passo++; proximo += s16;
-      if (passo === 16) {
-        passo = 0;
-        if (ab) compasso = M.proximaAbertura(compasso);
-        else { var p = M.proxima(faixa, compasso + 1); faixa = p.faixa; compasso = p.compasso; }
-      }
-    }
-  }
-
-  function avisarBatida(emSeg) {   // o nome do jogo pulsa junto com a música
-    setTimeout(function () { batidas.forEach(function (fn) { try { fn(); } catch (e) {} }); }, Math.max(0, emSeg * 1000));
-  }
-  function sintetizada() {
-    if (!ctx) return;
-    fonte = 'jogo'; tocando = true; passo = 0; proximo = ctx.currentTime + 0.05;   // retoma no começo do compasso onde parou
-    clearInterval(relogio); relogio = setInterval(agendar, 25); agendar();
-  }
-  /* n: 'inicio' (toca a abertura) | 'fim' (segue a música da rodada, no andamento normal) |
-     'crianca' | 'normal' | 'maluco' (segue/retoma a música da rodada). */
-  function musica(n) {
-    if (n === 'inicio' || n === 'fim') { nivel = 'inicio'; queda = 0; } else if (n) nivel = n;
-    if (n === 'inicio' && tipo !== 'abertura') { tipo = 'abertura'; compasso = 0; if (tocando) { parar(); return sintetizada(); } }
-    if (tocando && fonte === 'jogo') return;
-    if (fonte === 'minhas' && audio && !audio.paused) return;
-    parar();
-    if (!minhas.length) return sintetizada();
-    // MP3 do dono; se não tocar (arquivo quebrado, sem internet e fora do cache), volta para as músicas do jogo
-    var falhou = function () { if (fonte === 'minhas') { if (audio) try { audio.pause(); } catch (e) {} sintetizada(); } };
-    try {
-      if (!audio) { audio = new Audio(); audio.loop = true; }
-      fonte = 'minhas';
-      audio.onerror = falhou;
-      audio.src = 'musicas/' + minhas[Math.floor(Math.random() * minhas.length)].arquivo;
-      audio.muted = mudo; var pr = audio.play(); if (pr && pr.catch) pr.catch(falhou);
-    } catch (e) { falhou(); }
-  }
-  function andamento(i) { queda = i || 0; }
-  /* começo de rodada: a próxima música da lista, do começo (cada rodada uma música diferente) */
-  function rodada(n) {
-    nivel = n; queda = 0;
-    if (rodadas++ > 0 || tipo === 'jogo') faixa = (faixa + 1) % M.FAIXAS.length;
-    tipo = 'jogo'; compasso = 0;
-    if (fonte === 'minhas' && audio && !audio.paused) return;
-    parar(); musica(n);
-  }
-  function parar() {
-    tocando = false; fonte = ''; clearInterval(relogio);
-    if (audio) try { audio.pause(); } catch (e) {}
-  }
-
-  /* ---------- efeitos ---------- */
   function nota(t, freq, dur, tipo, vol, corte) {
     var f = filtro('lowpass', corte || 3000), g = ctx.createGain(); f.connect(g); g.connect(mestre);
     env(g, t, 0.01, dur, vol); return osc(t, tipo, freq, 0, dur, f);
@@ -292,30 +109,109 @@
     },
     fim: function (t) { [60, 64, 67, 72, 76, 79, 84].forEach(function (m, k) { nota(t + k * 0.09, hz(m), 0.4, 'sawtooth', 0.14, 4500); }); crash(t + 0.63, 1); }
   };
+
+  /* ---------- música gravada ---------- */
+  function ligarPlayer() {
+    if (!player) {
+      player = new Audio(); player.preload = 'auto';
+      player.addEventListener('ended', function () { if (tipo === 'jogo') proximaJogo(); });
+      player.addEventListener('error', function () { if (atual) ruins[atual.arquivo] = true; if (tipo === 'jogo') proximaJogo(); else if (lista.length) { tipo = 'jogo'; proximaJogo(); } });
+    }
+    if (ctx && !ganhoMusica && ctx.createMediaElementSource) {
+      try {
+        var src = ctx.createMediaElementSource(player);
+        ganhoMusica = ctx.createGain(); ganhoMusica.gain.value = VOLUME_MUSICA;
+        src.connect(ganhoMusica); ganhoMusica.connect(mestre);
+      } catch (e) { ganhoMusica = null; }
+    }
+    if (!ganhoMusica) player.volume = VOLUME_MUSICA;
+    player.muted = mudo && !ganhoMusica;
+  }
+  function avisarTroca() { trocas.forEach(function (fn) { try { fn(atual); } catch (e) {} }); }
+  function pulsar() {
+    clearInterval(pulso);
+    if (!tocando || !atual) return;
+    pulso = setInterval(function () { if (tocando) batidas.forEach(function (fn) { try { fn(); } catch (e) {} }); }, 60000 / (atual.bpm || 120));
+  }
+  function tocar(entrada, emLaco) {
+    ligarPlayer();
+    atual = entrada; faixa = tipo === 'jogo' ? lista.indexOf(entrada) : -1;
+    player.loop = !!emLaco;
+    player.src = 'musicas/' + entrada.arquivo;
+    try { player.currentTime = 0; } catch (e) {}
+    retomar(); avisarTroca();
+  }
+  function retomar() {
+    if (!player || !atual) return;
+    tocando = true; fonte = 'jogo';
+    try { var pr = player.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {}
+    pulsar();
+  }
+  function proximaJogo() {
+    if (!lista.length) return;
+    var entrada = null;
+    if (forcada) { entrada = forcada; forcada = null; }
+    else for (var k = 0; k < lista.length && !entrada; k++) {
+      ponteiro = (ponteiro + 1) % ordem.length;
+      var e = lista[ordem[ponteiro]]; if (!ruins[e.arquivo] && e !== atual) entrada = e;
+    }
+    if (!entrada) { parar(); return; }   // nenhuma música carrega (sem internet e fora do cache): silêncio
+    tocar(entrada, false);
+  }
+  /* n: 'inicio' (abertura em laço) | 'fim' (segue a da rodada) | 'crianca'/'normal'/'maluco' (retoma) */
+  function musica(n) {
+    if (n === 'inicio' && abertura && (tipo !== 'abertura' || !atual)) { tipo = 'abertura'; tocar(abertura, true); return; }
+    if (!atual) { if (abertura) { tipo = 'abertura'; tocar(abertura, true); } return; }
+    if (!tocando) retomar();
+  }
+  /* começo de rodada: a próxima música da lista, do começo (cada rodada uma diferente) */
+  function rodada() { tipo = 'jogo'; proximaJogo(); }
+  function andamento() {}
+  function parar() {
+    tocando = false; fonte = ''; clearInterval(pulso);
+    if (player) try { player.pause(); } catch (e) {}
+    try { if (ctx && ctx.state === 'running') ctx.suspend(); } catch (e) {}   // nada fica soando depois de sair da página
+  }
+
+  function validar(o) {
+    if (!o || typeof o !== 'object' || typeof o.arquivo !== 'string' || !ARQ.test(o.arquivo) || o.arquivo.indexOf('..') >= 0) return null;
+    var txt = function (v, max) { return typeof v === 'string' && v.length <= max ? v : ''; };
+    var bpm = typeof o.bpm === 'number' && o.bpm >= 60 && o.bpm <= 200 ? o.bpm : 120;
+    return { titulo: txt(o.titulo, 60) || o.arquivo, arquivo: o.arquivo, bpm: bpm, autor: txt(o.autor, 60), fonte: txt(o.fonte, 60), licenca: txt(o.licenca, 30), abertura: o.abertura === true };
+  }
+  function embaralhar(n) {
+    var a = []; for (var k = 0; k < n; k++) a.push(k);
+    if (!TESTE) for (var i = n - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  var carregou = false;
+  function quandoPronta(fn) { if (carregou) fn(); else pronta.then(fn); }
+  var pronta = root.fetch ? root.fetch('musicas/musicas.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : []; }).then(function (v) {
+    var todas = (Array.isArray(v) ? v : []).slice(0, 60).map(validar).filter(Boolean);
+    abertura = todas.filter(function (o) { return o.abertura; })[0] || null;
+    lista = todas.filter(function (o) { return o !== abertura; });
+    ordem = embaralhar(lista.length);
+  }).catch(function () {}).then(function () { carregou = true; }) : Promise.resolve().then(function () { carregou = true; });
+
   function efeito(nome) {
     if (registro) registro.push(nome);
     if (!ctx || mudo || !EFEITOS[nome]) return;
-    try { EFEITOS[nome](ctx.currentTime + 0.01); } catch (e) {}
+    try { if (ctx.state !== 'running') ctx.resume(); EFEITOS[nome](ctx.currentTime + 0.01); } catch (e) {}
   }
   function definirMudo(b) {
     mudo = !!b;
     if (mestre) mestre.gain.value = mudo ? 0 : VOLUME;
-    if (audio) audio.muted = mudo;
-  }
-
-  /* MP3s do dono (musicas/musicas.json): [{ "nome": "...", "arquivo": "festa.mp3" }] */
-  if (root.fetch) {
-    root.fetch('musicas/musicas.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : []; }).then(function (v) {
-      if (Array.isArray(v)) minhas = v.filter(function (o) { return o && typeof o.arquivo === 'string' && ARQ.test(o.arquivo) && o.arquivo.indexOf('..') < 0; }).slice(0, 50);
-    }).catch(function () {});
+    if (player && !ganhoMusica) player.muted = mudo;
   }
 
   root.PeluqueriaSom = {
-    ligar: ligar, musica: musica, andamento: andamento, parar: parar, efeito: efeito, mudo: definirMudo, registro: registro,
-    minhas: function () { return minhas.slice(); }, fonte: function () { return fonte; },
-    rodada: rodada, aoBater: function (fn) { batidas.push(fn); },
-    posicao: function () { return tipo === 'abertura' ? { faixa: 'abertura', compasso: compasso, nome: M.ABERTURA.nome } : { faixa: faixa, compasso: compasso, nome: M.FAIXAS[faixa].nome }; },
-    _recursos: function () { return { eco: !!sala, estereo: !!(ctx && ctx.createStereoPanner) }; },
-    _ctx: function () { return ctx; }, _passos: function () { return contador; }
+    ligar: ligar, musica: function (n) { quandoPronta(function () { musica(n); }); }, andamento: andamento, parar: parar, efeito: efeito, mudo: definirMudo, registro: registro,
+    fonte: function () { return fonte; }, tocando: function () { return !!(tocando && player && !player.paused); },
+    rodada: function () { quandoPronta(rodada); },
+    aoBater: function (fn) { batidas.push(fn); }, aoTrocar: function (fn) { trocas.push(fn); },
+    lista: function () { return lista.slice(); },
+    posicao: function () { return atual ? { faixa: tipo === 'abertura' ? 'abertura' : faixa, titulo: atual.titulo, autor: atual.autor, arquivo: atual.arquivo, nome: { pt: atual.titulo, en: atual.titulo } } : { faixa: null }; },
+    _ctx: function () { return ctx; }, _elemento: function () { return player; },
+    _forcarProxima: function (arquivo) { forcada = lista.filter(function (o) { return o.arquivo === arquivo; })[0] || null; }
   };
 })(typeof self !== 'undefined' ? self : this);
