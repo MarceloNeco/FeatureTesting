@@ -17,12 +17,47 @@
     neve: { ceu: ['#8fb8ff', '#eef4ff'], grama: ['#f4f8ff', '#e4ecfb'], borda: ['#3a86ff', '#ffffff'], pista: ['#7d8590', '#77808a'], faixa: '#ffd166', sol: '#ffffff', nome: ['Montanha de Neve', 'Snow Mountain'], emoji: '❄️', cor: '#3a86ff' },
     neon: { ceu: ['#0d0630', '#4b1a7a'], grama: ['#1b1250', '#160f45'], borda: ['#ff2bd6', '#2bf4ff'], pista: ['#2a2550', '#25204a'], faixa: '#2bf4ff', sol: null, nome: ['Cidade Neon', 'Neon City'], emoji: '🌃', cor: '#9b5de5', noite: true }
   };
+  // visual NEON (padrão): os mesmos mundos à noite, estrada escura com bordas de neon
+  var NEON = {
+    praia: { ceu: ['#040714', '#1b1150'], grama: ['#0b1626', '#091321'], pista: ['#15161f', '#121319'], borda: ['#00e5ff', '#ff3df0'], faixa: '#00e5ff' },
+    floresta: { ceu: ['#020a08', '#0e2a22'], grama: ['#07140e', '#06110c'], pista: ['#131614', '#101311'], borda: ['#39ff88', '#ffd166'], faixa: '#39ff88' },
+    doces: { ceu: ['#0f0316', '#3a0d3f'], grama: ['#170819', '#140716'], pista: ['#1a1219', '#161015'], borda: ['#ff4fd8', '#7cf9ff'], faixa: '#ff4fd8' },
+    neve: { ceu: ['#030714', '#142650'], grama: ['#141b2b', '#121827'], pista: ['#151a24', '#12161f'], borda: ['#7cc8ff', '#ffffff'], faixa: '#7cc8ff' },
+    neon: { ceu: ['#05010f', '#2a0b55'], grama: ['#0c0620', '#0a051b'], pista: ['#120d24', '#0f0b1f'], borda: ['#ff2bd6', '#2bf4ff'], faixa: '#2bf4ff' }
+  };
+  Object.keys(NEON).forEach(function (k) { var a = NEON[k], b = TEMAS[k]; a.nome = b.nome; a.emoji = b.emoji; a.cor = b.cor; a.noite = true; a.sol = null; });
+  var ESTILO = 'neon';
+  function tema(nome) { return (ESTILO === 'neon' ? NEON : TEMAS)[nome]; }
+  function rgba(hex, a) { var n = parseInt(hex.slice(1), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; }
+  function luz(c, x, y, r, hex, a) {   // brilho redondo somando luz (fica bonito no escuro)
+    if (r < 0.8) return;
+    var g = c.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, rgba(hex, a)); g.addColorStop(0.35, rgba(hex, a * 0.45)); g.addColorStop(1, rgba(hex, 0));
+    c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill();
+  }
+  var fundosNoite = {};
+  function fundoNoite(nome) {
+    if (fundosNoite[nome]) return fundosNoite[nome];
+    var o = base.fundos[nome], cv = document.createElement('canvas'); cv.width = o.width; cv.height = o.height;
+    var c = cv.getContext('2d'); c.drawImage(o, 0, 0); c.globalCompositeOperation = 'source-atop'; c.fillStyle = nome === 'neon' ? 'rgba(6,4,24,.35)' : 'rgba(6,6,24,.72)'; c.fillRect(0, 0, cv.width, cv.height);
+    // janelinhas acesas nos morros/cidade
+    c.globalCompositeOperation = 'source-atop'; var s0 = 11;
+    for (var k = 0; k < 70; k++) { s0 = (s0 * 9301 + 49297) % 233280; var x = s0 / 233280 * cv.width; s0 = (s0 * 9301 + 49297) % 233280; var y = cv.height * (0.55 + s0 / 233280 * 0.45); c.fillStyle = k % 3 ? 'rgba(255,209,102,.8)' : 'rgba(43,244,255,.7)'; c.fillRect(x, y, 2, 2); }
+    fundosNoite[nome] = cv; return cv;
+  }
+  var NAO_ESCURECE = { poste: 1, predio: 1, palmeiraNeon: 1 };
+  function enfeiteSpr(tipo) { var b = base[tipo]; if (!b || ESTILO !== 'neon' || NAO_ESCURECE[tipo]) return b; return S.escurecido(tipo, b, 0.6); }
+  var ITEM_NEON = { estrela: 'estrelaNeon', turbo: 'turboNeon', lama: 'oleo' };
+
   var CORES = ['#ff3b5c', '#ffb703', '#3a86ff', '#2ec4b6', '#9b5de5', '#ff7ac6'];
   var PILOTOS = ['🐱', '🐶', '🦄', '🐼', '🐸', '🐰', '🦊', '🐯'];
 
   var lingua = 'pt', base = null, carrosJog = [], portais = [], largada = null, chegada = null;
   var ALT_VOO = 6500;               // altura do voo acima da estrada (quem vai de avião, jato ou helicóptero)
-  var VOA = [], VEIC = [];          // por jogador: voa? e a ficha do veículo
+  var VOA = [], VEIC = [], INFO = [];   // por jogador: voa?, a ficha do veículo e o piloto (bichinho ou selfie)
+  var Cab = function () { return raiz.VruuumCabeca; };
+  function infoPiloto(cor, piloto, foto) { return { emoji: piloto, foto: foto || null, cor: cor, camisa: V() ? V().tom(cor, -0.4) : '#3a2f73' }; }
+  // o piloto vivo: de costas, e de vez em quando vira, olha e sorri
+  function pilotoVivo(c, vv, x0, y0, cw, ch, info, semente, periodo) { if (Cab()) Cab().desenhar(c, vv, x0, y0, cw, ch, info, Date.now() / 1000, semente, periodo); }
   var V = function () { return raiz.VruuumVeiculos; };
   // o que aparece no lugar de cada coisa quando se está voando
   var NO_CEU = { cone: 'passaro', lama: 'nuvemRaio', turbo: 'anel', rampa: 'corrente', onibus: 'balao' };
@@ -38,10 +73,12 @@
     return 'rgb(' + r + ',' + g + ',' + bl + ')';
   }
 
-  function preparar(estado, jogadores, lang) {
+  function preparar(estado, jogadores, lang, visual) {
     lingua = lang || 'pt';
+    ESTILO = visual === 'colorido' ? 'colorido' : 'neon';
     base = S.basicos();
-    carrosJog = jogadores.map(function (j) { return S.carroJogador(j.cor, j.piloto, j.veic); });
+    carrosJog = jogadores.map(function (j) { return S.carroJogador(j.cor, null, j.veic); });
+    INFO = jogadores.map(function (j) { return infoPiloto(j.cor, j.piloto, j.foto); });
     VEIC = jogadores.map(function (j) { return V() ? V().achar(j.veic) : null; });
     VOA = jogadores.map(function (j) { return !!(V() && V().voa(j.veic)); });
     portais = estado.pista.mundos.map(function (m) { var tm = TEMAS[m]; return S.arco(tm.emoji + ' ' + t(tm.nome[0], tm.nome[1]), tm.cor, '#ffffff', false); });
@@ -141,7 +178,7 @@
     var voa = !!VOA[ji], camY = jY + ALTURA_CAM + (voa ? ALT_VOO : 0), camX = j.x * LARG;
 
     // céu e fundo: misturam com o mundo anterior logo depois do portal
-    var m = jSeg.mundo, tm = TEMAS[pista.mundos[m]], antes = m > 0 ? TEMAS[pista.mundos[m - 1]] : tm;
+    var m = jSeg.mundo, tm = tema(pista.mundos[m]), antes = m > 0 ? tema(pista.mundos[m - 1]) : tm, neon = ESTILO === 'neon';
     var f = m > 0 ? Math.min(1, (jSeg.i - Math.round(pista.chegada / 4 * m)) / 90) : 1;
     var ceu = c.createLinearGradient(0, 0, 0, cy);
     ceu.addColorStop(0, misturar(antes.ceu[0], tm.ceu[0], f)); ceu.addColorStop(1, misturar(antes.ceu[1], tm.ceu[1], f));
@@ -151,9 +188,14 @@
     var solCor = tm.sol || antes.sol;
     if (solCor && noite < 1) { c.globalAlpha = 1 - noite; c.shadowColor = solCor; c.shadowBlur = K * 0.2; c.fillStyle = solCor; c.beginPath(); c.arc(w * 0.78, cy * 0.35, K * 0.1, 0, Math.PI * 2); c.fill(); c.shadowBlur = 0; c.globalAlpha = 1; }
     if (noite < 1) camada(c, base.nuvens, w, cy * 0.75, cy * 0.5, vs.nuvemX, 1 - noite);
-    var altF = Math.min(K * 0.55, cy * 0.9);
-    if (f < 1) camada(c, base.fundos[pista.mundos[m - 1]], w, cy + 2, altF, vs.fundoX, 1);
-    camada(c, base.fundos[pista.mundos[m]], w, cy + 2, altF, vs.fundoX, f);
+    if (neon) {   // lua com halo
+      luz(c, w * 0.8, cy * 0.3, K * 0.32, '#bfd4ff', 0.35);
+      c.fillStyle = '#eef3ff'; c.beginPath(); c.arc(w * 0.8, cy * 0.3, K * 0.055, 0, Math.PI * 2); c.fill();
+      c.fillStyle = 'rgba(180,195,230,.5)'; c.beginPath(); c.arc(w * 0.8 + K * 0.015, cy * 0.3 - K * 0.01, K * 0.014, 0, Math.PI * 2); c.fill();
+    }
+    var altF = Math.min(K * 0.55, cy * 0.9), fundoDe = function (nome) { return neon ? fundoNoite(nome) : base.fundos[nome]; };
+    if (f < 1) camada(c, fundoDe(pista.mundos[m - 1]), w, cy + 2, altF, vs.fundoX, 1);
+    camada(c, fundoDe(pista.mundos[m]), w, cy + 2, altF, vs.fundoX, f);
 
     // estrada, do perto para o longe
     var maxy = h, x = 0, dx = -(segs[baseI].curva * basePct), n, cnt = op.dist, s;
@@ -168,13 +210,25 @@
       aX[n] = X1; aY[n] = Y1; aS[n] = sc1; aClip[n] = maxy; aZ[n] = z1;
       x += dx; dx += s.curva;
       if (z1 <= PROF || Y2 >= Y1 || Y2 >= maxy) continue;
-      var ts = TEMAS[pista.mundos[s.mundo]], par = s.listra;
+      var ts = tema(pista.mundos[s.mundo]), par = s.listra;
       c.fillStyle = ts.grama[par]; c.fillRect(0, Y2, w, Y1 - Y2 + 1);
       var r1 = W1 / 7, r2 = W2 / 7;
       Y1 += 1;   // 1 pixel de sobra: sem risquinhos entre um pedaço e outro
-      poligono(c, X1 - W1 - r1, Y1, X1 - W1, Y1, X2 - W2, Y2, X2 - W2 - r2, Y2, ts.borda[par]);
-      poligono(c, X1 + W1 + r1, Y1, X1 + W1, Y1, X2 + W2, Y2, X2 + W2 + r2, Y2, ts.borda[par]);
-      poligono(c, X1 - W1, Y1, X1 + W1, Y1, X2 + W2, Y2, X2 - W2, Y2, ts.pista[par]);
+      if (neon) {
+        // asfalto escuro e bordas de neon: um brilho largo e fraco e um fio forte por cima
+        poligono(c, X1 - W1 * 1.06, Y1, X1 + W1 * 1.06, Y1, X2 + W2 * 1.06, Y2, X2 - W2 * 1.06, Y2, ts.pista[par]);
+        var e1 = W1 * 0.025, e2 = W2 * 0.025, cor0 = ts.borda[0];
+        c.globalAlpha = 0.22;
+        poligono(c, X1 - W1 - e1 * 4, Y1, X1 - W1 + e1 * 4, Y1, X2 - W2 + e2 * 4, Y2, X2 - W2 - e2 * 4, Y2, cor0);
+        poligono(c, X1 + W1 - e1 * 4, Y1, X1 + W1 + e1 * 4, Y1, X2 + W2 + e2 * 4, Y2, X2 + W2 - e2 * 4, Y2, cor0);
+        c.globalAlpha = 1;
+        poligono(c, X1 - W1 - e1, Y1, X1 - W1 + e1, Y1, X2 - W2 + e2, Y2, X2 - W2 - e2, Y2, cor0);
+        poligono(c, X1 + W1 - e1, Y1, X1 + W1 + e1, Y1, X2 + W2 + e2, Y2, X2 + W2 - e2, Y2, cor0);
+      } else {
+        poligono(c, X1 - W1 - r1, Y1, X1 - W1, Y1, X2 - W2, Y2, X2 - W2 - r2, Y2, ts.borda[par]);
+        poligono(c, X1 + W1 + r1, Y1, X1 + W1, Y1, X2 + W2, Y2, X2 + W2 + r2, Y2, ts.borda[par]);
+        poligono(c, X1 - W1, Y1, X1 + W1, Y1, X2 + W2, Y2, X2 - W2, Y2, ts.pista[par]);
+      }
       if (s.xadrez) {
         for (var q = 0; q < 8; q++) {
           var a = -1 + q / 4, b = a + 0.25;
@@ -182,7 +236,9 @@
         }
       } else if (!par) {
         var l1 = W1 / 32, l2 = W2 / 32;
+        if (neon) c.globalAlpha = 0.85;
         for (var fx = -1 / 3; fx < 0.5; fx += 2 / 3) poligono(c, X1 + W1 * fx - l1, Y1, X1 + W1 * fx + l1, Y1, X2 + W2 * fx + l2, Y2, X2 + W2 * fx - l2, Y2, ts.faixa);
+        c.globalAlpha = 1;
       }
       maxy = Y2;
     }
@@ -190,7 +246,8 @@
     // quem voa: névoa sobre o chão lá embaixo (dá a sensação de altura) e a rota no ar, um caminho de luz
     if (voa) {
       var hz0 = Math.max(0, Math.min(h, cy)), nev = c.createLinearGradient(0, hz0, 0, h);
-      nev.addColorStop(0, 'rgba(255,255,255,.55)'); nev.addColorStop(1, 'rgba(220,240,255,.22)');
+      if (ESTILO === 'neon') { nev.addColorStop(0, 'rgba(24,16,70,.55)'); nev.addColorStop(1, 'rgba(10,8,36,.12)'); }   // à noite, névoa escura
+      else { nev.addColorStop(0, 'rgba(255,255,255,.55)'); nev.addColorStop(1, 'rgba(220,240,255,.22)'); }
       c.fillStyle = nev; c.fillRect(0, hz0, w, h - hz0);
       var trilhos = [[], []];
       for (n = cnt - 2; n >= 0; n--) {
@@ -224,39 +281,113 @@
       var idx = baseI + n; s = segs[idx];
       var esc = aS[n] * K, sx = aX[n], sy = aY[n], clip = aClip[n], k2;
       var syAr = sy - esc * ALT_VOO;   // a altura do voo neste pedaço
+      var tsN = tema(pista.mundos[s.mundo]);
+      if (s.tunel) tunel(c, s, idx, sx, sy, syAr, esc, w, h, voa, tsN);
+      if (neon && !s.tunel && n > 2 && idx % 8 === 0) postesNeon(c, idx, sx, sy, esc, clip, tsN, w);
       for (k2 = 0; n > 3 && k2 < s.enfeites.length; k2++) {   // enfeite colado na câmera taparia a tela
-        var en = s.enfeites[k2], arco = en.tipo === 'portal' || en.tipo === 'chegada' || en.tipo === 'largada', spr = en.tipo === 'portal' ? portais[en.mundo] : en.tipo === 'chegada' ? chegada : en.tipo === 'largada' ? largada : base[en.tipo];
+        var en = s.enfeites[k2], arco = en.tipo === 'portal' || en.tipo === 'chegada' || en.tipo === 'largada', spr = en.tipo === 'portal' ? portais[en.mundo] : en.tipo === 'chegada' ? chegada : en.tipo === 'largada' ? largada : enfeiteSpr(en.tipo);
         if (!spr) continue;
         if (voa && arco) sprite(c, spr, esc, sx + esc * en.x * LARG, syAr + esc * 1900, 0, w);   // no céu, o portal fica na altura do voo
         else sprite(c, spr, esc, sx + esc * en.x * LARG, sy, clip, w);
       }
       if (voa && n > 3 && idx % 6 === 0) {   // nuvens dos lados, em alturas diferentes
-        var hz = hash(idx), lado = hz < 0.5 ? -1 : 1, tm2 = TEMAS[pista.mundos[s.mundo]];
-        sprite(c, base[tm2.noite ? 'nuvemNoite' : 'nuvemFofa'], esc, sx + esc * lado * (2.2 + hash(idx + 7) * 1.6) * LARG, syAr + esc * (hash(idx + 3) - 0.35) * 2600, 0, w);
+        var hz = hash(idx), lado = hz < 0.5 ? -1 : 1, tm2 = tema(pista.mundos[s.mundo]);
+        sprite(c, base[tm2.noite || ESTILO === 'neon' ? 'nuvemNoite' : 'nuvemFofa'], esc, sx + esc * lado * (2.2 + hash(idx + 7) * 1.6) * LARG, syAr + esc * (hash(idx + 3) - 0.35) * 2600, 0, w);
       }
       for (k2 = 0; k2 < s.coisas.length; k2++) {
         var co = s.coisas[k2];
         if (co.pego[ji]) continue;
         var alt = co.alt;
         if (co.tipo === 'estrela') alt += Math.sin(e.t * 5 + idx) * 80;
-        if (voa) sprite(c, base[sprCeu(co.tipo)], esc, sx + esc * co.x * LARG, syAr - esc * (alt + (co.tipo === 'anel' || co.tipo === 'turbo' ? -150 : 0)), 0, w);
-        else sprite(c, base[co.tipo], esc, sx + esc * co.x * LARG, sy - esc * alt, clip, w);
+        if (voa) sprite(c, base[neon && co.tipo === 'estrela' ? 'estrelaNeon' : sprCeu(co.tipo)], esc, sx + esc * co.x * LARG, syAr - esc * (alt + (co.tipo === 'anel' || co.tipo === 'turbo' ? -150 : 0)), 0, w);
+        else sprite(c, base[neon && ITEM_NEON[co.tipo] ? ITEM_NEON[co.tipo] : co.tipo], esc, sx + esc * co.x * LARG, sy - esc * alt, clip, w);
       }
       var cs = porSeg[idx];
       if (cs) for (k2 = 0; k2 < cs.length; k2++) {
-        if (voa) sprite(c, base[sprCeu(cs[k2].tipo)], esc, sx + esc * cs[k2].x * LARG, syAr - esc * 200, 0, w);
-        else sprite(c, base[cs[k2].tipo], esc, sx + esc * cs[k2].x * LARG, sy, clip, w);
+        var tx = sx + esc * cs[k2].x * LARG;
+        if (voa) { sprite(c, base[sprCeu(cs[k2].tipo)], esc, tx, syAr - esc * 200, 0, w); if (neon || s.tunel) luzesAviao(c, tx, syAr - esc * 200, esc, idx); }
+        else { sprite(c, base[cs[k2].tipo], esc, tx, sy, clip, w); if ((neon || s.tunel) && sy <= clip + 2) lanternasTransito(c, cs[k2].tipo, tx, sy, esc); }
       }
       if (idx === oSeg && outro.z > j.z - JOG_Z * 0.6) {
         var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / (outro.puloMax || raiz.VruuumMotor.PULO))) * 1400 * (outro.puloMax || 1.1) / 1.1 : 0;
         var oVoa = !!VOA[outro.n];   // o outro pode estar voando enquanto eu vou de carro (e vice-versa)
-        sprite(c, carrosJog[outro.n], esc, sx + esc * outro.x * LARG, (oVoa ? syAr : sy) - esc * lift, oVoa || voa ? 0 : clip, w);
+        var oSpr = carrosJog[outro.n], oX = sx + esc * outro.x * LARG, oY = (oVoa ? syAr : sy) - esc * lift;
+        sprite(c, oSpr, esc, oX, oY, oVoa || voa ? 0 : clip, w);
+        if (oSpr.w * esc > 24 && (oVoa || voa || oY <= clip)) pilotoVivo(c, VEIC[outro.n], oX - oSpr.w * esc / 2, oY - oSpr.h * esc, oSpr.w * esc, oSpr.h * esc, INFO[outro.n], outro.n * 3.3, 7);
       }
     }
 
     desenharCarro(c, j, vs, g, h, w, e);
     desenharEfeitos(c, vs, g, w, h);
     desenharPlacar(c, e, j, ji, w, h, K, op, v);
+    c.restore();
+  }
+
+  // ---------- túnel ----------
+  // no chão: molduras encaixadas uma na frente da outra (cada pedaço pinta tudo FORA da sua abertura),
+  // com faixas de luz correndo; na entrada, uma parede grande em volta da boca. No céu: anéis de luz.
+  function tunel(c, s, idx, sx, sy, syAr, esc, w, h, voa, ts) {
+    var meia = esc * LARG * 1.32, x1 = sx - meia, x2 = sx + meia, neon = ESTILO === 'neon', tt = Date.now() / 1000;
+    var aceso = ((idx - tt * 26) % 18 + 18) % 18 < 3;   // luz que corre pelo túnel
+    var corA = neon ? ts.borda[(Math.floor(idx / 3)) % 2] : '#ffd166';
+    c.save(); c.globalCompositeOperation = 'source-over';
+    if (voa) {   // tubo de anéis de luz em volta da rota no céu
+      if (idx % 3 === 0) {
+        var yT = syAr - esc * 2400, yB = syAr + esc * 900, lw = Math.max(1.2, esc * 60);
+        c.globalCompositeOperation = 'lighter';
+        c.strokeStyle = rgba(corA, aceso ? 0.35 : 0.14); c.lineWidth = lw * 4; c.strokeRect(x1, yT, x2 - x1, yB - yT);
+        c.strokeStyle = rgba(corA, aceso ? 1 : 0.55); c.lineWidth = lw; c.strokeRect(x1, yT, x2 - x1, yB - yT);
+      }
+      c.restore(); return;
+    }
+    var alto = esc * 2700, yT2 = sy - alto, yB2 = sy + 1;
+    var parede = neon ? (idx % 2 ? '#0b0a19' : '#0e0c20') : (idx % 2 ? '#4a4f5c' : '#454a57');
+    var fx1 = -10, fx2 = w + 10, fy = -10;
+    if (s.entrada) { fx1 = sx - meia * 3.4; fx2 = sx + meia * 3.4; fy = sy - esc * 7000; parede = neon ? '#14112a' : '#6b7080'; }
+    c.fillStyle = parede; c.beginPath(); c.rect(fx1, fy, fx2 - fx1, yB2 - fy); c.rect(x1, yT2, x2 - x1, yB2 - yT2);
+    try { c.fill('evenodd'); } catch (e) { c.fill(); }
+    if (s.entrada) {   // contorno de luz na boca do túnel
+      c.globalCompositeOperation = 'lighter';
+      c.strokeStyle = rgba(neon ? ts.borda[0] : '#ffd166', 0.9); c.lineWidth = Math.max(1.5, esc * 90);
+      c.beginPath(); c.moveTo(x1, yB2); c.lineTo(x1, yT2); c.lineTo(x2, yT2); c.lineTo(x2, yB2); c.stroke();
+    } else if (idx % 3 === 0) {   // faixas de luz nas paredes e no teto
+      c.globalCompositeOperation = 'lighter';
+      var lw2 = Math.max(1, esc * 45);
+      c.strokeStyle = rgba(corA, aceso ? 0.3 : 0.1); c.lineWidth = lw2 * 4;
+      c.beginPath(); c.moveTo(x1, yB2); c.lineTo(x1, yT2); c.lineTo(x2, yT2); c.lineTo(x2, yB2); c.stroke();
+      c.strokeStyle = rgba(corA, aceso ? 1 : 0.45); c.lineWidth = lw2;
+      c.beginPath(); c.moveTo(x1, yB2); c.lineTo(x1, yT2); c.lineTo(x2, yT2); c.lineTo(x2, yB2); c.stroke();
+      if (!neon) { c.fillStyle = 'rgba(255,240,180,.9)'; c.fillRect(sx - meia * 0.12, yT2, meia * 0.24, Math.max(1, esc * 60)); }
+    }
+    c.restore();
+  }
+  // postes de neon dos dois lados da estrada, piscando devagar
+  function postesNeon(c, idx, sx, sy, esc, clip, ts, w) {
+    var tt = Date.now() / 1000;
+    [-1, 1].forEach(function (lado, k) {
+      var px = sx + esc * lado * 1.28 * LARG, topo = sy - esc * 1700;
+      if (px < -50 || px > w + 50 || sy > clip + 4) return;
+      var cor = ts.borda[(idx / 8 + k) % 2], pisca = 0.55 + 0.45 * Math.sin(tt * 3 + idx * 0.7 + k);
+      c.fillStyle = '#1b1830'; c.fillRect(px - Math.max(0.6, esc * 20), topo, Math.max(1.2, esc * 40), sy - topo);
+      c.save(); c.globalCompositeOperation = 'lighter';
+      c.fillStyle = rgba(cor, pisca); c.fillRect(px - Math.max(0.5, esc * 14), topo + esc * 120, Math.max(1, esc * 28), esc * 900);
+      luz(c, px, topo + esc * 500, esc * 900, cor, 0.35 * pisca);
+      luz(c, px, sy, esc * 700, cor, 0.18 * pisca);   // reflexo no chão
+      c.restore();
+    });
+  }
+  // lanternas vermelhas acesas nos carrinhos do trânsito (e luzes piscando nos aviões)
+  function lanternasTransito(c, tipo, x, y, esc) {
+    var spr = base[tipo]; if (!spr) return;
+    var dw = spr.w * esc, dh = spr.h * esc, yl = y - dh * (tipo === 'onibus' ? 0.38 : 0.43), dx = dw * (tipo === 'onibus' ? 0.36 : 0.34);
+    c.save(); c.globalCompositeOperation = 'lighter';
+    luz(c, x - dx, yl, dw * 0.28, '#ff2a2a', 0.8); luz(c, x + dx, yl, dw * 0.28, '#ff2a2a', 0.8);
+    c.restore();
+  }
+  function luzesAviao(c, x, y, esc, idx) {
+    var liga = Math.sin(Date.now() / 160 + idx) > 0.3, dw = 1300 * esc;
+    c.save(); c.globalCompositeOperation = 'lighter';
+    luz(c, x - dw * 0.47, y - dw * 0.18, dw * 0.12, '#ff3b3b', liga ? 0.9 : 0.25); luz(c, x + dw * 0.47, y - dw * 0.18, dw * 0.12, '#4cd964', liga ? 0.9 : 0.25);
     c.restore();
   }
 
@@ -267,7 +398,7 @@
     if (j.turbo > 0) {
       var tr = Math.min(1, j.turbo), lw = cw * 0.8 / 7;
       for (var k = 0; k < 7; k++) {
-        var gr = c.createLinearGradient(0, chao - lift, 0, h); gr.addColorStop(0, S.ARCO[k]); gr.addColorStop(1, 'rgba(255,255,255,0)');
+        var gr = c.createLinearGradient(0, chao - lift, 0, h); gr.addColorStop(0, ESTILO === 'neon' ? (k % 2 ? '#ff2bd6' : '#2bf4ff') : S.ARCO[k]); gr.addColorStop(1, 'rgba(255,255,255,0)');
         c.globalAlpha = 0.75 * tr; c.fillStyle = gr; c.fillRect(g.cx - cw * 0.4 + k * lw, chao - lift - ch * 0.15, lw + 1, h);
       }
       c.globalAlpha = 0.5 * tr; c.strokeStyle = '#fff'; c.lineWidth = Math.max(1, K * 0.006);
@@ -277,6 +408,27 @@
     var vv = VEIC[j.n], voa = !!VOA[j.n], tt = Date.now() / 1000;
     if (voa) lift += Math.sin(tt * 2.2) * K * 0.012;   // flutuando no ar
     if (lift > 0 && !voa) { c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse ? c.ellipse(g.cx, chao, cw * 0.45 * (1 - lift / K), ch * 0.06, 0, 0, Math.PI * 2) : c.arc(g.cx, chao, cw * 0.4, 0, Math.PI * 2); c.fill(); }
+    var segAqui = P.achar(e.pista, j.z), acesas = ESTILO === 'neon' || !!segAqui.tunel;
+    if (acesas) {
+      c.save(); c.globalCompositeOperation = 'lighter';
+      // faróis iluminando a estrada à frente
+      var yF = chao - lift - ch * 0.25, yL = g.cy + K * 0.25;
+      [-1, 1].forEach(function (l) {
+        var gr2 = c.createLinearGradient(0, yF, 0, yL); gr2.addColorStop(0, 'rgba(255,244,214,.32)'); gr2.addColorStop(1, 'rgba(255,244,214,0)');
+        c.fillStyle = gr2; c.beginPath(); c.moveTo(g.cx + l * cw * 0.18, yF); c.lineTo(g.cx + l * cw * 0.34, yF); c.lineTo(g.cx + l * cw * 0.7 + vs.lado * K * 0.2, yL); c.lineTo(g.cx + l * cw * 0.05 + vs.lado * K * 0.2, yL); c.fill();
+      });
+      if (!voa) {   // luz neon por baixo do veículo, na cor dele
+        var corV = (INFO[j.n] && INFO[j.n].cor) || '#2bf4ff', pul = 0.75 + Math.sin(tt * 4) * 0.15;
+        c.save(); c.translate(g.cx, chao - lift); c.scale(1, 0.22); luz(c, 0, 0, cw * 0.75, corV, 0.75 * pul); c.restore();
+      }
+      // rastro de luz das lanternas quando está rápido
+      var rap = Math.min(1, j.vel / e.pista.cfg.velMax);
+      if (!voa && rap > 0.5) [-1, 1].forEach(function (l) {
+        var gr3 = c.createLinearGradient(0, chao - lift - ch * 0.4, 0, h); gr3.addColorStop(0, 'rgba(255,40,40,' + (0.5 * rap) + ')'); gr3.addColorStop(1, 'rgba(255,40,40,0)');
+        c.fillStyle = gr3; c.fillRect(g.cx + l * cw * 0.36 - cw * 0.03, chao - lift - ch * 0.4, cw * 0.06, h);
+      });
+      c.restore();
+    }
     c.save();
     c.translate(g.cx, chao - lift);
     // avião inclina bem nas curvas; moto deita um pouco; carro quase nada
@@ -285,7 +437,13 @@
     if (j.rodando > 0) c.scale(Math.max(0.25, Math.abs(Math.cos(j.rodando * 9))) * (Math.cos(j.rodando * 9) < 0 ? -1 : 1), 1);
     extrasAntes(c, vv, cw, ch, tt);
     c.drawImage(spr.img, -cw / 2, -ch, cw, ch);
+    pilotoVivo(c, vv, -cw / 2, -ch, cw, ch, INFO[j.n], j.n * 3.3, 7);
     extrasDepois(c, vv, cw, ch, tt, j.turbo > 0);
+    if (acesas && !voa) {   // lanternas brilhando
+      c.globalCompositeOperation = 'lighter';
+      luz(c, -cw * 0.36, -ch * 0.4, cw * 0.22, '#ff2a2a', 0.75); luz(c, cw * 0.36, -ch * 0.4, cw * 0.22, '#ff2a2a', 0.75);
+      c.globalCompositeOperation = 'source-over';
+    }
     c.restore();
   }
 
@@ -408,38 +566,56 @@
 
   // prévia da garagem: o veículo grande, animado (hélice, rotor, fogo), na estrada ou no céu
   var cachePrevia = {};
-  function spritePrevia(cor, piloto, veic) {
-    var k = cor + '|' + piloto + '|' + veic;
-    if (!cachePrevia[k]) cachePrevia[k] = S.carroJogador(cor, piloto, veic, 360);
+  function spritePrevia(cor, veic) {
+    var k = cor + '|' + veic;
+    if (!cachePrevia[k]) cachePrevia[k] = S.carroJogador(cor, null, veic, 360);
     return cachePrevia[k];
   }
-  function previa(cv, cor, piloto, veic) {
+  function previa(cv, cor, piloto, veic, foto) {
     var c = cv.getContext('2d'), W = cv.width, H = cv.height, vv = V() ? V().achar(veic) : null, voa = !!(V() && V().voa(veic)), tt = Date.now() / 1000;
-    var spr = spritePrevia(cor, piloto, veic);
-    var g = c.createLinearGradient(0, 0, 0, H);
-    if (voa) { g.addColorStop(0, '#38b6ff'); g.addColorStop(1, '#c9f0ff'); } else { g.addColorStop(0, '#2a2160'); g.addColorStop(1, '#3a2f73'); }
+    var spr = spritePrevia(cor, veic);
+    var g = c.createLinearGradient(0, 0, 0, H), neon = ESTILO === 'neon';
+    if (neon) { g.addColorStop(0, '#05030f'); g.addColorStop(1, voa ? '#1d1450' : '#160f35'); }
+    else if (voa) { g.addColorStop(0, '#38b6ff'); g.addColorStop(1, '#c9f0ff'); } else { g.addColorStop(0, '#2a2160'); g.addColorStop(1, '#3a2f73'); }
     c.fillStyle = g; c.fillRect(0, 0, W, H);
-    if (voa) {
+    if (neon) {   // garagem à noite: estrelas, estrada escura com bordas de neon e luz por baixo do veículo
+      base = base || S.basicos();
+      c.globalAlpha = 0.8; c.drawImage(base.estrelasCeu, 0, 0, W, H * 0.6); c.globalAlpha = 1;
+      if (!voa) {
+        c.fillStyle = '#121320'; c.beginPath(); c.moveTo(W * 0.4, H * 0.32); c.lineTo(W * 0.6, H * 0.32); c.lineTo(W * 1.05, H); c.lineTo(-W * 0.05, H); c.fill();
+        c.save(); c.globalCompositeOperation = 'lighter'; c.lineWidth = 3;
+        c.strokeStyle = 'rgba(43,244,255,.9)'; c.beginPath(); c.moveTo(W * 0.4, H * 0.32); c.lineTo(-W * 0.05, H); c.stroke();
+        c.strokeStyle = 'rgba(255,43,214,.9)'; c.beginPath(); c.moveTo(W * 0.6, H * 0.32); c.lineTo(W * 1.05, H); c.stroke();
+        for (var q = 0; q < 5; q++) { var pq = ((tt * 1.5 + q / 5) % 1), yq = H * 0.32 + (H * 0.68) * pq * pq; c.fillStyle = 'rgba(43,244,255,.8)'; c.fillRect(W / 2 - 1.5 - pq * 4, yq, 3 + pq * 8, 4 + pq * 14); }
+        c.translate(W / 2, H * 0.94); c.scale(1, 0.2); luz(c, 0, 0, W * 0.35, cor, 0.7);
+        c.restore();
+      }
+    } else if (voa) {
       base = base || S.basicos();
       var nx = ((tt * 40) % (W * 1.6)) - W * 0.3;
       c.drawImage(base.nuvemFofa.img, W - nx, H * 0.08, W * 0.5, W * 0.23); c.drawImage(base.nuvemFofa.img, W * 1.5 - nx * 0.6, H * 0.45, W * 0.4, W * 0.19);
-    } else {
+    }
+    if (!neon && !voa) {
       c.fillStyle = '#6e737b'; c.beginPath(); c.moveTo(W * 0.4, H * 0.32); c.lineTo(W * 0.6, H * 0.32); c.lineTo(W * 1.05, H); c.lineTo(-W * 0.05, H); c.fill();
       c.fillStyle = '#ffffff'; for (var k = 0; k < 5; k++) { var p = ((tt * 1.5 + k / 5) % 1), y = H * 0.32 + (H * 0.68) * p * p; c.fillRect(W / 2 - 1.5 - p * 4, y, 3 + p * 8, 4 + p * 14); }
     }
     var esc = Math.min(W * 0.78 / spr.w, H * 0.8 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
     c.save(); c.translate(W / 2, H * 0.94 + (voa ? Math.sin(tt * 2.2) * H * 0.02 - H * 0.06 : Math.sin(tt * 9) * 1.2));
     if (voa) c.rotate(Math.sin(tt * 0.9) * 0.08);
-    extrasAntes(c, vv, cw, ch, tt); c.drawImage(spr.img, -cw / 2, -ch, cw, ch); extrasDepois(c, vv, cw, ch, tt, false);
+    extrasAntes(c, vv, cw, ch, tt); c.drawImage(spr.img, -cw / 2, -ch, cw, ch);
+    pilotoVivo(c, vv, -cw / 2, -ch, cw, ch, infoPiloto(cor, piloto, foto), 1.2, 4.5);   // na garagem vira mais vezes
+    extrasDepois(c, vv, cw, ch, tt, false);
     c.restore();
   }
   // miniatura parada (cartões da garagem)
-  function miniatura(cv, cor, piloto, veic) {
-    var c = cv.getContext('2d'), spr = spritePrevia(cor, piloto, veic), W = cv.width, H = cv.height;
+  function miniatura(cv, cor, piloto, veic, foto) {
+    var c = cv.getContext('2d'), spr = spritePrevia(cor, veic), W = cv.width, H = cv.height;
     c.clearRect(0, 0, W, H);
     var esc = Math.min(W * 0.9 / spr.w, H * 0.9 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
     c.drawImage(spr.img, (W - cw) / 2, H * 0.95 - ch, cw, ch);
+    if (Cab()) Cab().desenhar(c, V().achar(veic), (W - cw) / 2, H * 0.95 - ch, cw, ch, infoPiloto(cor, piloto, foto), 50, 0, 1000);   // parado, de costas
   }
 
-  raiz.VruuumDesenho = { preparar: preparar, desenhar: desenhar, passo: passo, evento: evento, vistas: vistas, margemLocal: margemLocal, botaoPulo: botaoPulo, previa: previa, miniatura: miniatura, ALT_VOO: ALT_VOO, TEMAS: TEMAS, CORES: CORES, PILOTOS: PILOTOS };
+  function definirEstilo(v) { ESTILO = v === 'colorido' ? 'colorido' : 'neon'; }
+  raiz.VruuumDesenho = { definirEstilo: definirEstilo, preparar: preparar, desenhar: desenhar, passo: passo, evento: evento, vistas: vistas, margemLocal: margemLocal, botaoPulo: botaoPulo, previa: previa, miniatura: miniatura, ALT_VOO: ALT_VOO, TEMAS: TEMAS, CORES: CORES, PILOTOS: PILOTOS };
 })(this);

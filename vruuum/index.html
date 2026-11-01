@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Vruuum! — Bolinho de Chuva · SolverONE</title>
 <link rel="icon" href="icone-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -62,6 +62,14 @@
       <button class="opcao crianca" type="button" data-nivel="crianca" data-t="🐢 Criança|🐢 Kids"></button>
       <button class="opcao normal" type="button" data-nivel="normal" data-t="🚗 Normal|🚗 Normal"></button>
       <button class="opcao turbo" type="button" data-nivel="turbo" data-t="🚀 Turbo|🚀 Turbo"></button>
+    </div>
+  </div>
+
+  <div class="grupo">
+    <p class="rotulo" data-t="Visual|Look"></p>
+    <div class="opcoes" role="group">
+      <button class="opcao visual-neon" type="button" data-visual="neon" data-t="🌃 Neon|🌃 Neon"></button>
+      <button class="opcao" type="button" data-visual="colorido" data-t="🌈 Colorido|🌈 Colorful"></button>
     </div>
   </div>
 
@@ -125,6 +133,29 @@
   <p data-t="Esta brincadeira está desligada no momento.|This game is turned off right now."></p>
 </section>
 
+<div id="selfie" class="selfie" hidden role="dialog" aria-modal="true" aria-labelledby="selfieTitulo">
+  <div class="selfie-painel">
+    <h2 id="selfieTitulo" data-t="📸 Seu rosto no carrinho|📸 Your face in the car"></h2>
+    <p class="dica" data-t="A foto fica só neste aparelho e não vai para a internet. Peça ajuda a um adulto.|The photo stays only on this device and never goes online. Ask a grown-up to help."></p>
+    <div class="selfie-botoes">
+      <label class="medio botao-arquivo"><span data-t="🤳 Tirar selfie|🤳 Take a selfie"></span><input id="selfieCamera" type="file" accept="image/*" capture="user"></label>
+      <label class="medio botao-arquivo"><span data-t="🖼️ Escolher foto|🖼️ Pick a photo"></span><input id="selfieGaleria" type="file" accept="image/*"></label>
+    </div>
+    <div id="selfieEditor" class="selfie-editor" hidden>
+      <canvas id="selfieTela" width="400" height="400" aria-label="Arraste o círculo até o rosto / Drag the circle onto the face"></canvas>
+      <div class="selfie-ajuste">
+        <p id="selfieAviso" class="dica" aria-live="polite"></p>
+        <label class="rotulo selfie-tam"><span data-t="Tamanho do círculo|Circle size"></span><input id="selfieTam" type="range" min="8" max="80" value="35"></label>
+        <button id="selfieUsar" class="grande" type="button" data-t="✅ Usar este rosto|✅ Use this face"></button>
+      </div>
+    </div>
+    <div class="selfie-botoes">
+      <button id="selfieApagar" class="medio" type="button" data-t="🗑️ Apagar minha foto|🗑️ Delete my photo"></button>
+      <button id="selfieFechar" class="medio" type="button" data-t="Fechar|Close"></button>
+    </div>
+  </div>
+</div>
+
 <div id="aviso" class="sr" aria-live="polite"></div>
 <div id="sondaBorda" aria-hidden="true"></div>
 
@@ -132,10 +163,12 @@
 <script src="motor.js"></script>
 <script src="sprites.js"></script>
 <script src="veiculos.js"></script>
+<script src="cabeca.js"></script>
 <script src="desenho.js"></script>
 <script src="rock.js"></script>
 <script src="som.js"></script>
 <script src="movimento.js"></script>
+<script src="selfie.js"></script>
 <script src="baixar.js"></script>
 <script src="../recursos.js" data-app="feature-tester" data-fora-do-arquivo></script>
 <script src="app.js"></script>

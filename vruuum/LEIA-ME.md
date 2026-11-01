@@ -30,6 +30,18 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 | 🚗 Normal | mais rápido, curvas que puxam para fora, mais cones e carrinhos |
 | 🚀 Turbo | o mais rápido, curvas fortes, muito trânsito |
 
+## Visual: 🌃 Neon ou 🌈 Colorido
+
+- **Neon** (padrão, escolhido no menu em "Visual"): os mesmos mundos à noite, com céu estrelado e lua, asfalto escuro,
+  bordas da estrada em neon (cada mundo com suas cores), faixas acesas e postes de neon piscando. A paisagem fica no
+  escuro, só com as luzes. Os veículos têm faróis iluminando a estrada, luz neon por baixo na cor do carro, lanternas
+  brilhando e rastro de luz quando estão rápidos; o trânsito tem lanternas acesas. Os itens ficam mais sóbrios: estrela de
+  luz sem carinha, portal de turbo em setas de neon e mancha de óleo (no lugar da lama).
+- **Colorido**: o visual de dia, com as cores e personagens de antes. Os faróis só acendem dentro dos túneis.
+- **Túneis** (nos dois visuais): de 2 a 4 por corrida (`pista.js`, longe dos portais, da largada e da chegada). No chão,
+  paredes com faixas de luz correndo e contorno de luz na entrada; lá dentro as paredes seguram o carro na pista. No céu,
+  um tubo de anéis de luz em volta da rota.
+
 ## Garagem e veículos
 
 - O veículo escolhido fica **sempre à vista**: em pé, preso no topo da tela enquanto as opções rolam; deitado, de um
@@ -46,6 +58,20 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 - **Quem voa** segue um caminho de luzes no céu, com a estrada lá embaixo. Os obstáculos mudam: pássaros (no lugar dos
   cones), nuvem de tempestade (lama), anel dourado (turbo), corrente de ar (rampa), balões e aviões (trânsito). As
   regras são as mesmas; só o desenho muda. Com 2 jogadores dá para misturar um carro e um avião.
+
+## O piloto e a selfie
+
+- O piloto fica **de costas**, olhando a estrada: nuca, orelhas e pelo de cada bichinho (no kart e na moto, o capacete
+  com listra). A cada ~7 s ele **vira para trás, olha e sorri** por 2 s, e volta. Na garagem vira mais vezes.
+  Desenhado ao vivo por `cabeca.js`, por cima do veículo, recortado pela janela.
+- **📸 Selfie**: na garagem, o botão 📸 abre a janela da selfie. Ali dá para **🤳 Tirar selfie** (câmera da frente) ou
+  **🖼️ Escolher foto**. O rosto é achado **sem internet** pelo MediaPipe Face Detector, que roda no aparelho: o motor
+  fica em `../baguncolandia/libs/mediapipe/` (~14 MB, baixado na primeira selfie e guardado) e o modelo de rosto em
+  `rosto.tflite` (229 KB). Um círculo marca o rosto e dá para arrastar e mudar de tamanho. **✅ Usar este rosto**
+  recorta 256×256 e guarda. De costas aparece um cabelo da cor tirada da foto, e de frente, o rosto.
+- **Privacidade**: a foto **nunca sai do aparelho**. Fica no `localStorage` (`vruuum.foto.0` e `.1`, ~17 KB cada) e se
+  apaga em 📸 → **🗑️ Apagar minha foto**. Sem o detector (aparelho antigo ou arquivo baixado), o círculo começa no
+  meio e a pessoa ajusta à mão.
 
 ## Controles
 
@@ -100,6 +126,8 @@ No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para
 | `som.js` | motor, buzina e efeitos sintetizados (WebAudio); liga e desliga a música do `rock.js`. |
 | `app.js` | menu, controles, tela cheia, bordas seguras, laço da corrida, pausa, resultado, recorde, instalar e baixar. `APP_VERSION` aqui. |
 | `movimento.js` | **puro**: acelerômetro → direção do volante e pulo pelo toquinho (com calibração no 3‑2‑1), testado no Node. |
+| `cabeca.js` | o piloto animado (de costas, vira e sorri; bichinho ou selfie), testado no Node. |
+| `selfie.js` | a selfie: acha o rosto sem internet (MediaPipe + `rosto.tflite`), recorta e guarda só no aparelho. |
 | `baixar.js` | monta o `vruuum.html` de arquivo único (genérico: serve para outro jogo do Bolinho de Chuva; scripts com `data-fora-do-arquivo` ficam de fora). |
 | `sw.js` | cache `vruuum-v…` para funcionar sem internet. `VERSAO` aqui. |
 | `versoes.json` | novidades de cada versão (PT e EN). |

@@ -2,7 +2,7 @@
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.7.0';
+  var APP_VERSION = '0.9.0';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -15,9 +15,13 @@
   var pref = ler('vruuum.pref', null) || {};
   if (pref.jogadores !== 2) pref.jogadores = 1;
   if (NIVEIS.indexOf(pref.nivel) < 0) pref.nivel = 'crianca';
+  if (pref.visual !== 'colorido') pref.visual = 'neon';   // neon é o padrão (mais sóbrio, com túneis iluminados)
+  D.definirEstilo(pref.visual);
   if (pref.lingua !== 'en' && pref.lingua !== 'pt') pref.lingua = (navigator.language || 'pt').slice(0, 2) === 'pt' ? 'pt' : 'en';
   if (!pref.carros || pref.carros.length !== 2) pref.carros = [{ cor: 0, piloto: 0 }, { cor: 2, piloto: 1 }];
-  var VE = window.VruuumVeiculos;
+  var VE = window.VruuumVeiculos, SE = window.VruuumSelfie;
+  // a selfie do jogador k, se ele escolheu usar a foto (fica só neste aparelho: selfie.js)
+  function fotoDe(k) { return k >= 0 && pref.carros[k] && pref.carros[k].foto && SE ? SE.carregar(k) : null; }
   pref.carros.forEach(function (c, k) { if (!VE.achar(c.veic)) c.veic = k ? 'gt' : 'classico'; });
   function salvar() { gravar('vruuum.pref', pref); }
 
@@ -71,9 +75,15 @@
         b.style.background = cor; b.setAttribute('data-cor', k); $('cores').appendChild(b);
       });
       D.PILOTOS.forEach(function (emo, k) {
-        var b = botao('bicho', emo, function () { pref.carros[editando].piloto = k; salvar(); Som.tocar('buzina', editando); marcar(); });
+        var b = botao('bicho', emo, function () { pref.carros[editando].piloto = k; pref.carros[editando].foto = false; salvar(); Som.tocar('buzina', editando); marcar(); });
         b.textContent = emo; b.setAttribute('data-piloto', k); $('bichos').appendChild(b);
       });
+      if (SE) {
+        // a própria foto (aparece depois de tirar) e o botão de tirar/trocar a selfie
+        var bf = botao('bicho foto', t('Minha foto', 'My photo'), function () { pref.carros[editando].foto = true; salvar(); Som.tocar('buzina', editando); marcar(); });
+        bf.id = 'btFoto'; var cvf = document.createElement('canvas'); cvf.width = cvf.height = 76; bf.appendChild(cvf); $('bichos').appendChild(bf);
+        var bc = botao('bicho camera', t('Tirar selfie', 'Take a selfie'), abrirSelfie); bc.textContent = '📸'; $('bichos').appendChild(bc);
+      }
       Array.prototype.forEach.call(document.querySelectorAll('[data-aba]'), function (b) {
         b.addEventListener('click', function () { editando = +b.getAttribute('data-aba'); Som.tocar('clique'); marcar(); });
       });
@@ -88,15 +98,85 @@
     var passo = function () {
       if (estadoTela !== 'menu') { animPrevia = 0; return; }
       var c = pref.carros[editando];
-      D.previa($('previa'), D.CORES[c.cor], D.PILOTOS[c.piloto], c.veic);
+      D.previa($('previa'), D.CORES[c.cor], D.PILOTOS[c.piloto], c.veic, fotoDe(editando));
       animPrevia = requestAnimationFrame(passo);
     };
     animPrevia = requestAnimationFrame(passo);
   }
+  // ---------- selfie: tirar, achar o rosto (sem internet), ajustar o círculo, recortar ----------
+  var ed = { img: null, url: null, esc: 1, roda: null, arrasta: null };
+  function abrirSelfie() {
+    $('selfie').hidden = false; $('selfieEditor').hidden = true; $('selfieAviso').textContent = '';
+    $('selfieApagar').hidden = !SE.tem(editando);
+    SE.prepararDetector();   // já vai carregando o reconhecedor de rosto (só na primeira vez precisa de internet)
+    try { $('selfieCamera').parentNode.querySelector('input').focus(); } catch (e) { /* ok */ }
+  }
+  function fecharSelfie() {
+    $('selfie').hidden = true;
+    if (ed.url) { URL.revokeObjectURL(ed.url); ed.url = null; }
+    ed.img = null; $('selfieCamera').value = ''; $('selfieGaleria').value = '';
+    marcar();
+  }
+  function desenharEditor() {
+    var cv = $('selfieTela'), c = cv.getContext('2d'), r = ed.roda, k = ed.esc;
+    if (!ed.img || !r) return;
+    c.drawImage(ed.img, 0, 0, cv.width, cv.height);
+    c.fillStyle = 'rgba(11,10,31,.62)'; c.beginPath(); c.rect(0, 0, cv.width, cv.height); c.arc(r.x * k, r.y * k, r.r * k, 0, Math.PI * 2, true); c.fill();
+    c.strokeStyle = '#ffd166'; c.lineWidth = 3; if (c.setLineDash) c.setLineDash([10, 7]);
+    c.beginPath(); c.arc(r.x * k, r.y * k, r.r * k, 0, Math.PI * 2); c.stroke(); if (c.setLineDash) c.setLineDash([]);
+  }
+  function abrirFoto(arquivo) {
+    if (!arquivo) return;
+    if (ed.url) URL.revokeObjectURL(ed.url);
+    ed.url = URL.createObjectURL(arquivo);
+    var img = new Image();
+    img.onload = function () {
+      ed.img = img;
+      var cv = $('selfieTela'), deitado = window.innerWidth > window.innerHeight;
+      var maxW = Math.min(window.innerWidth - 60, deitado ? 520 : 480), maxH = window.innerHeight * (deitado ? 0.62 : 0.5);
+      ed.esc = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+      cv.width = Math.round(img.naturalWidth * ed.esc); cv.height = Math.round(img.naturalHeight * ed.esc);
+      var menor = Math.min(img.naturalWidth, img.naturalHeight);
+      ed.roda = { x: img.naturalWidth / 2, y: img.naturalHeight * 0.42, r: menor * 0.3 };
+      $('selfieTam').value = 30; $('selfieEditor').hidden = false;
+      $('selfieAviso').textContent = t('🔎 Procurando o rosto…', '🔎 Looking for the face…');
+      desenharEditor();
+      SE.acharRosto(img).then(function (achou) {
+        if (ed.img !== img) return;
+        if (achou) { ed.roda = achou; $('selfieTam').value = Math.round(achou.r / menor * 100); $('selfieAviso').textContent = t('✅ Achei o rosto! Se precisar, arraste o círculo ou mude o tamanho.', '✅ Found the face! Drag the circle or change its size if needed.'); }
+        else $('selfieAviso').textContent = t('🙂 Não achei o rosto sozinho. Arraste o círculo até ele.', "🙂 Couldn't find the face by myself. Drag the circle onto it.");
+        desenharEditor();
+      });
+    };
+    img.src = ed.url;
+  }
+  if (SE) {
+    $('selfieCamera').addEventListener('change', function (e) { abrirFoto(e.target.files && e.target.files[0]); });
+    $('selfieGaleria').addEventListener('change', function (e) { abrirFoto(e.target.files && e.target.files[0]); });
+    $('selfieTam').addEventListener('input', function () { if (!ed.img) return; ed.roda.r = +$('selfieTam').value / 100 * Math.min(ed.img.naturalWidth, ed.img.naturalHeight); desenharEditor(); });
+    var telaSelfie = $('selfieTela');
+    var ponto = function (e) { var b = telaSelfie.getBoundingClientRect(); return { x: (e.clientX - b.left) * telaSelfie.width / b.width / ed.esc, y: (e.clientY - b.top) * telaSelfie.height / b.height / ed.esc }; };
+    telaSelfie.addEventListener('pointerdown', function (e) { if (!ed.img) return; e.preventDefault(); try { telaSelfie.setPointerCapture(e.pointerId); } catch (x) { /* ok */ } var p = ponto(e); ed.arrasta = { dx: ed.roda.x - p.x, dy: ed.roda.y - p.y }; });
+    telaSelfie.addEventListener('pointermove', function (e) {
+      if (!ed.arrasta) return; e.preventDefault();
+      var p = ponto(e), W = ed.img.naturalWidth, H = ed.img.naturalHeight;
+      ed.roda.x = Math.max(0, Math.min(W, p.x + ed.arrasta.dx)); ed.roda.y = Math.max(0, Math.min(H, p.y + ed.arrasta.dy)); desenharEditor();
+    });
+    ['pointerup', 'pointercancel'].forEach(function (n) { telaSelfie.addEventListener(n, function () { ed.arrasta = null; }); });
+    $('selfieUsar').addEventListener('click', function () {
+      if (!ed.img) return;
+      if (SE.salvar(editando, SE.recortar(ed.img, ed.roda))) { pref.carros[editando].foto = true; salvar(); Som.tocar('chegou'); fecharSelfie(); }
+      else $('selfieAviso').textContent = t('Não deu para guardar a foto neste aparelho.', "Couldn't save the photo on this device.");
+    });
+    $('selfieApagar').addEventListener('click', function () { SE.apagar(editando); pref.carros[editando].foto = false; salvar(); fecharSelfie(); });
+    $('selfieFechar').addEventListener('click', fecharSelfie);
+  }
+
   function barra(v) { return Math.max(25, Math.min(100, 30 + (v - 0.92) / 0.2 * 70)) + '%'; }
   function marcar() {
     Array.prototype.forEach.call(document.querySelectorAll('[data-jogadores]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-jogadores') === pref.jogadores)); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-nivel]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-nivel') === pref.nivel)); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-visual]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-visual') === pref.visual)); });
     if (editando >= pref.jogadores) editando = 0;
     var c = pref.carros[editando], v = VE.achar(c.veic);
     $('abas').hidden = pref.jogadores < 2;
@@ -106,10 +186,16 @@
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-veic]'), function (b) {
       b.setAttribute('aria-pressed', String(b.getAttribute('data-veic') === c.veic));
-      D.miniatura(b.querySelector('canvas'), D.CORES[c.cor], D.PILOTOS[c.piloto], b.getAttribute('data-veic'));
+      D.miniatura(b.querySelector('canvas'), D.CORES[c.cor], D.PILOTOS[c.piloto], b.getAttribute('data-veic'), fotoDe(editando));
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-cor]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-cor') === c.cor)); });
-    Array.prototype.forEach.call(document.querySelectorAll('[data-piloto]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-piloto') === c.piloto)); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-piloto]'), function (b) { b.setAttribute('aria-pressed', String(!c.foto && +b.getAttribute('data-piloto') === c.piloto)); });
+    var bf = $('btFoto'), fot = SE && SE.carregar(editando);
+    if (bf) {
+      bf.hidden = !fot; bf.setAttribute('aria-pressed', String(!!c.foto && !!fot));
+      if (fot) { var desenhaFoto = function () { var x = bf.querySelector('canvas').getContext('2d'); x.clearRect(0, 0, 76, 76); x.save(); x.beginPath(); x.arc(38, 38, 37, 0, Math.PI * 2); x.clip(); x.drawImage(fot.img, 0, 0, 76, 76); x.restore(); }; if (fot.img.complete) desenhaFoto(); else fot.img.onload = function () { desenhaFoto(); marcar(); }; }
+    }
+    if (c.foto && !fot) c.foto = false;
     $('nomeVeic').textContent = (pref.jogadores === 2 ? D.PILOTOS[c.piloto] + ' ' : '') + t(v.nome[0], v.nome[1]) + (VE.voa(v.id) ? t(' · voa no céu ✈️', ' · flies in the sky ✈️') : '');
     $('barraVel').style.width = barra(v.vel); $('barraCurva').style.width = barra(v.curva);
     var dica = $('dicaTecla'); dica.hidden = TOQUE || pref.jogadores < 2;
@@ -123,6 +209,7 @@
   }
   opcao('data-jogadores', function (v) { pref.jogadores = +v; });
   opcao('data-nivel', function (v) { pref.nivel = v; });
+  opcao('data-visual', function (v) { pref.visual = v; D.definirEstilo(v); });
   $('btLingua').addEventListener('click', function () { pref.lingua = pref.lingua === 'en' ? 'pt' : 'en'; salvar(); traduzir(); marcar(); });
   $('btSom').addEventListener('click', function () { Som.iniciar(); var lig = Som.alternar(); $('btSom').textContent = lig ? '🔊' : '🔇'; });
   $('btAjuda').addEventListener('click', function () { var a = $('ajuda'); a.hidden = !a.hidden; $('btAjuda').setAttribute('aria-expanded', String(!a.hidden)); });
@@ -157,9 +244,9 @@
     if (TOQUE && pref.jogadores === 1) ligarMovimento();
     mov.zerar(); mov.calibrar();
     estado = M.novaCorrida(pref.nivel, (Date.now() % 1000000007) | 0, pref.jogadores);
-    jogs = pref.carros.slice(0, pref.jogadores).map(function (c) { return { cor: D.CORES[c.cor], piloto: D.PILOTOS[c.piloto], veic: c.veic }; });
+    jogs = pref.carros.slice(0, pref.jogadores).map(function (c) { return { cor: D.CORES[c.cor], piloto: D.PILOTOS[c.piloto], veic: c.veic, foto: fotoDe(pref.carros.indexOf(c)) }; });
     estado.jogadores.forEach(function (j, k) { var v = VE.achar(jogs[k].veic); j.mod = { vel: v.vel, curva: v.curva }; });
-    D.preparar(estado, jogs, pref.lingua);
+    D.preparar(estado, jogs, pref.lingua, pref.visual);
     tela('jogo'); redimensionar();
     $('pausa').hidden = true; pausado = false; ponteiros = {}; pularPend = [false, false];
     lerBordas(); telaCheia(true);
@@ -288,6 +375,7 @@
   }
   document.addEventListener('keydown', function (e) {
     var n = nomeTecla(e);
+    if (!$('selfie').hidden) { if (n === 'voltar') { e.preventDefault(); fecharSelfie(); } return; }
     if (estadoTela === 'entrada') { if (n === 'ok' || n === 'espaco') { e.preventDefault(); entrar(); } return; }
     if (estadoTela !== 'jogo' || pausado) {
       if (n === 'esq' || n === 'cima') { e.preventDefault(); moverFoco(-1); }

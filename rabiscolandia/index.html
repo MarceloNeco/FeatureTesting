@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; font-src 'self'; connect-src 'self' data: blob: https://*.supabase.co wss://*.supabase.co; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Rabiscolândia — Bolinho de Chuva · SolverONE</title>
+<link rel="icon" href="icone-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-192.png">
+<meta name="theme-color" content="#1b1446">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Desenhar, colorir e pintar por números, com pincéis vivos, adesivos animados, paisagens, música e até desenhar com a mão na frente da câmera ou na TV. / Draw, color and paint by numbers with live brushes, animated stickers, landscapes, music — even draw with your hand in front of the camera or on the TV.">
+<link rel="stylesheet" href="estilo.css">
+<!--
+  Rabiscolândia — sexta brincadeira da família Bolinho de Chuva (SolverONE · Feature Tester).
+  Desenhar livre, livro de colorir (contorno), pintar por números, adesivos animados, fundos, música,
+  mão na câmera (MediaPipe, no aparelho) e TV com o celular de controle.
+  Sem login, sem banco, sem cookie: tudo fica no aparelho. Nada de script inline: a CSP acima não permite.
+  Mapa dos arquivos: LEIA-ME.md. Versão: APP_VERSION em app.js, VERSAO em sw.js e versoes.json.
+-->
+</head>
+<body>
+
+<section id="entrada" class="tela ativa" data-recurso="rabiscolandia">
+  <div class="rabiscos" aria-hidden="true"></div>
+  <h1 class="logo" aria-label="Rabiscolândia"><span>R</span><span>a</span><span>b</span><span>i</span><span>s</span><span>c</span><span>o</span><span>l</span><span>â</span><span>n</span><span>d</span><span>i</span><span>a</span></h1>
+  <p class="sub" data-t="desenhar, colorir e pintar por números — com a mão, no celular, no tablet e na TV|draw, color and paint by numbers — with your hand, on phone, tablet and TV"></p>
+  <button id="btEntrar" class="grande" type="button" data-t="🎨 Toque para começar!|🎨 Tap to start!"></button>
+  <p class="dica" data-t="Aumente o volume para ouvir a música 🎵|Turn the volume up for the music 🎵"></p>
+</section>
+
+<section id="menu" class="tela" data-recurso="rabiscolandia">
+  <div class="faixa">
+    <button id="btLingua" class="mini" type="button" aria-label="Idioma / Language">EN</button>
+    <button id="btMusica" class="mini" type="button" aria-label="Música / Music">🎵</button>
+    <button id="btEfeitos" class="mini" type="button" aria-label="Sons / Sounds">🔊</button>
+    <button id="btAjuda" class="mini" type="button" aria-label="Como brincar / How to play" aria-expanded="false">❓</button>
+  </div>
+  <h1 class="logo pequeno" aria-label="Rabiscolândia"><span>R</span><span>a</span><span>b</span><span>i</span><span>s</span><span>c</span><span>o</span><span>l</span><span>â</span><span>n</span><span>d</span><span>i</span><span>a</span></h1>
+  <div id="ajuda" class="ajuda" hidden>
+    <p data-t="🎨 Desenhar livre: escolha o pincel, a cor e o tamanho embaixo e desenhe com o dedo. Os pincéis ✨ vivos mexem sozinhos: arco-íris que corre, neon que pisca, purpurina que brilha e minhoca que dança.|🎨 Free drawing: pick a brush, a color and a size at the bottom and draw with your finger. The ✨ live brushes move by themselves: running rainbow, glowing neon, sparkling glitter and a dancing worm."></p>
+    <p data-t="📚 Livro de colorir: escolha um desenho e pinte com qualquer pincel ou com o balde 🪣, que enche a área sem passar do contorno. 👀 mostra a colinha (como pode ficar) e 🎨 troca as cores da colinha.|📚 Coloring book: pick a picture and paint with any brush or the bucket 🪣, which fills the area without crossing the outline. 👀 shows the cheat sheet and 🎨 changes its colors."></p>
+    <p data-t="🔢 Pintar por números: escolha uma cor numerada embaixo e toque nas áreas com o mesmo número. Use dois dedos para chegar perto. 🪄 mostra onde falta.|🔢 Paint by numbers: pick a numbered color at the bottom and tap the areas with the same number. Use two fingers to zoom. 🪄 shows what is missing."></p>
+    <p data-t="🖐 Com a mão: fique na frente da câmera. Mão aberta ✋ mira, mão fechada ✊ desenha. Mão aberta parada em cima de um botão aperta o botão.|🖐 With your hand: stand in front of the camera. Open hand ✋ aims, closed hand ✊ draws. Holding an open hand over a button presses it."></p>
+    <p data-t="⭐ Adesivos: escolha um e toque na folha para colar. Os animados mexem! ✋ arrasta um adesivo. 🏞️ troca o fundo: paisagens, cores ou uma foto sua.|⭐ Stickers: pick one and tap the page to stick it. The animated ones move! ✋ drags a sticker. 🏞️ changes the background: landscapes, colors or your own photo."></p>
+    <p data-t="📱 Gire o aparelho à vontade: o menu fica no mesmo lugar e o desenho se ajusta para caber na tela inteira. Dois dedos fazem zoom.|📱 Turn the device any way: the menu stays in place and the drawing adjusts to fill the whole screen. Two fingers zoom."></p>
+  </div>
+  <div class="botoes-menu">
+    <button id="btLivre" class="grande" type="button" data-t="🎨 Desenhar livre|🎨 Free drawing"></button>
+    <button id="btLivro" class="grande rosa" type="button" data-t="📚 Livro de colorir|📚 Coloring book"></button>
+    <button id="btNumeros" class="grande ciano" type="button" data-t="🔢 Pintar por números|🔢 Paint by numbers"></button>
+    <div class="linha-menu">
+      <button id="btComMao" class="medio" type="button" data-t="🖐 Desenhar com a mão|🖐 Draw with your hand"></button>
+      <button id="btMeus" class="medio" type="button"><span data-t="🖼️ Meus desenhos|🖼️ My drawings"></span> <span id="qtdMeus" class="bolha">0</span></button>
+    </div>
+    <div class="linha-menu">
+      <button id="btTV" class="medio" type="button" data-so-site data-t="📺 Na TV|📺 On the TV"></button>
+      <button id="btInstalar" class="medio" type="button" hidden data-t="📲 Instalar|📲 Install"></button>
+    </div>
+  </div>
+  <p id="versao" class="versao"></p>
+</section>
+
+<section id="livro" class="tela" data-recurso="rabiscolandia">
+  <div class="cabeca">
+    <button class="voltar mini" type="button" aria-label="Voltar / Back">←</button>
+    <h2 id="livroTitulo"></h2>
+  </div>
+  <div id="livroCats" class="chips" role="tablist"></div>
+  <div id="livroGrade" class="grade"></div>
+</section>
+
+<section id="meus" class="tela" data-recurso="rabiscolandia">
+  <div class="cabeca">
+    <button class="voltar mini" type="button" aria-label="Voltar / Back">←</button>
+    <h2 data-t="🖼️ Meus desenhos|🖼️ My drawings"></h2>
+  </div>
+  <p id="meusVazio" class="dica" hidden data-t="Ainda não tem nenhum desenho guardado. Eles ficam aqui sozinhos enquanto você desenha.|No drawings yet. They are kept here automatically while you draw."></p>
+  <div id="meusGrade" class="grade"></div>
+  <p class="dica pequena" data-t="Ficam só neste aparelho (até 40). Para guardar para sempre, use 📸 e salve no celular.|Kept only on this device (up to 40). To keep them forever, use 📸 and save to the phone."></p>
+</section>
+
+<section id="tvEscolha" class="tela" data-recurso="rabiscolandia">
+  <div class="cabeca">
+    <button class="voltar mini" type="button" aria-label="Voltar / Back">←</button>
+    <h2 data-t="📺 Desenhar na TV|📺 Draw on the TV"></h2>
+  </div>
+  <div class="cartoes-tv">
+    <div class="cartao">
+      <h3 data-t="Jeito mais fácil: espelhar|Easiest: screen mirroring"></h3>
+      <p data-t="Espelhe a tela deste aparelho na TV (Android: Transmitir ou Smart View; iPhone/iPad: Espelhar Tela) e use 🖐 Desenhar com a mão com o aparelho em pé, perto da TV, com a câmera da frente virada para você.|Mirror this device on the TV (Android: Cast or Smart View; iPhone/iPad: Screen Mirroring) and use 🖐 Draw with your hand with the device standing near the TV, front camera facing you."></p>
+      <button id="btTVMao" class="medio" type="button" data-t="🖐 Desenhar com a mão|🖐 Draw with your hand"></button>
+    </div>
+    <div class="cartao">
+      <h3 data-t="A TV abre a Rabiscolândia|The TV opens Rabiscolândia"></h3>
+      <p data-t="Na TV, abra solverone.com.br/tv/rabiscolandia. Ela mostra um código. Aqui, toque em Controlar a TV e digite o código. O celular vira o controle: deslizar o dedo, mexer o celular ou a mão na câmera.|On the TV, open solverone.com.br/tv/rabiscolandia. It shows a code. Here, tap Control the TV and type the code. The phone becomes the remote: slide your finger, move the phone or your hand in the camera."></p>
+      <div class="linha-menu">
+        <button id="btSouTV" class="medio" type="button" data-t="📺 Esta é a TV|📺 This is the TV"></button>
+        <button id="btSouControle" class="medio rosa" type="button" data-t="🎮 Controlar a TV|🎮 Control the TV"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="controle" class="tela" data-recurso="rabiscolandia">
+  <div class="cabeca">
+    <button class="voltar mini" type="button" aria-label="Voltar / Back">←</button>
+    <h2 data-t="🎮 Controle da TV|🎮 TV remote"></h2>
+  </div>
+  <form id="ctrlEntrar" class="ctrl-entrar">
+    <label><span data-t="Código da TV|TV code"></span> <input id="ctrlCodigo" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" placeholder="ABCD"></label>
+    <label><span data-t="Seu nome|Your name"></span> <input id="ctrlNome" maxlength="16" autocomplete="off" placeholder="Ex.: Ana"></label>
+    <button id="ctrlConectar" class="grande" type="submit" data-t="Conectar|Connect"></button>
+    <p id="ctrlMsg" class="dica" aria-live="polite"></p>
+  </form>
+  <div id="ctrlPainel" class="ctrl-painel" hidden>
+    <div class="chips" role="tablist">
+      <button class="chip ctrl-modo" type="button" data-modo="toque" aria-pressed="true" data-t="👆 Dedo|👆 Finger"></button>
+      <button class="chip ctrl-modo" type="button" data-modo="giro" aria-pressed="false" data-t="📱 Mexer o celular|📱 Move the phone"></button>
+      <button class="chip ctrl-modo" type="button" data-modo="mao" aria-pressed="false" data-t="🖐 Mão na câmera|🖐 Hand in camera"></button>
+    </div>
+    <div id="ctrlArea" class="ctrl-area" aria-label="Área de desenho / Drawing pad">
+      <p id="ctrlDica" class="ctrl-dica"></p>
+      <video id="ctrlVideo" class="ctrl-video" playsinline muted hidden></video>
+      <canvas id="ctrlPontos" class="ctrl-pontos" width="320" height="240" hidden></canvas>
+    </div>
+    <div class="linha-ctrl">
+      <button id="ctrlSegurar" class="grande" type="button" hidden data-t="✏️ Segure para desenhar|✏️ Hold to draw"></button>
+      <button id="ctrlCentro" class="medio" type="button" hidden data-t="🎯 Centralizar|🎯 Center"></button>
+    </div>
+    <div id="ctrlCores" class="faixa-cores"></div>
+    <div id="ctrlPinceis" class="faixa-cores"></div>
+    <div class="linha-ctrl">
+      <button id="ctrlDesfazer" class="mini" type="button" aria-label="Desfazer / Undo">↩</button>
+      <button id="ctrlMenos" class="mini" type="button" aria-label="Diminuir / Zoom out">🔍−</button>
+      <button id="ctrlAjustar" class="mini" type="button" aria-label="Ajustar / Fit">⤢</button>
+      <button id="ctrlMais" class="mini" type="button" aria-label="Aumentar / Zoom in">🔍+</button>
+      <button id="ctrlCarimbo" class="mini" type="button" aria-label="Adesivo / Sticker">⭐</button>
+      <button id="ctrlMusica" class="mini" type="button" aria-label="Música / Music">🎵</button>
+    </div>
+  </div>
+</section>
+
+<section id="pintar" class="tela" data-recurso="rabiscolandia">
+  <div id="topo" class="topo">
+    <button id="btSair" class="mini" type="button" aria-label="Início / Home">🏠</button>
+    <button id="btDesfazer" class="mini" type="button" aria-label="Desfazer / Undo" disabled>↩</button>
+    <span id="tituloPintar" class="titulo-pintar"></span>
+    <button id="btMao" class="mini" type="button" aria-label="Desenhar com a mão / Draw with your hand" aria-pressed="false">🖐</button>
+    <button id="btMusica2" class="mini" type="button" aria-label="Música / Music">🎵</button>
+    <button id="btLimpar" class="mini" type="button" aria-label="Começar de novo / Start over">🗑️</button>
+    <button id="btFoto" class="mini" type="button" aria-label="Foto / Photo">📸</button>
+  </div>
+  <div class="area-tela">
+    <canvas id="tela" aria-label="Folha de desenho / Drawing sheet"></canvas>
+    <div id="tvChip" class="tv-chip" hidden></div>
+    <div id="flutua" class="flutua">
+      <button id="btColinha" class="mini" type="button" hidden aria-label="Colinha / Cheat sheet" aria-pressed="false">👀</button>
+      <button id="btVariacao" class="mini" type="button" hidden aria-label="Outras cores / Other colors">🎨</button>
+      <button id="btDica" class="mini" type="button" hidden aria-label="Dica / Hint">🪄</button>
+      <button id="btZoomMais" class="mini so-sem-toque" type="button" aria-label="Aumentar / Zoom in">🔍+</button>
+      <button id="btZoomMenos" class="mini so-sem-toque" type="button" aria-label="Diminuir / Zoom out">🔍−</button>
+      <button id="btAjustar" class="mini" type="button" aria-label="Ver tudo / Fit">⤢</button>
+    </div>
+    <div id="colinha" class="colinha" hidden><img id="colinhaImg" alt=""><span data-t="Colinha|Cheat sheet"></span></div>
+    <div id="camBox" class="cam-box" hidden>
+      <video id="camVideo" playsinline muted></video>
+      <canvas id="camPontos" width="320" height="240"></canvas>
+      <p id="camStatus" aria-live="polite"></p>
+    </div>
+    <p id="avisoPerto" class="aviso-perto" hidden data-t="Use dois dedos para chegar perto e ver os números 🔍|Use two fingers to zoom in and see the numbers 🔍"></p>
+  </div>
+  <div id="barra" class="barra">
+    <div id="ferramentas" class="ferramentas"></div>
+    <div id="cores" class="faixa-cores"></div>
+    <div id="paleta" class="paleta" hidden></div>
+  </div>
+  <div id="painel" class="painel" hidden role="dialog" aria-modal="false">
+    <div class="painel-cabeca"><h3 id="painelTitulo"></h3><button id="painelFechar" class="mini" type="button" aria-label="Fechar / Close">✕</button></div>
+    <div id="painelCorpo" class="painel-corpo"></div>
+  </div>
+</section>
+
+<section id="desligado" class="tela" hidden>
+  <h2 data-t="A Rabiscolândia está descansando agora.|Rabiscolândia is resting right now."></h2>
+</section>
+
+<div id="mira" class="mira" hidden aria-hidden="true"><span></span></div>
+<div id="aviso" class="aviso" role="status" aria-live="polite" hidden></div>
+
+<div id="janela" class="janela" hidden role="dialog" aria-modal="true" aria-labelledby="janelaTitulo">
+  <div class="janela-caixa">
+    <h2 id="janelaTitulo"></h2>
+    <p id="janelaTexto"></p>
+    <img id="janelaImg" alt="" hidden>
+    <div id="janelaBotoes" class="janela-botoes"></div>
+  </div>
+</div>
+
+<input id="arquivoFoto" type="file" accept="image/*" hidden>
+
+<script src="folha.js"></script>
+<script src="paginas.js"></script>
+<script src="fundos.js"></script>
+<script src="adesivos.js"></script>
+<script src="som.js"></script>
+<script src="pintura.js"></script>
+<script src="mao.js"></script>
+<script src="../recursos.js" data-app="feature-tester" data-fora-do-arquivo></script>
+<script src="app.js"></script>
+<script src="sala.js"></script>
+<script src="tv.js"></script>
+</body>
+</html>

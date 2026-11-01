@@ -52,6 +52,7 @@
     // nível Criança: sem mexer no volante, o carro volta sozinho para a estrada
     if (cfg.ajuda && !dir && Math.abs(j.x) > 0.8) j.x -= (j.x > 0 ? 1 : -1) * dt * 0.8;
     j.x = Math.max(-cfg.limiteX, Math.min(cfg.limiteX, j.x));
+    if (seg.tunel) j.x = Math.max(-1.1, Math.min(1.1, j.x));   // dentro do túnel as paredes seguram o carro na pista
 
     // acelera sozinho (criança não precisa segurar nada); freio é opcional
     var alvo = max;

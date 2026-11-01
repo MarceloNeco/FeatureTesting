@@ -2,6 +2,38 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "0.9.0",
+      "data": "01/Nov/2026",
+      "hora": "17:19:00",
+      "pt": [
+        "Visual Neon (o novo padrão, mais sóbrio): a corrida é à noite, com céu estrelado e lua, asfalto escuro, bordas da estrada em linhas de neon brilhando, faixas acesas e postes de neon piscando. A paisagem fica no escuro, só com as luzes acesas.",
+        "Túneis: de 2 a 4 por corrida. No chão, túnel escuro com contorno de luz na entrada e faixas de neon correndo pelas paredes (as paredes seguram o carro na pista). No céu, um túnel de anéis de luz para atravessar voando.",
+        "Veículos iluminados: faróis clareando a estrada à frente, luz neon por baixo na cor do carro, lanternas brilhando e rastro de luz em alta velocidade. O trânsito anda com as lanternas acesas e os aviões piscam as luzes das asas.",
+        "No neon, os itens ficam mais sóbrios: estrela de luz (sem carinha), portal de turbo em setas de neon e mancha de óleo no lugar da lama. Quem preferir o jeito antigo escolhe 🌈 Colorido no menu."
+      ],
+      "en": [
+        "Neon look (the new default, more grown-up): the race happens at night, with a starry sky and moon, dark asphalt, glowing neon road edges, lit lane lines and blinking neon posts. The scenery sits in the dark, only the lights are on.",
+        "Tunnels: 2 to 4 per race. On the ground, a dark tunnel with a lit entrance and neon strips racing along the walls (the walls keep the car on the road). In the sky, a tunnel of light rings to fly through.",
+        "Lit-up rides: headlights lighting the road ahead, neon underglow in the car's color, glowing taillights and light trails at high speed. Traffic drives with taillights on and planes blink their wing lights.",
+        "In neon, items look more grown-up: a star of light (no face), a turbo gate of neon chevrons and an oil slick instead of mud. Prefer the old look? Pick 🌈 Colorful in the menu."
+      ]
+    },
+    {
+      "versao": "0.8.0",
+      "data": "01/Nov/2026",
+      "hora": "17:02:00",
+      "pt": [
+        "O piloto agora fica de costas, olhando a estrada: aparece a nuca, as orelhas e o pelo de cada bichinho (no kart e na moto, o capacete). De vez em quando ele vira para trás, olha para você e sorri, e volta a olhar para a frente.",
+        "📸 Selfie no carrinho: na garagem, toque no 📸, tire uma selfie ou escolha uma foto. O jogo acha o rosto sozinho, sem internet, e mostra um círculo que dá para arrastar e aumentar. O seu rosto vira o piloto do carro, da moto ou do avião; de costas aparece o seu cabelo, com a cor tirada da foto.",
+        "A foto fica só neste aparelho e nunca vai para a internet. Dá para apagar a qualquer hora em 📸 → Apagar minha foto. Cada jogador tem a sua."
+      ],
+      "en": [
+        "The driver now faces the road: you see the back of the head, the ears and fur of each animal (a helmet on the kart and motorbike). Every now and then they turn around, look at you and smile, then face forward again.",
+        "📸 Selfie in the car: in the garage, tap 📸 and take a selfie or pick a photo. The game finds the face by itself, offline, and shows a circle you can drag and resize. Your face becomes the driver of the car, bike or plane; from behind you see your hair, in the color taken from the photo.",
+        "The photo stays only on this device and never goes online. You can delete it any time in 📸 → Delete my photo. Each player has their own."
+      ]
+    },
+    {
       "versao": "0.7.0",
       "data": "01/Nov/2026",
       "hora": "16:47:00",

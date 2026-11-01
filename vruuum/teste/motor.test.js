@@ -162,3 +162,28 @@ test('jeito do veículo: mais rápido corre mais, curva melhor vira mais (na ret
   assert.ok(rodar({ vel: 1.1, curva: 1 }, {}, 3).vel > rodar({ vel: 1, curva: 1 }, {}, 3).vel);
   assert.ok(rodar({ vel: 1, curva: 1.12 }, { dir: 1 }, 0.3).x > rodar({ vel: 1, curva: 1 }, { dir: 1 }, 0.3).x);
 });
+
+test('túneis: alguns por corrida, sem encostar em portal, largada ou chegada', () => {
+  for (const [nivel, n] of [['crianca', 2], ['normal', 3], ['turbo', 4]]) {
+    for (let semente = 1; semente < 8; semente++) {
+      const p = P.montar(nivel, semente * 31);
+      assert.ok(p.tuneis.length >= 1 && p.tuneis.length <= n, nivel + ' ' + p.tuneis.length);
+      const quarto = p.chegada / 4;
+      for (const [a, b] of p.tuneis) {
+        assert.ok(a > 200 && b < p.chegada - 100, 'longe da largada e da chegada');
+        for (let q = 1; q < 4; q++) assert.ok(Math.round(quarto * q) < a - 30 || Math.round(quarto * q) > b + 30, 'longe do portal');
+        assert.ok(p.segs[a].entrada && p.segs[a].tunel && !p.segs[b].tunel);
+        for (let i = a; i < b; i++) assert.equal(p.segs[i].enfeites.length, 0, 'sem árvore dentro do túnel');
+      }
+    }
+  }
+});
+
+test('dentro do túnel o carro não atravessa a parede', () => {
+  const e = M.novaCorrida('normal', 5, 1);
+  e.fase = 'corrida'; e.carros = [];
+  const [a] = e.pista.tuneis[0], j = e.jogadores[0];
+  j.z = (a + 5) * P.SEG; j.x = 0; j.vel = 3000;
+  for (let k = 0; k < 120; k++) M.atualizar(e, [{ dir: -1 }], 1 / 60);
+  assert.ok(j.x >= -1.1, 'x ' + j.x);
+});

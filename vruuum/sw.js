@@ -3,9 +3,9 @@
    cópia primeiro. Músicas gravadas (MP3, ~10 MB): baixadas em segundo plano depois de instalar e na
    primeira vez que tocam; sempre servidas inteiras da cópia (o <audio> pede pedaços, o cache não). Cache com o nome do app: só apaga caches "vruuum-" (nunca os dos outros apps
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
-var VERSAO = '0.7.0';
+var VERSAO = '0.9.0';
 var CACHE = 'vruuum-v' + VERSAO;
-var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'pista.js', 'motor.js', 'sprites.js', 'veiculos.js', 'desenho.js', 'rock.js', 'som.js', 'movimento.js', 'app.js', 'baixar.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
+var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'pista.js', 'motor.js', 'sprites.js', 'veiculos.js', 'cabeca.js', 'desenho.js', 'rock.js', 'som.js', 'movimento.js', 'selfie.js', 'app.js', 'baixar.js', 'rosto.tflite', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 var CACHE_MUSICAS = 'vruuum-musicas-v1';   // não muda a cada versão: as músicas não baixam de novo
 var MUSICAS = ['musicas/volatile-reaction.mp3', 'musicas/kart-grand-prix.mp3', 'musicas/heroic-age.mp3', 'musicas/lava.mp3', 'musicas/unholy-knight.mp3', 'musicas/las-dunas-champions.mp3'];
 function guardarMusicas() {
@@ -35,7 +35,7 @@ self.addEventListener('fetch', function (e) {
     }));
     return;
   }
-  if (/\.(woff2|png)$/i.test(url.pathname)) {
+  if (/\.(woff2|png|wasm|tflite|task|mjs)$/i.test(url.pathname)) {   // fonte, imagens e o reconhecedor de rosto: cópia primeiro
     e.respondWith(caches.match(req).then(function (r) { return r || fetch(req).then(function (resp) { if (resp.status === 200) { var c2 = resp.clone(); caches.open(CACHE).then(function (c) { return c.put(req, c2); }).catch(function () {}); } return resp; }); }));
     return;
   }
