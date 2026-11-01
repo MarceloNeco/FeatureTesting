@@ -80,6 +80,18 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
   apaga em 📸 → **🗑️ Apagar minha foto**. Sem o detector (aparelho antigo ou arquivo baixado), o círculo começa no
   meio e a pessoa ajusta à mão.
 
+## Rivais e personagens
+
+- **Rivais** (menu "Rivais", ligado por padrão): 3 personagens correm junto (2 com 2 jogadores), sorteados entre os que
+  ninguém escolheu, no chão ou no céu como o jogador 1. Eles aceleram, desviam de cone, lama e carrinho (às vezes erram:
+  aí ficam mais lentos) e empurram quando encostam. Ficam por perto (quem dispara segura, quem fica para trás acelera),
+  para a corrida ser sempre disputada (`moverRival` em `motor.js`). O placar mostra a posição (🏁 2º / 4) e o fim mostra
+  a classificação; 1º/2º/3º lugar ganham +800/+400/+200 pontos.
+- **Personagens** (`personagens.js`), todos de **domínio público** e desenhados aqui: Emília, Visconde, Saci, Cuca,
+  Curupira, Iara, Chapeuzinho, Pinóquio, Alice, Robin Hood, Sherlock e Papai Noel. Podem ser escolhidos como piloto na
+  garagem (fileira "Personagens de histórias") e ficam de costas, virando para sorrir, como os bichinhos.
+- Personagens de empresas (Mario, Sonic, Disney, DreamWorks, filmes) **não podem entrar**: têm dono.
+
 ## Pontos e checkpoints
 
 Ninguém perde a corrida, mas o placar sobe e desce (`PONTOS` em `motor.js`): estrela **+100**, estrela no ar **+200**,
@@ -151,6 +163,7 @@ No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para
 | `rock.js` | a banda de rock e as 3 músicas (partitura em `MUSICAS`), testadas no Node. |
 | `som.js` | motor, buzina e efeitos sintetizados (WebAudio); liga e desliga a música do `rock.js`. |
 | `app.js` | menu, controles, tela cheia, bordas seguras, laço da corrida, pausa, resultado, recorde, instalar e baixar. `APP_VERSION` aqui. |
+| `personagens.js` | os 12 personagens de domínio público (frente e costas) e o sorteio dos rivais, testados no Node. |
 | `maos.js` | volante no ar: lê as mãos pela câmera (MediaPipe) e vira direção, pulo e freio; contas testadas no Node. |
 | `movimento.js` | **puro**: acelerômetro → direção do volante e pulo pelo toquinho (com calibração no 3‑2‑1), testado no Node. |
 | `cabeca.js` | o piloto animado (de costas, vira e sorri; bichinho ou selfie), testado no Node. |

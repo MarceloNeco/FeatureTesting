@@ -2,7 +2,7 @@
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '1.0.0';
+  var APP_VERSION = '1.1.0';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -16,6 +16,8 @@
   if (pref.jogadores !== 2) pref.jogadores = 1;
   if (NIVEIS.indexOf(pref.nivel) < 0) pref.nivel = 'crianca';
   if (pref.controle !== 'maos') pref.controle = 'toque';
+  if (pref.rivais !== 'sem') pref.rivais = 'com';
+  var PE = window.VruuumPersonagens;
   if (['neon', 'colorido', 'misto'].indexOf(pref.visual) < 0 || !pref.visualV2) { pref.visual = 'misto'; pref.visualV2 = true; }   // misto: alterna dia e noite (padrão desde a 1.0)
   D.definirEstilo(pref.visual);
   if (pref.lingua !== 'en' && pref.lingua !== 'pt') pref.lingua = (navigator.language || 'pt').slice(0, 2) === 'pt' ? 'pt' : 'en';
@@ -76,15 +78,21 @@
         b.style.background = cor; b.setAttribute('data-cor', k); $('cores').appendChild(b);
       });
       D.PILOTOS.forEach(function (emo, k) {
-        var b = botao('bicho', emo, function () { pref.carros[editando].piloto = k; pref.carros[editando].foto = false; salvar(); Som.tocar('buzina', editando); marcar(); });
+        var b = botao('bicho', emo, function () { pref.carros[editando].piloto = k; pref.carros[editando].foto = false; pref.carros[editando].personagem = null; salvar(); Som.tocar('buzina', editando); marcar(); });
         b.textContent = emo; b.setAttribute('data-piloto', k); $('bichos').appendChild(b);
       });
       if (SE) {
         // a própria foto (aparece depois de tirar) e o botão de tirar/trocar a selfie
-        var bf = botao('bicho foto', t('Minha foto', 'My photo'), function () { pref.carros[editando].foto = true; salvar(); Som.tocar('buzina', editando); marcar(); });
+        var bf = botao('bicho foto', t('Minha foto', 'My photo'), function () { pref.carros[editando].foto = true; pref.carros[editando].personagem = null; salvar(); Som.tocar('buzina', editando); marcar(); });
         bf.id = 'btFoto'; var cvf = document.createElement('canvas'); cvf.width = cvf.height = 76; bf.appendChild(cvf); $('bichos').appendChild(bf);
         var bc = botao('bicho camera', t('Tirar selfie', 'Take a selfie'), abrirSelfie); bc.textContent = '📸'; $('bichos').appendChild(bc);
       }
+      if (PE) PE.LISTA.forEach(function (p) {   // personagens de domínio público como piloto
+        var b = botao('bicho pers', p.nome[0], function () { pref.carros[editando].personagem = p.id; pref.carros[editando].foto = false; salvar(); Som.tocar('buzina', editando); marcar(); });
+        b.setAttribute('data-personagem', p.id); b.title = p.nome[0];
+        var cv = document.createElement('canvas'); cv.width = cv.height = 80; p.frente(cv.getContext('2d'), 40, 46, 26); b.appendChild(cv);
+        $('personagens').appendChild(b);
+      });
       Array.prototype.forEach.call(document.querySelectorAll('[data-aba]'), function (b) {
         b.addEventListener('click', function () { editando = +b.getAttribute('data-aba'); Som.tocar('clique'); marcar(); });
       });
@@ -99,7 +107,7 @@
     var passo = function () {
       if (estadoTela !== 'menu') { animPrevia = 0; return; }
       var c = pref.carros[editando];
-      D.previa($('previa'), D.CORES[c.cor], D.PILOTOS[c.piloto], c.veic, fotoDe(editando));
+      D.previa($('previa'), D.CORES[c.cor], D.PILOTOS[c.piloto], c.veic, fotoDe(editando), c.personagem);
       animPrevia = requestAnimationFrame(passo);
     };
     animPrevia = requestAnimationFrame(passo);
@@ -173,10 +181,15 @@
     $('selfieFechar').addEventListener('click', fecharSelfie);
   }
 
+  function nomePiloto(k) {
+    var c = pref.carros[k], p = c.personagem && PE ? PE.achar(c.personagem) : null;
+    return p ? t(p.nome[0], p.nome[1]) : (c.foto && fotoDe(k) ? '📸' : D.PILOTOS[c.piloto]);
+  }
   function barra(v) { return Math.max(25, Math.min(100, 30 + (v - 0.92) / 0.2 * 70)) + '%'; }
   function marcar() {
     Array.prototype.forEach.call(document.querySelectorAll('[data-jogadores]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-jogadores') === pref.jogadores)); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-nivel]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-nivel') === pref.nivel)); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-rivais]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-rivais') === pref.rivais)); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-controle]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-controle') === pref.controle)); });
     $('dicaMaos').hidden = pref.controle !== 'maos';
     Array.prototype.forEach.call(document.querySelectorAll('[data-visual]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-visual') === pref.visual)); });
@@ -185,21 +198,22 @@
     $('abas').hidden = pref.jogadores < 2;
     Array.prototype.forEach.call(document.querySelectorAll('[data-aba]'), function (b) {
       var k = +b.getAttribute('data-aba'); b.setAttribute('aria-selected', String(k === editando));
-      b.textContent = D.PILOTOS[pref.carros[k].piloto] + ' ' + t('Jogador ', 'Player ') + (k + 1);
+      b.textContent = nomePiloto(k) + ' · ' + t('Jogador ', 'Player ') + (k + 1);
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-veic]'), function (b) {
       b.setAttribute('aria-pressed', String(b.getAttribute('data-veic') === c.veic));
-      D.miniatura(b.querySelector('canvas'), D.CORES[c.cor], D.PILOTOS[c.piloto], b.getAttribute('data-veic'), fotoDe(editando));
+      D.miniatura(b.querySelector('canvas'), D.CORES[c.cor], D.PILOTOS[c.piloto], b.getAttribute('data-veic'), fotoDe(editando), c.personagem);
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-cor]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-cor') === c.cor)); });
-    Array.prototype.forEach.call(document.querySelectorAll('[data-piloto]'), function (b) { b.setAttribute('aria-pressed', String(!c.foto && +b.getAttribute('data-piloto') === c.piloto)); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-piloto]'), function (b) { b.setAttribute('aria-pressed', String(!c.foto && !c.personagem && +b.getAttribute('data-piloto') === c.piloto)); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-personagem]'), function (b) { b.setAttribute('aria-pressed', String(c.personagem === b.getAttribute('data-personagem'))); });
     var bf = $('btFoto'), fot = SE && SE.carregar(editando);
     if (bf) {
       bf.hidden = !fot; bf.setAttribute('aria-pressed', String(!!c.foto && !!fot));
       if (fot) { var desenhaFoto = function () { var x = bf.querySelector('canvas').getContext('2d'); x.clearRect(0, 0, 76, 76); x.save(); x.beginPath(); x.arc(38, 38, 37, 0, Math.PI * 2); x.clip(); x.drawImage(fot.img, 0, 0, 76, 76); x.restore(); }; if (fot.img.complete) desenhaFoto(); else fot.img.onload = function () { desenhaFoto(); marcar(); }; }
     }
     if (c.foto && !fot) c.foto = false;
-    $('nomeVeic').textContent = (pref.jogadores === 2 ? D.PILOTOS[c.piloto] + ' ' : '') + t(v.nome[0], v.nome[1]) + (VE.voa(v.id) ? t(' · voa no céu ✈️', ' · flies in the sky ✈️') : '');
+    $('nomeVeic').textContent = (pref.jogadores === 2 || c.personagem ? nomePiloto(editando) + ' · ' : '') + t(v.nome[0], v.nome[1]) + (VE.voa(v.id) ? t(' · voa no céu ✈️', ' · flies in the sky ✈️') : '');
     $('barraVel').style.width = barra(v.vel); $('barraCurva').style.width = barra(v.curva);
     var dica = $('dicaTecla'); dica.hidden = TOQUE || pref.jogadores < 2;
     dica.textContent = editando ? t('Teclado: setas e ⬆', 'Keyboard: arrows and ⬆') : t('Teclado: A, D e W', 'Keyboard: A, D and W');
@@ -213,6 +227,7 @@
   opcao('data-jogadores', function (v) { pref.jogadores = +v; });
   opcao('data-nivel', function (v) { pref.nivel = v; });
   opcao('data-controle', function (v) { pref.controle = v; });
+  opcao('data-rivais', function (v) { pref.rivais = v; });
   opcao('data-visual', function (v) { pref.visual = v; D.definirEstilo(v); });
   $('btLingua').addEventListener('click', function () { pref.lingua = pref.lingua === 'en' ? 'pt' : 'en'; salvar(); traduzir(); marcar(); });
   $('btSom').addEventListener('click', function () { Som.iniciar(); var lig = Som.alternar(); $('btSom').textContent = lig ? '🔊' : '🔇'; });
@@ -247,8 +262,17 @@
     Som.iniciar();
     if (TOQUE && pref.jogadores === 1 && pref.controle !== 'maos') ligarMovimento();   // com as mãos na câmera, o celular fica parado (sem inclinar)
     mov.zerar(); mov.calibrar();
-    estado = M.novaCorrida(pref.nivel, (Date.now() % 1000000007) | 0, pref.jogadores);
-    jogs = pref.carros.slice(0, pref.jogadores).map(function (c) { return { cor: D.CORES[c.cor], piloto: D.PILOTOS[c.piloto], veic: c.veic, foto: fotoDe(pref.carros.indexOf(c)) }; });
+    jogs = pref.carros.slice(0, pref.jogadores).map(function (c) { return { cor: D.CORES[c.cor], piloto: D.PILOTOS[c.piloto], veic: c.veic, foto: fotoDe(pref.carros.indexOf(c)), personagem: c.personagem || null }; });
+    // rivais: personagens sorteados (fora os escolhidos), no chão ou no céu como o jogador 1
+    var configs = [];
+    if (pref.rivais === 'com' && PE) {
+      var voa1 = VE.voa(jogs[0].veic), opcoes = VE.LISTA.filter(function (v) { return VE.voa(v.id) === voa1; });
+      PE.sortear(pref.jogadores === 1 ? 3 : 2, jogs.map(function (j) { return j.personagem; })).forEach(function (p, k) {
+        var v = opcoes[Math.floor(Math.random() * opcoes.length)];
+        configs.push({ id: p.id, veic: v.id, cor: p.cor || D.CORES[(k + 3) % D.CORES.length], mod: { vel: v.vel, curva: v.curva } });
+      });
+    }
+    estado = M.novaCorrida(pref.nivel, (Date.now() % 1000000007) | 0, pref.jogadores, configs);
     estado.jogadores.forEach(function (j, k) { var v = VE.achar(jogs[k].veic); j.mod = { vel: v.vel, curva: v.curva }; });
     D.preparar(estado, jogs, pref.lingua, pref.visual);
     tela('jogo'); redimensionar();
@@ -400,6 +424,14 @@
       linhas.forEach(function (l) { var el = document.createElement('div'); el.className = l[0]; el.textContent = l[1]; div.appendChild(el); });
       caixa.appendChild(div);
     });
+    if (estado.rivais.length) {   // classificação com os rivais
+      var todos = js.map(function (j) { return { nome: (jogs[j.n].personagem && PE ? t(PE.achar(jogs[j.n].personagem).nome[0], PE.achar(jogs[j.n].personagem).nome[1]) : jogs[j.n].piloto) + (js.length === 2 ? ' (' + t('Jogador ', 'Player ') + (j.n + 1) + ')' : ' (' + t('você', 'you') + ')'), fim: j.chegou ? j.tempo : Infinity, z: j.z, eu: true }; })
+        .concat(estado.rivais.map(function (r) { var p = PE.achar(r.id); return { nome: t(p.nome[0], p.nome[1]), fim: r.chegou ? r.tempo : Infinity, z: r.z, eu: false }; }));
+      todos.sort(function (a, b) { return a.fim !== b.fim ? a.fim - b.fim : b.z - a.z; });
+      var ol = document.createElement('ol'); ol.className = 'classificacao';
+      todos.forEach(function (o, k) { var li = document.createElement('li'); if (o.eu) li.className = 'eu'; li.textContent = ['🥇', '🥈', '🥉'][k] || ((k + 1) + 'º'); var sp = document.createElement('span'); sp.textContent = o.nome; li.appendChild(sp); ol.appendChild(li); });
+      caixa.appendChild(ol);
+    }
     var chave = 'vruuum.recordePts.' + estado.pista.nivel, antes = ler(chave, 0);
     $('novoRecorde').hidden = !(melhor > antes);
     if (melhor > antes) gravar(chave, melhor);

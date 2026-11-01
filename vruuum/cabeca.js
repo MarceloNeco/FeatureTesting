@@ -28,9 +28,10 @@
   function ombros(c, x, y, r, camisa) { elipse(c, x, y + r * 1.55, r * 1.5, r * 0.85, 0, camisa); }
 
   // ---------- de costas ----------
-  function costas(c, x, y, s, piloto, foto, camisa) {
+  function costas(c, x, y, s, piloto, foto, camisa, pers) {
     var r = s / 2;
     ombros(c, x, y, r, camisa);
+    if (pers) { pers.costas(c, x, y, r); return; }   // personagem de domínio público (personagens.js)
     if (foto) {   // a criança de costas: cabelo da cor da foto e orelhinhas da cor da pele
       elipse(c, x - r * 0.97, y + r * 0.08, r * 0.2, r * 0.28, 0, foto.pele);
       elipse(c, x + r * 0.97, y + r * 0.08, r * 0.2, r * 0.28, 0, foto.pele);
@@ -52,10 +53,11 @@
   }
 
   // ---------- de frente (virou para olhar e sorrir) ----------
-  function frente(c, x, y, s, piloto, foto, camisa, sorriso) {
+  function frente(c, x, y, s, piloto, foto, camisa, sorriso, pers) {
     var r = s / 2;
     ombros(c, x, y, r, camisa);
-    if (foto && foto.img) {
+    if (pers) pers.frente(c, x, y, r);
+    else if (foto && foto.img) {
       c.save(); c.beginPath(); c.arc(x, y, r * 1.02, 0, Math.PI * 2); c.clip();
       c.drawImage(foto.img, x - r * 1.02, y - r * 1.02, r * 2.04, r * 2.04); c.restore();
       c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = Math.max(1, r * 0.07); c.beginPath(); c.arc(x, y, r * 1.02, 0, Math.PI * 2); c.stroke();
@@ -101,8 +103,8 @@
     if (v.capacete && !e.frente) { c.restore(); return; }   // de costas, o capacete (no desenho do veículo) já é a nuca
     if (v.capacete) { circ(c, cx, cy, s * 0.5, 'rgba(20,20,30,.88)'); s *= 0.8; }   // viseira aberta
     c.translate(cx, cy); c.scale(Math.max(0.04, e.sx), 1);
-    if (e.frente) frente(c, 0, 0, s, info.emoji, info.foto, camisa, e.sorriso);
-    else costas(c, 0, 0, s, info.emoji, info.foto, camisa);
+    if (e.frente) frente(c, 0, 0, s, info.emoji, info.foto, camisa, e.sorriso, info.personagem);
+    else costas(c, 0, 0, s, info.emoji, info.foto, camisa, info.personagem);
     c.restore();
     if (!v.capacete) {   // reflexo do vidro por cima
       c.save(); caminho(c, v.janela, x0, y0, W, H); c.clip();
