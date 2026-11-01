@@ -2,6 +2,19 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "0.6.0",
+      "data": "01/Nov/2026",
+      "hora": "15:12:00",
+      "pt": [
+        "Mais rock'n'roll: 3 músicas de rock de guitarra do Kevin MacLeod (Volatile Reaction, Heroic Age e Unholy Knight, licença Creative Commons BY 4.0). A Volatile Reaction, a mais pesada e rápida, é a primeira: já toca no menu.",
+        "A rádio agora toca duas gravadas e uma feita pelo jogo, sem parar (6 gravadas e 3 do jogo). As novas também ficam guardadas para tocar sem internet."
+      ],
+      "en": [
+        "More rock'n'roll: 3 guitar rock songs by Kevin MacLeod (Volatile Reaction, Heroic Age and Unholy Knight, Creative Commons BY 4.0). Volatile Reaction, the heaviest and fastest, comes first: it plays right on the menu.",
+        "The radio now plays two recorded songs and one made by the game, non-stop (6 recorded, 3 from the game). The new ones are also saved to play offline."
+      ]
+    },
+    {
       "versao": "0.5.0",
       "data": "01/Nov/2026",
       "hora": "14:23:00",

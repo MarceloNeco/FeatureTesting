@@ -44,14 +44,16 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 
 A "rádio" do jogo (`som.js`) intercala dois tipos de rock, sem parar:
 
-- **Gravadas** (`musicas/*.mp3`): 3 músicas livres do jogo de kart **SuperTuxKart**: Kart Grand Prix (Weirwood),
-  Lava (Kalsan) e Las Dunas Champions (ALBatross), licença **CC BY-SA** (pode usar dando o crédito; quem copiar
-  mantém a mesma licença). O menu mostra a música tocando com autor e licença. Detalhes em `musicas/LICENCAS.md`.
+- **Gravadas** (`musicas/*.mp3`, ~10 MB): 3 de rock de guitarra do **Kevin MacLeod** (incompetech.com): Volatile
+  Reaction (a primeira, já no menu), Heroic Age e Unholy Knight, licença **CC BY 4.0**; e 3 do jogo de kart
+  **SuperTuxKart**: Kart Grand Prix (Weirwood), Lava (Kalsan) e Las Dunas Champions (ALBatross), licença **CC BY-SA**
+  (quem copiar mantém a mesma licença). O menu mostra a música tocando com autor e licença. Detalhes em
+  `musicas/LICENCAS.md`.
 - **Feitas pelo jogo** (`rock.js`, WebAudio): banda de rock pesado com guitarra base distorcida dobrada, guitarra
   solo com eco, baixo com drive, bateria completa e coro de "Ei!", em 3 músicas próprias: Trovão na Pista
   (138 bpm), Pedal no Fundo (152 bpm) e Motor de Fogo (168 bpm).
 
-Tocam **o tempo todo** (menu, corrida, pausa e fim); cada corrida começa a próxima. Só silenciam com o app escondido
+A rádio toca duas gravadas e uma feita pelo jogo, sem parar (menu, corrida, pausa e fim); cada corrida começa a próxima. Só silenciam com o app escondido
 ou no 🔊. Sem internet: as gravadas ficam guardadas no aparelho depois da primeira abertura (cache próprio
 `vruuum-musicas-v1`, que não baixa de novo a cada versão); se uma não estiver guardada, a rádio pula para a próxima.
 No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para o arquivo continuar pequeno.

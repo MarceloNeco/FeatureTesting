@@ -34,23 +34,30 @@
   }
 
   // ---------- música: a "rádio" do jogo ----------
-  /* Intercala as músicas gravadas (musicas/*.mp3, do SuperTuxKart, CC BY-SA, créditos em
-     musicas/LICENCAS.md) com as de rock feitas pelo rock.js. Tocam sem parar, uma depois da outra.
+  /* Intercala as músicas gravadas (musicas/*.mp3: Kevin MacLeod, CC BY 4.0, e SuperTuxKart, CC BY-SA;
+     créditos em musicas/LICENCAS.md) com as de rock feitas pelo rock.js. Tocam sem parar, uma depois da outra.
      Sem a gravada (sem internet e ainda não guardada, ou no arquivo baixado), pula para a próxima.
      Um único <audio> para tudo (o iPhone só deixa tocar o elemento que já tocou depois de um toque). */
+  // ordem da rádio: rock de guitarra do Kevin MacLeod (CC BY 4.0) primeiro, intercalado com o SuperTuxKart (CC BY-SA)
   var GRAVADAS = [
+    { url: 'musicas/volatile-reaction.mp3', nome: 'Volatile Reaction', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
     { url: 'musicas/kart-grand-prix.mp3', nome: 'Kart Grand Prix', autor: 'Weirwood', licenca: 'CC BY-SA 3.0' },
+    { url: 'musicas/heroic-age.mp3', nome: 'Heroic Age', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
     { url: 'musicas/lava.mp3', nome: 'Lava', autor: 'Kalsan', licenca: 'CC BY-SA 3.0' },
+    { url: 'musicas/unholy-knight.mp3', nome: 'Unholy Knight', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
     { url: 'musicas/las-dunas-champions.mp3', nome: 'Las Dunas Champions', autor: 'ALBatross', licenca: 'CC BY-SA 4.0' }
   ];
   var lista = [], atual = -1, audio = null, aoTrocar = null, falhas = 0;
+  // duas gravadas, uma feita pelo jogo, duas gravadas, outra do jogo... (sem gravadas: só as do jogo)
   function montarLista() {
     var semGravadas = !!raiz.JOGO_EM_ARQUIVO || !raiz.Audio;
-    var n = raiz.VruuumRock ? raiz.VruuumRock.MUSICAS.length : 0;
+    var sint = raiz.VruuumRock ? raiz.VruuumRock.MUSICAS.map(function (m, k) { return { s: k, nome: m.nome, autor: 'Vruuum!', licenca: '' }; }) : [];
+    var grav = semGravadas ? [] : GRAVADAS.map(function (g) { return { g: g }; });
     lista = [];
-    for (var k = 0; k < Math.max(n, GRAVADAS.length); k++) {
-      if (!semGravadas && k < GRAVADAS.length) lista.push({ g: GRAVADAS[k] });
-      if (k < n) lista.push({ s: k, nome: raiz.VruuumRock.MUSICAS[k].nome, autor: 'Vruuum!', licenca: '' });
+    while (grav.length || sint.length) {
+      if (grav.length) lista.push(grav.shift());
+      if (grav.length) lista.push(grav.shift());
+      if (sint.length) lista.push(sint.shift());
     }
   }
   function info(item) { return item.g ? { nome: item.g.nome, autor: item.g.autor, licenca: item.g.licenca } : { nome: item.nome, autor: item.autor, licenca: item.licenca }; }
