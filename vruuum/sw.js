@@ -3,7 +3,7 @@
    cópia primeiro. Músicas gravadas (MP3, ~10 MB): baixadas em segundo plano depois de instalar e na
    primeira vez que tocam; sempre servidas inteiras da cópia (o <audio> pede pedaços, o cache não). Cache com o nome do app: só apaga caches "vruuum-" (nunca os dos outros apps
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
-var VERSAO = '0.9.0';
+var VERSAO = '0.9.1';
 var CACHE = 'vruuum-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'pista.js', 'motor.js', 'sprites.js', 'veiculos.js', 'cabeca.js', 'desenho.js', 'rock.js', 'som.js', 'movimento.js', 'selfie.js', 'app.js', 'baixar.js', 'rosto.tflite', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 var CACHE_MUSICAS = 'vruuum-musicas-v1';   // não muda a cada versão: as músicas não baixam de novo
