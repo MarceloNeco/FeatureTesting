@@ -4,7 +4,7 @@
    (banco "rabiscolandia"). Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.0';
+  var APP_VERSION = '0.1.1';
   var $ = function (id) { return document.getElementById(id); };
   var F = window.DesenhoFolha, P = window.DesenhoPaginas || { LISTA: [], CATEGORIAS: [] }, Pt = window.DesenhoPintura;
   var Som = window.DesenhoSom || { iniciar: function () {}, musica: function () {}, musicaLigada: function () { return false; }, efeito: function () {}, efeitos: function () {}, efeitosLigados: function () { return false; }, proxima: function () {}, nomeAtual: function () { return ''; } };
