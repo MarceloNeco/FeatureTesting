@@ -2,6 +2,21 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.9.1",
+      "data": "01/Nov/2026",
+      "hora": "18:25:06",
+      "pt": [
+        "🔄 Giro sem susto: durante a volta com rastro de luz, o cabelo e a orelha às vezes apareciam cortados no lugar errado (o desenho usava os recortes da cópia de outro ângulo). Corrigido: cada cópia do rastro tem os seus.",
+        "👆 Escolher ficou mais fácil: primeiro aparecem as partes da aba, grandes (Base, Blush, Batom…). Tocou numa, as partes recolhem num botão \"⬅ Partes\", o palco diminui um pouco e as opções ganham a tela. O Voltar do celular também volta para as partes.",
+        "🔤 Os nomes das abas não aparecem mais cortados com reticências (troca para o nome curto quando não cabe)."
+      ],
+      "en": [
+        "🔄 No more scary spins: during the spin with the light trail, the hair and the ear sometimes showed up cut in the wrong place (the drawing used the clips of a copy at another angle). Fixed: each trail copy has its own.",
+        "👆 Easier choosing: first the tab's parts show up, big (Foundation, Blush, Lipstick…). Tap one and the parts fold into a \"⬅ Parts\" button, the stage gets a bit smaller and the options get the screen. The phone's Back button also goes back to the parts.",
+        "🔤 Tab names no longer show up cut with an ellipsis (they switch to the short name when they don't fit)."
+      ]
+    },
+    {
       "versao": "0.9.0",
       "data": "01/Nov/2026",
       "hora": "17:38:32",
