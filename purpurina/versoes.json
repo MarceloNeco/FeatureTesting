@@ -2,6 +2,21 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.10.0",
+      "data": "01/Nov/2026",
+      "hora": "18:35:33",
+      "pt": [
+        "✨ Desfile de verdade: passarela de show com letreiro de lâmpadas, luzes correndo nas bordas, holofotes balançando, plateia com flashes de câmera e fogos de artifício.",
+        "👠 Ela entra lá do fundo e vem andando, rebolando, até a frente; para, sorri e dá tchauzinho; olha para um lado e para o outro; dá uma volta com rastro de luz; e fica posando, sorrindo e acenando de vez em quando.",
+        "⭐ As estrelas e os jurados aparecem quando ela chega na frente. Com \"reduzir movimento\" ligado no celular, ela aparece parada e sorrindo, sem fogos."
+      ],
+      "en": [
+        "✨ A real runway show: a stage with a light-bulb sign, lights running along the runway edges, swinging spotlights, an audience with camera flashes and fireworks.",
+        "👠 She comes in from the back and walks, swaying, to the front; stops, smiles and waves; looks to one side and the other; spins with a light trail; and keeps posing, smiling and waving now and then.",
+        "⭐ The stars and the judges show up when she reaches the front. With \"reduce motion\" on, she shows up standing still and smiling, with no fireworks."
+      ]
+    },
+    {
       "versao": "0.9.1",
       "data": "01/Nov/2026",
       "hora": "18:25:06",

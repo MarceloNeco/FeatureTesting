@@ -78,9 +78,13 @@
        (testa, nariz, lábios e queixo); o cabelo da frente gira junto com o rosto e o de trás vai para trás.
        O corpo só fica um pouco mais estreito de lado e, passando de 90°, aparece de costas; passando de ~100°,
        a cabeça também fica de costas (só cabelo). */
-    var ang = (((op.angulo || 0) % 360) + 360) % 360; if (ang < 0.5 || ang > 359.5) ang = 0;
-    var rad = ang * Math.PI / 180, radS = ang > 180 ? rad - 2 * Math.PI : rad, cos = ang ? Math.cos(rad) : 1, sen = ang ? Math.sin(rad) : 0;
-    var corpoCostas = cos < 0, costas = cos < -0.17, virada = !!ang && !costas, escalaX = 0.62 + 0.38 * Math.abs(cos);
+    function normal(a) { a = (((a || 0) % 360) + 360) % 360; return a < 0.5 || a > 359.5 ? 0 : a; }
+    // opcoes.olhar: só a cabeça vira (o corpo fica de frente) — no desfile ela olha para os lados
+    var angB = normal(op.angulo), ang = angB || normal(op.olhar);
+    var rad = ang * Math.PI / 180, radS = ang > 180 ? rad - 2 * Math.PI : rad, cos = ang ? Math.cos(rad) : 1, sen = ang ? Math.sin(rad) : 0, cosB = Math.cos(angB * Math.PI / 180);
+    var corpoCostas = cosB < 0, costas = cos < -0.17, virada = !!ang && !costas, escalaX = 0.62 + 0.38 * Math.abs(cosB);
+    // opcoes.sorriso: sorriso aberto; opcoes.tchau: braço levantado dando tchau (mexendo, com opcoes.anim)
+    e.sorrindo = !!op.sorriso; var tchau = !!op.tchau && !angB;
     // de lado, o cabelo de trás e o pescoço não afinam junto com o corpo
     if (virada) out.push(grupo(torcer(cabeloTras(e, I, cab, cabE), true, radS)), pescoco());
     var iniBoneca = out.length;
@@ -106,7 +110,7 @@
     // ---------- pescoço, tronco e braços ----------
     if (!virada) out.push(ret(186, 270, 28, 80, { fill: pele, stroke: peleE, 'stroke-width': 2 }), ret(187, 300, 26, 18, { fill: esc(pele, 0.35), opacity: 0.15 }));
     out.push(p('M150,342 Q200,330 250,342 Q262,346 260,366 L248,458 L152,458 L140,366 Q138,346 150,342Z', { fill: pele, stroke: peleE, 'stroke-width': 1.4 }) + p('M150,342 Q200,330 250,342 Q262,346 260,366 L248,458 L152,458 L140,366 Q138,346 150,342Z', { fill: 'url(#' + I + 'lado)' }));
-    var bracos = ['M150,354 Q126,420 118,498', 'M250,354 Q274,420 282,498'];
+    var bracos = tchau ? ['M150,354 Q126,420 118,498'] : ['M150,354 Q126,420 118,498', 'M250,354 Q274,420 282,498'];
     bracos.forEach(function (d) { out.push(membro(d, 23)); });
 
     // ---------- vestido ou blusa ----------
@@ -114,13 +118,14 @@
     else out.push(blusa(e.blusa === 'nenhum' ? 'nenhum' : e.blusa, C('blusa'), peca, linha));
 
     // ---------- bolsa, mãos e joias do corpo ----------
-    if (vis('bolsa')) out.push(bolsa(e.bolsa, C('bolsa'), peca, linha));
+    if (vis('bolsa') && !tchau) out.push(bolsa(e.bolsa, C('bolsa'), peca, linha));
     var esmalte = { tipo: e.unhas, cor: C('unhas') };
-    out.push(mao(118, -1, pele, peleE, esmalte), mao(282, 1, pele, peleE, esmalte));
+    out.push(mao(118, -1, pele, peleE, esmalte));
+    if (!tchau) out.push(mao(282, 1, pele, peleE, esmalte));
     if (!corpoCostas && vis('colar')) out.push(colar(e.colar, C('colar'), I));
     if (!corpoCostas && vis('broche')) out.push(broche(e.broche, C('broche')));
-    if (vis('pulseira')) out.push(pulseira(e.pulseira, C('pulseira')));
-    if (!corpoCostas && vis('anel')) out.push(anel(e.anel, C('anel')));
+    if (vis('pulseira') && !tchau) out.push(pulseira(e.pulseira, C('pulseira')));
+    if (!corpoCostas && vis('anel') && !tchau) out.push(anel(e.anel, C('anel')));
     if (corpoCostas) out.push(asasF);
 
     // ---------- cabeça (tudo aqui dentro vai para o grupo aumentado) ----------
@@ -158,12 +163,14 @@
     var cabecaPronta = grupo(out.join(''));
     out = corpo;
     if (e.glitter === 'tudo') out.push(glitter(e, C('glitter'), op.anim && !ang));
-    if (ang) {
+    if (angB) {
       // só o corpo afina um pouco; a cabeça fica do tamanho certo (de costas, espelhada: laço e cabelo trocam de lado)
       var boneca = out.splice(iniBoneca).join('');
       out.push('<g transform="translate(200 0) scale(' + n((corpoCostas ? -1 : 1) * escalaX * 100) / 100 + ' 1) translate(-200 0)">' + boneca + '</g>');
       out.push(costas ? '<g transform="translate(400 0) scale(-1 1)">' + cabecaPronta + '</g>' : cabecaPronta);
     } else out.push(cabecaPronta);
+    // o braço do tchau vai por cima de tudo (fica na frente do cabelo, do lado do rosto)
+    if (tchau) out.push(bracoTchau(pele, peleE, esmalte, membro, op.anim));
     return fechar();
 
     // pescoço girado: de lado fica um pouco mais largo e mais para trás, com a sombra do queixo
@@ -641,6 +648,18 @@
       elip(200, 285, 12, 4, { fill: '#fff', opacity: 0.2 });
   }
 
+  // braço levantado dando tchau: ombro → cotovelo → mão aberta; o antebraço balança (opcoes.anim)
+  function bracoTchau(pele, peleE, esmalte, membro, anim) {
+    var s = membro('M250,356 Q282,352 300,330', 22);
+    var mao2 = p('M308,258 Q306,232 322,228 Q338,232 336,258 Q334,272 322,274 Q310,272 308,258Z', { fill: pele, stroke: peleE, 'stroke-width': 2 });
+    var dedosT = [[312, 236, 218], [319, 232, 210], [326, 232, 211], [333, 236, 220]].map(function (d) { return p('M' + d[0] + ',' + d[1] + ' L' + d[0] + ',' + d[2], { stroke: peleE, 'stroke-width': 7.4, 'stroke-linecap': 'round' }) + p('M' + d[0] + ',' + d[1] + ' L' + d[0] + ',' + d[2], { stroke: pele, 'stroke-width': 5, 'stroke-linecap': 'round' }); }).join('');
+    var polegar = p('M310,260 L298,248', { stroke: peleE, 'stroke-width': 7.4, 'stroke-linecap': 'round' }) + p('M310,260 L298,248', { stroke: pele, 'stroke-width': 5, 'stroke-linecap': 'round' });
+    var pontas = [[312, 217], [319, 209], [326, 210], [333, 219], [298.6, 247]];
+    var ante = membro('M300,330 Q312,300 320,270', 19) + dedosT + polegar + mao2 + elip(318, 246, 6, 4, { fill: '#fff', opacity: 0.18 }) + unhas(pontas, esmalte, pele);
+    var mexe = anim ? '<animateTransform attributeName="transform" type="rotate" values="-12 300 330;14 300 330;-12 300 330" dur=".7s" repeatCount="indefinite"/>' : '';
+    return s + '<g>' + ante + mexe + '</g>';
+  }
+
   // ---------- mãos: palma, 4 dedos e polegar (do lado de dentro, virado para o corpo) ----------
   // dedos vistos de fora para dentro: mindinho, anelar, médio, indicador. lado -1 = mão da esquerda da imagem.
   var DEDOS = [[-7, 10], [-2.4, 12.5], [2.4, 13], [7, 11]];
@@ -750,6 +769,13 @@
       '<g opacity="0">' + f + '<animate attributeName="opacity" values="0;0;1;1;0;0"' + tempo + '/></g>';
   }
   function boca(e, cor, pele, I) {
+    // sorriso aberto (desfile): cantos para cima, dentinhos e a cor do batom (ou a boca natural)
+    if (e.sorrindo) {
+      var cs = e.batom === 'nenhum' ? mistura(pele, '#d8606c', 0.45) : cor.hex;
+      return p('M178,262 Q200,272 222,262 Q216,290 200,291 Q184,290 178,262Z', { fill: esc(cs, 0.45) }) + p('M182,265 Q200,272 218,265 L216,270 Q200,276 184,270Z', { fill: '#fff' }) +
+        p('M190,284 Q200,280 210,284 Q200,290 190,284Z', { fill: '#ff8fa3', opacity: 0.9 }) + p('M178,262 Q200,272 222,262', { fill: 'none', stroke: cs, 'stroke-width': 4, 'stroke-linecap': 'round' }) +
+        p('M180,266 Q184,288 200,291 Q216,288 220,266', { fill: 'none', stroke: cs, 'stroke-width': 3.4, 'stroke-linecap': 'round' }) + p('M176,260 Q177,264 180,264 M224,260 Q223,264 220,264', { fill: 'none', stroke: esc(pele, 0.3), 'stroke-width': 1.6, 'stroke-linecap': 'round' });
+    }
     // menino sem batom: boquinha sorrindo, mais fina
     if (e.personagem === 'menino' && e.batom === 'nenhum') { var nm = mistura(pele, '#c86a6a', 0.35); return p('M184,268 Q200,282 216,268 Q200,276 184,268Z', { fill: cla(nm, 0.1) }) + p('M183,267 Q200,281 217,267', { fill: 'none', stroke: esc(nm, 0.35), 'stroke-width': 2.6, 'stroke-linecap': 'round' }); }
     var cima = 'M182,266 Q191,259 200,264 Q209,259 218,266 Q200,272 182,266Z', baixo = 'M182,266 Q200,272 218,266 Q212,285 200,286 Q188,285 182,266Z';
@@ -1322,6 +1348,53 @@
     return s;
   }
 
+  /* ---------- a passarela do desfile ----------
+     Palco de show: parede com letreiro de lâmpadas, passarela em perspectiva com luzes correndo nas bordas,
+     holofotes, plateia dos dois lados com flashes de câmera. As animações (lâmpadas, luzes, holofotes e flashes)
+     são de CSS (classes pas-*), então param sozinhas com "reduzir movimento". 400 × 720, alinhado embaixo. */
+  function passarela(id) {
+    var I = (id || 'pas') + '-', s = '', r = sorteio(42), k;
+    s += '<defs><linearGradient id="' + I + 'ceu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12031f"/><stop offset=".55" stop-color="#3a0d5a"/><stop offset="1" stop-color="#1c0630"/></linearGradient>' +
+      '<linearGradient id="' + I + 'chao" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd6ec"/><stop offset=".5" stop-color="#ff9fd2"/><stop offset="1" stop-color="#e45fa8"/></linearGradient>' +
+      '<linearGradient id="' + I + 'brilhoChao" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
+      '<linearGradient id="' + I + 'luz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6c8" stop-opacity=".75"/><stop offset="1" stop-color="#fff6c8" stop-opacity="0"/></linearGradient>' +
+      '<radialGradient id="' + I + 'brilho"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#ff9fd2" stop-opacity="0"/></radialGradient></defs>';
+    s += ret(0, 0, 400, 720, { fill: 'url(#' + I + 'ceu)' });
+    // estrelinhas no teto escuro
+    for (k = 0; k < 40; k++) s += circ(r() * 400, r() * 300, 0.6 + r() * 1.4, { fill: '#fff', opacity: n(0.3 + r() * 0.6), class: 'pas-pisca', style: 'animation-delay:' + n(r() * 3) + 's' });
+    // parede do fundo: arco com lâmpadas e o letreiro
+    s += p('M60,430 L60,250 Q200,150 340,250 L340,430Z', { fill: '#2a0a45', stroke: '#ff5fb4', 'stroke-width': 3 });
+    s += p('M80,430 L80,262 Q200,178 320,262 L320,430Z', { fill: '#4b1673' });
+    for (k = 0; k <= 26; k++) { var t = k / 26, ax = (1 - t) * (1 - t) * 60 + 2 * (1 - t) * t * 200 + t * t * 340, ay = (1 - t) * (1 - t) * 250 + 2 * (1 - t) * t * 150 + t * t * 250; s += circ(ax, ay, 4, { fill: '#ffe680', class: 'pas-lampada', style: 'animation-delay:' + n(k * 0.08) + 's' }); }
+    for (k = 0; k < 8; k++) { s += circ(60, 270 + k * 20, 3.5, { fill: '#ffe680', class: 'pas-lampada', style: 'animation-delay:' + n(k * 0.1) + 's' }) + circ(340, 270 + k * 20, 3.5, { fill: '#ffe680', class: 'pas-lampada', style: 'animation-delay:' + n(k * 0.1 + 0.05) + 's' }); }
+    s += '<text x="200" y="236" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="30" fill="#fff" stroke="#ff5fb4" stroke-width="1.5" class="pas-letreiro">✨ PURPURINA ✨</text>';
+    // cortina de luz no fundo do arco
+    for (k = 0; k < 9; k++) s += ret(88 + k * 26, 280, 10, 150, { fill: k % 2 ? '#ff8fc8' : '#b892ff', opacity: 0.22, rx: 5, class: 'pas-led', style: 'animation-delay:' + n(k * 0.15) + 's' });
+    // passarela em perspectiva (do fundo até a frente)
+    s += p('M168,430 L232,430 L380,720 L20,720Z', { fill: 'url(#' + I + 'chao)' });
+    s += p('M190,430 L210,430 L240,720 L160,720Z', { fill: 'url(#' + I + 'brilhoChao)', opacity: 0.8 });
+    for (k = 0; k < 7; k++) { var yl = 430 + Math.pow(k / 7, 1.6) * 290; s += p('M' + n(200 - (32 + (yl - 430) * 0.62)) + ',' + n(yl) + ' L' + n(200 + 32 + (yl - 430) * 0.62) + ',' + n(yl), { stroke: '#fff', 'stroke-width': 1, opacity: 0.25 }); }
+    // luzes correndo nas bordas da passarela
+    for (k = 0; k < 16; k++) {
+      var tt = Math.pow(k / 15, 1.5), yy = 430 + tt * 290, dx = 32 + tt * 180, rr = 2.2 + tt * 5;
+      s += circ(200 - dx, yy, rr, { fill: '#fff', class: 'pas-borda', style: 'animation-delay:' + n(k * 0.09) + 's' }) + circ(200 + dx, yy, rr, { fill: '#fff', class: 'pas-borda', style: 'animation-delay:' + n(k * 0.09) + 's' });
+    }
+    // plateia dos dois lados, com flashes de câmera
+    [[-1, 0], [1, 0]].forEach(function (q) {
+      for (var fila = 0; fila < 3; fila++) for (var c = 0; c < 6; c++) {
+        var y = 520 + fila * 70 + (c % 2) * 8, x = q[0] < 0 ? 18 + c * 24 - fila * 6 + fila * fila * 0 : 382 - c * 24 + fila * 6;
+        if ((q[0] < 0 && x > 200 - (34 + (y - 430) * 0.62) - 14) || (q[0] > 0 && x < 200 + (34 + (y - 430) * 0.62) + 14)) continue;
+        var tom = ['#1a0630', '#24083d', '#2e0b4a'][fila];
+        s += elip(x, y + 26, 15, 16, { fill: tom }) + circ(x, y, 11, { fill: tom });
+        if (r() < 0.45) s += '<g class="pas-flash" style="animation-delay:' + n(r() * 4) + 's;animation-duration:' + n(2.5 + r() * 3) + 's">' + circ(x + 6, y + 12, 10, { fill: 'url(#' + I + 'brilho)' }) + p(estrela4(x + 6, y + 12, 9), { fill: '#fff' }) + '</g>';
+      }
+    });
+    // holofotes balançando
+    s += '<g class="pas-holofote pas-h1">' + p('M70,0 L30,720 L170,720Z', { fill: 'url(#' + I + 'luz)', opacity: 0.35 }) + '</g>';
+    s += '<g class="pas-holofote pas-h2">' + p('M330,0 L230,720 L370,720Z', { fill: 'url(#' + I + 'luz)', opacity: 0.35 }) + '</g>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 720" preserveAspectRatio="xMidYMax slice">' + s + '</svg>';
+  }
+
   // ---------- cenários ----------
   function cenario(id, I) {
     var s = '', r = sorteio(99), k;
@@ -1406,7 +1479,7 @@
     return s;
   }
 
-  var API = { svg: svg, espelhar: espelhar };
+  var API = { svg: svg, espelhar: espelhar, passarela: passarela };
   raiz.PurpurinaBoneca = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })(typeof window !== 'undefined' ? window : this);

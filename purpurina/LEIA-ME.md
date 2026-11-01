@@ -28,7 +28,9 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
   (vai para Downloads) e **📤 Compartilhar** (quando o celular deixa; dá para mandar para a galeria ou WhatsApp).
 - **💖 Guardar**: guarda o look em **💖 Meus looks** (até 30, só neste aparelho). Lá dá para **👗 Vestir** de novo ou
   apagar.
-- **✨ Desfilar!**: passarela com confete, aplausos e 3 jurados (🐱 🦄 🐰).
+- **✨ Desfilar!**: passarela de show (letreiro de lâmpadas, luzes nas bordas, holofotes, plateia com flashes e fogos de
+  artifício). Ela entra lá do fundo andando, sorri, dá tchauzinho, olha para os lados, gira e fica posando; aí vêm as
+  estrelas, o confete, os aplausos e os 3 jurados (🐱 🦄 🐰). Com "reduzir movimento", ela aparece parada e sorrindo.
 - **⭐ Desafios** (10): Festa na praia, Baile de princesa, Show de pop star, Piquenique no jardim, Festa do pijama,
   Dia de neve, Festa de aniversário, Sereia no fundo do mar, Noite das joias e Dia do cabelo maluco. Cada um começa com a personagem dela e o cenário do
   tema, e mostra **3 dicas** que ganham ✅ na hora. No desfile, cada dica cumprida vale uma estrela; **ninguém
