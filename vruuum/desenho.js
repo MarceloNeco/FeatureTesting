@@ -359,7 +359,7 @@
       if (rs) for (k2 = 0; k2 < rs.length; k2++) {
         var rv = e.rivais[rs[k2]], rd = RIV[rs[k2]]; if (!rd || rv.z < j.z - JOG_Z * 0.6) continue;
         var rX = sx + esc * rv.x * LARG, rY = rd.voa ? syAr : sy, rW = rd.spr.w * esc, rH = rd.spr.h * esc;
-        sprite(c, rd.spr, esc, rX, rY, rd.voa || voa ? 0 : clip, w);
+        sprite(c, S.quadro(rd.spr, rd.spr.quadros ? faseSkate(rd, rv, e) : 0), esc, rX, rY, rd.voa || voa ? 0 : clip, w);
         if (rW > 24 && (rd.voa || voa || rY <= clip)) pilotoVivo(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info, 10 + rs[k2] * 2.1, 6);
         if (!rd.voa && (nS2 || s.tunel) && rY <= clip + 2) { c.save(); c.globalCompositeOperation = 'lighter'; luz(c, rX - rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7); luz(c, rX + rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7); c.restore(); }
       }
@@ -367,7 +367,7 @@
         var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / (outro.puloMax || raiz.VruuumMotor.PULO))) * 1400 * (outro.puloMax || 1.1) / 1.1 : 0;
         var oVoa = !!VOA[outro.n];   // o outro pode estar voando enquanto eu vou de carro (e vice-versa)
         var oSpr = carrosJog[outro.n], oX = sx + esc * outro.x * LARG, oY = (oVoa ? syAr : sy) - escY * lift;
-        sprite(c, oSpr, esc, oX, oY, oVoa || voa ? 0 : clip, w);
+        sprite(c, S.quadro(oSpr, VS[outro.n] && VS[outro.n].fPe != null ? VS[outro.n].fPe : 0.8), esc, oX, oY, oVoa || voa ? 0 : clip, w);
         if (oSpr.w * esc > 24 && (oVoa || voa || oY <= clip)) pilotoVivo(c, VEIC[outro.n], oX - oSpr.w * esc / 2, oY - oSpr.h * esc, oSpr.w * esc, oSpr.h * esc, INFO[outro.n], outro.n * 3.3, 7);
       }
     }
@@ -467,6 +467,16 @@
     c.restore();
   }
 
+  // em que momento da remada está o skatista (obj guarda o ritmo): mais rápido, rema mais depressa;
+  // pulando ou parado, os dois pés ficam no shape
+  function faseSkate(obj, cor, e) {
+    var tt = Date.now() / 1000, dt = obj.tPe ? Math.min(0.1, Math.max(0, tt - obj.tPe)) : 0, rap = Math.min(1, (cor.vel || 0) / e.pista.cfg.velMax);
+    obj.tPe = tt;
+    if (cor.pulo > 0 || rap < 0.03) { obj.fPe = 0.8; return 0.8; }
+    obj.fPe = ((obj.fPe == null ? 0.8 : obj.fPe) + dt * (0.6 + 0.5 * rap)) % 1;
+    return obj.fPe;
+  }
+
   function desenharCarro(c, j, vs, g, h, w, e) {
     var K = g.K, esc = K / ALTURA_CAM, spr = carrosJog[j.n], cw = spr.w * esc, ch = spr.h * esc;
     var chao = g.cy + g.KY, lift = j.pulo > 0 ? Math.sin(Math.PI * (1 - j.pulo / (j.puloMax || raiz.VruuumMotor.PULO))) * K * 0.42 * (j.puloMax || 1.1) / 1.1 : 0;
@@ -512,7 +522,7 @@
     c.rotate(vs.lado * inclina + (j.rodando > 0 ? Math.sin(j.rodando * 22) * 0.25 : 0));
     if (j.rodando > 0) c.scale(Math.max(0.25, Math.abs(Math.cos(j.rodando * 9))) * (Math.cos(j.rodando * 9) < 0 ? -1 : 1), 1);
     extrasAntes(c, vv, cw, ch, tt);
-    c.drawImage(spr.img, -cw / 2, -ch, cw, ch);
+    c.drawImage((spr.quadros ? S.quadro(spr, faseSkate(vs, j, e)) : spr).img, -cw / 2, -ch, cw, ch);
     pilotoVivo(c, vv, -cw / 2, -ch, cw, ch, INFO[j.n], j.n * 3.3, 7);
     extrasDepois(c, vv, cw, ch, tt, j.turbo > 0);
     if (acesas && !voa) {   // lanternas brilhando
@@ -684,7 +694,7 @@
     var esc = Math.min(W * 0.78 / spr.w, H * 0.8 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
     c.save(); c.translate(W / 2, H * 0.94 + (voa ? Math.sin(tt * 2.2) * H * 0.02 - H * 0.06 : Math.sin(tt * 9) * 1.2));
     if (voa) c.rotate(Math.sin(tt * 0.9) * 0.08);
-    extrasAntes(c, vv, cw, ch, tt); c.drawImage(spr.img, -cw / 2, -ch, cw, ch);
+    extrasAntes(c, vv, cw, ch, tt); c.drawImage(S.quadro(spr, tt * 0.8).img, -cw / 2, -ch, cw, ch);
     pilotoVivo(c, vv, -cw / 2, -ch, cw, ch, infoPiloto(cor, piloto, foto, pers), 1.2, 4.5);   // na garagem vira mais vezes
     extrasDepois(c, vv, cw, ch, tt, false);
     c.restore();
@@ -694,7 +704,7 @@
     var c = cv.getContext('2d'), spr = spritePrevia(cor, veic), W = cv.width, H = cv.height;
     c.clearRect(0, 0, W, H);
     var esc = Math.min(W * 0.9 / spr.w, H * 0.9 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
-    c.drawImage(spr.img, (W - cw) / 2, H * 0.95 - ch, cw, ch);
+    c.drawImage(S.quadro(spr, 0.3).img, (W - cw) / 2, H * 0.95 - ch, cw, ch);   // o skate aparece empurrando
     if (Cab()) Cab().desenhar(c, V().achar(veic), (W - cw) / 2, H * 0.95 - ch, cw, ch, infoPiloto(cor, piloto, foto, pers), 50, 0, 1000);   // parado, de costas
   }
 

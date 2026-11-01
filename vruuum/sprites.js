@@ -432,10 +432,15 @@
   function carroJogador(cor, emoji, tipo, px) {
     var V = raiz.VruuumVeiculos, v = V && V.achar(tipo);
     if (!v) return fazer(800, 640, function (c, W, H) { carroTras(c, W, H, cor, emoji, true); }, px || 256);
-    return fazer(v.w, v.h, function (c, W, H) { v.desenhar(c, W, H, cor, emoji); }, px || 256);
+    if (!v.quadros) return fazer(v.w, v.h, function (c, W, H) { v.desenhar(c, W, H, cor, emoji); }, px || 256);
+    var qs = [];   // animado (skate): um desenho para cada momento do movimento
+    for (var k = 0; k < v.quadros; k++) qs.push(fazer(v.w, v.h, (function (f) { return function (c, W, H) { v.desenhar(c, W, H, cor, emoji, f); }; })(k / v.quadros), px || 256));
+    return { w: v.w, h: v.h, img: qs[0].img, quadros: qs };
   }
+  // o quadro certo de um desenho animado (fase de 0 a 1); os parados voltam eles mesmos
+  function quadro(spr, fase) { return spr.quadros ? spr.quadros[Math.floor((((fase || 0) % 1 + 1) % 1) * spr.quadros.length) % spr.quadros.length] : spr; }
   function arco(texto, cor1, cor2, xadrez) { return fazer(5600, 3400, function (c, W, H) { faixa(c, W, H, texto, cor1, cor2, xadrez); }, 640); }
 
-  raiz.VruuumSprites = { basicos: basicos, carroJogador: carroJogador, arco: arco, fazer: fazer, escurecido: escurecido, carroTras: carroTras, ARCO: ARCO, EMOJI: EMOJI, FONTE: FONTE,
+  raiz.VruuumSprites = { basicos: basicos, carroJogador: carroJogador, quadro: quadro, arco: arco, fazer: fazer, escurecido: escurecido, carroTras: carroTras, ARCO: ARCO, EMOJI: EMOJI, FONTE: FONTE,
     util: { circ: circ, oval: oval, caixa: caixa, poli: poli, linha: linha, sombra: sombra, brilho: brilho } };
 })(this);
