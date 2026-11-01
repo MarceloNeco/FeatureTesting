@@ -140,6 +140,10 @@ async function comecar(pg, nivel) {
   await ps.click('#btPausa'); await ps.click('#btSeguir');
   confere(ps.erros().length === 0, 'som: sem erros', ps.erros());
 
+  /* botão de pausa desenhado (Amazon Fire não tem o símbolo ⏸): sem emoji, com as duas barras visíveis */
+  const pb = await D(ps, () => { const b = document.querySelector('#btPausa .barras'), r = b && b.getBoundingClientRect(), c = b && getComputedStyle(b); return { txt: document.getElementById('btPausa').textContent.trim(), w: r && r.width, h: r && r.height, cor: c && c.borderLeftColor, lb: c && c.borderLeftWidth }; });
+  confere(pb.txt === '' && pb.w >= 14 && pb.h >= 14 && pb.lb === '6px' && pb.cor === 'rgb(255, 255, 255)', 'botão ⏸ desenhado no CSS, sem depender do símbolo', pb);
+
   /* iPad/iPhone antigo (iOS < 13): sem pointer events, só toque. Tocar na tela tem de parar o item. */
   const ipad = await abrir(browser, base + '?teste', { ctx: { viewport: { width: 820, height: 1180 }, hasTouch: true, isMobile: true }, antes: () => {
     const orig = EventTarget.prototype.addEventListener;
@@ -293,7 +297,7 @@ async function comecar(pg, nivel) {
 
   const pdb = await abrir(browser, base + '?debug&teste');
   await passo(pdb, 500);
-  confere(/v0\.6\.1/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(/v0\.6\.2/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
 
   /* ---------- revisão final ---------- */

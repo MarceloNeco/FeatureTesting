@@ -2,6 +2,13 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.6.2",
+      "data": "01/Nov/2026",
+      "hora": "19:43:00",
+      "pt": ["Botão de pausa desenhado pelo próprio jogo: em tablets como o Amazon Fire, que não têm o símbolo de pausa, o botão aparecia vazio."],
+      "en": ["Pause button drawn by the game itself: on tablets like the Amazon Fire, which lack the pause symbol, the button showed up empty."]
+    },
+    {
       "versao": "0.6.1",
       "data": "01/Nov/2026",
       "hora": "19:31:00",
