@@ -187,3 +187,5 @@ button:focus-visible, input:focus-visible, .carta:focus-visible { outline: 3px s
 .item-ad.vivo canvas { width: 100%; max-width: 72px; aspect-ratio: 1; }
 .item-ad[aria-pressed="true"] { border-color: var(--ouro); background: var(--card2); }
 .grade-ad:has(.vivo) { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
+.ico-borracha { display: grid; place-items: center; line-height: 0; }
+.ico-borracha svg { width: 36px; height: 36px; }

@@ -148,7 +148,7 @@
     var pinc = $('ctrlPinceis'); pinc.innerHTML = '';
     A.PINCEIS_LIVRES.concat(['balde', 'borracha']).forEach(function (id, i) {
       var info = window.DesenhoPintura.PINCEIS.filter(function (p) { return p.id === id; })[0];
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'ferramenta'; b.textContent = info.ico; b.setAttribute('aria-label', A.N(info)); b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'ferramenta'; if (id === 'borracha') b.appendChild(A.iconeBorracha()); else b.textContent = info.ico; b.setAttribute('aria-label', A.N(info)); b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
       b.addEventListener('click', function () { Array.prototype.forEach.call(pinc.children, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); ctrl.sala.mandar({ t: 'ferramenta', id: ctrl.id, pincel: id }); });
       pinc.appendChild(b);
     });

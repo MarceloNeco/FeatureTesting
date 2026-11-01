@@ -112,7 +112,7 @@
     mestre = ac.createGain(); mestre.gain.value = 0.9; mestre.connect(comp);
     efGanho = ac.createGain(); efGanho.gain.value = efLigados ? VOL_EFEITOS : 0; efGanho.connect(mestre);
     vigiarTela();
-    if (querMusica) comecar();
+    if (querMusica) tocarAtual();
   }
   function tom(tipo, f, ini, dur, vol, destino, fFim, ataque) {
     if (!ac) return;
@@ -269,7 +269,7 @@
       var mu = MUSICAS[faixa], r = roteiro(faixa), casas = mu.tempos * 2, e = 30 / mu.bpm, pos = passo % casas;
       tocarColcheia(mu, r[Math.floor(passo / casas)], pos, prox + (pos % 2 ? mu.balanco * e : 0), e);
       passo++; prox += e;
-      if (passo >= r.length * casas) { passo = 0; faixa = (faixa + 1) % MUSICAS.length; if (faixa === 0) volta++; }
+      if (passo >= r.length * casas) { passo = 0; volta++; parar(); setTimeout(avancar, 700); return; }   // acabou: a próxima da rádio
     }
   }
   function comecar() {
@@ -282,17 +282,66 @@
   }
   function parar() { if (timer) { clearInterval(timer); timer = null; } }
 
+  /* ---------- a rádio: músicas GRAVADAS de verdade (instrumentos de verdade, licença livre) intercaladas com as
+     feitas aqui pelo navegador. Pedido do dono (01/Nov/2026): "mais instrumentos, mais elaboradas, não Atari",
+     no clima do primeiro LittleBigPlanet. As 6 gravadas são do Kevin MacLeod (CC BY 4.0: o crédito aparece na
+     tela quando cada uma começa, e está em musicas/LICENCAS.md). Ordem: duas gravadas, uma nossa, duas gravadas...
+     Sem o arquivo (sem internet e ainda não guardado), pula para a próxima. */
+  var GRAVADAS = [
+    { url: 'musicas/fluffing-a-duck.mp3', nome: 'Fluffing a Duck', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/carefree.mp3', nome: 'Carefree', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/sneaky-snitch.mp3', nome: 'Sneaky Snitch', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/wallpaper.mp3', nome: 'Wallpaper', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/local-forecast-elevator.mp3', nome: 'Local Forecast – Elevator', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/investigations.mp3', nome: 'Investigations', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' }
+  ];
+  var VOL_GRAVADA = 0.42;                      // as gravadas já vêm com o volume igualado; ficam abaixo dos efeitos
+  var lista = [], atual = -1, audio = null, falhas = 0, aoTrocar = null;
+  function temAudio() { return typeof Audio !== 'undefined' && typeof document !== 'undefined'; }
+  function montarLista() {
+    var grav = temAudio() ? GRAVADAS.map(function (g) { return { g: g }; }) : [], sint = MUSICAS.map(function (m, k) { return { s: k }; });
+    lista = [];
+    while (grav.length || sint.length) {
+      if (grav.length) lista.push(grav.shift());
+      if (grav.length) lista.push(grav.shift());
+      if (sint.length) lista.push(sint.shift());
+    }
+  }
+  function nomeDe(it) { return it.g ? it.g.nome + ' — ' + it.g.autor + ' (' + it.g.licenca + ')' : MUSICAS[it.s].nome; }
+  function pararTudo() { parar(); if (ac) calar(); if (audio) { try { audio.pause(); } catch (e) { /* ok */ } } }
+  function tocarAtual() {
+    if (!lista.length) montarLista();
+    if (atual < 0) atual = 0;
+    var it = lista[atual];
+    if (!querMusica || !ac || escondida) return;
+    if (it.s != null) { faixa = it.s; prox = ac.currentTime + 0.12; comecar(); return; }
+    if (!audio) { audio = new Audio(); audio.preload = 'auto'; audio.addEventListener('ended', avancar); }
+    if (audio.getAttribute('data-url') !== it.g.url) { audio.src = it.g.url; audio.setAttribute('data-url', it.g.url); }
+    audio.volume = VOL_GRAVADA;
+    var p = audio.play();
+    if (p && p.then) p.then(function () { falhas = 0; }).catch(function () { if (querMusica && !escondida && ++falhas < lista.length) avancar(); });
+  }
+  function tocarItem(k) {
+    if (!lista.length) montarLista();
+    atual = ((k % lista.length) + lista.length) % lista.length;
+    pararTudo(); passo = 0;
+    if (audio && lista[atual].g) { try { audio.currentTime = 0; } catch (e) { /* ok */ } audio.removeAttribute('data-url'); }
+    if (aoTrocar && querMusica) { try { aoTrocar(nomeDe(lista[atual]), lista[atual].g || null); } catch (e) { /* ok */ } }
+    tocarAtual();
+  }
+  function avancar() { if (querMusica) tocarItem(atual + 1); }
   function musica(ligar) {
     ligar = !!ligar;
     if (ligar === querMusica) return;
     querMusica = ligar;
-    if (ligar) { passo = 0; comecar(); } else { parar(); if (ac) calar(); }
+    if (ligar) { if (atual < 0) tocarItem(0); else tocarAtual(); } else pararTudo();
   }
   function proxima() {
-    faixa = (faixa + 1) % MUSICAS.length; passo = 0;
-    if (ac && querMusica && !escondida) { parar(); calar(); prox = ac.currentTime + 0.12; comecar(); }
+    if (!lista.length) montarLista();
+    if (querMusica) tocarItem(atual + 1);
+    else { atual = (atual + 1) % lista.length; passo = 0; }
   }
-  function nomeAtual() { return querMusica && ac ? MUSICAS[faixa].nome : ''; }
+  function nomeAtual() { return querMusica && ac && atual >= 0 ? nomeDe(lista[atual]) : ''; }
 
   // página escondida (outra aba, tela apagada): silencia tudo; ao voltar, a música continua de onde parou
   function vigiarTela() {
@@ -302,8 +351,8 @@
     document.addEventListener('visibilitychange', function () {
       escondida = !!document.hidden;
       if (!ac) return;
-      if (escondida) { parar(); suspender(); }
-      else { retomar(); if (querMusica) comecar(); }
+      if (escondida) { parar(); suspender(); if (audio) { try { audio.pause(); } catch (e) { /* ok */ } } }
+      else { retomar(); if (querMusica) tocarAtual(); }
     });
   }
 
@@ -360,6 +409,8 @@
     musica: musica,
     musicaLigada: function () { return querMusica; },
     proxima: proxima,
+    aoTrocar: function (fn) { aoTrocar = fn; },
+    GRAVADAS: GRAVADAS,
     nomeAtual: nomeAtual,
     efeitos: efeitos,
     efeitosLigados: function () { return efLigados; },
