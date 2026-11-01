@@ -140,6 +140,18 @@ async function comecar(pg, nivel) {
   await ps.click('#btPausa'); await ps.click('#btSeguir');
   confere(ps.erros().length === 0, 'som: sem erros', ps.erros());
 
+  /* iPad/iPhone antigo (iOS < 13): sem pointer events, só toque. Tocar na tela tem de parar o item. */
+  const ipad = await abrir(browser, base + '?teste', { ctx: { viewport: { width: 820, height: 1180 }, hasTouch: true, isMobile: true }, antes: () => {
+    const orig = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function (tipo, fn, op) { if (/^pointer/.test(tipo)) return; return orig.call(this, tipo, fn, op); };
+    delete window.PointerEvent; window.PointerEvent = undefined;
+  } });
+  await D(ipad, () => PeluqueriaDebug.novaRodada('crianca'));
+  await ateAlvo(ipad); await ipad.touchscreen.tap(410, 700);
+  const ip = await est(ipad);
+  confere(ip.fase === 'parado' && ip.res.length === 1, 'iPad antigo (sem pointer events): tocar na tela para o item', ip);
+  confere(ipad.erros().length === 0, 'iPad antigo: sem erros', ipad.erros());
+
   const mudo = await abrir(browser, base + '?teste', { antes: () => { delete window.speechSynthesis; delete window.AudioContext; delete window.webkitAudioContext; window.speechSynthesis = undefined; window.AudioContext = undefined; window.webkitAudioContext = undefined; } });
   await D(mudo, () => PeluqueriaDebug.novaRodada('crianca'));
   await ateAlvo(mudo); await tocar(mudo); await passo(mudo, 2100);
@@ -281,7 +293,7 @@ async function comecar(pg, nivel) {
 
   const pdb = await abrir(browser, base + '?debug&teste');
   await passo(pdb, 500);
-  confere(/v0\.6\.0/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(/v0\.6\.1/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
 
   /* ---------- revisão final ---------- */

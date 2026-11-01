@@ -392,3 +392,11 @@ sem me consultar"):
   continua aceitando os 8 tipos para as imagens do dono em `meus/`.
 - **"U-huuu!" gravado** (voz + torcida, CC BY) em `efeitos/`, alternando duas versões; se não carregar, toca a
   torcida sintetizada antiga.
+
+## Mudanças da v0.6.1
+
+- **Fotos e desenhos juntos:** os 12 desenhos voltaram (ids `desenho-…`, só lugares do rosto e pescoço) e cada
+  cenário tem `estilo` (`foto` ou `desenho`); o sorteio prefere trocar de estilo a cada queda, então alterna.
+- **Toque no iPad:** em tela de toque o jogo escuta `touchstart` (iPad/iPhone com iOS < 13 não têm pointer events);
+  `pointerdown` fica para mouse e caneta. Vale para tocar no palco e para o PARAR! do celular-controle.
+
