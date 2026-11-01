@@ -1,10 +1,10 @@
 /* Rabiscolândia — service worker: guarda a pasta no aparelho para abrir sem internet.
    Código (html, js, css, json): rede primeiro com 4 s de espera, senão a cópia; fonte, imagens e a biblioteca
-   da mão (MediaPipe em ../baguncolandia/libs/, só baixa quando alguém liga a mão) e as músicas gravadas
-   (musicas/*.mp3, só baixam quando tocam): cópia primeiro.
+   da mão (MediaPipe em ../baguncolandia/libs/, só baixa quando alguém liga a mão): cópia primeiro.
+   Músicas gravadas (musicas/*.mp3): o service worker não mexe (o navegador busca direto).
    Cache com o nome do app: só apaga caches "rabiscolandia-" (nunca os dos outros apps da mesma origem).
    Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
-var VERSAO = '0.1.4';
+var VERSAO = '0.1.5';
 var CACHE = 'rabiscolandia-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'folha.js', 'paginas.js', 'fundos.js', 'adesivos.js', 'som.js', 'pintura.js', 'mao.js', 'app.js', 'sala.js', 'tv.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 self.addEventListener('install', function (e) {
@@ -17,7 +17,10 @@ self.addEventListener('fetch', function (e) {
   var req = e.request; if (req.method !== 'GET') return;
   var url = new URL(req.url);
   if (url.origin !== location.origin) return;
-  if (/\.(woff2|png|mjs|wasm|task|mp3)$/i.test(url.pathname) || /\/libs\//.test(url.pathname)) {
+  // músicas gravadas: o navegador busca direto (pedidos de áudio vêm em pedaços, "Range"; passar pelo service worker
+  // atrapalha alguns celulares). Sem internet, a rádio segue com as músicas feitas pelo app.
+  if (/\.mp3$/i.test(url.pathname)) return;
+  if (/\.(woff2|png|mjs|wasm|task)$/i.test(url.pathname) || /\/libs\//.test(url.pathname)) {
     e.respondWith(caches.match(req).then(function (r) { return r || fetch(req).then(function (resp) { if (resp.status === 200) { var c2 = resp.clone(); caches.open(CACHE).then(function (c) { return c.put(req, c2); }).catch(function () {}); } return resp; }); }));
     return;
   }

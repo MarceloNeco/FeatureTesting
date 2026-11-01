@@ -119,7 +119,7 @@ desafio novo e desfile começam a próxima. Só silenciam com o app escondido (o
 | `estilo.css` | visual, em pé × deitado, bordas seguras, animações (respeita "reduzir movimento"). |
 | `pecas.js` | **só dados**: paletas, abas, categorias, opções (com `tags`), áreas de zoom (`ZOOM`, e `zoom` em cada parte), padrão e os desafios. Peça nova entra aqui. |
 | `visual.js` | **puro**: regras (vestido × blusa/saia/calça, nunca sem roupa), surpresa, desfazer, limpar look antigo, dicas e estrelas. |
-| `boneca.js` | o desenho em SVG da personagem (com giro contínuo: `opcoes.angulo` em graus — `cabecaVirada`, `contorno`, `torcer`), das roupas, acessórios e dos 8 cenários (tudo em código). Peça nova = um `case` aqui. |
+| `boneca.js` | o desenho em SVG da personagem (com giro contínuo: `opcoes.angulo` em graus — a cabeça é feita de volumes 3D (`VOLUMES`, `NARIZ_V`, `LABIOS_V`; `contorno` = união das elipses projetadas), `cabecaVirada`, `torcer`; `opcoes.olhar`, `sorriso` e `tchau` no desfile), das roupas, acessórios e dos 8 cenários (tudo em código). Peça nova = um `case` aqui. |
 | `som.js` | a rádio (gravadas + feitas pelo jogo) e os efeitos sintetizados (WebAudio). |
 | `musicas/` | as 8 músicas gravadas (MP3, CC BY 4.0 e CC0) e `LICENCAS.md`. |
 | `sala.js` | canal TV ↔ celular (Supabase Realtime; `BroadcastChannel` com `?teste`); confere toda mensagem que chega. |

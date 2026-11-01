@@ -201,6 +201,10 @@
       }
       larg = nl; alt = na; retrato = nl < na; sujo = true;
     }
+    function conferirTamanho() {
+      var r = tela.getBoundingClientRect(), w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));   // mesmo arredondamento do redimensionar
+      if (r.width > 0 && r.height > 0 && (w !== larg || h !== alt || Math.min(raiz.devicePixelRatio || 1, 3) !== dpr)) redimensionar();
+    }
     function conteudo() {
       var c = pag ? { x: PAG.x, y: PAG.y, w: PAG.w, h: PAG.h } : null;
       vivos.forEach(function (v) { c = F.unir(c, F.caixaDePontos(v.pts, v.tam)); });
@@ -677,6 +681,7 @@
     function quadro() {
       if (!rodando) return;
       raiz.requestAnimationFrame(quadro);
+      conferirTamanho();
       var t = agora();
       if (animVista) {
         var u = Math.min(1, (t - animVista.t) / 0.45), e = 1 - Math.pow(1 - u, 3), a = animVista.de, b = animVista.para;
@@ -763,6 +768,10 @@
       return Promise.resolve();
     }
 
+    /* a folha se mede de novo SEMPRE que o tamanho dela muda (barra que terminou de aparecer, fonte que carregou,
+       barra do navegador que sumiu, girar, tela cheia). Sem isso o desenho ficava "espremido" e o risco saía longe
+       do dedo na parte de baixo (achado do dono, 01/Nov/2026). ResizeObserver avisa; o quadro também confere. */
+    if (raiz.ResizeObserver) { try { new ResizeObserver(function () { conferirTamanho(); }).observe(tela); } catch (e) { /* segue com a conferência do quadro */ } }
     redimensionar(); iniciar();
     return {
       redimensionar: redimensionar, iniciar: iniciar, parar: parar,
@@ -780,7 +789,7 @@
       numerosVisiveis: function () { return perto; },
       fundo: function (f) { if (f) definirFundo(f); return fundo; },
       estado: estado, pinturaBlob: pinturaBlob, carregar: carregar, foto: foto, miniatura: miniatura, festejar: festejar,
-      tamanhoTela: function () { return { larg: larg, alt: alt }; }, calmo: function (v) { calmo = !!v; sujo = true; }
+      tamanhoTela: function () { return { larg: larg, alt: alt }; }, aTela: function (x, y) { return F.aTela(vista, x, y); }, calmo: function (v) { calmo = !!v; sujo = true; }
     };
   }
 
