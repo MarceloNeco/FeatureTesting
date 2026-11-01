@@ -23,9 +23,9 @@
 
   // pedacos: tamanho da corrida (~100 s em velocidade cheia); obst: quanto obstáculo (0 a 1)
   var NIVEIS = {
-    crianca: { pedacos: 3600, velMax: 7200, obst: 0.35, carros: 6, velCarro: [0.25, 0.4], perdeCarro: 1, perdeCone: 0, curva: 0.6, morro: 0.5, centrifuga: 0.12, limiteX: 1.3, ajuda: true },
-    normal: { pedacos: 4800, velMax: 9600, obst: 0.7, carros: 14, velCarro: [0.3, 0.55], perdeCarro: 3, perdeCone: 1, curva: 1, morro: 1, centrifuga: 0.25, limiteX: 1.5, ajuda: false },
-    turbo: { pedacos: 6000, velMax: 12000, obst: 1, carros: 24, velCarro: [0.32, 0.65], perdeCarro: 5, perdeCone: 2, curva: 1.3, morro: 1.2, centrifuga: 0.32, limiteX: 1.6, ajuda: false }
+    crianca: { pedacos: 3600, velMax: 7200, obst: 0.35, carros: 6, tuneis: 2, velCarro: [0.25, 0.4], perdeCarro: 1, perdeCone: 0, curva: 0.6, morro: 0.5, centrifuga: 0.12, limiteX: 1.3, ajuda: true },
+    normal: { pedacos: 4800, velMax: 9600, obst: 0.7, carros: 14, tuneis: 3, velCarro: [0.3, 0.55], perdeCarro: 3, perdeCone: 1, curva: 1, morro: 1, centrifuga: 0.25, limiteX: 1.5, ajuda: false },
+    turbo: { pedacos: 6000, velMax: 12000, obst: 1, carros: 24, tuneis: 4, velCarro: [0.32, 0.65], perdeCarro: 5, perdeCone: 2, curva: 1.3, morro: 1.2, centrifuga: 0.32, limiteX: 1.6, ajuda: false }
   };
 
   // sorteio com semente (mulberry32): mesma semente, mesma sequência
@@ -125,7 +125,21 @@
       carros.push({ z: (inteiro(260, chegada - 60)) * SEG, x: faixa(), vel: entre(cfg.velCarro[0], cfg.velCarro[1]) * cfg.velMax, tipo: r() < 0.18 ? 'onibus' : 'carro' + inteiro(0, 4) });
     }
 
-    return { segs: segs, chegada: chegada, zChegada: chegada * SEG, comprimento: segs.length * SEG, nivel: NIVEIS[nivel] ? nivel : 'normal', cfg: cfg, mundos: ordem, carros: carros, semente: semente };
+    // túneis: trechos cobertos (no céu, um tubo de anéis de luz), longe dos portais, da largada e da chegada
+    var tuneis = [], tentativas = 0;
+    while (tuneis.length < cfg.tuneis && tentativas++ < 80) {
+      var tIni = inteiro(260, chegada - 280), tFim = tIni + inteiro(70, 130), ok = true;
+      tuneis.forEach(function (t) { if (tFim > t[0] - 80 && tIni < t[1] + 80) ok = false; });
+      for (var q = 1; q < 4; q++) { var pq = Math.round(quarto * q); if (pq > tIni - 40 && pq < tFim + 40) ok = false; }
+      if (ok) tuneis.push([tIni, tFim]);
+    }
+    tuneis.sort(function (a, b) { return a[0] - b[0]; });
+    tuneis.forEach(function (t, k) {
+      for (var i2 = t[0]; i2 < t[1]; i2++) { segs[i2].tunel = k + 1; segs[i2].enfeites = []; }
+      segs[t[0]].entrada = true;
+    });
+
+    return { segs: segs, chegada: chegada, tuneis: tuneis, zChegada: chegada * SEG, comprimento: segs.length * SEG, nivel: NIVEIS[nivel] ? nivel : 'normal', cfg: cfg, mundos: ordem, carros: carros, semente: semente };
   }
 
   function achar(pista, z) {

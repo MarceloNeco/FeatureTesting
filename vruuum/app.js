@@ -2,7 +2,7 @@
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.0';
+  var APP_VERSION = '0.9.0';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -15,6 +15,8 @@
   var pref = ler('vruuum.pref', null) || {};
   if (pref.jogadores !== 2) pref.jogadores = 1;
   if (NIVEIS.indexOf(pref.nivel) < 0) pref.nivel = 'crianca';
+  if (pref.visual !== 'colorido') pref.visual = 'neon';   // neon é o padrão (mais sóbrio, com túneis iluminados)
+  D.definirEstilo(pref.visual);
   if (pref.lingua !== 'en' && pref.lingua !== 'pt') pref.lingua = (navigator.language || 'pt').slice(0, 2) === 'pt' ? 'pt' : 'en';
   if (!pref.carros || pref.carros.length !== 2) pref.carros = [{ cor: 0, piloto: 0 }, { cor: 2, piloto: 1 }];
   var VE = window.VruuumVeiculos, SE = window.VruuumSelfie;
@@ -174,6 +176,7 @@
   function marcar() {
     Array.prototype.forEach.call(document.querySelectorAll('[data-jogadores]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-jogadores') === pref.jogadores)); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-nivel]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-nivel') === pref.nivel)); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-visual]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-visual') === pref.visual)); });
     if (editando >= pref.jogadores) editando = 0;
     var c = pref.carros[editando], v = VE.achar(c.veic);
     $('abas').hidden = pref.jogadores < 2;
@@ -206,6 +209,7 @@
   }
   opcao('data-jogadores', function (v) { pref.jogadores = +v; });
   opcao('data-nivel', function (v) { pref.nivel = v; });
+  opcao('data-visual', function (v) { pref.visual = v; D.definirEstilo(v); });
   $('btLingua').addEventListener('click', function () { pref.lingua = pref.lingua === 'en' ? 'pt' : 'en'; salvar(); traduzir(); marcar(); });
   $('btSom').addEventListener('click', function () { Som.iniciar(); var lig = Som.alternar(); $('btSom').textContent = lig ? '🔊' : '🔇'; });
   $('btAjuda').addEventListener('click', function () { var a = $('ajuda'); a.hidden = !a.hidden; $('btAjuda').setAttribute('aria-expanded', String(!a.hidden)); });
@@ -242,7 +246,7 @@
     estado = M.novaCorrida(pref.nivel, (Date.now() % 1000000007) | 0, pref.jogadores);
     jogs = pref.carros.slice(0, pref.jogadores).map(function (c) { return { cor: D.CORES[c.cor], piloto: D.PILOTOS[c.piloto], veic: c.veic, foto: fotoDe(pref.carros.indexOf(c)) }; });
     estado.jogadores.forEach(function (j, k) { var v = VE.achar(jogs[k].veic); j.mod = { vel: v.vel, curva: v.curva }; });
-    D.preparar(estado, jogs, pref.lingua);
+    D.preparar(estado, jogs, pref.lingua, pref.visual);
     tela('jogo'); redimensionar();
     $('pausa').hidden = true; pausado = false; ponteiros = {}; pularPend = [false, false];
     lerBordas(); telaCheia(true);

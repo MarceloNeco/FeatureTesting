@@ -129,3 +129,4 @@ a { color: var(--ciano); }
   .selfie-editor { flex-wrap: nowrap; }
   #selfieTela { max-height: 62vh; }
 }
+.opcao.visual-neon { color: #2bf4ff; text-shadow: 0 0 8px rgba(43,244,255,.6); }
