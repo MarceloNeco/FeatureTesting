@@ -2,6 +2,21 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "0.3.0",
+      "data": "01/Nov/2026",
+      "hora": "13:55:00",
+      "pt": [
+        "O celular agora é volante sempre (1 jogador): incline para um lado e o carro vira; dê um toquinho com o celular para cima e o carro pula. Funciona deitado ou em pé, e o jeito de segurar no 3-2-1 vira o meio do volante. Tocar nos lados e o botão ⬆ continuam valendo junto.",
+        "Um botão só, 📲 Guardar no celular: instala com ícone na tela quando o navegador deixa; senão, baixa o arquivo do jogo. Os dois jeitos funcionam sem internet. Some quando o jogo já está instalado.",
+        "Saiu a escolha \"Como dirigir no celular\" do menu (não precisa mais)."
+      ],
+      "en": [
+        "The phone is now always a steering wheel (1 player): tilt it and the car turns; give the phone a little flick up and the car jumps. Works sideways or upright, and how you hold it during the 3-2-1 becomes the wheel's center. Tapping the sides and the ⬆ button still work too.",
+        "A single button, 📲 Save on the phone: installs with a home-screen icon when the browser allows; otherwise downloads the game file. Both work offline. It hides once the game is installed.",
+        "The \"How to steer on the phone\" choice is gone from the menu (no longer needed)."
+      ]
+    },
+    {
       "versao": "0.2.0",
       "data": "01/Nov/2026",
       "hora": "13:50:00",
