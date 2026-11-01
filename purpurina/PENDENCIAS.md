@@ -21,3 +21,4 @@ Situação: 🟡 aberta · 🔵 em andamento · ⏸ aguardando o dono · ✅ fei
 | 15 | Testar a Purpurina na TV LG de verdade (código, som depois do OK, YouTube e Spotify no navegador da TV). | v0.5.0 | ⏸ dono testar |
 | 16 | Spotify com a música inteira dentro do app (exige o Client ID de um app do Spotify e login Premium; mesmo caso da Peluqueria). | v0.5.0 | ⏸ aguardando o dono |
 | 17 | Personagem com "cara de papel"; fotos mais realistas e renderizadas. | dono, 01/Nov/2026 | ✅ v0.6.0 (volume, sombra macia, fundo desfocado, foto de estúdio em camadas). Realismo de 3D de verdade continua no #11 |
+| 18 | Bolsa parecendo fora da mão; desenho com mais detalhe. Celular mostrando versão antiga. | dono, 01/Nov/2026 | ✅ v0.7.0 (bolsas seguradas, com costura e metal; aviso de versão nova) |

@@ -175,6 +175,7 @@ ul { list-style: none; }
 .janela-caixa img { max-width: 100%; max-height: 52vh; margin: 0 auto; border-radius: 14px; }
 .janela-botoes { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .recado { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; bottom: calc(16px + var(--sb)); background: #fff; color: #3a1450; font-weight: 600; border-radius: 999px; padding: 10px 18px; z-index: 55; box-shadow: 0 6px 20px rgba(0,0,0,.35); max-width: calc(100% - 32px); text-align: center; animation: subir .2s ease-out; }
+.nova-versao { position: fixed; left: 0; right: 0; margin: 0 auto; width: max-content; max-width: calc(100% - 24px); top: calc(10px + var(--st)); z-index: 65; background: linear-gradient(180deg, #ffe08a, #ffbf3a); color: #4a2400; font-weight: 700; font-size: 1.05rem; border-radius: 999px; padding: 0 18px; min-height: 48px; box-shadow: 0 6px 20px rgba(0,0,0,.4); animation: subir .25s ease-out; }
 .festa { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
 
 /* ---------- 📺 conectar, 🎵 música, TV ---------- */
