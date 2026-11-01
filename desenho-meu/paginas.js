@@ -236,7 +236,7 @@
     for (s = -1; s <= 1; s += 2) {
       if (tipo === 'urso') {
         // a parte de dentro da orelha é só um risco (como pintura, ficaria fininha demais)
-        f(circ(x + s * 0.72 * R, y - 0.8 * R, 0.34 * R), pelo);
+        f(circ(x + s * 0.72 * R, y - 0.8 * R, Math.max(28, 0.34 * R)), pelo);
         l(arco(x + s * 0.75 * R, y - 0.86 * R, 0.17 * R, 175, 365));
       } else if (tipo === 'coelho') {
         // orelha comprida; a parte rosa fica mais para baixo, para sobrar a pontinha para pintar
@@ -244,7 +244,7 @@
         f(elipR(x + s * 0.36 * R, y - 1.3 * R, 0.64 * R, 0.32 * R, 90 + s * 10), pelo);
         f(elipR(x + s * 0.36 * R + Math.cos(ga) * 0.16 * R, y - 1.3 * R + Math.sin(ga) * 0.16 * R, 0.36 * R, Math.max(22, 0.15 * R), 90 + s * 10), c.orelha || c.bochecha);
       } else if (tipo === 'gato') {
-        f(poliR([[x + s * 1.0 * R, y - 0.2 * R], [x + s * 0.86 * R, y - 1.18 * R], [x + s * 0.2 * R, y - 0.86 * R]], 0.14 * R), pelo);
+        f(poliR([[x + s * 1.02 * R, y - 0.2 * R], [x + s * 0.88 * R, y - 1.24 * R], [x + s * 0.18 * R, y - 0.88 * R]], 0.14 * R), pelo);
         l(reta([[x + s * 0.78 * R, y - 0.6 * R], [x + s * 0.8 * R, y - 0.98 * R], [x + s * 0.5 * R, y - 0.84 * R]]));
       }
     }
@@ -266,7 +266,7 @@
     }
     var bx = tipo === 'cachorro' ? 0.56 : 0.64;
     if (tipo === 'urso' || tipo === 'cachorro') {
-      f(elip(x, y + 0.38 * R, 0.34 * R, 0.25 * R), c.claro);
+      f(elip(x, y + 0.38 * R, Math.max(34, 0.34 * R), Math.max(24, 0.25 * R)), c.claro);
       l(ponto(x, y + 0.28 * R, 0.11 * R, 0.075 * R));
       l(reta([[x, y + 0.33 * R], [x, y + 0.42 * R]]));
       l('M ' + pt(x - 0.13 * R, y + 0.4 * R) + ' Q ' + pt(x - 0.065 * R, y + 0.5 * R) + ' ' + pt(x, y + 0.42 * R) + ' Q ' + pt(x + 0.065 * R, y + 0.5 * R) + ' ' + pt(x + 0.13 * R, y + 0.4 * R));
@@ -833,20 +833,259 @@
       [360, 430, 545, 615].forEach(function (x) { f(pilula(x, 720, x, 860, 30), 7); });
       f(elip(480, 680, 175, 108), 7);
       [360, 430, 545, 615].forEach(function (x) { f(ret(x - 32, 838, 64, 42, 14), 11); });
-      f(suave([[530, 650], [585, 540], [660, 480], [700, 560], [645, 690]]), 7);
-      f(poliR([[708, 372], [775, 390], [758, 278]], 12), 7);
-      f(circ(665, 445, 102), 7);
-      f(elip(752, 495, 80, 60), 7);
-      l(ponto(800, 486, 7)); l('M 760 528 Q 785 545 812 525');
+      f(suave([[530, 650], [585, 575], [650, 535], [690, 610], [645, 690]]), 7);
+      // cabeça (um pouco mais baixa, pescoço curtinho = mais fofo)
+      var hx = -10, hy = 45;
+      function H(x, y) { return [x + hx, y + hy]; }
+      f(poliR([H(708, 372), H(775, 390), H(758, 278)], 12), 7);
+      f(circ(665 + hx, 445 + hy, 102), 7);
+      f(elip(752 + hx, 495 + hy, 80, 60), 7);
+      l(ponto(800 + hx, 486 + hy, 7)); l('M ' + pt(760 + hx, 528 + hy) + ' Q ' + pt(785 + hx, 545 + hy) + ' ' + pt(812 + hx, 525 + hy));
       // crina e topete
-      f(cobra([[600, 300, 40], [562, 370, 44], [550, 450, 44], [562, 530, 40], [592, 600, 32]]), 8);
-      f(cobra([[612, 330, 22], [586, 392, 24], [578, 462, 24], [590, 530, 20]]), 9);
-      f(suave([[605, 335], [650, 312], [695, 335], [672, 372], [628, 375]]), 9);
-      f(poliR([[648, 342], [712, 346], [700, 190]], 10), 10);
-      l(reta([[660, 315], [702, 300]])); l(reta([[668, 270], [700, 258]])); l(reta([[678, 228], [698, 220]]));
-      // olhinho fechado com cílios e bochecha
-      l(ponto(700, 440, 13)); l(reta([[712, 430], [724, 418]]));
-      f(elip(690, 500, 30, 22), 11);
+      f(cobra([H(600, 300).concat(40), H(562, 370).concat(44), H(550, 450).concat(44), H(562, 525).concat(40), H(592, 585).concat(32)]), 8);
+      f(cobra([H(612, 330).concat(22), H(586, 392).concat(24), H(578, 462).concat(24), H(590, 525).concat(20)]), 9);
+      f(suave([H(605, 335), H(650, 312), H(695, 335), H(672, 372), H(628, 375)]), 9);
+      f(poliR([H(648, 342), H(712, 346), H(700, 190)], 10), 10);
+      l(reta([H(660, 315), H(702, 300)])); l(reta([H(668, 270), H(700, 258)])); l(reta([H(678, 228), H(698, 220)]));
+      // olhinho, cílio e bochecha
+      l(ponto(700 + hx, 440 + hy, 13)); l(reta([H(712, 430), H(724, 418)]));
+      f(elip(690 + hx, 500 + hy, 30, 22), 11);
+    });
+
+  // ===== Dinossauro fofinho =====
+  pagina('dinossauro', 'Dinossauro fofinho', 'Cute dinosaur', 'fantasia',
+    ['#d4f1ff', '#b08968', '#ff7b54', '#c5e384', '#7ed6a5', '#fff1b5', '#ffb347', '#ff9fb0', '#4cae6a', '#c49a6c', '#fffaf0', '#ffd166'],
+    [v('Lilás', 'Lilac', ['#ffe9d6', '#9c7ab8', '#ff5d8f', '#f2d78a', '#c9a7ff', '#ffe3f1', '#7ad3a8', '#ff9fb0', '#58b368', '#a8693c', '#fff8ec', '#8fd3ff']),
+      v('Pôr do sol', 'Sunset', ['#ffcf9e', '#7a5a4a', '#ffd23f', '#a6c46a', '#ffb3a7', '#fff6e0', '#7ac7e8', '#ff8fa3', '#3f8f5f', '#8c5a3a', '#f4f0ff', '#ff7b54'])],
+    function (f, l, poe) {
+      f(ret(0, 0, 1000, 1000), 1);
+      f(circ(880, 120, 60), 12);
+      for (var i = 0; i < 8; i++) { var a = i * 45 * Math.PI / 180; l(reta([[880 + Math.cos(a) * 80, 120 + Math.sin(a) * 80], [880 + Math.cos(a) * 108, 120 + Math.sin(a) * 108]])); }
+      // vulcão soltando fumacinha
+      f(nuvem(290, 170, 160), 11);
+      f(poliR([[80, 620], [225, 290], [335, 290], [480, 620]], 22), 2);
+      f(suave([[228, 300], [280, 278], [332, 300], [330, 360], [302, 340], [272, 395], [248, 345]]), 3);
+      f(chao([[0, 620], [500, 590], [1000, 630]]), 4);
+      // coqueiro
+      f(cobra([[880, 900, 28], [872, 760, 26], [852, 610, 24], [862, 480, 22]]), 10);
+      [[320, 95], [210, 95], [270, 90], [20, 95]].forEach(function (g) {
+        var a = g[0] * Math.PI / 180;
+        f(elipR(862 + Math.cos(a) * 80, 470 + Math.sin(a) * 80, g[1], 32, g[0]), 9);
+      });
+      // dinossauro: rabo, espinhos e pernas atrás do corpo
+      f(cobra([[430, 760, 60], [330, 785, 48], [240, 765, 34], [175, 722, 24]]), 5);
+      function espinho(cx, cy, g) {
+        var a = g * Math.PI / 180, b = a + Math.PI / 2;
+        f(poliR([[cx + Math.cos(b) * 40, cy + Math.sin(b) * 40], [cx + Math.cos(a) * 66, cy + Math.sin(a) * 66], [cx - Math.cos(b) * 40, cy - Math.sin(b) * 40]], 12), 7);
+      }
+      espinho(548, 356, 238); espinho(505, 412, 205); espinho(452, 596, 238); espinho(380, 636, 218); espinho(322, 748, 262); espinho(238, 738, 250);
+      f(ret(390, 760, 84, 120, 38), 5); f(ret(545, 760, 84, 120, 38), 5);
+      f(elip(500, 700, 152, 122), 5);
+      f(elip(545, 725, 88, 82), 6);
+      f(suave([[470, 630], [530, 530], [640, 505], [660, 610], [600, 660]]), 5);
+      f(circ(615, 450, 122), 5);
+      f(pilula(612, 625, 668, 690, 27), 5);
+      l(ponto(570, 440, 14)); l(ponto(672, 440, 14));
+      f(elip(548, 495, 30, 22), 8); f(elip(694, 495, 30, 22), 8);
+      l('M 597 492 Q 621 516 645 492');
+      l(reta([[520, 700], [570, 700]])); l(reta([[510, 740], [580, 740]]));
+      // ovinho
+      f(elip(800, 845, 64, 82), 11);
+      f(circ(775, 805, 23), 12); f(circ(828, 870, 24), 12);
+      l(reta([[740, 840], [765, 820], [790, 845], [815, 820], [840, 845], [862, 828]]));
+      l(reta([[60, 860], [70, 820]])); l(reta([[80, 860], [95, 828]])); l(reta([[660, 920], [668, 885]])); l(reta([[680, 920], [692, 890]]));
+    });
+
+  // ===== Foguete no espaço =====
+  pagina('foguete', 'Foguete no espaço', 'Rocket in space', 'veiculos',
+    ['#2b2d63', '#fff3a3', '#ff9fb5', '#ffd166', '#f5f5f5', '#ff5d5d', '#9ad9ff', '#d4a373', '#ffb347', '#ffe66d', '#c9c9e0', '#ff9fb0'],
+    [v('Galáxia', 'Galaxy', ['#3a1f5d', '#ffd6f5', '#7ad3a8', '#ff9f43', '#ffe8f4', '#8a5cf5', '#ffe08a', '#e3b07c', '#ff7aa8', '#ffd1e8', '#b8a1ff', '#ff9fb0']),
+      v('Doce', 'Sweet', ['#d9f2ff', '#ffb3c6', '#ffd166', '#c9a7ff', '#ffffff', '#7ad3a8', '#fff0b3', '#f2c7a0', '#ff8fa3', '#ffe08a', '#e0e0f5', '#ff9fb0'])],
+    function (f, l, poe) {
+      f(ret(0, 0, 1000, 1000), 1);
+      [[120, 470, 0], [880, 380, 20], [800, 110, 340], [190, 760, 15], [60, 90, 30]].forEach(function (e) { f(estrela(e[0], e[1], 46, 22, e[2]), 2); });
+      [[300, 80], [650, 60], [930, 560], [70, 600], [330, 900], [700, 920]].forEach(function (p) { l(brilhinho(p[0], p[1], 13)); });
+      // planeta com anel
+      f(circ(165, 255, 80), 3);
+      f('M 15 262 A 150 62 0 0 0 315 262 L 265 262 A 100 22 0 0 1 65 262 Z', 4);
+      // lua com crateras
+      f(circ(870, 830, 115), 11);
+      l(circ(830, 790, 24)); l(circ(905, 860, 30)); l(circ(840, 890, 16));
+      // foguete: fogo e asas atrás do corpo
+      f(suave([[420, 770], [440, 870], [500, 970], [560, 870], [580, 770]]), 9);
+      f(suave([[458, 770], [470, 840], [500, 900], [530, 840], [542, 770]]), 10);
+      f(poliR([[352, 520], [228, 720], [228, 800], [362, 735]], 16), 6);
+      f(poliR([[648, 520], [772, 720], [772, 800], [638, 735]], 16), 6);
+      f('M 500 110 C 620 200 680 360 670 560 L 650 760 L 350 760 L 330 560 C 320 360 380 200 500 110 Z', 5);
+      f('M 500 110 C 560 155 600 205 625 260 Q 500 292 375 260 C 400 205 440 155 500 110 Z', 6);
+      f(poli([[335, 612], [665, 612], [660.4, 658], [339.6, 658]]), 6);
+      f(poliR([[372, 750], [628, 750], [600, 815], [400, 815]], 12), 6);
+      // janelinha com o ursinho astronauta
+      f(circ(500, 440, 142), 4);
+      f(circ(500, 440, 102), 7);
+      poe(bicho('urso', 500, 455, 72, { pelo: 8, claro: 5, bochecha: 12 }, { corpo: false }));
+      l(arco(500, 440, 84, 200, 250));
+    });
+
+  // ===== Gatinha sereia =====
+  pagina('sereia', 'Gatinha sereia', 'Mermaid kitty', 'fantasia',
+    ['#7fd3e8', '#ffe0a3', '#5cc28f', '#f3e9ff', '#6fd6c8', '#ff9fd1', '#ffd166', '#e6fbff', '#ffb347', '#ff7f7f', '#c9a7ff', '#ff9fb0'],
+    [v('Fundo do mar', 'Deep sea', ['#2b4c8c', '#d9c08a', '#2a9d8f', '#ffe6f2', '#c9a7ff', '#7ad3a8', '#ffd23f', '#8fd3ff', '#ff8fa3', '#ffb347', '#ff9fd6', '#ff9fb0']),
+      v('Coral', 'Coral', ['#b8f0e6', '#fff1c9', '#ff8fa3', '#fff6e0', '#ff9f80', '#ffd166', '#c9a7ff', '#ffffff', '#5aa9e6', '#7ad3a8', '#ffb3c6', '#ff9fb0'])],
+    function (f, l, poe) {
+      f(ret(0, 0, 1000, 1000), 1);
+      f(chao([[0, 830], [400, 800], [1000, 840]]), 2);
+      // algas
+      f(cobra([[90, 1000, 32], [125, 860, 30], [82, 730, 28], [122, 600, 26], [92, 480, 24]]), 3);
+      f(cobra([[905, 1000, 32], [872, 880, 30], [912, 760, 28], [880, 640, 26]]), 3);
+      // peixinhos
+      f(poliR([[862, 300], [945, 250], [945, 350]], 12), 9);
+      f(elip(790, 300, 84, 54), 9);
+      l(ponto(745, 290, 9)); l(curva([[795, 280], [810, 300], [795, 320]]));
+      f(poliR([[110, 200], [40, 160], [40, 240]], 10), 11);
+      f(elip(175, 200, 72, 46), 11);
+      l(ponto(215, 192, 8));
+      // bolhas
+      [[640, 180, 36], [690, 100, 26], [300, 140, 30], [250, 70, 24], [560, 60, 24]].forEach(function (b) { f(circ(b[0], b[1], b[2]), 8); l(arco(b[0], b[1], b[2] * 0.6, 200, 250)); });
+      // gatinha com cauda de sereia e coroa
+      var cauda = [
+        { d: elipR(842, 705, 70, 36, 300), n: 6 }, { d: elipR(855, 790, 70, 36, 25), n: 6 },
+        { d: cobra([[470, 600, 76], [500, 680, 68], [580, 750, 54], [690, 772, 42], [790, 748, 30]]), n: 5 }
+      ];
+      poe(bicho('gato', 470, 340, 110, { pelo: 4, bochecha: 12 }, { pes: false, segura: cauda, maos: [[360, 520], [600, 300]] }));
+      [[520, 680], [575, 715], [630, 740], [690, 750]].forEach(function (p) { l('M ' + pt(p[0] - 18, p[1]) + ' Q ' + pt(p[0], p[1] + 20) + ' ' + pt(p[0] + 18, p[1])); });
+      f(poliR([[422, 262], [518, 262], [530, 192], [496, 220], [470, 172], [444, 220], [410, 192]], 8), 7);
+      // estrela-do-mar e conchinha na areia
+      f(estrela(300, 890, 64, 32, 10), 10);
+      f('M 600 930 A 58 58 0 0 1 716 930 Z', 11);
+      l(reta([[658, 930], [658, 880]])); l(reta([[658, 930], [628, 888]])); l(reta([[658, 930], [688, 888]]));
+    });
+
+  // ===== Castelo encantado =====
+  pagina('castelo', 'Castelo encantado', 'Enchanted castle', 'fantasia',
+    ['#ffd9ec', '#ffffff', '#9fe0a8', '#d9c8ff', '#bfa8f5', '#ff8fb8', '#b8865b', '#fff1a8', '#7fd1ff', '#ffe3b0', '#ffd166'],
+    [v('Noite', 'Night', ['#2b2d63', '#c9c9e0', '#3f7f5f', '#a3b1d9', '#8b9bd1', '#7a5af5', '#6b4430', '#ffe08a', '#ff8fb8', '#d9c08a', '#fff3a3']),
+      v('Princesa', 'Princess', ['#e0f4ff', '#fffafd', '#c5ecb0', '#fff0f7', '#ffd6e8', '#c9a7ff', '#e0a875', '#ffe8a3', '#ff7aa8', '#fff1d6', '#ffd166'])],
+    function (f, l, poe) {
+      f(ret(0, 0, 1000, 1000), 1);
+      f(circ(870, 130, 62), 11);
+      for (var i = 0; i < 8; i++) { var a = i * 45 * Math.PI / 180; l(reta([[870 + Math.cos(a) * 82, 130 + Math.sin(a) * 82], [870 + Math.cos(a) * 110, 130 + Math.sin(a) * 110]])); }
+      f(nuvem(170, 140, 210), 2);
+      f(chao([[0, 700], [300, 640], [700, 660], [1000, 620]]), 3);
+      function janela(x, y) { f('M ' + pt(x, y + 80) + ' L ' + pt(x, y + 26) + ' A 26 26 0 0 1 ' + pt(x + 52, y + 26) + ' L ' + pt(x + 52, y + 80) + ' Z', 8); }
+      function bandeira(x, y) { l(reta([[x, y + 70], [x, y - 10]])); f(poliR([[x, y - 10], [x + 100, y + 20], [x, y + 50]], 8), 9); }
+      // torre do meio (atrás)
+      f(ret(420, 260, 160, 300), 5);
+      bandeira(500, 70);
+      f(poliR([[396, 274], [604, 274], [500, 130]], 12), 6);
+      janela(474, 320);
+      // muralha com ameias
+      var m = [[290, 800], [290, 430]], x;
+      for (x = 290; x < 710; x += 70) m.push([x, 400], [x + 40, 400], [x + 40, 430], [x + 70, 430]);
+      m.push([710, 800]);
+      f(poliR(m, 5), 4);
+      janela(350, 520); janela(598, 520);
+      // torres dos lados
+      [[245, 180], [755, 180]].forEach(function (t) {
+        f(ret(t[0] - 75, 360, 150, 440), 5);
+        bandeira(t[0], t[1] - 20);
+        f(poliR([[t[0] - 98, 372], [t[0] + 98, 372], [t[0], 190]], 12), 6);
+        janela(t[0] - 26, 470);
+      });
+      // portão, caminho e moitas
+      f('M 440 800 L 440 670 A 60 60 0 0 1 560 670 L 560 800 Z', 7);
+      l(reta([[480, 625], [480, 800]])); l(reta([[520, 625], [520, 800]]));
+      f(poliR([[440, 800], [560, 800], [650, 1000], [350, 1000]], 6), 10);
+      f(suave([[40, 820], [90, 760], [170, 750], [240, 790], [250, 850], [150, 870], [60, 860]]), 3);
+      f(suave([[760, 830], [800, 770], [880, 755], [960, 790], [965, 860], [860, 880], [770, 870]]), 3);
+      l(brilhinho(120, 330, 14)); l(brilhinho(900, 330, 12)); l(brilhinho(640, 200, 10));
+    });
+
+  // ===== Passeio de carro =====
+  pagina('carro', 'Passeio de carro', 'Car ride', 'veiculos',
+    ['#cfeeff', '#a8e08f', '#c4c9d6', '#ff6b8b', '#bfe9ff', '#555a6e', '#ffe08a', '#ffcf9e', '#ff9fb0', '#5fbf6a', '#b07a4f', '#ffd23f'],
+    [v('Taxi', 'Taxi', ['#ffeccc', '#c9d86f', '#a3a8b8', '#ffd23f', '#e0f4ff', '#3d405b', '#ffffff', '#c9c3dc', '#ff9fb0', '#4f9d69', '#8c5a3a', '#ff9f43']),
+      v('Noite', 'Night', ['#2b2d63', '#3f6f5a', '#5b5f73', '#8fd3ff', '#ffe08a', '#2a2a3a', '#fff3a3', '#e8dcc8', '#ff9fb0', '#2f5d50', '#5a3a2a', '#f1f1ff'])],
+    function (f, l, poe) {
+      f(ret(0, 0, 1000, 1000), 1);
+      f(circ(150, 130, 62), 12);
+      for (var i = 0; i < 8; i++) { var a = i * 45 * Math.PI / 180; l(reta([[150 + Math.cos(a) * 82, 130 + Math.sin(a) * 82], [150 + Math.cos(a) * 110, 130 + Math.sin(a) * 110]])); }
+      f(chao([[0, 560], [300, 500], [650, 560], [1000, 500]], 780), 2);
+      [[930, 420], [800, 340]].forEach(function (t) { f(ret(t[0] - 20, t[1], 40, 120, 12), 11); f(circ(t[0], t[1] - 40, 56), 10); });
+      f(ret(0, 760, 1000, 240), 3);
+      for (i = 0; i < 5; i++) l(reta([[40 + i * 200, 920], [140 + i * 200, 920]]));
+      // fumacinha
+      f(circ(70, 640, 30), 5); f(circ(40, 590, 22), 5);
+      // carrinho com a gatinha dirigindo
+      f(poliR([[280, 525], [350, 255], [670, 255], [790, 525]], 50), 4);
+      f(poliR([[335, 505], [385, 310], [485, 310], [485, 505]], 20), 5);
+      f(poliR([[520, 310], [640, 310], [740, 505], [520, 505]], 20), 5);
+      poe(bicho('gato', 600, 445, 88, { pelo: 8, bochecha: 9 }, { corpo: false }));
+      f(pilula(100, 690, 900, 690, 24), 3);
+      f(ret(110, 500, 780, 200, 70), 4);
+      l(reta([[500, 520], [500, 690]])); l(reta([[530, 560], [570, 560]]));
+      f(circ(840, 570, 26), 7); f(elip(145, 575, 24, 32), 9);
+      [[280, 710], [720, 710]].forEach(function (c) { f(circ(c[0], c[1], 86), 6); f(circ(c[0], c[1], 40), 7); });
+    });
+
+  // ===== Patinho no jardim =====
+  pagina('pato-jardim', 'Patinho no jardim', 'Duckling in the garden', 'natureza',
+    ['#d6f5ff', '#9edb7a', '#ffffff', '#ffe066', '#ff9f43', '#7fb7ff', '#ff8fb1', '#c9a3ff', '#ffd23f', '#4fae5a', '#ff9fb0'],
+    [v('Outono', 'Autumn', ['#ffe9c7', '#d8c27a', '#fff6e8', '#fff3b0', '#e07a5f', '#3fa7a0', '#e76f51', '#f4a261', '#ffd166', '#8a9a3a', '#ff9fb0']),
+      v('Algodão-doce', 'Cotton candy', ['#ffe3f1', '#c5ecb0', '#fffafd', '#fff6c2', '#ffb07a', '#c9a7ff', '#8fd3ff', '#ffb3c6', '#fff08a', '#7cc68a', '#ff9fb0'])],
+    function (f, l, poe) {
+      f(ret(0, 0, 1000, 1000), 1);
+      f(circ(870, 120, 60), 9);
+      for (var i = 0; i < 8; i++) { var a = (i * 45 + 22) * Math.PI / 180; l(reta([[870 + Math.cos(a) * 80, 120 + Math.sin(a) * 80], [870 + Math.cos(a) * 108, 120 + Math.sin(a) * 108]])); }
+      f(nuvem(250, 110, 190), 3);
+      // cerca
+      for (i = 0; i < 11; i++) { var x = i * 92 - 10; f(poliR([[x + 12, 600], [x + 80, 600], [x + 80, 430], [x + 46, 392], [x + 12, 430]], 8), 3); }
+      f(ret(0, 452, 1000, 40), 3); f(ret(0, 532, 1000, 40), 3);
+      f(chao([[0, 600], [500, 580], [1000, 600]]), 2);
+      // borboleta
+      f(elip(560, 225, 46, 36), 8); f(elip(640, 225, 46, 36), 8); f(elip(570, 282, 36, 28), 7); f(elip(630, 282, 36, 28), 7);
+      l(reta([[600, 205], [600, 300]])); l(curva([[600, 205], [588, 180], [572, 172]])); l(curva([[600, 205], [612, 180], [628, 172]]));
+      // flores
+      [[650, 760, 7], [800, 680, 8], [925, 770, 7]].forEach(function (p) {
+        l(reta([[p[0], p[1] + 60], [p[0], 930]]));
+        f(elipR(p[0] - 40, 860, 44, 24, 330), 10); f(elipR(p[0] + 40, 830, 44, 24, 30), 10);
+        f(flor(p[0], p[1], 66), p[2]); f(circ(p[0], p[1], 24), 9);
+      });
+      // patinho com regador
+      var regador = [
+        { d: faixa(540, 662, 30, 68, 180, 360), n: 6 },
+        { d: pilula(600, 700, 690, 630, 21), n: 6 },
+        { d: circ(702, 620, 26), n: 6 },
+        { d: ret(465, 650, 150, 115, 28), n: 6 }
+      ];
+      poe(bicho('pato', 320, 562, 105, { pelo: 4, bico: 5, bochecha: 11, pe: 5 }, { segura: regador, maos: [[220, 690], [500, 610]] }));
+      l(reta([[728, 600], [742, 580]])); l(reta([[738, 628], [756, 612]])); l(reta([[732, 655], [752, 645]]));
+    });
+
+  // ===== Cachorrinho e a casinha =====
+  pagina('cachorro-casinha', 'Cachorrinho e a casinha', 'Puppy and the doghouse', 'bichos',
+    ['#d8f0ff', '#a7dc8a', '#ff8f70', '#ffd59e', '#7a5236', '#ffffff', '#9b7653', '#ff9fb0', '#ffe9b0', '#6fb8ff', '#ff5c5c'],
+    [v('Outono', 'Autumn', ['#ffe8cc', '#d8c27a', '#7a5af5', '#f4d6a0', '#4a3a5a', '#f7e7d4', '#c4703c', '#ff9fb0', '#fff6e0', '#e76f51', '#3fa7a0']),
+      v('Doce', 'Sweet', ['#ffe6f2', '#bfe8c9', '#c9a7ff', '#fff2b3', '#8a6a9a', '#fffafd', '#f4a7c4', '#ff9fb0', '#ffffff', '#ffb3c6', '#7ad3a8'])],
+    function (f, l, poe) {
+      f(ret(0, 0, 1000, 1000), 1);
+      f(nuvem(780, 120, 200), 6); f(nuvem(380, 90, 140), 6);
+      f(chao([[0, 640], [500, 610], [1000, 640]]), 2);
+      // casinha
+      f(ret(90, 470, 310, 330), 4);
+      f(poliR([[55, 495], [245, 295], [435, 495]], 18), 3);
+      f('M 175 800 L 175 650 A 70 70 0 0 1 315 650 L 315 800 Z', 5);
+      f(ret(185, 512, 120, 52, 16), 9);
+      // ossinho, bolinha e tigela
+      f(pilula(380, 885, 520, 885, 22), 9);
+      [[372, 862], [372, 908], [528, 862], [528, 908]].forEach(function (p) { f(circ(p[0], p[1], 26), 9); });
+      f(circ(880, 860, 62), 10);
+      f('M 818 860 A 62 62 0 0 0 942 860 Z', 11);
+      f(poliR([[440, 760], [580, 760], [560, 822], [460, 822]], 12), 10);
+      // cachorrinho sentado com coleira
+      f(cobra([[740, 770, 24], [800, 730, 24], [828, 668, 24]]), 6);
+      var coleira = [{ d: pilula(600, 636, 700, 636, 21), n: 11 }, { d: circ(650, 668, 24), n: 9 }];
+      poe(bicho('cachorro', 650, 525, 115, { pelo: 6, claro: 6, orelha: 7, bochecha: 8 }, { sentado: true, segura: coleira, maos: [[560, 720], [740, 720]] }));
     });
 
   // ---------- categorias (só as usadas) ----------
