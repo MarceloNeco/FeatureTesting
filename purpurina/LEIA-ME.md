@@ -43,6 +43,27 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
   navegador sabe, senão WebM), para salvar ou compartilhar. A foto sai em 1080×2094 com luz de estúdio.
 - O botão **Voltar do celular** volta uma tela (ou fecha a janela da foto) em vez de sair do jogo.
 
+## 📺 Na TV, com o celular de controle
+
+1. Na TV, abra **solverone.com.br/tv/purpurina** (ou o cartão Purpurina em `solverone.com.br/kids`). Aparece um **código
+   de 4 letras**. Aperte **OK** no controle para ligar o som.
+2. No celular, abra a Purpurina (cartão em `solverone.com.br/bolinho-de-chuva`), toque em **📺 Conectar na TV**, digite o
+   código e o nome. Até **4 celulares**: cada um vira uma personagem, lado a lado na TV.
+3. Tudo o que a criança faz no celular aparece na TV na hora: maquiagem, roupa, giro (inclusive a volta com rastro) e
+   o desfile (com confete, aplausos e o nome dela).
+4. **🎵 Música** (no menu ou no 🎵 do palco): **✨ da Purpurina**, **▶ YouTube** (colar o link de um vídeo ou playlist) ou
+   **🟢 Spotify** (colar o link de uma música, álbum ou playlist). Conectado, a música toca **na TV** e o celular comanda
+   ⏮ ⏯ ⏭ ⏹; sem TV, toca no próprio celular (o tocador do YouTube/Spotify aparece num quadrinho no canto, com ✕).
+   - O YouTube só deixa tocar vídeos cujo dono permite tocar fora do YouTube; o app avisa quando não pode.
+   - O Spotify, sem a pessoa estar conectada no Spotify naquele navegador, toca só 30 s de cada música (regra do
+     Spotify). Para a música inteira na TV, o jeito mais simples é o próprio app do Spotify ("Dispositivos" → TV).
+5. Sem celular: **🎮 Brincar aqui com o controle da TV** (setas e OK).
+6. Outro jeito, sem código: **espelhar a tela** do celular na TV (Android: Transmitir/Smart View; iPhone: Espelhar Tela).
+
+Como funciona: a TV e os celulares trocam mensagens pequenas pela "sala" (`sala.js`, Supabase Realtime da plataforma,
+o mesmo canal da Peluqueria): o visual de cada personagem, o ângulo do giro, o desfile e os comandos de música. Nada de
+vídeo, foto nem dado pessoal (só o nome que a criança digita). Toda mensagem que chega é conferida antes de ser usada.
+
 ## Controles
 
 | Onde | Como |
@@ -79,6 +100,9 @@ estrofe, refrão, sininhos, palmas, viradas e prato, feitas na hora pelo `som.js
 | `visual.js` | **puro**: regras (vestido × blusa/saia/calça, nunca sem roupa), surpresa, desfazer, limpar look antigo, dicas e estrelas. |
 | `boneca.js` | o desenho em SVG da personagem (com giro: `opcoes.angulo`, frente/lado/costas), das roupas, acessórios e dos 8 cenários (tudo em código). Peça nova = um `case` aqui. |
 | `som.js` | músicas e efeitos sintetizados (WebAudio). |
+| `sala.js` | canal TV ↔ celular (Supabase Realtime; `BroadcastChannel` com `?teste`); confere toda mensagem que chega. |
+| `musica.js` | links do YouTube/Spotify e o tocador (Purpurina, YouTube IFrame API, Spotify iFrame API). |
+| `tv.js` | modo TV (código, até 4 personagens, desfile, música), celular-controle (📺 Conectar) e a tela 🎵 Música. |
 | `app.js` | telas, Voltar do celular, estúdio, zoom do palco, pincel e faíscas, foto, looks, desfile, confete, teclado/TV, instalar e baixar. `APP_VERSION` aqui. |
 | `baixar.js` | **cópia idêntica** do `vruuum/baixar.js` (o teste confere): monta o `.html` de arquivo único. |
 | `sw.js` | cache `purpurina-v…` para funcionar sem internet. `VERSAO` aqui. |

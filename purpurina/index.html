@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.youtube.com https://open.spotify.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://open.spotify.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com; media-src 'self' blob:; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Purpurina — Bolinho de Chuva · SolverONE</title>
 <link rel="icon" href="icone-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -51,6 +51,10 @@
     <button id="btLivre" class="grande" type="button" data-t="🎨 Brincar livre|🎨 Free play"></button>
     <button id="btDesafios" class="grande roxo" type="button" data-t="⭐ Desafios|⭐ Challenges"></button>
     <button id="btLooks" class="medio" type="button"><span data-t="💖 Meus looks|💖 My looks"></span> <span id="qtdLooks" class="bolha">0</span></button>
+    <div class="linha-menu">
+      <button id="btMusica" class="medio" type="button" data-t="🎵 Música|🎵 Music"></button>
+      <button id="btTV" class="medio" type="button" data-so-site data-t="📺 Conectar na TV|📺 Connect to TV"></button>
+    </div>
   </div>
   <div id="guardar" class="guardar">
     <button id="btInstalar" class="medio" type="button" hidden data-t="📲 Instalar no celular|📲 Install on the phone"></button>
@@ -78,6 +82,68 @@
   <div id="listaLooks" class="lista-looks"></div>
 </section>
 
+<section id="conectar" class="tela" data-recurso="purpurina">
+  <div class="topo-simples">
+    <button class="mini voltar" type="button" aria-label="Voltar / Back">⬅</button>
+    <h2 data-t="📺 Conectar na TV|📺 Connect to TV"></h2>
+  </div>
+  <ol class="passos">
+    <li data-t="Na TV, abra o navegador e digite: solverone.com.br/tv/purpurina (ou solverone.com.br/kids e escolha a Purpurina). Aparece um código de 4 letras.|On the TV, open the browser and type: solverone.com.br/tv/purpurina (or solverone.com.br/kids and pick Purpurina). A 4-letter code shows up."></li>
+    <li data-t="Digite aqui o código e o seu nome e toque em Conectar.|Type the code and your name here and tap Connect."></li>
+    <li data-t="Pronto: sua personagem aparece grande na TV, e tudo o que você fizer aqui aparece lá. Até 4 celulares ao mesmo tempo!|Done: your character shows big on the TV, and everything you do here shows there. Up to 4 phones at once!"></li>
+  </ol>
+  <div id="formConectar" class="form-conectar">
+    <label><span data-t="Código da TV|TV code"></span><input id="codigoTV" class="campo codigo" maxlength="4" autocomplete="off" autocapitalize="characters" inputmode="text"></label>
+    <label><span data-t="Seu nome|Your name"></span><input id="nomeTV" class="campo" maxlength="16" autocomplete="off"></label>
+    <button id="btConectar" class="grande" type="button" data-t="📺 Conectar|📺 Connect"></button>
+  </div>
+  <button id="btDesconectar" class="medio" type="button" hidden data-t="✕ Desconectar da TV|✕ Disconnect from the TV"></button>
+  <p id="conectarAviso" class="dica" aria-live="polite"></p>
+  <p class="dica" data-t="Outro jeito: espelhar a tela do celular na TV (no Android: Transmitir ou Smart View; no iPhone: Espelhar Tela).|Another way: mirror the phone screen on the TV (Android: Cast or Smart View; iPhone: Screen Mirroring)."></p>
+</section>
+
+<section id="musica" class="tela" data-recurso="purpurina">
+  <div class="topo-simples">
+    <button class="mini voltar" type="button" aria-label="Voltar / Back">⬅</button>
+    <h2 data-t="🎵 Música|🎵 Music"></h2>
+  </div>
+  <p id="ondeToca" class="dica"></p>
+  <div class="fontes" role="group">
+    <button class="opcao-fonte" type="button" data-fonte-bt="purpurina" data-t="✨ Da Purpurina|✨ Purpurina's"></button>
+    <button class="opcao-fonte" type="button" data-fonte-bt="youtube" data-so-site data-t="▶ YouTube|▶ YouTube"></button>
+    <button class="opcao-fonte" type="button" data-fonte-bt="spotify" data-so-site data-t="🟢 Spotify|🟢 Spotify"></button>
+  </div>
+  <div id="linkMusica" class="link-musica" hidden>
+    <input id="linkMusicaCampo" class="campo" inputmode="url" autocomplete="off">
+    <button id="btTocarLink" class="grande" type="button" data-t="▶ Tocar|▶ Play"></button>
+    <p id="ajudaYT" class="dica" hidden><span data-t="No app do YouTube, abra a música ou a playlist, toque em Compartilhar → Copiar link e cole aqui.|In the YouTube app, open the song or playlist, tap Share → Copy link and paste it here."></span> <a href="https://m.youtube.com/" target="_blank" rel="noopener" data-t="Abrir o YouTube ↗|Open YouTube ↗"></a></p>
+    <p id="ajudaSP" class="dica" hidden><span data-t="No app do Spotify, toque nos ⋯ da música ou da playlist → Compartilhar → Copiar link e cole aqui. Sem estar conectado no Spotify neste aparelho, o Spotify toca só 30 segundos de cada música.|In the Spotify app, tap ⋯ on the song or playlist → Share → Copy link and paste it here. Without being logged in to Spotify on this device, Spotify plays only 30 seconds of each song."></span> <a href="https://open.spotify.com/" target="_blank" rel="noopener" data-t="Abrir o Spotify ↗|Open Spotify ↗"></a></p>
+  </div>
+  <p id="musicaAgora" class="musica-agora" aria-live="polite"></p>
+  <div class="controles-musica">
+    <button id="btMusAnt" class="mini" type="button" aria-label="Anterior / Previous">⏮</button>
+    <button id="btMusTocar" class="mini grande-mini" type="button" aria-label="Tocar / Play">▶</button>
+    <button id="btMusProx" class="mini" type="button" aria-label="Próxima / Next">⏭</button>
+    <button id="btMusParar" class="mini" type="button" aria-label="Parar / Stop">⏹</button>
+  </div>
+  <p id="musicaAviso" class="dica" aria-live="polite"></p>
+</section>
+
+<section id="tv" class="tela tela-tv">
+  <div id="tvPalcos" class="tv-palcos"></div>
+  <div id="tvEspera" class="tv-espera">
+    <h1 class="logo">Purpurina</h1>
+    <p class="tv-passos"><span data-t="No celular, abra|On the phone, open"></span> <b id="tvEndereco"></b><br><span data-t="toque em 💄 Purpurina, depois em 📺 Conectar na TV, e digite o código:|tap 💄 Purpurina, then 📺 Connect to TV, and type the code:"></span></p>
+    <p id="tvCodigo" class="tv-codigo"></p>
+    <button id="btLigarSom" class="grande" type="button" data-t="🔊 Ligar o som (aperte OK)|🔊 Turn on the sound (press OK)"></button>
+    <button id="btTvControle" class="medio" type="button" data-t="🎮 Brincar aqui com o controle da TV|🎮 Play here with the TV remote"></button>
+  </div>
+  <p id="tvCanto" class="tv-canto" hidden><span id="tvCodigoCanto"></span></p>
+  <p id="tvTitulo" class="tv-titulo" hidden></p>
+  <div id="tvMusica" class="tv-musica" hidden></div>
+  <div id="tvDesfile" class="tv-desfile" hidden><p id="tvDesfileTxt"></p><p id="tvDesfileEst" class="tv-estrelas"></p><p id="tvJurados" class="tv-jurados"></p></div>
+</section>
+
 <section id="estudio" class="tela" data-recurso="purpurina">
   <div class="topo">
     <button id="btCasa" class="mini" type="button" aria-label="Menu">🏠</button>
@@ -89,6 +155,10 @@
   </div>
   <div id="palco" class="palco">
     <div id="rastro" class="rastro" aria-hidden="true"></div>
+    <div class="palco-esq">
+      <button id="btMusicaPalco" class="mini" type="button" aria-label="Música / Music">🎵</button>
+      <button id="seloTV" class="mini selo-tv" type="button" hidden aria-label="TV"></button>
+    </div>
     <div id="boneca" class="boneca" role="img"></div>
     <div class="giro">
       <button id="btFrente" class="mini" type="button" hidden aria-label="Virar de frente / Face front">🙂</button>
@@ -156,6 +226,9 @@
   </div>
 </div>
 
+<div id="miniTocador" class="mini-tocador" hidden>
+  <button id="btFecharMini" class="mini fechar-mini" type="button" aria-label="Parar a música / Stop the music">✕</button>
+</div>
 <canvas id="festa" class="festa" aria-hidden="true"></canvas>
 <div id="recado" class="recado" role="status" aria-live="polite" hidden></div>
 
@@ -166,5 +239,8 @@
 <script src="baixar.js"></script>
 <script src="../recursos.js" data-app="feature-tester" data-fora-do-arquivo></script>
 <script src="app.js"></script>
+<script src="sala.js"></script>
+<script src="musica.js"></script>
+<script src="tv.js"></script>
 </body>
 </html>

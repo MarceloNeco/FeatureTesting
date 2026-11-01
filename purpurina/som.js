@@ -93,6 +93,8 @@
     else if (!liga && musicaLigada) { musicaLigada = false; clearInterval(timer); timer = null; }
   }
   // desafio novo ou desfile: a próxima música, do começo
+  function faixaAtual() { return MUSICAS[faixa].nome; }
+  function anterior() { faixa = (faixa + MUSICAS.length - 1) % MUSICAS.length; passo = 0; if (ac) prox = Math.max(prox, ac.currentTime + 0.05); }
   function proxima() { faixa = (faixa + 1) % MUSICAS.length; passo = 0; if (ac) prox = Math.max(prox, ac.currentTime + 0.05); }
   // app escondido (outra aba, tela apagada): silencia; ao voltar, continua
   function dormir(sim) { if (!ac) return; if (sim) ac.suspend(); else ac.resume(); }
@@ -116,5 +118,5 @@
   function tocar(nome) { if (!ac || !ligado || !efeitos[nome]) return; efeitos[nome](ac.currentTime + 0.005); }
   function alternar() { ligado = !ligado; if (mestre) mestre.gain.setTargetAtTime(ligado ? 0.8 : 0, ac.currentTime, 0.05); return ligado; }
 
-  raiz.PurpurinaSom = { iniciar: iniciar, tocar: tocar, musica: musica, proxima: proxima, dormir: dormir, alternar: alternar, ligado: function () { return ligado; }, MUSICAS: MUSICAS };
+  raiz.PurpurinaSom = { iniciar: iniciar, tocar: tocar, musica: musica, proxima: proxima, anterior: anterior, faixaAtual: faixaAtual, tocandoMusica: function () { return musicaLigada; }, dormir: dormir, alternar: alternar, ligado: function () { return ligado; }, MUSICAS: MUSICAS };
 })(this);

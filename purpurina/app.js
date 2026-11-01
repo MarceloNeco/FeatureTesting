@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.4.0';
+  var APP_VERSION = '0.5.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -40,6 +40,7 @@
     if (id === 'desafios') listaDesafios();
     if (id === 'looks') listaLooks();
     if (id === 'estudio') desenharTudo();
+    if (window.PurpurinaTV && PurpurinaTV.aoMostrar) PurpurinaTV.aoMostrar(id);
     setTimeout(focarPrimeiro, 30);
   }
   function ir(id) { if (id === atual) return; pilha.push(atual); try { history.pushState({ purpurina: pilha.length }, ''); } catch (e) { /* sem histórico: segue */ } mostrar(id); }
@@ -109,6 +110,11 @@
     ] });
   });
   $('btDesafios').addEventListener('click', function () { Som.tocar('aba'); ir('desafios'); });
+  $('btTV').addEventListener('click', function () { Som.tocar('aba'); ir('conectar'); });
+  $('btMusica').addEventListener('click', function () { Som.tocar('aba'); ir('musica'); });
+  $('btMusicaPalco').addEventListener('click', function () { Som.tocar('aba'); ir('musica'); });
+  // ponte com a TV (tv.js): quando o celular está conectado, cada mudança vai para a TV
+  function ponte(tipo, extra) { if (window.PurpurinaTV && PurpurinaTV.conectado()) PurpurinaTV.mandar(tipo, extra); }
   $('btLooks').addEventListener('click', function () { Som.tocar('aba'); ir('looks'); });
 
   // tela cheia no celular: a barra do navegador não tampa nada (deitado ou em pé). No iPhone não existe.
@@ -153,7 +159,7 @@
     else { estado = livre; grupoAtual = grupoAtual || 'eu'; }
     dicasAntes = d ? V.avaliar(estado, d).dicas : [];
     vista = INTEIRA.slice(); zoomLigado = false; angulo = 0; animGiro++;
-    ir('estudio'); setTimeout(mostrarDicaGiro, 600);
+    ir('estudio'); setTimeout(mostrarDicaGiro, 600); ponte('visual');
   }
   function mudar(novo, catId) {
     if (V.iguais(novo, estado)) return;
@@ -161,6 +167,7 @@
   }
   function aposMudar() {
     if (!modo) { livre = estado; gravar('purpurina.atual', estado); }
+    ponte('visual');
     if (angulo) { girarPara(0, 300); }
     desenharBoneca(); desenharOpcoes(); desenharDicas(true);
     $('btDesfazer').disabled = !hist.tem();
@@ -175,6 +182,7 @@
     var el = $('boneca');
     el.innerHTML = B.svg(estado, { id: 'palco', anim: !CALMO && !angulo, area: vista, angulo: angulo });
     $('btFrente').hidden = !angulo;
+    if (angulo !== angMandado && !emVolta) { angMandado = angulo; ponte('giro'); }
     el.setAttribute('aria-label', V.resumo(estado, pref.lingua));
   }
   function desenharDicas(comSom) {
@@ -356,7 +364,7 @@
      Arrastar o dedo para os lados gira (frente, lado, costas). Um toque (ou o ↻) dá uma volta inteira com
      rastro de luz: a cada poucos quadros, uma cópia do desenho fica para trás e vai sumindo (efeito
      estroboscópico, sem piscar a tela). Quem pediu menos movimento vê a volta em 4 paradas, sem rastro. */
-  var angulo = 0, animGiro = 0, arraste = null, pedidoQuadro = 0;
+  var angulo = 0, animGiro = 0, arraste = null, pedidoQuadro = 0, angMandado = 0, emVolta = false;
   function redesenharGiro() { if (pedidoQuadro) return; pedidoQuadro = requestAnimationFrame(function () { pedidoQuadro = 0; desenharBoneca(); }); }
   function girarPara(alvo, dur) {
     var id = ++animGiro, de = angulo, ini = performance.now();
@@ -394,7 +402,8 @@
     })(ini);
   }
   function voltaNoPalco() {
-    volta($('boneca'), $('rastro'), function (a) { angulo = a; desenharBoneca(); }, function () { var q = naTela(200, 360); faiscas(q[0], q[1], 10); });
+    ponte('volta'); emVolta = true;   // a TV faz a própria volta; durante a volta não manda cada quadro
+    volta($('boneca'), $('rastro'), function (a) { angulo = a; desenharBoneca(); }, function () { emVolta = false; angMandado = angulo; var q = naTela(200, 360); faiscas(q[0], q[1], 10); });
   }
   var bonecaEl = $('boneca');
   bonecaEl.addEventListener('pointerdown', function (ev) {
@@ -642,7 +651,7 @@
     $('btProximo').textContent = d ? t('▶ Próximo desafio', '▶ Next challenge') : t('🎨 Continuar brincando', '🎨 Keep playing');
     $('btMaisUm').hidden = !d;
     Som.proxima(); Som.tocar('tada'); setTimeout(function () { Som.tocar('aplausos'); }, 500);
-    confete();
+    confete(); ponte('desfile', { d: modo || '', est: r ? r.estrelas : 0 });
   }
   $('btProximo').addEventListener('click', function () {
     var d = desafioAtual();
@@ -726,6 +735,8 @@
   });
   var EM_ARQUIVO = !!window.JOGO_EM_ARQUIVO || location.protocol === 'file:' || location.protocol === 'content:';
   if (EM_ARQUIVO || !window.BaixarJogo) $('guardar').hidden = true;
+  // no arquivo baixado não há TV nem YouTube/Spotify (precisam do site e da internet)
+  if (EM_ARQUIVO) Array.prototype.forEach.call(document.querySelectorAll('[data-so-site]'), function (el) { el.hidden = true; });
   $('btBaixar').addEventListener('click', function () {
     var aviso = $('baixarAviso');
     aviso.textContent = t('Preparando o arquivo…', 'Preparing the file…');
@@ -742,5 +753,12 @@
   $('entradaBoneca').innerHTML = B.svg(livre, { id: 'entrada', fundo: false, area: [40, 40, 320, 640] });
   traduzir();
   if (TV) setTimeout(focarPrimeiro, 200);
+  // o que o tv.js (TV, celular-controle e 🎵 Música) usa do app
+  window.PurpurinaApp = {
+    t: t, N: N, TV: TV && !EM_ARQUIVO, mostrar: mostrar, ir: ir, recado: recado, confete: confete,
+    estado: function () { return V.copiar(estado); }, angulo: function () { return angulo; }, telaAtual: function () { return atual; },
+    // depois de conectar: volta para o estúdio se veio de lá; senão abre o brincar livre
+    irEstudio: function () { if (atual === 'estudio') return; if (pilha[pilha.length - 1] === 'estudio') voltar(); else comecar(null); }
+  };
   if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(function () { /* sem modo offline */ });
 })();

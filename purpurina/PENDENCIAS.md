@@ -16,5 +16,7 @@ Situação: 🟡 aberta · 🔵 em andamento · ⏸ aguardando o dono · ✅ fei
 | 10 | Pedidos do dono depois da 0.3: perfil realista, renderizar e compartilhar, botão de reiniciar, fotos mais realistas, muito mais penteados, dedos com unhas para pintar, 🚫 em todas as partes e tirar todos os acessórios, e todo tipo de sapato. | dono, 01/Nov/2026 | ✅ v0.4.0 (marcas de verdade não entram: são registradas; os modelos têm nomes próprios) |
 | 11 | Corpo de perfil de verdade (braços e pernas de lado, roupa de lado) e fotos ainda mais realistas (seria preciso outro jeito de desenhar, por exemplo 3D). | v0.4.0 | 🟡 |
 | 12 | Etiquetas das partes (Brincos, Colares, Pulseiras…) escondidas para o lado: criança não sabia que dava para arrastar. | dono, 01/Nov/2026 | ✅ v0.4.0 (botões quadradinhos, todos à vista, e ⬇ mais) |
-| 13 | Integração com YouTube e Spotify para tocar música, espelhar na TV e controle pelo celular. | dono, 01/Nov/2026 | 🔵 em andamento (próxima versão) |
+| 13 | Integração com YouTube e Spotify para tocar música, espelhar na TV e controle pelo celular. | dono, 01/Nov/2026 | ✅ v0.5.0 (testar na TV de verdade; o Spotify sem login toca 30 s) |
 | 14 | Giro "espremido" na 0.3 (não parecia 3D). | dono, 01/Nov/2026 | ✅ v0.4.0 (16 posições: frente, três-quartos, perfil, costas) |
+| 15 | Testar a Purpurina na TV LG de verdade (código, som depois do OK, YouTube e Spotify no navegador da TV). | v0.5.0 | ⏸ dono testar |
+| 16 | Spotify com a música inteira dentro do app (exige o Client ID de um app do Spotify e login Premium; mesmo caso da Peluqueria). | v0.5.0 | ⏸ aguardando o dono |
