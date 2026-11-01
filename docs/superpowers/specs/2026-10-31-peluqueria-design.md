@@ -382,3 +382,21 @@ sem me consultar"):
   e o celular em duas abas e joga de verdade, com esqueleto falso injetado.
 - **TV LG.** Casca `tv-lg-peluqueria/` (como a da Bagunçolândia), modo leve na TV.
 - Fora: vídeo do jogador na TV, mais de 2 jogadores, palma pelo microfone (o movimento brusco já cobre o pedido).
+
+## Mudanças da v0.6.0 (pedido do dono, nota 4,2 das filhas)
+
+- **Cenários viraram fotos reais** de 10 bichos (Wikimedia Commons, licença aberta, autor no `CREDITOS.md`),
+  recortadas e reduzidas para no máximo 1000 px em JPEG. Os desenhos SVG de cenário e o gerador saíram.
+- **Só lugares que todo mundo entende:** cabeça, olhos, nariz, boca e pescoço. Ombro, orelha e mão saíram do
+  jogo (papagaio, passarinho, flor, brinco, balão e medalha); sorvete, pirulito e microfone vão na boca. O motor
+  continua aceitando os 8 tipos para as imagens do dono em `meus/`.
+- **"U-huuu!" gravado** (voz + torcida, CC BY) em `efeitos/`, alternando duas versões; se não carregar, toca a
+  torcida sintetizada antiga.
+
+## Mudanças da v0.6.1
+
+- **Fotos e desenhos juntos:** os 12 desenhos voltaram (ids `desenho-…`, só lugares do rosto e pescoço) e cada
+  cenário tem `estilo` (`foto` ou `desenho`); o sorteio prefere trocar de estilo a cada queda, então alterna.
+- **Toque no iPad:** em tela de toque o jogo escuta `touchstart` (iPad/iPhone com iOS < 13 não têm pointer events);
+  `pointerdown` fica para mouse e caneta. Vale para tocar no palco e para o PARAR! do celular-controle.
+

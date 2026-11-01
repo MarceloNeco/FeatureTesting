@@ -167,7 +167,7 @@
   $('ctCodigo').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('ctNome').focus(); });
   $('ctNome').addEventListener('keydown', function (e) { if (e.key === 'Enter') entrar(); });
   $('ctSair').addEventListener('click', sair);
-  $('ctParar').addEventListener('pointerdown', function (e) { e.preventDefault(); parar(0); });
+  A.aoTocar($('ctParar'), function (e) { e.preventDefault(); parar(0); });   // também no iPad antigo
   $('ctComecar').addEventListener('click', function () { mandar({ t: 'cmd', id: ct.id, k: ct.k, acao: ct.fase === 'fim' ? 'deNovo' : 'comecar' }); });
   document.querySelectorAll('[data-nivel-tv]').forEach(function (b) { b.addEventListener('click', function () { mandar({ t: 'cmd', id: ct.id, k: ct.k, acao: 'nivel', nivel: b.getAttribute('data-nivel-tv') }); }); });
   $('ctCorpo').addEventListener('click', function () { if (ct.corpo) desligarCorpo(); else ligarCorpo(); });

@@ -5,7 +5,7 @@ const path = require('path');
 const http = require('http');
 const fs = require('fs');
 const raiz = path.resolve(__dirname, '..', '..');
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.woff2': 'font/woff2', '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json', '.mp3': 'audio/mpeg' };
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json', '.mp3': 'audio/mpeg' };
 const server = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html';
   const f = path.join(raiz, p);
@@ -135,8 +135,22 @@ async function comecar(pg, nivel) {
   const reg = await D(ps, () => window.PeluqueriaSom && PeluqueriaSom.registro);
   confere(Array.isArray(reg) && reg.includes('PERFEITO') && reg.includes('conta'), 'som registra contagem e PERFEITO', reg);
   confere(reg.includes('uhul') && await D(ps, () => PeluqueriaVoz.ultimo !== 'UHUL!'), 'PERFEITO toca a torcida "u-huuu!" (e não a voz robótica)', reg);
+  const gritos = await ps.waitForFunction(() => PeluqueriaSom._gritos() === 2, null, { timeout: 10000 }).then(() => true, () => false);
+  confere(gritos, 'o "u-huuu!" gravado (2 arquivos) carrega e decodifica', await D(ps, () => PeluqueriaSom._gritos()));
   await ps.click('#btPausa'); await ps.click('#btSeguir');
   confere(ps.erros().length === 0, 'som: sem erros', ps.erros());
+
+  /* iPad/iPhone antigo (iOS < 13): sem pointer events, só toque. Tocar na tela tem de parar o item. */
+  const ipad = await abrir(browser, base + '?teste', { ctx: { viewport: { width: 820, height: 1180 }, hasTouch: true, isMobile: true }, antes: () => {
+    const orig = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function (tipo, fn, op) { if (/^pointer/.test(tipo)) return; return orig.call(this, tipo, fn, op); };
+    delete window.PointerEvent; window.PointerEvent = undefined;
+  } });
+  await D(ipad, () => PeluqueriaDebug.novaRodada('crianca'));
+  await ateAlvo(ipad); await ipad.touchscreen.tap(410, 700);
+  const ip = await est(ipad);
+  confere(ip.fase === 'parado' && ip.res.length === 1, 'iPad antigo (sem pointer events): tocar na tela para o item', ip);
+  confere(ipad.erros().length === 0, 'iPad antigo: sem erros', ipad.erros());
 
   const mudo = await abrir(browser, base + '?teste', { antes: () => { delete window.speechSynthesis; delete window.AudioContext; delete window.webkitAudioContext; window.speechSynthesis = undefined; window.AudioContext = undefined; window.webkitAudioContext = undefined; } });
   await D(mudo, () => PeluqueriaDebug.novaRodada('crianca'));
@@ -279,7 +293,7 @@ async function comecar(pg, nivel) {
 
   const pdb = await abrir(browser, base + '?debug&teste');
   await passo(pdb, 500);
-  confere(/v0\.5\.0/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(/v0\.6\.1/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
 
   /* ---------- revisão final ---------- */
@@ -431,15 +445,15 @@ async function comecar(pg, nivel) {
   confere(!(await pm.isVisible('#btMinhas')) && pm.erros().length === 0, 'meus/ inválido: abre sem erro e sem "Minhas imagens"', pm.erros());
 
   /* ---------- meus/ com uma imagem ---------- */
-  const pm2 = await abrir(browser, base + '?teste', { rotas: [['**/meus/cenarios.json', JSON.stringify([{ id: 'teste', nome: 'Teste', arquivo: '../cenarios/gato.svg', largura: 1000, altura: 1000, lugares: { cabeca: { x: 0.5, y: 0.2, tam: 0.4 } } }, { id: 'teste2', nome: 'Teste', arquivo: 'nao-existe.png', largura: 1000, altura: 1000, lugares: { cabeca: { x: 0.5, y: 0.2, tam: 0.4 } } }])]] });
+  const pm2 = await abrir(browser, base + '?teste', { rotas: [['**/meus/cenarios.json', JSON.stringify([{ id: 'teste', nome: 'Teste', arquivo: '../cenarios/gato.jpg', largura: 1000, altura: 1000, lugares: { cabeca: { x: 0.5, y: 0.2, tam: 0.4 } } }, { id: 'teste2', nome: 'Teste', arquivo: 'nao-existe.png', largura: 1000, altura: 1000, lugares: { cabeca: { x: 0.5, y: 0.2, tam: 0.4 } } }])]] });
   confere(!(await pm2.isVisible('#btMinhas')), 'meus/ só com entradas ruins não liga "Minhas imagens"');
 
   /* ---------- meus/ com uma imagem boa ---------- */
-  const gato = fs.readFileSync(path.join(raiz, 'peluqueria/cenarios/gato.svg'), 'utf8');
+  const gato = fs.readFileSync(path.join(raiz, 'peluqueria/cenarios/gato.jpg'));
   const ctx3 = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'pt-BR' });
   const p3 = await ctx3.newPage();
-  await p3.route('**/meus/cenarios.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'foto', nome: 'Foto', arquivo: 'foto.svg', largura: 1000, altura: 1000, lugares: { cabeca: { x: 0.5, y: 0.27, tam: 0.4 } } }]) }));
-  await p3.route('**/meus/foto.svg', r => r.fulfill({ status: 200, contentType: 'image/svg+xml', body: gato }));
+  await p3.route('**/meus/cenarios.json', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 'foto', nome: 'Foto', arquivo: 'foto.jpg', largura: 960, altura: 803, lugares: { cabeca: { x: 0.5, y: 0.17, tam: 0.4 } } }]) }));
+  await p3.route('**/meus/foto.jpg', r => r.fulfill({ status: 200, contentType: 'image/jpeg', body: gato }));
   await p3.goto(base + '?teste'); await p3.waitForFunction(() => window.PeluqueriaDebug && window.PeluqueriaDebug.pronto); await p3.click('#btEntrar');
   confere(await p3.isVisible('#btMinhas'), 'meus/ com imagem boa mostra "Minhas imagens"');
   await p3.click('#btMinhas');

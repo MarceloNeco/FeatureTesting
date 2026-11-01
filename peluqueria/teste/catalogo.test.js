@@ -6,11 +6,13 @@ const path = require('path');
 const P = require('../jogo.js');
 const pasta = path.resolve(__dirname, '..');
 const json = f => JSON.parse(fs.readFileSync(path.join(pasta, f), 'utf8'));
-const CENARIOS = ['cachorro', 'gato', 'tubarao', 'bebe', 'vovo', 'coruja', 'leao', 'robo', 'sapo', 'cavalo', 'pinguim', 'boneco-de-neve'];
+const FOTOS = ['cachorro', 'gato', 'leao', 'coruja', 'cavalo', 'pinguim', 'coelho', 'panda-vermelho', 'tigre', 'girafa'];
+const DESENHOS = ['cachorro', 'gato', 'tubarao', 'bebe', 'vovo', 'coruja', 'leao', 'robo', 'sapo', 'cavalo', 'pinguim', 'boneco-de-neve'].map(i => 'desenho-' + i);
+const CENARIOS = FOTOS.concat(DESENHOS);
 const ITENS = { 'peruca-oculos': 'olhos', 'boca-tubarao': 'boca', coroa: 'cabeca', cartola: 'cabeca', bigode: 'boca', 'nariz-palhaco': 'nariz', 'oculos-escuros': 'olhos', fone: 'cabeca', laco: 'cabeca', bone: 'cabeca', 'chapeu-pirata': 'cabeca', 'capacete-viking': 'cabeca' };
-Object.assign(ITENS, { sorvete: 'mao', balao: 'mao', pirulito: 'mao', microfone: 'mao', flor: 'orelha', brinco: 'orelha', papagaio: 'ombro', passarinho: 'ombro', 'gravata-borboleta': 'pescoco', medalha: 'pescoco' });
+Object.assign(ITENS, { sorvete: 'boca', pirulito: 'boca', microfone: 'boca', 'gravata-borboleta': 'pescoco' });
 
-test('12 cenários, todos válidos e com os 4 lugares do meio', () => {
+test('10 fotos de bichos e 12 desenhos, todos válidos e com os 4 lugares do rosto', () => {
   const lista = json('cenarios/cenarios.json');
   assert.deepEqual(lista.map(c => c.id).sort(), CENARIOS.slice().sort());
   for (const c of lista) {
@@ -20,7 +22,7 @@ test('12 cenários, todos válidos e com os 4 lugares do meio', () => {
   }
 });
 
-test('22 itens, todos válidos e no lugar certo', () => {
+test('16 itens, todos válidos e no lugar certo', () => {
   const lista = json('itens/itens.json');
   assert.deepEqual(lista.map(i => i.id).sort(), Object.keys(ITENS).sort());
   for (const i of lista) {
@@ -60,26 +62,35 @@ test('carregar ignora meus/ quebrado', async () => {
   delete require.cache[require.resolve('../cenarios.js')]; delete require.cache[require.resolve('../itens.js')];
   const C = require('../cenarios.js'), I = require('../itens.js');
   const c = await C.carregar(), i = await I.carregar();
-  assert.equal(c.jogo.length, 12); assert.equal(i.jogo.length, 22);
+  assert.equal(c.jogo.length, 22); assert.equal(i.jogo.length, 16);
   assert.deepEqual(c.meus, []); assert.deepEqual(i.meus, []);
   assert.ok(C.avisos.length >= 1 && I.avisos.length >= 2, JSON.stringify([C.avisos, I.avisos]));
   assert.ok(c.jogo[0].img && c.jogo[0].src.startsWith('cenarios/'));
 });
 
-test('cada bicho tem mão, ombro e pescoço; orelha em pelo menos 8; lugares de lado bem fora do meio', () => {
-  const lista = json('cenarios/cenarios.json');
-  let comOrelha = 0, maoEsq = 0, maoDir = 0, novos = 0;
-  for (const c of lista) {
-    const L = c.lugares;
-    for (const k of ['mao', 'ombro', 'pescoco']) assert.ok(L[k], c.id + ' sem ' + k);
-    if (L.orelha) { comOrelha++; assert.ok(Math.abs(L.orelha.x - 0.5) >= 0.12, c.id + ' orelha no meio'); }
-    assert.ok(Math.abs(L.mao.x - 0.5) >= 0.3, c.id + ' mão perto do meio');
-    assert.ok(Math.abs(L.ombro.x - 0.5) >= 0.1, c.id + ' ombro no meio');
-    assert.ok((L.mao.x - 0.5) * (L.ombro.x - 0.5) < 0, c.id + ': ombro tem de ficar do lado oposto da mão');
-    if (L.mao.x < 0.5) maoEsq++; else maoDir++;
-    novos += ['mao', 'orelha', 'ombro', 'pescoco'].filter(k => L[k]).length;
+/* v0.6.0: as filhas do dono acharam ombro e orelha confusos; só fica o que todo mundo vê na foto */
+test('só lugares do rosto e pescoço (nada de mão, orelha nem ombro); fotos em JPEG leve, desenhos em SVG', () => {
+  for (const c of json('cenarios/cenarios.json')) {
+    assert.deepEqual(Object.keys(c.lugares).filter(k => !['cabeca', 'olhos', 'nariz', 'boca', 'pescoco'].includes(k)), [], c.id);
+    assert.ok(c.estilo === 'foto' ? /\.jpg$/.test(c.arquivo) : c.estilo === 'desenho' && /\.svg$/.test(c.arquivo), c.id);
+    const tam = fs.statSync(path.join(pasta, 'cenarios', c.arquivo)).size;
+    assert.ok(tam < 300 * 1024, c.id + ' pesada: ' + tam);
+    if (c.lugares.pescoco) assert.ok(c.lugares.pescoco.y > c.lugares.boca.y, c.id + ' pescoço acima da boca');
   }
-  assert.ok(comOrelha >= 8, 'orelhas: ' + comOrelha);
-  assert.ok(maoEsq >= 5 && maoDir >= 5, 'mão sempre do mesmo lado: ' + maoEsq + '/' + maoDir);
-  assert.ok(novos >= 44, 'lugares novos: ' + novos);
+  for (const i of json('itens/itens.json')) assert.ok(!['mao', 'orelha', 'ombro'].includes(i.lugar), i.id);
+});
+
+test('cada foto tem autor e licença em CREDITOS.md', () => {
+  const cred = fs.readFileSync(path.join(pasta, 'CREDITOS.md'), 'utf8');
+  for (const c of json('cenarios/cenarios.json').filter(c => c.estilo === 'foto')) assert.ok(cred.includes('`cenarios/' + c.arquivo + '`'), 'sem crédito: ' + c.arquivo);
+});
+
+/* v0.6.1: o dono pediu para manter os desenhos e as fotos, alternando */
+test('a rodada alterna foto e desenho', () => {
+  const cen = json('cenarios/cenarios.json').map(P.validarCenario), its = json('itens/itens.json').map(P.validarItem);
+  assert.equal(cen.filter(c => c.estilo === 'foto').length, 10); assert.equal(cen.filter(c => c.estilo === 'desenho').length, 12);
+  for (const nivel of ['crianca', 'normal', 'maluco']) for (let sem = 1; sem <= 30; sem++) {
+    const q = P.criarRodada({ nivel, cenarios: cen, itens: its, semente: sem }).quedas;
+    for (let k = 1; k < q.length; k++) assert.notEqual(q[k].cenario.estilo, q[k - 1].cenario.estilo, nivel + ' semente ' + sem + ' queda ' + k);
+  }
 });

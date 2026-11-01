@@ -2,6 +2,34 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.6.1",
+      "data": "01/Nov/2026",
+      "hora": "19:31:00",
+      "pt": [
+        "iPad: tocar na tela para parar o item voltou a funcionar (iPad e iPhone mais antigos não entendiam o toque do jogo). O botão PARAR! do celular-controle também.",
+        "Os desenhos voltaram: o jogo alterna a cada queda entre uma foto real e um desenho (22 imagens no total). Os desenhos usam só cabeça, olhos, nariz, boca e pescoço."
+      ],
+      "en": [
+        "iPad: tapping the screen to stop the item works again (older iPads and iPhones did not understand the game's tap). So does the phone controller's STOP! button.",
+        "The drawings are back: each drop alternates between a real photo and a drawing (22 pictures in all). Drawings only use head, eyes, nose, mouth and neck."
+      ]
+    },
+    {
+      "versao": "0.6.0",
+      "data": "01/Nov/2026",
+      "hora": "19:05:00",
+      "pt": [
+        "Fotos de verdade: saíram os desenhos e entraram 10 fotos reais de bichos (cachorro, gato, leão, coruja, cavalo, pinguim, coelho, panda-vermelho, tigre e girafa), todas com licença aberta e autor nos créditos.",
+        "Só lugares fáceis de entender: cabeça, olhos, nariz, boca e pescoço. Saíram ombro, orelha e mão (papagaio, passarinho, flor, brinco, balão e medalha). Sorvete, pirulito e microfone agora vão na boca.",
+        "O \"u-huuu!\" do PERFEITO agora é um grito gravado de verdade, com torcida (licença aberta, créditos no jogo)."
+      ],
+      "en": [
+        "Real photos: the drawings are gone and 10 real animal photos are in (dog, cat, lion, owl, horse, penguin, rabbit, red panda, tiger and giraffe), all openly licensed with the author in the credits.",
+        "Only easy spots: head, eyes, nose, mouth and neck. Shoulder, ear and hand are gone (parrot, little bird, flower, earring, balloon and medal). Ice cream, lollipop and microphone now go on the mouth.",
+        "The PERFECT \"woo-hoo!\" is now a real recorded cheer with a crowd (openly licensed, credited in the game)."
+      ]
+    },
+    {
       "versao": "0.5.0",
       "data": "01/Nov/2026",
       "hora": "18:35:00",

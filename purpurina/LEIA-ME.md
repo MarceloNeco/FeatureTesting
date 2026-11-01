@@ -52,6 +52,10 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
 
 ## 📺 Na TV, com o celular de controle
 
+Tablet ou celular de toque que abre o endereço da TV (`?tv=auto`, como pelo cartão da página Kids) entra na brincadeira
+normal — só TV de verdade (sem toque, ou com nome de TV no navegador) mostra o código. Para usar um tablet como a
+"TV", abra com `?tv=sim`.
+
 1. Na TV, abra **solverone.com.br/tv/purpurina** (ou o cartão Purpurina em `solverone.com.br/kids`). Aparece um **código
    de 4 letras**. Aperte **OK** no controle para ligar o som.
 2. No celular, abra a Purpurina (cartão em `solverone.com.br/bolinho-de-chuva`), toque em **📺 Conectar na TV**, digite o

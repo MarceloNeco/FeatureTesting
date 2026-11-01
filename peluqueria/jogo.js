@@ -48,7 +48,9 @@
       var cand = pares;
       if (ant) {
         // prefere mudar cenário E item; se não der, ao menos o item; depois ao menos o cenário
+        // primeiro tenta trocar também o estilo (foto ↔ desenho), para alternar
         var filtros = [
+          function (p) { return p.cenario.estilo !== ant.cenario.estilo && p.cenario !== ant.cenario && p.item !== ant.item; },
           function (p) { return p.cenario !== ant.cenario && p.item !== ant.item; },
           function (p) { return p.item !== ant.item; },
           function (p) { return p.cenario !== ant.cenario; }
@@ -161,6 +163,7 @@
       lug[nomeL] = { x: L.x, y: L.y, tam: L.tam, rot: rot };
     }
     c.largura = o.largura; c.altura = o.altura; c.lugares = lug;
+    if (o.estilo === 'foto' || o.estilo === 'desenho') c.estilo = o.estilo;   // v0.6.1: o jogo alterna foto e desenho
     return c;
   }
   function validarItem(o) {
