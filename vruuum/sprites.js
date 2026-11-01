@@ -307,6 +307,64 @@
     for (var k = 0; k < 90; k++) circ(c, (k * 137) % W, (k * 71) % H, k % 7 ? 1.3 : 2.4, k % 5 ? 'rgba(255,255,255,.85)' : '#ffd166');
   }
 
+  // ---------- céu (para quem voa): obstáculos, trânsito aéreo e enfeites ----------
+  function passaros(c, W, H) {   // bando de 3 passarinhos fofos de asas abertas
+    [[0.5, 0.45, 1], [0.2, 0.7, 0.7], [0.8, 0.68, 0.75]].forEach(function (p) {
+      var x = W * p[0], y = H * p[1], r = W * 0.13 * p[2];
+      c.fillStyle = '#ff9f1c'; c.beginPath(); c.moveTo(x - r * 2.3, y - r * 0.9); c.quadraticCurveTo(x - r, y - r * 1.4, x, y); c.quadraticCurveTo(x + r, y - r * 1.4, x + r * 2.3, y - r * 0.9); c.quadraticCurveTo(x + r, y - r * 0.2, x, y + r * 0.3); c.quadraticCurveTo(x - r, y - r * 0.2, x - r * 2.3, y - r * 0.9); c.fill();
+      circ(c, x, y, r, '#3a86ff'); circ(c, x, y + r * 0.25, r * 0.6, '#a9dcff');
+      circ(c, x - r * 0.35, y - r * 0.25, r * 0.16, '#fff'); circ(c, x + r * 0.35, y - r * 0.25, r * 0.16, '#fff');
+      circ(c, x - r * 0.33, y - r * 0.22, r * 0.08, '#111'); circ(c, x + r * 0.37, y - r * 0.22, r * 0.08, '#111');
+      poli(c, [x - r * 0.18, y + r * 0.05, x + r * 0.18, y + r * 0.05, x, y + r * 0.35], '#ffd166');
+    });
+  }
+  function nuvemRaio(c, W, H) {   // nuvem de tempestade: balança e segura
+    [[0.5, 0.45, 0.3], [0.28, 0.55, 0.22], [0.72, 0.55, 0.23], [0.38, 0.35, 0.2], [0.62, 0.34, 0.21]].forEach(function (b) { circ(c, W * b[0], H * b[1], W * b[2], '#4b4f66'); });
+    [[0.45, 0.4, 0.15], [0.62, 0.42, 0.12]].forEach(function (b) { circ(c, W * b[0], H * b[1], W * b[2], '#5d6280'); });
+    brilho(c, '#ffe066', W * 0.08);
+    poli(c, [W * 0.52, H * 0.6, W * 0.4, H * 0.82, W * 0.5, H * 0.82, W * 0.42, H * 1.0, W * 0.62, H * 0.74, W * 0.52, H * 0.74, W * 0.6, H * 0.6], '#ffe066');
+    c.shadowBlur = 0;
+    circ(c, W * 0.42, H * 0.5, W * 0.03, '#fff'); circ(c, W * 0.58, H * 0.5, W * 0.03, '#fff'); circ(c, W * 0.42, H * 0.51, W * 0.015, '#222'); circ(c, W * 0.58, H * 0.51, W * 0.015, '#222');
+    c.strokeStyle = '#222'; c.lineWidth = W * 0.012; c.beginPath(); c.arc(W * 0.5, H * 0.6, W * 0.05, Math.PI + 0.4, -0.4); c.stroke();
+  }
+  function anel(c, W, H) {   // anel dourado de turbo, em pé, com brilho de arco-íris por dentro
+    var cx = W / 2, cy = H / 2, R = W * 0.44;
+    brilho(c, '#ffd166', W * 0.12);
+    c.strokeStyle = '#ffb703'; c.lineWidth = W * 0.09; c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.stroke();
+    c.shadowBlur = 0; c.strokeStyle = '#fff3a0'; c.lineWidth = W * 0.03; c.beginPath(); c.arc(cx, cy, R, Math.PI * 1.1, Math.PI * 1.6); c.stroke();
+    ARCO.forEach(function (cor, k) { c.strokeStyle = cor; c.globalAlpha = 0.35; c.lineWidth = W * 0.025; c.beginPath(); c.arc(cx, cy, R * (0.86 - k * 0.04), 0, Math.PI * 2); c.stroke(); });
+    c.globalAlpha = 1;
+    for (var k = 0; k < 8; k++) { var a = k * Math.PI / 4; poli(c, [cx + Math.cos(a) * R * 1.12, cy + Math.sin(a) * R * 1.12 - W * 0.03, cx + Math.cos(a) * R * 1.12 + W * 0.02, cy + Math.sin(a) * R * 1.12, cx + Math.cos(a) * R * 1.12, cy + Math.sin(a) * R * 1.12 + W * 0.03, cx + Math.cos(a) * R * 1.12 - W * 0.02, cy + Math.sin(a) * R * 1.12], '#fff'); }
+  }
+  function corrente(c, W, H) {   // corrente de ar para cima: espiral clara com setas
+    c.globalAlpha = 0.55;
+    for (var k = 0; k < 3; k++) { c.strokeStyle = k % 2 ? '#bdeaff' : '#ffffff'; c.lineWidth = W * 0.05; c.beginPath(); for (var t = 0; t <= 1; t += 0.02) { var x = W * (0.5 + Math.sin(t * Math.PI * 4 + k * 2) * 0.35 * (1 - t * 0.3)), y = H * (1 - t); if (t === 0) c.moveTo(x, y); else c.lineTo(x, y); } c.stroke(); }
+    c.globalAlpha = 1;
+    [0.3, 0.6].forEach(function (y) { poli(c, [W * 0.5, H * (y - 0.14), W * 0.68, H * y, W * 0.57, H * y, W * 0.57, H * (y + 0.1), W * 0.43, H * (y + 0.1), W * 0.43, H * y, W * 0.32, H * y], '#3ee8ff'); });
+  }
+  function aviaoTrafego(c, W, H, cor) {   // aviãozinho do trânsito do céu (mais simples)
+    poli(c, [W * 0.02, H * 0.6, W * 0.98, H * 0.6, W * 0.98, H * 0.68, W * 0.02, H * 0.68], cor);
+    caixa(c, W * 0.3, H * 0.34, W * 0.4, H * 0.06, H * 0.02, cor);
+    poli(c, [W * 0.47, H * 0.56, W * 0.5, H * 0.1, W * 0.53, H * 0.1, W * 0.54, H * 0.56], cor);
+    oval(c, W * 0.5, H * 0.62, W * 0.12, H * 0.16, '#f5f5f5'); circ(c, W * 0.5, H * 0.62, W * 0.05, '#9fdcff');
+    brilho(c, '#ff2a2a', W * 0.03); circ(c, W * 0.03, H * 0.64, H * 0.03, '#ff3b3b'); circ(c, W * 0.97, H * 0.64, H * 0.03, '#4cd964'); c.shadowBlur = 0;
+  }
+  function balao(c, W, H) {   // balão de ar quente listrado
+    var cores = ['#ff4d6d', '#ffd166', '#3ee8ff', '#c6ff3d', '#ff9f1c', '#9b5de5'];
+    c.save(); c.beginPath(); c.ellipse ? c.ellipse(W * 0.5, H * 0.36, W * 0.46, H * 0.34, 0, 0, Math.PI * 2) : c.arc(W * 0.5, H * 0.36, W * 0.46, 0, Math.PI * 2); c.clip();
+    for (var k = 0; k < 6; k++) { c.fillStyle = cores[k]; c.beginPath(); c.ellipse ? c.ellipse(W * 0.5, H * 0.36, W * 0.46 * (1 - k / 6), H * 0.36, 0, 0, Math.PI * 2) : c.arc(W * 0.5, H * 0.36, W * 0.46 * (1 - k / 6), 0, Math.PI * 2); c.fill(); }
+    c.restore();
+    poli(c, [W * 0.3, H * 0.62, W * 0.7, H * 0.62, W * 0.58, H * 0.74, W * 0.42, H * 0.74], '#ff4d6d');
+    linha(c, [W * 0.42, H * 0.74, W * 0.4, H * 0.85], '#6b4b1a', W * 0.01); linha(c, [W * 0.58, H * 0.74, W * 0.6, H * 0.85], '#6b4b1a', W * 0.01);
+    caixa(c, W * 0.38, H * 0.85, W * 0.24, H * 0.13, W * 0.02, '#a0682f'); c.fillStyle = '#7a4b1e'; c.fillRect(W * 0.38, H * 0.9, W * 0.24, H * 0.015);
+    c.font = Math.round(H * 0.08) + 'px ' + EMOJI; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('🐻', W * 0.5, H * 0.84);
+  }
+  function nuvemFofa(c, W, H, noite) {
+    var cor = noite ? 'rgba(190,150,255,.75)' : 'rgba(255,255,255,.95)', sombraCor = noite ? 'rgba(120,80,200,.6)' : 'rgba(200,220,240,.9)';
+    [[0.5, 0.62, 0.26], [0.28, 0.7, 0.2], [0.72, 0.7, 0.21], [0.4, 0.5, 0.2], [0.6, 0.48, 0.22], [0.16, 0.78, 0.13], [0.84, 0.78, 0.14]].forEach(function (b) { circ(c, W * b[0], H * b[1] + H * 0.04, W * b[2], sombraCor); });
+    [[0.5, 0.62, 0.26], [0.28, 0.7, 0.2], [0.72, 0.7, 0.21], [0.4, 0.5, 0.2], [0.6, 0.48, 0.22], [0.16, 0.78, 0.13], [0.84, 0.78, 0.14]].forEach(function (b) { circ(c, W * b[0], H * b[1], W * b[2], cor); });
+  }
+
   // ---------- montagem ----------
   var base = null;
   function basicos() {
@@ -319,17 +377,26 @@
       boneco: fazer(1000, 1500, boneco), presente: fazer(800, 800, presente, 140),
       poste: fazer(500, 2800, poste, 120), predio: fazer(2200, 3800, predio, 220), palmeiraNeon: fazer(1500, 2600, palmeiraNeon),
       estrela: fazer(520, 520, estrela, 128), cone: fazer(420, 560, cone, 100), lama: fazer(1100, 280, lama, 180), turbo: fazer(1250, 640, turbo, 220), rampa: fazer(1100, 520, rampa, 180),
-      onibus: fazer(1050, 1250, onibus, 200)
+      onibus: fazer(1050, 1250, onibus, 200),
+      passaro: fazer(900, 600, passaros, 200), nuvemRaio: fazer(1300, 1100, nuvemRaio, 220), anel: fazer(1300, 1300, anel, 240), corrente: fazer(900, 1300, corrente, 160),
+      balao: fazer(1300, 1800, balao, 220), nuvemFofa: fazer(3200, 1500, function (c, W, H) { nuvemFofa(c, W, H, false); }, 320), nuvemNoite: fazer(3200, 1500, function (c, W, H) { nuvemFofa(c, W, H, true); }, 320)
     };
     ['#e63946', '#2a9d8f', '#f4a261', '#457b9d', '#8ac926'].forEach(function (cor, k) { b['carro' + k] = fazer(800, 640, function (c, W, H) { carroTras(c, W, H, cor, null, false); }, 180); });
+    ['#e63946', '#2a9d8f', '#f4a261', '#457b9d', '#8ac926'].forEach(function (cor, k) { b['aviaoTrafego' + k] = fazer(1300, 650, function (c, W, H) { aviaoTrafego(c, W, H, cor); }, 200); });
     b.fundos = {}; Object.keys(FUNDOS).forEach(function (k) { var cv = document.createElement('canvas'); cv.width = 1024; cv.height = 256; FUNDOS[k](cv.getContext('2d'), 1024, 256); b.fundos[k] = cv; });
     var n = document.createElement('canvas'); n.width = 1024; n.height = 200; nuvens(n.getContext('2d'), 1024, 200); b.nuvens = n;
     var e = document.createElement('canvas'); e.width = 1024; e.height = 300; estrelas(e.getContext('2d'), 1024, 300); b.estrelasCeu = e;
     base = b;
     return b;
   }
-  function carroJogador(cor, emoji) { return fazer(800, 640, function (c, W, H) { carroTras(c, W, H, cor, emoji, true); }, 256); }
+  // carro (ou moto, avião...) de cada jogador: o desenho vem do veiculos.js; sem ele, o carro clássico
+  function carroJogador(cor, emoji, tipo, px) {
+    var V = raiz.VruuumVeiculos, v = V && V.achar(tipo);
+    if (!v) return fazer(800, 640, function (c, W, H) { carroTras(c, W, H, cor, emoji, true); }, px || 256);
+    return fazer(v.w, v.h, function (c, W, H) { v.desenhar(c, W, H, cor, emoji); }, px || 256);
+  }
   function arco(texto, cor1, cor2, xadrez) { return fazer(5600, 3400, function (c, W, H) { faixa(c, W, H, texto, cor1, cor2, xadrez); }, 640); }
 
-  raiz.VruuumSprites = { basicos: basicos, carroJogador: carroJogador, arco: arco, ARCO: ARCO, EMOJI: EMOJI, FONTE: FONTE };
+  raiz.VruuumSprites = { basicos: basicos, carroJogador: carroJogador, arco: arco, fazer: fazer, carroTras: carroTras, ARCO: ARCO, EMOJI: EMOJI, FONTE: FONTE,
+    util: { circ: circ, oval: oval, caixa: caixa, poli: poli, linha: linha, sombra: sombra, brilho: brilho } };
 })(this);

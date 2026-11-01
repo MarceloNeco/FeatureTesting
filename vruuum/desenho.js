@@ -21,6 +21,13 @@
   var PILOTOS = ['🐱', '🐶', '🦄', '🐼', '🐸', '🐰', '🦊', '🐯'];
 
   var lingua = 'pt', base = null, carrosJog = [], portais = [], largada = null, chegada = null;
+  var ALT_VOO = 6500;               // altura do voo acima da estrada (quem vai de avião, jato ou helicóptero)
+  var VOA = [], VEIC = [];          // por jogador: voa? e a ficha do veículo
+  var V = function () { return raiz.VruuumVeiculos; };
+  // o que aparece no lugar de cada coisa quando se está voando
+  var NO_CEU = { cone: 'passaro', lama: 'nuvemRaio', turbo: 'anel', rampa: 'corrente', onibus: 'balao' };
+  function sprCeu(tipo) { if (NO_CEU[tipo]) return NO_CEU[tipo]; if (tipo.indexOf('carro') === 0) return 'aviaoTrafego' + tipo.slice(5); return tipo; }
+  function hash(i) { return ((i * 9301 + 49297) % 233280) / 233280; }
   var VS = [];   // estado de cada vista (fundo andando, inclinação, partículas, faixas de texto)
   var porSeg = {};
 
@@ -34,7 +41,9 @@
   function preparar(estado, jogadores, lang) {
     lingua = lang || 'pt';
     base = S.basicos();
-    carrosJog = jogadores.map(function (j) { return S.carroJogador(j.cor, j.piloto); });
+    carrosJog = jogadores.map(function (j) { return S.carroJogador(j.cor, j.piloto, j.veic); });
+    VEIC = jogadores.map(function (j) { return V() ? V().achar(j.veic) : null; });
+    VOA = jogadores.map(function (j) { return !!(V() && V().voa(j.veic)); });
     portais = estado.pista.mundos.map(function (m) { var tm = TEMAS[m]; return S.arco(tm.emoji + ' ' + t(tm.nome[0], tm.nome[1]), tm.cor, '#ffffff', false); });
     largada = S.arco(t('🚦 VAI! 🚦', '🚦 GO! 🚦'), '#ff4fa3', '#ffffff', false);
     chegada = S.arco(t('🏁 CHEGADA 🏁', '🏁 FINISH 🏁'), '#1a1446', '#ffffff', true);
@@ -75,6 +84,9 @@
     if (ev.tipo === 'estrela') { texto(vs, '+1', '#ffd93d', ev.ar ? 1.4 : 1); if (ev.ar) confete(vs, 8); }
     else if (ev.tipo === 'perdeu') { for (var k = 0; k < Math.min(ev.q, 6); k++) vs.parts.push({ tipo: 'est', x: 0, y: -0.2, vx: (Math.random() - 0.5) * 2.4, vy: -1.8 - Math.random(), vida: 1.2, max: 1.2 }); }
     else if (ev.tipo === 'batida') texto(vs, t('Opa!', 'Oops!'), '#ffffff', 1.4);
+    else if (ev.tipo === 'cone' && VOA[ev.j]) texto(vs, t('Piu piu!', 'Tweet!'), '#ff9f1c', 1.2);
+    else if (ev.tipo === 'lama' && VOA[ev.j]) texto(vs, t('Turbulência!', 'Turbulence!'), '#dfe6ff', 1.2);
+    else if (ev.tipo === 'pulo' && VOA[ev.j]) texto(vs, ev.manual ? t('Subindo!', 'Climb!') : t('Corrente de ar!', 'Updraft!'), '#c6ff3d', 1.3);
     else if (ev.tipo === 'cone') texto(vs, t('Ops!', 'Oops!'), '#ff9f1c', 1.2);
     else if (ev.tipo === 'lama') { texto(vs, t('Splash!', 'Splash!'), '#c98a4b', 1.2); for (k = 0; k < 10; k++) vs.parts.push({ tipo: 'gota', cor: '#6b3e1f', x: (Math.random() - 0.5) * 0.4, y: -0.1, vx: (Math.random() - 0.5) * 2, vy: -1.5 - Math.random(), vida: 0.8, max: 0.8 }); }
     else if (ev.tipo === 'turbo') texto(vs, 'TURBO!', '#3ee8ff', 1.6);
@@ -126,7 +138,7 @@
     var baseI = Math.floor(camZ / SEG), basePct = (camZ % SEG) / SEG;
     var jSeg = P.achar(pista, j.z), jPct = (j.z % SEG) / SEG;
     var jY = jSeg.p1.y + (jSeg.p2.y - jSeg.p1.y) * jPct;
-    var camY = jY + ALTURA_CAM, camX = j.x * LARG;
+    var voa = !!VOA[ji], camY = jY + ALTURA_CAM + (voa ? ALT_VOO : 0), camX = j.x * LARG;
 
     // céu e fundo: misturam com o mundo anterior logo depois do portal
     var m = jSeg.mundo, tm = TEMAS[pista.mundos[m]], antes = m > 0 ? TEMAS[pista.mundos[m - 1]] : tm;
@@ -175,28 +187,70 @@
       maxy = Y2;
     }
 
+    // quem voa: névoa sobre o chão lá embaixo (dá a sensação de altura) e a rota no ar, um caminho de luz
+    if (voa) {
+      var hz0 = Math.max(0, Math.min(h, cy)), nev = c.createLinearGradient(0, hz0, 0, h);
+      nev.addColorStop(0, 'rgba(255,255,255,.55)'); nev.addColorStop(1, 'rgba(220,240,255,.22)');
+      c.fillStyle = nev; c.fillRect(0, hz0, w, h - hz0);
+      var trilhos = [[], []];
+      for (n = cnt - 2; n >= 0; n--) {
+        if (aZ[n] <= PROF) continue;
+        var la = aS[n] * ALT_VOO * K, lb = aS[n + 1] * ALT_VOO * K, LY1 = aY[n] - la, LY2 = aY[n + 1] - lb;
+        var LW1 = aS[n] * LARG * K, LW2 = aS[n + 1] * LARG * K, sg = segs[baseI + n];
+        if (LY2 > h + 40) continue;
+        trilhos[0].push(aX[n] - LW1, LY1); trilhos[1].push(aX[n] + LW1, LY1);
+        c.globalAlpha = sg.xadrez ? 0.8 : (sg.listra ? 0.2 : 0.11);
+        poligono(c, aX[n] - LW1, LY1, aX[n] + LW1, LY1, aX[n + 1] + LW2, LY2, aX[n + 1] - LW2, LY2, sg.xadrez ? ((baseI + n) % 2 ? '#111' : '#fff') : '#bfe9ff');
+        c.globalAlpha = 1;
+        if ((baseI + n) % 4 === 0) {
+          var rl = Math.max(1.5, LW1 * 0.035), corL = (baseI + n) % 8 ? '#ffd166' : '#ff4fa3';
+          c.shadowColor = corL; c.shadowBlur = rl * 3; c.fillStyle = corL;
+          c.beginPath(); c.arc(aX[n] - LW1, LY1, rl, 0, Math.PI * 2); c.arc(aX[n] + LW1, LY1, rl, 0, Math.PI * 2); c.fill(); c.shadowBlur = 0;
+        }
+      }
+      // trilhos brilhantes nas duas bordas da rota
+      c.lineJoin = 'round'; c.lineCap = 'round';
+      trilhos.forEach(function (tr) {
+        if (tr.length < 4) return;
+        c.strokeStyle = 'rgba(62,232,255,.85)'; c.lineWidth = Math.max(2, K * 0.012); c.shadowColor = '#3ee8ff'; c.shadowBlur = K * 0.03;
+        c.beginPath(); c.moveTo(tr[0], tr[1]); for (var q = 2; q < tr.length; q += 2) c.lineTo(tr[q], tr[q + 1]); c.stroke(); c.shadowBlur = 0;
+      });
+    }
+
     // enfeites, coisas, trânsito e o outro jogador, do longe para o perto
     var outro = e.jogadores.length === 2 ? e.jogadores[1 - ji] : null, oSeg = outro ? Math.floor(outro.z / SEG) : -1;
     for (n = cnt - 1; n >= 0; n--) {
       if (aZ[n] <= PROF) continue;
       var idx = baseI + n; s = segs[idx];
       var esc = aS[n] * K, sx = aX[n], sy = aY[n], clip = aClip[n], k2;
+      var syAr = sy - esc * ALT_VOO;   // a altura do voo neste pedaço
       for (k2 = 0; n > 3 && k2 < s.enfeites.length; k2++) {   // enfeite colado na câmera taparia a tela
-        var en = s.enfeites[k2], spr = en.tipo === 'portal' ? portais[en.mundo] : en.tipo === 'chegada' ? chegada : en.tipo === 'largada' ? largada : base[en.tipo];
-        if (spr) sprite(c, spr, esc, sx + esc * en.x * LARG, sy, clip, w);
+        var en = s.enfeites[k2], arco = en.tipo === 'portal' || en.tipo === 'chegada' || en.tipo === 'largada', spr = en.tipo === 'portal' ? portais[en.mundo] : en.tipo === 'chegada' ? chegada : en.tipo === 'largada' ? largada : base[en.tipo];
+        if (!spr) continue;
+        if (voa && arco) sprite(c, spr, esc, sx + esc * en.x * LARG, syAr + esc * 1900, 0, w);   // no céu, o portal fica na altura do voo
+        else sprite(c, spr, esc, sx + esc * en.x * LARG, sy, clip, w);
+      }
+      if (voa && n > 3 && idx % 6 === 0) {   // nuvens dos lados, em alturas diferentes
+        var hz = hash(idx), lado = hz < 0.5 ? -1 : 1, tm2 = TEMAS[pista.mundos[s.mundo]];
+        sprite(c, base[tm2.noite ? 'nuvemNoite' : 'nuvemFofa'], esc, sx + esc * lado * (2.2 + hash(idx + 7) * 1.6) * LARG, syAr + esc * (hash(idx + 3) - 0.35) * 2600, 0, w);
       }
       for (k2 = 0; k2 < s.coisas.length; k2++) {
         var co = s.coisas[k2];
         if (co.pego[ji]) continue;
         var alt = co.alt;
         if (co.tipo === 'estrela') alt += Math.sin(e.t * 5 + idx) * 80;
-        sprite(c, base[co.tipo], esc, sx + esc * co.x * LARG, sy - esc * alt, clip, w);
+        if (voa) sprite(c, base[sprCeu(co.tipo)], esc, sx + esc * co.x * LARG, syAr - esc * (alt + (co.tipo === 'anel' || co.tipo === 'turbo' ? -150 : 0)), 0, w);
+        else sprite(c, base[co.tipo], esc, sx + esc * co.x * LARG, sy - esc * alt, clip, w);
       }
       var cs = porSeg[idx];
-      if (cs) for (k2 = 0; k2 < cs.length; k2++) sprite(c, base[cs[k2].tipo], esc, sx + esc * cs[k2].x * LARG, sy, clip, w);
+      if (cs) for (k2 = 0; k2 < cs.length; k2++) {
+        if (voa) sprite(c, base[sprCeu(cs[k2].tipo)], esc, sx + esc * cs[k2].x * LARG, syAr - esc * 200, 0, w);
+        else sprite(c, base[cs[k2].tipo], esc, sx + esc * cs[k2].x * LARG, sy, clip, w);
+      }
       if (idx === oSeg && outro.z > j.z - JOG_Z * 0.6) {
         var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / (outro.puloMax || raiz.VruuumMotor.PULO))) * 1400 * (outro.puloMax || 1.1) / 1.1 : 0;
-        sprite(c, carrosJog[outro.n], esc, sx + esc * outro.x * LARG, sy - esc * lift, clip, w);
+        var oVoa = !!VOA[outro.n];   // o outro pode estar voando enquanto eu vou de carro (e vice-versa)
+        sprite(c, carrosJog[outro.n], esc, sx + esc * outro.x * LARG, (oVoa ? syAr : sy) - esc * lift, oVoa || voa ? 0 : clip, w);
       }
     }
 
@@ -220,13 +274,45 @@
       for (k = 0; k < 14; k++) { var a = Math.random() * Math.PI * 2, r0 = K * (0.7 + Math.random() * 0.3); c.beginPath(); c.moveTo(g.cx + Math.cos(a) * r0, g.cy + Math.sin(a) * r0 * 0.6); c.lineTo(g.cx + Math.cos(a) * r0 * 1.6, g.cy + Math.sin(a) * r0 * 0.96); c.stroke(); }
       c.globalAlpha = 1;
     }
-    if (lift > 0) { c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse ? c.ellipse(g.cx, chao, cw * 0.45 * (1 - lift / K), ch * 0.06, 0, 0, Math.PI * 2) : c.arc(g.cx, chao, cw * 0.4, 0, Math.PI * 2); c.fill(); }
+    var vv = VEIC[j.n], voa = !!VOA[j.n], tt = Date.now() / 1000;
+    if (voa) lift += Math.sin(tt * 2.2) * K * 0.012;   // flutuando no ar
+    if (lift > 0 && !voa) { c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse ? c.ellipse(g.cx, chao, cw * 0.45 * (1 - lift / K), ch * 0.06, 0, 0, Math.PI * 2) : c.arc(g.cx, chao, cw * 0.4, 0, Math.PI * 2); c.fill(); }
     c.save();
     c.translate(g.cx, chao - lift);
-    c.rotate(vs.lado * 0.07 + (j.rodando > 0 ? Math.sin(j.rodando * 22) * 0.25 : 0));
+    // avião inclina bem nas curvas; moto deita um pouco; carro quase nada
+    var inclina = voa ? 0.3 : (vv && vv.id === 'moto' ? 0.2 : 0.07);
+    c.rotate(vs.lado * inclina + (j.rodando > 0 ? Math.sin(j.rodando * 22) * 0.25 : 0));
     if (j.rodando > 0) c.scale(Math.max(0.25, Math.abs(Math.cos(j.rodando * 9))) * (Math.cos(j.rodando * 9) < 0 ? -1 : 1), 1);
+    extrasAntes(c, vv, cw, ch, tt);
     c.drawImage(spr.img, -cw / 2, -ch, cw, ch);
+    extrasDepois(c, vv, cw, ch, tt, j.turbo > 0);
     c.restore();
+  }
+
+  // partes que se mexem, desenhadas por cima do veículo (origem: meio da base do desenho)
+  function extrasAntes(c, vv, cw, ch, tt) {
+    if (!vv || !vv.helice) return;   // hélice girando na frente do avião (aparece em volta do corpo)
+    var cy0 = -ch * 0.44, r = cw * 0.14;
+    c.globalAlpha = 0.28; c.fillStyle = '#e8e8f0'; c.beginPath(); c.arc(0, cy0, r, 0, Math.PI * 2); c.fill();
+    c.globalAlpha = 0.6; c.strokeStyle = '#555'; c.lineWidth = Math.max(1, cw * 0.012);
+    var a = tt * 40; c.beginPath(); c.moveTo(Math.cos(a) * r, cy0 + Math.sin(a) * r); c.lineTo(-Math.cos(a) * r, cy0 - Math.sin(a) * r); c.stroke();
+    c.globalAlpha = 1;
+  }
+  function extrasDepois(c, vv, cw, ch, tt, turbo) {
+    if (!vv) return;
+    if (vv.rotor) {   // pás do helicóptero
+      var ry = -ch * 0.88, rx = cw * 0.78, rr = ch * 0.07;
+      c.globalAlpha = 0.25; c.fillStyle = '#dcdce6'; c.beginPath(); c.ellipse ? c.ellipse(0, ry, rx, rr, 0, 0, Math.PI * 2) : c.arc(0, ry, rx, 0, Math.PI * 2); c.fill();
+      c.globalAlpha = 0.8; c.strokeStyle = '#2a2a30'; c.lineWidth = Math.max(1.5, ch * 0.025);
+      for (var k = 0; k < 2; k++) { var a = tt * 18 + k * Math.PI / 2; c.beginPath(); c.moveTo(Math.cos(a) * rx, ry + Math.sin(a) * rr); c.lineTo(-Math.cos(a) * rx, ry - Math.sin(a) * rr); c.stroke(); }
+      c.globalAlpha = 1;
+    }
+    if (vv.fogo) {   // fogo do jato (azul e maior no turbo)
+      var fy = -ch * 0.38, fr = cw * (turbo ? 0.09 : 0.055) * (0.85 + Math.random() * 0.3);
+      var gr = c.createRadialGradient(0, fy, 0, 0, fy + fr * 0.6, fr * 1.8);
+      gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.3, turbo ? '#7fd3ff' : '#ffd166'); gr.addColorStop(0.7, turbo ? 'rgba(58,134,255,.6)' : 'rgba(255,123,0,.6)'); gr.addColorStop(1, 'rgba(255,80,0,0)');
+      c.fillStyle = gr; c.beginPath(); c.arc(0, fy + fr * 0.6, fr * 1.8, 0, Math.PI * 2); c.fill();
+    }
   }
 
   function desenharEfeitos(c, vs, g, w, h) {
@@ -320,15 +406,40 @@
     return vv;
   }
 
-  // prévia do carro no menu
-  function previa(cv, cor, piloto) {
-    var spr = S.carroJogador(cor, piloto), c = cv.getContext('2d');
-    c.clearRect(0, 0, cv.width, cv.height);
-    var g = c.createLinearGradient(0, 0, 0, cv.height); g.addColorStop(0, '#2a2160'); g.addColorStop(1, '#3a2f73'); c.fillStyle = g; c.fillRect(0, 0, cv.width, cv.height);
-    c.fillStyle = '#6e737b'; c.beginPath(); c.moveTo(cv.width * 0.35, cv.height * 0.3); c.lineTo(cv.width * 0.65, cv.height * 0.3); c.lineTo(cv.width, cv.height); c.lineTo(0, cv.height); c.fill();
-    var w = cv.width * 0.62, h = w * spr.h / spr.w;
-    c.drawImage(spr.img, (cv.width - w) / 2, cv.height * 0.95 - h, w, h);
+  // prévia da garagem: o veículo grande, animado (hélice, rotor, fogo), na estrada ou no céu
+  var cachePrevia = {};
+  function spritePrevia(cor, piloto, veic) {
+    var k = cor + '|' + piloto + '|' + veic;
+    if (!cachePrevia[k]) cachePrevia[k] = S.carroJogador(cor, piloto, veic, 360);
+    return cachePrevia[k];
+  }
+  function previa(cv, cor, piloto, veic) {
+    var c = cv.getContext('2d'), W = cv.width, H = cv.height, vv = V() ? V().achar(veic) : null, voa = !!(V() && V().voa(veic)), tt = Date.now() / 1000;
+    var spr = spritePrevia(cor, piloto, veic);
+    var g = c.createLinearGradient(0, 0, 0, H);
+    if (voa) { g.addColorStop(0, '#38b6ff'); g.addColorStop(1, '#c9f0ff'); } else { g.addColorStop(0, '#2a2160'); g.addColorStop(1, '#3a2f73'); }
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    if (voa) {
+      base = base || S.basicos();
+      var nx = ((tt * 40) % (W * 1.6)) - W * 0.3;
+      c.drawImage(base.nuvemFofa.img, W - nx, H * 0.08, W * 0.5, W * 0.23); c.drawImage(base.nuvemFofa.img, W * 1.5 - nx * 0.6, H * 0.45, W * 0.4, W * 0.19);
+    } else {
+      c.fillStyle = '#6e737b'; c.beginPath(); c.moveTo(W * 0.4, H * 0.32); c.lineTo(W * 0.6, H * 0.32); c.lineTo(W * 1.05, H); c.lineTo(-W * 0.05, H); c.fill();
+      c.fillStyle = '#ffffff'; for (var k = 0; k < 5; k++) { var p = ((tt * 1.5 + k / 5) % 1), y = H * 0.32 + (H * 0.68) * p * p; c.fillRect(W / 2 - 1.5 - p * 4, y, 3 + p * 8, 4 + p * 14); }
+    }
+    var esc = Math.min(W * 0.78 / spr.w, H * 0.8 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
+    c.save(); c.translate(W / 2, H * 0.94 + (voa ? Math.sin(tt * 2.2) * H * 0.02 - H * 0.06 : Math.sin(tt * 9) * 1.2));
+    if (voa) c.rotate(Math.sin(tt * 0.9) * 0.08);
+    extrasAntes(c, vv, cw, ch, tt); c.drawImage(spr.img, -cw / 2, -ch, cw, ch); extrasDepois(c, vv, cw, ch, tt, false);
+    c.restore();
+  }
+  // miniatura parada (cartões da garagem)
+  function miniatura(cv, cor, piloto, veic) {
+    var c = cv.getContext('2d'), spr = spritePrevia(cor, piloto, veic), W = cv.width, H = cv.height;
+    c.clearRect(0, 0, W, H);
+    var esc = Math.min(W * 0.9 / spr.w, H * 0.9 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
+    c.drawImage(spr.img, (W - cw) / 2, H * 0.95 - ch, cw, ch);
   }
 
-  raiz.VruuumDesenho = { preparar: preparar, desenhar: desenhar, passo: passo, evento: evento, vistas: vistas, margemLocal: margemLocal, botaoPulo: botaoPulo, previa: previa, TEMAS: TEMAS, CORES: CORES, PILOTOS: PILOTOS };
+  raiz.VruuumDesenho = { preparar: preparar, desenhar: desenhar, passo: passo, evento: evento, vistas: vistas, margemLocal: margemLocal, botaoPulo: botaoPulo, previa: previa, miniatura: miniatura, ALT_VOO: ALT_VOO, TEMAS: TEMAS, CORES: CORES, PILOTOS: PILOTOS };
 })(this);
