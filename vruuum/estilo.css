@@ -1,0 +1,76 @@
+/* Vruuum! — visual (paleta Bolinho de Chuva, fonte Fredoka) */
+@font-face { font-family: 'Fredoka'; src: url('fontes/fredoka.woff2') format('woff2'); font-weight: 300 700; font-display: swap; }
+:root { --bg: #0b0a1f; --bg2: #1a1446; --card: #221b4d; --borda: #3a2f73; --text: #f3f0ff; --muted: #b3acd6; --lima: #c6ff3d; --rosa: #ff4fa3; --ciano: #3ee8ff; --ouro: #ffd166; --fonte: 'Fredoka', system-ui, -apple-system, sans-serif; }
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; }
+body { background: radial-gradient(ellipse at 50% 0%, var(--bg2), var(--bg) 70%); color: var(--text); font-family: var(--fonte); overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+button { font-family: inherit; color: inherit; cursor: pointer; border: 0; min-height: 44px; min-width: 44px; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--lima); outline-offset: 3px; }
+a { color: var(--ciano); }
+.tela { display: none; min-height: 100%; }
+.tela.ativa { display: flex; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+#entrada, #menu, #fim, #desligado { position: relative; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 16px calc(28px + env(safe-area-inset-bottom)); text-align: center; }
+#menu { justify-content: flex-start; padding-top: calc(16px + env(safe-area-inset-top)); }
+.faixa { position: absolute; top: calc(8px + env(safe-area-inset-top)); right: 8px; display: flex; gap: 6px; z-index: 2; }
+.mini { background: rgba(26,20,70,.85); border-radius: 12px; font-size: 1.1rem; padding: 0 10px; }
+.logo { font-size: clamp(3rem, 15vw, 6rem); font-weight: 700; letter-spacing: 1px; color: #fff; font-style: italic; text-shadow: 0 0 18px var(--ciano), 4px 5px 0 var(--rosa), 8px 10px 0 #5b1a8a; position: relative; }
+.logo.pequeno { font-size: clamp(2.2rem, 9vw, 3.6rem); }
+.sub { color: var(--muted); font-size: 1.1rem; margin-top: -6px; position: relative; }
+.dica { color: var(--muted); font-size: .95rem; position: relative; }
+.estrada-fundo { position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow: hidden; pointer-events: none; opacity: .5;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 40px, rgba(255,255,255,.9) 40px 80px) 50% 0 / 10px 100% no-repeat,
+    linear-gradient(90deg, transparent 0 28%, #3a2f73 28% 72%, transparent 72%);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 60%); mask-image: linear-gradient(180deg, transparent, #000 60%);
+  animation: andar .5s linear infinite; }
+@keyframes andar { to { background-position: 50% 80px, 0 0; } }
+
+.ajuda { max-width: 560px; background: var(--card); border-radius: 16px; padding: 14px 16px; color: var(--text); line-height: 1.45; text-align: left; display: grid; gap: 8px; }
+.grupo { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.rotulo { color: var(--muted); font-size: .95rem; }
+.opcoes { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.opcao { border-radius: 16px; padding: 8px 16px; font-size: 1.15rem; font-weight: 600; background: var(--card); border: 3px solid transparent; }
+.opcao[aria-pressed="true"] { border-color: var(--ouro); background: rgba(255,209,102,.16); }
+.opcao.crianca { color: var(--lima); } .opcao.normal { color: var(--ciano); } .opcao.turbo { color: var(--rosa); }
+.opcao.crianca[aria-pressed="true"] { border-color: var(--lima); } .opcao.normal[aria-pressed="true"] { border-color: var(--ciano); } .opcao.turbo[aria-pressed="true"] { border-color: var(--rosa); }
+
+.pilotos { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.piloto { background: var(--card); border: 1px solid var(--borda); border-radius: 20px; padding: 10px 12px 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(320px, 92vw); }
+.previa { width: 100%; max-width: 240px; height: auto; border-radius: 14px; }
+.tecla { font-size: .85rem; opacity: .8; }
+.cores, .bichos { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.cor { width: 44px; height: 44px; border-radius: 50%; border: 3px solid rgba(255,255,255,.25); }
+.cor[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 3px var(--ouro); }
+.bicho { width: 46px; height: 46px; border-radius: 14px; background: rgba(255,255,255,.07); font-size: 1.6rem; line-height: 1; border: 3px solid transparent; }
+.bicho[aria-pressed="true"] { border-color: var(--ouro); background: rgba(255,209,102,.18); }
+
+.grande { background: linear-gradient(180deg, #ff7cc0, var(--rosa)); color: #fff; font-size: 1.6rem; font-weight: 700; border-radius: 22px; padding: 12px 40px; box-shadow: 0 6px 0 #a3226a, 0 0 24px rgba(255,79,163,.5); position: relative; }
+.grande:active { transform: translateY(3px); box-shadow: 0 3px 0 #a3226a; }
+.medio { background: var(--card); border-radius: 16px; padding: 0 26px; font-size: 1.1rem; }
+.rodape { color: var(--muted); font-size: .85rem; }
+.recorde-menu { color: var(--muted); font-size: .95rem; }
+.recorde-menu b { color: var(--ouro); }
+
+#jogo { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: var(--bg); touch-action: none; user-select: none; -webkit-user-select: none; }
+#tela { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; display: block; }
+.pausa { position: absolute; top: calc(8px + env(safe-area-inset-top)); right: 10px; font-size: 1.4rem; background: rgba(0,0,0,.45); z-index: 2; }
+.pausa-painel { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: rgba(11,10,31,.82); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 3; }
+.pausa-painel h2 { font-size: 2.4rem; }
+.avise-virar { position: absolute; left: 50%; bottom: 18%; transform: translateX(-50%); background: rgba(26,20,70,.85); padding: 8px 14px; border-radius: 14px; font-size: .95rem; pointer-events: none; text-align: center; width: max-content; max-width: 90vw; }
+
+.resultado { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.cartao { background: var(--card); border: 2px solid var(--borda); border-radius: 20px; padding: 14px 22px; min-width: 200px; display: grid; gap: 4px; }
+.cartao.vencedor { border-color: var(--ouro); box-shadow: 0 0 24px rgba(255,209,102,.35); }
+.cartao .quem { font-size: 2.6rem; }
+.cartao .estrelas { font-size: 2rem; font-weight: 700; color: var(--ouro); }
+.cartao .medalha { font-size: 1.2rem; }
+.cartao .tempo { color: var(--muted); }
+.recorde-novo { color: var(--lima); font-size: 1.3rem; font-weight: 700; }
+
+/* TV: tudo um pouco maior para ver do sofá */
+.tv .opcao, .tv .medio { font-size: 1.4rem; }
+.tv .cor, .tv .bicho { width: 56px; height: 56px; }
+@media (prefers-reduced-motion: reduce) { .estrada-fundo { animation: none; } }
