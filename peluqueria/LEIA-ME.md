@@ -1,7 +1,7 @@
 # Peluqueria — o provador maluco da família
 
 Segunda brincadeira da família **Bolinho de Chuva** (Feature Tester · SolverONE). Um item (coroa, bigode,
-peruca com óculos…) desce sobre uma imagem (cachorro, tubarão, bebê, vovô…). **Toque em qualquer ponto da
+peruca com óculos…) desce sobre uma imagem (foto de um cachorro, leão, girafa, coruja…). **Toque em qualquer ponto da
 tela** para ele parar. Quanto mais perto do lugar certo, mais pontos.
 
 Endereço (depois do merge): https://solverone.com.br/FeatureTesting/peluqueria/ · na TV:
@@ -60,8 +60,8 @@ primeira abertura o jogo funciona sem internet.
 | `jogo.js` | motor puro: queda, balanço, giro, pontos, multiplicador, estrelas, validação |
 | `desenho.js` | desenha no canvas (cenário, item, lugar certo, confete, modo leve) |
 | `cenarios.js`, `itens.js` | leem e validam `cenarios/`, `itens/` e `meus/` |
-| `cenarios/`, `itens/` | os 12 cenários e 12 itens em SVG + listas `.json` |
-| `som.js`, `voz.js` | toca as músicas gravadas de `musicas/` e os efeitos (torcida do "u-huuu!"); fala |
+| `cenarios/`, `itens/` | as 10 fotos de bichos (JPEG, créditos no `CREDITOS.md`) e os 16 itens em SVG + listas `.json` |
+| `som.js`, `voz.js` | toca as músicas gravadas de `musicas/` e os efeitos; o "u-huuu!" gravado fica em `efeitos/`; fala |
 | `musicas/` | 17 músicas de Kevin MacLeod (CC BY 4.0) e a lista `musicas.json` |
 | `marcar.html`, `marcar.js` | página para marcar o lugar certo nas suas fotos |
 | `tv.js`, `controle.js` | modo TV (código, 1 ou 2 jogadores, pódio) e celular como controle (PARAR, corpo) |
@@ -69,7 +69,7 @@ primeira abertura o jogo funciona sem internet.
 | `partida.js`, `gesto.js` | puros: partida de 1 ou 2 jogadores; detector de movimento brusco |
 | `esqueleto.js` | esqueleto por IA (MediaPipe da pasta da Bagunçolândia) |
 | `sw.js` | guarda tudo no aparelho (cache `peluqueria-v…`); `VERSAO` igual à `APP_VERSION` |
-| `teste/` | testes (não vão para o site) e o gerador dos desenhos |
+| `teste/` | testes (não vão para o site) e a foto de prova (`galeria.js`) |
 
 ## Testes (para quem programa)
 
@@ -83,5 +83,5 @@ node --test 'peluqueria/teste/*.test.js'
 node peluqueria/teste/pagina.test.js
 ```
 
-Para refazer os desenhos: `node peluqueria/teste/desenhar-svgs.js`; para ver todos com os itens no lugar:
+Para ver todas as fotos com os itens no lugar:
 `node peluqueria/teste/galeria.js` (gera `/tmp/peluqueria-galeria.png`).

@@ -2,6 +2,19 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "1.2.0",
+      "data": "01/Nov/2026",
+      "hora": "21:55:00",
+      "pt": [
+        "Skate novo, como nos jogos de skate: o menino aparece de costas, de camiseta e bermuda, com um pé no shape e o outro empurrando a rua (o pé vai para trás, levanta mostrando a sola e volta). Quanto mais rápido, mais rápido ele rema; pulando, os dois pés ficam no shape. O piloto escolhido (bichinho, selfie ou personagem) é a cabeça dele.",
+        "A olhadinha para trás agora é um giro de cabeça em 3D: a cabeça continua redonda e gira como uma bola, o rosto entra pelo lado e a nuca sai pelo outro (antes parecia uma folha de papel virando). Uma vez vira por um lado, na outra pelo outro, e inclina a cabeça ao sorrir. No kart e na moto, o capacete inteiro gira e o rosto aparece pela viseira."
+      ],
+      "en": [
+        "New skateboard, like in skateboarding games: the kid is seen from behind in a T-shirt and shorts, one foot on the deck and the other pushing the street (the foot goes back, lifts showing the sole and comes back). The faster you go, the faster he pushes; when jumping, both feet stay on the deck. The chosen driver (animal, selfie or character) is his head.",
+        "The look back is now a 3D head turn: the head stays round and spins like a ball, the face comes in from one side and the back of the head leaves on the other (before it looked like a sheet of paper flipping). One time it turns one way, the next the other, and tilts the head when smiling. On the kart and the motorbike, the whole helmet turns and the face shows through the visor."
+      ]
+    },
+    {
       "versao": "1.1.0",
       "data": "01/Nov/2026",
       "hora": "18:36:00",

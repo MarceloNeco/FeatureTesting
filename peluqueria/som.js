@@ -5,7 +5,9 @@
    pelo navegador (<audio>) e passa pelo WebAudio só para o volume e o "mudo" (no iPhone o volume do <audio> não
    muda). Ao sair da página, a música e os efeitos param NA HORA (pausa + contexto suspenso) e voltam de onde
    pararam. Arquivo que não carrega é pulado, sem erro.
-   EFEITOS: curtos e sintetizados no WebAudio (acerto, erro, contagem, torcida do "u-huuu!").
+   EFEITOS: curtos e sintetizados no WebAudio (acerto, erro, contagem). O "u-huuu!" do PERFEITO (v0.6.0) é
+   GRAVADO: voz de verdade + torcida (efeitos/uhul-1.mp3 e uhul-2.mp3, créditos no CREDITOS.md); se o arquivo
+   não carregar, cai na torcida sintetizada.
    O som só começa depois do primeiro toque (regra dos navegadores). */
 (function (root) {
   'use strict';
@@ -18,6 +20,7 @@
   var player = null, atual = null, tipo = 'abertura', faixa = -1, tocando = false, fonte = '';
   var pulso = 0, batidas = [], trocas = [];
   var registro = TESTE ? [] : null;
+  var gritos = [], ultimoGrito = -1;   // "u-huuu!" gravados, decodificados uma vez
 
   function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
 
@@ -34,6 +37,7 @@
         for (var k = 0; k < n; k++) d[k] = Math.random() * 2 - 1;
         ruido = b;
         ligarPlayer();
+        carregarGritos();
       }
       if (ctx.state === 'suspended' || ctx.state === 'interrupted') ctx.resume();
     } catch (e) { ctx = null; }
@@ -94,8 +98,23 @@
     a.frequency.setValueAtTime(2300, t + 0.25); a.frequency.linearRampToValueAtTime(2950, t + 0.4); a.frequency.linearRampToValueAtTime(2600, t + 0.8);
   }
 
+  function carregarGritos() {
+    if (!root.fetch) return;
+    ['uhul-1.mp3', 'uhul-2.mp3'].forEach(function (f) {
+      root.fetch('efeitos/' + f).then(function (r) { if (!r.ok) throw new Error(); return r.arrayBuffer(); })
+        .then(function (a) { return new Promise(function (ok, nao) { var p = ctx.decodeAudioData(a, ok, nao); if (p && p.then) p.then(ok, nao); }); })
+        .then(function (b) { if (b && gritos.indexOf(b) < 0) gritos.push(b); }).catch(function () {});
+    });
+  }
+  function grito(t) {
+    if (!gritos.length) { torcida(t); return; }
+    ultimoGrito = (ultimoGrito + 1) % gritos.length;   // alterna as duas gravações
+    var s = ctx.createBufferSource(), g = ctx.createGain(); g.gain.value = 0.9;
+    s.buffer = gritos[ultimoGrito]; s.connect(g); g.connect(mestre); s.start(t);
+  }
+
   var EFEITOS = {
-    uhul: function (t) { torcida(t); },
+    uhul: function (t) { grito(t); },
     toque: function (t) { nota(t, 880, 0.08, 'square', 0.12); },
     conta: function (t) { nota(t, hz(76), 0.12, 'sawtooth', 0.18, 4000); },
     PERFEITO: function (t) {   // acorde brilhante subindo + prato
@@ -211,7 +230,7 @@
     aoBater: function (fn) { batidas.push(fn); }, aoTrocar: function (fn) { trocas.push(fn); },
     lista: function () { return lista.slice(); },
     posicao: function () { return atual ? { faixa: tipo === 'abertura' ? 'abertura' : faixa, titulo: atual.titulo, autor: atual.autor, arquivo: atual.arquivo, nome: { pt: atual.titulo, en: atual.titulo } } : { faixa: null }; },
-    _ctx: function () { return ctx; }, _elemento: function () { return player; },
+    _ctx: function () { return ctx; }, _gritos: function () { return gritos.length; }, _elemento: function () { return player; },
     _forcarProxima: function (arquivo) { forcada = lista.filter(function (o) { return o.arquivo === arquivo; })[0] || null; }
   };
 })(typeof self !== 'undefined' ? self : this);

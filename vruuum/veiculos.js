@@ -1,6 +1,6 @@
-/* Vruuum! — a garagem: 9 veículos, todos desenhados aqui em código, vistos de trás (como na corrida).
+/* Vruuum! — a garagem: 10 veículos, todos desenhados aqui em código, vistos de trás (como na corrida).
    Terra: Clássico, GT (traseira redonda), Superesportivo (largo, aerofólio grande), Kart, Monstrão,
-   Moto. Céu: Aviãozinho, Jato, Helicóptero — esses voam (desenho.js troca a estrada por uma rota no
+   Moto, Skate (animado: a perna empurra o chão, em quadros). Céu: Aviãozinho, Jato, Helicóptero — esses voam (desenho.js troca a estrada por uma rota no
    ar e os obstáculos por pássaros, nuvens de tempestade, anéis e correntes de ar).
    Estilos inspirados em carros esportivos famosos, mas sem marca, logotipo ou nome de fabricante.
    vel e curva: pequenas diferenças (até ~10%) para cada um ter seu jeito sem desequilibrar a corrida. */
@@ -129,26 +129,103 @@
     escape(c, W * 0.72, H * 0.7, W * 0.05); linha(c, [W * 0.66, H * 0.66, W * 0.72, H * 0.7], '#9aa0a6', W * 0.04);
   }
 
-  function skate(c, W, H, cor, emoji) {   // menino de skate, de capacete, braços abertos para equilibrar
-    sombra(c, W, H, 0.42);
-    // skate visto de trás: shape e as rodinhas
-    caixa(c, W * 0.1, H * 0.88, W * 0.8, H * 0.045, H * 0.02, '#2a2a33');
-    caixa(c, W * 0.1, H * 0.875, W * 0.8, H * 0.018, H * 0.009, '#ff7b00');
-    [0.2, 0.8].forEach(function (x) { caixa(c, W * (x - 0.08), H * 0.93, W * 0.16, H * 0.05, H * 0.02, '#f5f5f5'); });
-    // pernas (calça) e tênis
-    caixa(c, W * 0.3, H * 0.55, W * 0.15, H * 0.32, W * 0.06, '#2b3a55'); caixa(c, W * 0.55, H * 0.55, W * 0.15, H * 0.32, W * 0.06, '#2b3a55');
-    caixa(c, W * 0.26, H * 0.83, W * 0.2, H * 0.06, W * 0.04, '#ffffff'); caixa(c, W * 0.54, H * 0.83, W * 0.2, H * 0.06, W * 0.04, '#ffffff');
-    // moletom com capuz nas costas
-    c.fillStyle = grad(c, H * 0.24, H * 0.6, tom(cor, 0.15), tom(cor, -0.3));
-    c.beginPath(); c.moveTo(W * 0.26, H * 0.6); c.quadraticCurveTo(W * 0.2, H * 0.3, W * 0.36, H * 0.25); c.lineTo(W * 0.64, H * 0.25); c.quadraticCurveTo(W * 0.8, H * 0.3, W * 0.74, H * 0.6); c.closePath(); c.fill();
-    caixa(c, W * 0.38, H * 0.25, W * 0.24, H * 0.12, W * 0.08, tom(cor, -0.35));   // capuz
-    // braços abertos
-    linha(c, [W * 0.3, H * 0.32, W * 0.06, H * 0.42], tom(cor, -0.1), W * 0.1); linha(c, [W * 0.7, H * 0.32, W * 0.94, H * 0.38], tom(cor, -0.1), W * 0.1);
-    circ(c, W * 0.05, H * 0.43, W * 0.05, '#f2c9a0'); circ(c, W * 0.95, H * 0.385, W * 0.05, '#f2c9a0');
-    // capacete (visto de trás: a nuca, com listra)
-    circ(c, W * 0.5, H * 0.15, W * 0.2, '#f5f5f5'); circ(c, W * 0.5, H * 0.15, W * 0.18, '#ff7b00');
-    caixa(c, W * 0.46, H * 0.03, W * 0.08, H * 0.22, W * 0.04, '#ffffff'); circ(c, W * 0.43, H * 0.1, W * 0.035, 'rgba(255,255,255,.5)');
-    piloto(c, emoji, W * 0.5, H * 0.17, H * 0.15);
+  /* menino de skate visto de trás, como num jogo de skate: o pé da frente em cima do shape e o de trás
+     empurrando o chão. fase (0 a 1) é um ciclo da remada: 0–0.45 o pé de trás empurra a rua (vai para
+     trás, mais perto de quem olha), 0.45–0.65 levanta (aparece a sola) e volta, 0.65–1 descansa no
+     tail (deslizando). Desenhado em vários quadros (quadros: 12) que a corrida troca conforme a velocidade.
+     A cabeça é desenhada viva por cima (cabeca.js): aqui fica só uma cabeça neutra para quando está longe. */
+  var PELE = '#f2c9a0', PELE_SOMBRA = '#d9a57a', SHORT = '#2a2d3a';
+  function mistura(a, b, f) { return a + (b - a) * f; }
+  function suave(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+  // perna em dois pedaços (coxa e canela) com o joelho dobrando para fora (lado = -1 esquerda, 1 direita)
+  function joelho(hx, hy, fx, fy, comp, lado) {
+    var dx = fx - hx, dy = fy - hy, d = Math.sqrt(dx * dx + dy * dy) || 1, meio = Math.max(comp, d) / 2;
+    var alt = Math.sqrt(Math.max(0, meio * meio - (d / 2) * (d / 2)));
+    return [hx + dx / 2 - dy / d * alt * -lado, hy + dy / 2 + dx / d * alt * -lado];
+  }
+  function membro(c, a, b, l1, l2, cor, sombraCor) {   // pedaço de braço ou perna afinando, com sombra de um lado
+    var dx = b[0] - a[0], dy = b[1] - a[1], d = Math.sqrt(dx * dx + dy * dy) || 1, nx = -dy / d, ny = dx / d;
+    poli(c, [a[0] + nx * l1, a[1] + ny * l1, b[0] + nx * l2, b[1] + ny * l2, b[0] - nx * l2, b[1] - ny * l2, a[0] - nx * l1, a[1] - ny * l1], cor);
+    circ(c, a[0], a[1], l1, cor); circ(c, b[0], b[1], l2, cor);
+    if (sombraCor) poli(c, [a[0] + nx * l1 * 0.3, a[1] + ny * l1 * 0.3, b[0] + nx * l2 * 0.3, b[1] + ny * l2 * 0.3, b[0] + nx * l2 * 0.95, b[1] + ny * l2 * 0.95, a[0] + nx * l1 * 0.95, a[1] + ny * l1 * 0.95], sombraCor);
+  }
+  function tenis(c, x, y, w, sola, cor) {   // tênis visto de trás (calcanhar); sola > 0 = pé levantado mostrando a sola
+    var h = w * 0.62;
+    if (sola > 0) {
+      c.save(); c.translate(x, y); c.rotate(-0.25 * sola);
+      oval(c, 0, -h * 0.1, w * 0.52, h * (0.55 + sola * 0.6), '#e9e4ee');
+      oval(c, 0, -h * 0.1, w * 0.4, h * (0.42 + sola * 0.5), '#c95d7a');
+      c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = Math.max(1, w * 0.04);
+      for (var k = -2; k <= 2; k++) { c.beginPath(); c.moveTo(-w * 0.3, -h * 0.1 + k * h * 0.18 * (0.6 + sola)); c.lineTo(w * 0.3, -h * 0.1 + k * h * 0.18 * (0.6 + sola)); c.stroke(); }
+      c.restore(); return;
+    }
+    caixa(c, x - w / 2, y - h, w, h, w * 0.3, '#f6f6f8');
+    caixa(c, x - w / 2, y - h * 0.22, w, h * 0.22, w * 0.1, '#d8d8de');   // sola
+    caixa(c, x - w * 0.14, y - h * 0.95, w * 0.28, h * 0.6, w * 0.08, cor);   // reforço do calcanhar
+  }
+  function shape(c, W, H, cor) {
+    // sombra no chão, rodinhas da frente (lá adiante), o shape indo para longe em perspectiva e o tail perto da gente
+    oval(c, W * 0.47, H * 0.905, W * 0.21, H * 0.02, 'rgba(0,0,0,.3)');
+    [0.415, 0.525].forEach(function (x) { caixa(c, W * (x - 0.022), H * 0.728, W * 0.044, H * 0.028, W * 0.01, '#e8e2d0'); });
+    linha(c, [W * 0.415, H * 0.742, W * 0.525, H * 0.742], '#9aa0a6', H * 0.007);
+    function deck(dy) {
+      c.beginPath(); c.moveTo(W * 0.415, H * (0.708 + dy)); c.quadraticCurveTo(W * 0.47, H * (0.69 + dy), W * 0.525, H * (0.708 + dy));
+      c.lineTo(W * 0.585, H * (0.848 + dy)); c.quadraticCurveTo(W * 0.47, H * (0.876 + dy), W * 0.355, H * (0.848 + dy)); c.closePath();
+    }
+    deck(0.016); c.fillStyle = cor; c.fill();   // a borda do shape (madeira pintada)
+    deck(0.009); c.fillStyle = '#e9c48a'; c.fill();
+    deck(0); c.fillStyle = grad(c, H * 0.69, H * 0.87, '#2a2a33', '#3b3b46'); c.fill();   // lixa
+    c.strokeStyle = 'rgba(255,255,255,.14)'; c.lineWidth = Math.max(1, H * 0.003); c.stroke();
+    c.fillStyle = 'rgba(255,255,255,.07)'; for (var k = 0; k < 22; k++) c.fillRect(W * (0.39 + (k * 37 % 17) / 100), H * (0.72 + (k * 13 % 12) / 100), 2, 2);
+    linha(c, [W * 0.385, H * 0.885, W * 0.555, H * 0.885], '#9aa0a6', H * 0.011);   // truck de trás
+    [0.37, 0.57].forEach(function (x) { caixa(c, W * (x - 0.038), H * 0.868, W * 0.076, H * 0.038, W * 0.02, '#f1ead6'); caixa(c, W * (x - 0.038), H * 0.868, W * 0.076, H * 0.011, W * 0.01, 'rgba(255,255,255,.75)'); });
+  }
+  function skatista(c, W, H, cor, emoji, fase) {
+    fase = ((fase || 0) % 1 + 1) % 1;
+    var camisa = cor, escura = tom(cor, -0.35), clara = tom(cor, 0.2);
+    // pé de trás: onde está em cada momento da remada
+    var px, py, sola = 0, noChao = false, perto = 1;
+    if (fase < 0.45) { var a = suave(fase / 0.45); px = mistura(0.63, 0.7, a); py = mistura(0.84, 0.975, a); noChao = true; perto = mistura(1, 1.18, a); }
+    else if (fase < 0.65) { var b = (fase - 0.45) / 0.2; px = mistura(0.7, 0.57, suave(b)); py = mistura(0.975, 0.82, suave(b)) - Math.sin(Math.PI * b) * 0.07; sola = Math.sin(Math.PI * Math.min(1, b * 1.3)); perto = mistura(1.18, 1, b); }
+    else { var d = suave((fase - 0.65) / 0.08); px = mistura(0.57, 0.545, d); py = mistura(0.82, 0.835, d); }
+    var balanco = Math.sin(fase * Math.PI * 2);   // braços balançam ao contrário da perna
+    shape(c, W, H, tom(cor, 0.1));
+    if (noChao) oval(c, W * px, H * (py + 0.005), W * 0.06 * perto, H * 0.012, 'rgba(0,0,0,.3)');
+    // perna de trás (direita): quadril -> joelho -> pé
+    var qd = [W * 0.555, H * 0.55], pd = [W * px, H * (py - 0.045 * perto)], jd = joelho(qd[0], qd[1], pd[0], pd[1], H * 0.27, 1);
+    membro(c, qd, jd, W * 0.062, W * 0.05, PELE, PELE_SOMBRA); membro(c, jd, pd, W * 0.05, W * 0.036 * perto, PELE, PELE_SOMBRA);
+    caixa(c, pd[0] - W * 0.038 * perto, pd[1] - H * 0.012, W * 0.076 * perto, H * 0.022, W * 0.01, '#fdfdfd');   // meia
+    tenis(c, W * px, H * py, W * 0.11 * perto, sola, tom(cor, -0.2));
+    // perna da frente (esquerda): pé em cima do shape, joelho um pouco dobrado
+    var qe = [W * 0.445, H * 0.55], pe = [W * 0.45, H * 0.765], je = joelho(qe[0], qe[1], pe[0], pe[1], H * 0.222, -1);
+    membro(c, qe, je, W * 0.062, W * 0.05, PELE, PELE_SOMBRA); membro(c, je, pe, W * 0.05, W * 0.036, PELE, PELE_SOMBRA);
+    caixa(c, pe[0] - W * 0.038, pe[1] - H * 0.012, W * 0.076, H * 0.022, W * 0.01, '#fdfdfd');
+    tenis(c, W * 0.45, H * 0.8, W * 0.11, 0, tom(cor, -0.2));
+    // bermuda
+    c.fillStyle = SHORT; c.beginPath();
+    c.moveTo(W * 0.36, H * 0.47); c.lineTo(W * 0.64, H * 0.47); c.lineTo(W * 0.635, H * 0.585);
+    c.lineTo(W * 0.505, H * 0.6); c.lineTo(W * 0.5, H * 0.545); c.lineTo(W * 0.495, H * 0.6); c.lineTo(W * 0.365, H * 0.585); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.07)'; c.fillRect(W * 0.38, H * 0.48, W * 0.24, H * 0.015);
+    // braços: ombro -> cotovelo -> mão, meio dobrados, balançando
+    [[-1, -balanco], [1, balanco]].forEach(function (l) {
+      var s = l[0], bb = l[1], om = [W * (0.5 + s * 0.15), H * 0.255], co = [W * (0.5 + s * (0.235 + bb * 0.015)), H * (0.375 - bb * 0.01)], mao = [W * (0.5 + s * (0.25 + bb * 0.03)), H * (0.475 - bb * 0.03)];
+      membro(c, om, co, W * 0.048, W * 0.04, PELE, PELE_SOMBRA); membro(c, co, mao, W * 0.04, W * 0.032, PELE, PELE_SOMBRA);
+      circ(c, mao[0], mao[1], W * 0.04, PELE);
+    });
+    // camiseta larga, com mangas curtas e dobras
+    c.fillStyle = grad(c, H * 0.22, H * 0.52, clara, escura); c.beginPath();
+    c.moveTo(W * 0.37, H * 0.505); c.quadraticCurveTo(W * 0.34, H * 0.38, W * 0.355, H * 0.3);
+    c.lineTo(W * 0.29, H * 0.335); c.lineTo(W * 0.255, H * 0.285); c.quadraticCurveTo(W * 0.3, H * 0.225, W * 0.41, H * 0.215);
+    c.quadraticCurveTo(W * 0.5, H * 0.235, W * 0.59, H * 0.215); c.quadraticCurveTo(W * 0.7, H * 0.225, W * 0.745, H * 0.285);
+    c.lineTo(W * 0.71, H * 0.335); c.lineTo(W * 0.645, H * 0.3); c.quadraticCurveTo(W * 0.66, H * 0.38, W * 0.63, H * 0.505);
+    c.quadraticCurveTo(W * 0.5, H * 0.52, W * 0.37, H * 0.505); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(0,0,0,.16)'; c.lineWidth = Math.max(1, W * 0.008); c.lineCap = 'round';
+    [[0.44, 0.3, 0.42, 0.46], [0.56, 0.32, 0.585, 0.47], [0.5, 0.38, 0.49, 0.5]].forEach(function (q) { c.beginPath(); c.moveTo(W * q[0], H * q[1]); c.quadraticCurveTo(W * (q[0] + 0.02), H * (q[1] + q[3]) / 2, W * q[2], H * q[3]); c.stroke(); });
+    c.fillStyle = 'rgba(255,255,255,.85)'; c.font = '800 ' + Math.round(H * 0.045) + 'px ' + FONTE; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('7', W * 0.5, H * 0.33);
+    // pescoço e cabeça neutra (cabelo), coberta pelo piloto vivo
+    caixa(c, W * 0.45, H * 0.17, W * 0.1, H * 0.06, W * 0.03, PELE_SOMBRA);
+    circ(c, W * 0.5, H * 0.13, H * 0.066, '#3a2a20');
+    piloto(c, emoji, W * 0.5, H * 0.135, H * 0.13);
   }
 
   // ---------- céu ----------
@@ -209,7 +286,7 @@
     { id: 'kart', janela: { elipse: [0.5, 0.24, 0.184, 0.221] }, cab: [0.5, 0.25, 0.34], capacete: true, grupo: 'terra', nome: ['Kart', 'Kart'], w: 720, h: 600, vel: 0.96, curva: 1.12, desenhar: kart },
     { id: 'monstrao', janela: { poli: [0.29, 0.07, 0.71, 0.07, 0.71, 0.22, 0.29, 0.22] }, cab: [0.5, 0.17, 0.14], grupo: 'terra', nome: ['Monstrão', 'Monster Truck'], w: 960, h: 920, vel: 0.95, curva: 0.98, desenhar: monstrao },
     { id: 'moto', janela: { elipse: [0.5, 0.14, 0.18, 0.123] }, cab: [0.5, 0.15, 0.22], capacete: true, grupo: 'moto', nome: ['Moto', 'Motorbike'], w: 520, h: 760, vel: 1.03, curva: 1.1, desenhar: moto },
-    { id: 'skate', janela: { elipse: [0.5, 0.15, 0.18, 0.112] }, cab: [0.5, 0.16, 0.2], capacete: true, grupo: 'moto', nome: ['Skate', 'Skateboard'], w: 430, h: 690, vel: 0.94, curva: 1.15, desenhar: skate },
+    { id: 'skate', janela: { elipse: [0.5, 0.13, 0.3, 0.2] }, cab: [0.5, 0.13, 0.132], aberto: true, quadros: 12, grupo: 'moto', nome: ['Skate', 'Skateboard'], w: 560, h: 780, vel: 0.94, curva: 1.15, desenhar: skatista },
     { id: 'aviao', janela: { elipse: [0.5, 0.44, 0.075, 0.1] }, cab: [0.5, 0.47, 0.16], grupo: 'ar', nome: ['Aviãozinho', 'Little Plane'], w: 1500, h: 760, vel: 1, curva: 1.05, desenhar: aviao, helice: true },
     { id: 'jato', janela: { elipse: [0.5, 0.43, 0.06, 0.09] }, cab: [0.5, 0.46, 0.14], grupo: 'ar', nome: ['Jato', 'Jet'], w: 1300, h: 700, vel: 1.1, curva: 0.92, desenhar: jato, fogo: true },
     { id: 'heli', janela: { elipse: [0.5, 0.48, 0.16, 0.15] }, cab: [0.5, 0.52, 0.21], grupo: 'ar', nome: ['Helicóptero', 'Helicopter'], w: 1100, h: 900, vel: 0.95, curva: 1.12, desenhar: helicoptero, rotor: true }

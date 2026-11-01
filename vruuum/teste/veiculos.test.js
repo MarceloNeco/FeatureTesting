@@ -32,3 +32,11 @@ test('nenhum nome de marca nos veículos', () => {
   const nomes = V.LISTA.map(v => v.nome.join(' ')).join(' ').toLowerCase();
   for (const marca of ['porsche', 'ferrari', 'lamborghini', 'boeing', 'airbus', 'honda', 'yamaha']) assert.ok(!nomes.includes(marca), marca);
 });
+
+test('o skate é animado: vários quadros da perna empurrando o chão, cabeça aberta (sem capacete)', () => {
+  const sk = V.achar('skate');
+  assert.ok(sk.quadros >= 8, 'quadros ' + sk.quadros);
+  assert.equal(sk.aberto, true);
+  assert.ok(!sk.capacete);
+});
+
