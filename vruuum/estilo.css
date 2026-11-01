@@ -130,3 +130,9 @@ a { color: var(--ciano); }
   #selfieTela { max-height: 62vh; }
 }
 .opcao.visual-neon { color: #2bf4ff; text-shadow: 0 0 8px rgba(43,244,255,.6); }
+.opcao.visual-misto { color: #ffd166; }
+/* volante no ar: janelinha da câmera com as mãos (espelhada) */
+.cam-maos { position: absolute; top: calc(60px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right)); z-index: 2; width: min(24vw, 170px); pointer-events: none; text-align: center; }
+.cam-maos video { display: none; }
+.cam-maos canvas { width: 100%; height: auto; border-radius: 12px; border: 2px solid rgba(43,244,255,.7); box-shadow: 0 0 14px rgba(43,244,255,.45); background: #000; }
+.cam-maos p { font-size: .8rem; margin-top: 2px; text-shadow: 0 1px 4px #000; }

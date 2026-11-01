@@ -22,3 +22,5 @@ Situação: 🟡 aberta · 🔵 em andamento · ⏸ aguardando o dono · ✅ fei
 | 16 | Selfie: a primeira vez baixa o motor de visão (~14 MB) da pasta da Bagunçolândia; sem internet nessa primeira vez, o círculo fica para ajustar à mão. | v0.8.0 | 🟡 (aviso já aparece na tela) |
 | 17 | Dono: túneis, carros brilhantes com farol, luzes e neon piscando, menos infantil e mais sóbrio (referências de aviões em neon). | dono, 01/Nov/2026 | ✅ v0.9.0 (visual Neon como padrão; Colorido continua no menu) |
 | 18 | Dono: tela girava sozinha ao inclinar muito na paisagem; veículo muito embaixo e alto da tela vazio; mais neon preenchendo a tela. | dono, 01/Nov/2026 | ✅ v0.9.1 (no iPhone o navegador não deixa travar a tela; lá, travar a rotação no próprio celular) |
+| 19 | Dono: modo TV com as mãos (volante no ar, pulo e abaixar), menino de skate, alternar fases neon e normais, checkpoints e pontos (sem morrer). | dono, 01/Nov/2026 | ✅ v1.0.0 (mãos testadas com câmera falsa; testar com as mãos de verdade) |
+| 20 | TV de verdade com as mãos: o celular filma e a TV mostra (como a Bagunçolândia: código na TV, pareamento pelo Supabase). Hoje: ligar o celular/notebook na TV. | v1.0.0 | 🟡 |

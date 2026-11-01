@@ -2,7 +2,7 @@
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.9.1';
+  var APP_VERSION = '1.0.0';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -15,7 +15,8 @@
   var pref = ler('vruuum.pref', null) || {};
   if (pref.jogadores !== 2) pref.jogadores = 1;
   if (NIVEIS.indexOf(pref.nivel) < 0) pref.nivel = 'crianca';
-  if (pref.visual !== 'colorido') pref.visual = 'neon';   // neon é o padrão (mais sóbrio, com túneis iluminados)
+  if (pref.controle !== 'maos') pref.controle = 'toque';
+  if (['neon', 'colorido', 'misto'].indexOf(pref.visual) < 0 || !pref.visualV2) { pref.visual = 'misto'; pref.visualV2 = true; }   // misto: alterna dia e noite (padrão desde a 1.0)
   D.definirEstilo(pref.visual);
   if (pref.lingua !== 'en' && pref.lingua !== 'pt') pref.lingua = (navigator.language || 'pt').slice(0, 2) === 'pt' ? 'pt' : 'en';
   if (!pref.carros || pref.carros.length !== 2) pref.carros = [{ cor: 0, piloto: 0 }, { cor: 2, piloto: 1 }];
@@ -176,6 +177,8 @@
   function marcar() {
     Array.prototype.forEach.call(document.querySelectorAll('[data-jogadores]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-jogadores') === pref.jogadores)); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-nivel]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-nivel') === pref.nivel)); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-controle]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-controle') === pref.controle)); });
+    $('dicaMaos').hidden = pref.controle !== 'maos';
     Array.prototype.forEach.call(document.querySelectorAll('[data-visual]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-visual') === pref.visual)); });
     if (editando >= pref.jogadores) editando = 0;
     var c = pref.carros[editando], v = VE.achar(c.veic);
@@ -200,7 +203,7 @@
     $('barraVel').style.width = barra(v.vel); $('barraCurva').style.width = barra(v.curva);
     var dica = $('dicaTecla'); dica.hidden = TOQUE || pref.jogadores < 2;
     dica.textContent = editando ? t('Teclado: setas e ⬆', 'Keyboard: arrows and ⬆') : t('Teclado: A, D e W', 'Keyboard: A, D and W');
-    $('recordeMenu').textContent = ler('vruuum.recorde.' + pref.nivel, 0);
+    $('recordeMenu').textContent = D.milhar(ler('vruuum.recordePts.' + pref.nivel, 0));
   }
   function opcao(atributo, fn) {
     Array.prototype.forEach.call(document.querySelectorAll('[' + atributo + ']'), function (b) {
@@ -209,6 +212,7 @@
   }
   opcao('data-jogadores', function (v) { pref.jogadores = +v; });
   opcao('data-nivel', function (v) { pref.nivel = v; });
+  opcao('data-controle', function (v) { pref.controle = v; });
   opcao('data-visual', function (v) { pref.visual = v; D.definirEstilo(v); });
   $('btLingua').addEventListener('click', function () { pref.lingua = pref.lingua === 'en' ? 'pt' : 'en'; salvar(); traduzir(); marcar(); });
   $('btSom').addEventListener('click', function () { Som.iniciar(); var lig = Som.alternar(); $('btSom').textContent = lig ? '🔊' : '🔇'; });
@@ -241,7 +245,7 @@
 
   function iniciarCorrida() {
     Som.iniciar();
-    if (TOQUE && pref.jogadores === 1) ligarMovimento();
+    if (TOQUE && pref.jogadores === 1 && pref.controle !== 'maos') ligarMovimento();   // com as mãos na câmera, o celular fica parado (sem inclinar)
     mov.zerar(); mov.calibrar();
     estado = M.novaCorrida(pref.nivel, (Date.now() % 1000000007) | 0, pref.jogadores);
     jogs = pref.carros.slice(0, pref.jogadores).map(function (c) { return { cor: D.CORES[c.cor], piloto: D.PILOTOS[c.piloto], veic: c.veic, foto: fotoDe(pref.carros.indexOf(c)) }; });
@@ -250,10 +254,43 @@
     tela('jogo'); redimensionar();
     $('pausa').hidden = true; pausado = false; ponteiros = {}; pularPend = [false, false];
     lerBordas(); telaCheia(true);
+    ligarMaos();
     Som.proxima(); Som.musica(true);
     if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request('screen').then(function (l) { trava = l; }).catch(function () { /* sem trava de tela: segue normal */ });
     if (!rodando) { rodando = true; ultimo = performance.now(); requestAnimationFrame(quadro); }
   }
+  // ---------- volante no ar (mãos na câmera) ----------
+  var MA = window.VruuumMaos, ctrlMaos = [], maosLigadas = false;
+  function ligarMaos() {
+    if (pref.controle !== 'maos' || !MA) { pararMaos(); return; }
+    ctrlMaos = [MA.criar(), MA.criar()];
+    $('camMaos').hidden = false; $('maosAviso').textContent = t('Ligando a câmera…', 'Starting the camera…');
+    if (maosLigadas) return;
+    MA.iniciar($('videoMaos'), function (maos, agora) {
+      var partes = MA.separar(maos, estado ? estado.jogadores.length : 1);
+      partes.forEach(function (m, k) { if (ctrlMaos[k]) ctrlMaos[k].ler(m, agora); });
+      desenharCamMaos(maos);
+    }).then(function () { maosLigadas = true; $('maosAviso').textContent = ''; })
+      .catch(function () { $('maosAviso').textContent = t('Sem câmera: use a tela ou o celular.', 'No camera: use the screen or the phone.'); setTimeout(function () { $('camMaos').hidden = true; }, 4000); });
+  }
+  function pararMaos() { if (MA) MA.parar(); maosLigadas = false; $('camMaos').hidden = true; }
+  // janelinha: a imagem espelhada, as mãos marcadas e o volante girando
+  function desenharCamMaos(maos) {
+    var cv = $('maosTela'), c = cv.getContext('2d'), v = $('videoMaos'), W = cv.width, H = cv.height;
+    c.save(); c.translate(W, 0); c.scale(-1, 1); try { c.drawImage(v, 0, 0, W, H); } catch (e) { /* sem quadro ainda */ } c.restore();
+    c.fillStyle = 'rgba(5,3,20,.35)'; c.fillRect(0, 0, W, H);
+    if (estado && estado.jogadores.length === 2) { c.fillStyle = 'rgba(255,255,255,.3)'; c.fillRect(W / 2 - 1, 0, 2, H); }
+    maos.forEach(function (m) { c.fillStyle = '#c6ff3d'; c.beginPath(); c.arc(m.x * W, m.y * H, 9, 0, Math.PI * 2); c.fill(); c.strokeStyle = '#1a1446'; c.lineWidth = 2; c.stroke(); });
+    (estado ? estado.jogadores : []).forEach(function (j, k) {
+      var cm = ctrlMaos[k]; if (!cm) return;
+      var cx = estado.jogadores.length === 2 ? (k ? W * 0.75 : W * 0.25) : W / 2, cy = H - 26, r = 20;
+      c.save(); c.translate(cx, cy); c.rotate(cm.direcao() * 0.9);
+      c.strokeStyle = '#2bf4ff'; c.lineWidth = 4; c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.stroke();
+      c.beginPath(); c.moveTo(-r, 0); c.lineTo(r, 0); c.moveTo(0, 0); c.lineTo(0, r); c.stroke(); c.restore();
+      if (cm.maos() === 0) { c.fillStyle = '#fff'; c.font = '700 13px Fredoka, sans-serif'; c.textAlign = 'center'; c.fillText(t('mostre as mãos 🙌', 'show your hands 🙌'), cx, 22); }
+    });
+  }
+
   function soltarTrava() { if (trava) { trava.release().catch(function () {}); trava = null; } }
 
   function quadro(agora) {
@@ -296,7 +333,7 @@
     if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request('screen').then(function (l) { trava = l; }).catch(function () {});
   }
   function irMenu() {
-    rodando = false; pausado = false; Som.motor([]); Som.musica(true); soltarTrava(); telaCheia(false);
+    rodando = false; pausado = false; Som.motor([]); Som.musica(true); soltarTrava(); telaCheia(false); pararMaos();
     tela('menu'); montarMenu(); focarPrimeiro();
   }
   $('btPausa').addEventListener('click', pausar);
@@ -342,30 +379,31 @@
 
   function tempoTxt(s) { var m = Math.floor(s / 60), r = Math.floor(s % 60); return m + ':' + (r < 10 ? '0' : '') + r; }
   function acabar() {
-    rodando = false; Som.motor([]); soltarTrava(); destravarTela();
+    rodando = false; Som.motor([]); soltarTrava(); destravarTela(); pararMaos();
     var total = 0;
     estado.pista.segs.forEach(function (s) { s.coisas.forEach(function (c) { if (c.tipo === 'estrela') total++; }); });
-    var js = estado.jogadores, melhor = Math.max.apply(null, js.map(function (j) { return j.estrelas; }));
-    var empate = js.length === 2 && js[0].estrelas === js[1].estrelas;
+    var js = estado.jogadores, melhor = Math.max.apply(null, js.map(function (j) { return j.pontos || 0; }));
+    var empate = js.length === 2 && js[0].pontos === js[1].pontos;
     var caixa = $('resultado'); caixa.innerHTML = '';
     js.forEach(function (j) {
       var p = total ? j.estrelas / total : 0;
       var medalha = p >= 0.4 ? t('🥇 Ouro', '🥇 Gold') : p >= 0.2 ? t('🥈 Prata', '🥈 Silver') : t('🥉 Bronze', '🥉 Bronze');
-      var div = document.createElement('div'); div.className = 'cartao' + (js.length === 2 && j.estrelas === melhor ? ' vencedor' : '');
+      var div = document.createElement('div'); div.className = 'cartao' + (js.length === 2 && j.pontos === melhor ? ' vencedor' : '');
       var linhas = [
         ['quem', jogs[j.n].piloto + (js.length === 2 ? ' ' + t('Jogador ', 'Player ') + (j.n + 1) : '')],
-        ['estrelas', '⭐ ' + j.estrelas],
+        ['estrelas', D.milhar(j.pontos || 0) + ' ' + t('pontos', 'points')],
+        ['tempo', '⭐ ' + j.estrelas + ' · ' + t('batidas ', 'crashes ') + j.batidas],
         ['medalha', medalha],
         ['tempo', '⏱ ' + tempoTxt(j.tempo)]
       ];
-      if (js.length === 2) linhas.push(['medalha', empate ? t('🤝 Empate!', '🤝 Tie!') : j.estrelas === melhor ? t('🏆 Mais estrelas!', '🏆 Most stars!') : t('👏 Muito bem!', '👏 Well done!')]);
+      if (js.length === 2) linhas.push(['medalha', empate ? t('🤝 Empate!', '🤝 Tie!') : j.pontos === melhor ? t('🏆 Mais pontos!', '🏆 Most points!') : t('👏 Muito bem!', '👏 Well done!')]);
       linhas.forEach(function (l) { var el = document.createElement('div'); el.className = l[0]; el.textContent = l[1]; div.appendChild(el); });
       caixa.appendChild(div);
     });
-    var chave = 'vruuum.recorde.' + estado.pista.nivel, antes = ler(chave, 0);
+    var chave = 'vruuum.recordePts.' + estado.pista.nivel, antes = ler(chave, 0);
     $('novoRecorde').hidden = !(melhor > antes);
     if (melhor > antes) gravar(chave, melhor);
-    $('recordeFim').textContent = Math.max(antes, melhor);
+    $('recordeFim').textContent = D.milhar(Math.max(antes, melhor));
     Som.musica(true);
     tela('fim'); traduzir(); focarPrimeiro();
   }
@@ -485,7 +523,7 @@
       ent[1].dir = (teclas.esq ? -1 : 0) + (teclas.dir ? 1 : 0); ent[1].freio = !!teclas.baixo;
     }
     for (var id in ponteiros) { var p = ponteiros[id]; if (p.j < n) ent[p.j].dir += p.dir; }
-    var usaMov = movLigado && n === 1 && estado.fase === 'corrida';
+    var usaMov = movLigado && n === 1 && estado.fase === 'corrida' && pref.controle !== 'maos';
     if (usaMov) ent[0].dir += mov.direcao();
     var pads = navigator.getGamepads ? navigator.getGamepads() : [];
     for (k = 0; k < Math.min(2, pads.length); k++) {
@@ -503,6 +541,12 @@
     }
     for (k = 0; k < n; k++) { ent[k].dir = Math.max(-1, Math.min(1, ent[k].dir)); ent[k].pular = pularPend[k]; pularPend[k] = false; }
     if (usaMov && mov.pulou()) ent[0].pular = true;
+    if (maosLigadas && estado.fase === 'corrida') for (k = 0; k < n; k++) {
+      var cm = ctrlMaos[k]; if (!cm) continue;
+      ent[k].dir = Math.max(-1, Math.min(1, ent[k].dir + cm.direcao()));
+      if (cm.freio()) ent[k].freio = true;
+      if (cm.pulou()) ent[k].pular = true;
+    }
     return ent;
   }
 
