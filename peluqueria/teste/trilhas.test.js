@@ -122,30 +122,31 @@ test('virada a cada 4 compassos e subida de tom no último refrão', () => {
   }
 });
 
-/* abertura especial (pedido do dono, 0.2.1): rock elétrico rápido, guitarra de semicolcheias com nota pedal */
+/* abertura nova (pedido do dono, 0.4.0: "cadê a música na introdução? tem que ser a melhor delas, uma nova") */
 const A = M.ABERTURA;
 const abSecao = nome => { let n = 0; for (const [s, q] of M.ESTRUTURA_ABERTURA) { if (s === nome) return n; n += q; } };
-test('abertura: rápida, com riff de guitarra em todas as semicolcheias', () => {
+test('abertura começa já com energia: bumbo, chiado subindo e virada no primeiro compasso', () => {
   assert.ok(A && A.bpm >= 132, 'bpm');
-  const g = M.abertura(abSecao('riff')).eventos.filter(e => e.tipo === 'guitarra');
-  assert.equal(new Set(g.map(e => e.t)).size, 16);
+  const t0 = new Set(M.abertura(0).eventos.map(e => e.tipo));
+  for (const k of ['bumbo', 'riser', 'caixa']) assert.ok(t0.has(k), 'compasso 1 sem ' + k);
 });
-test('abertura: riff com várias notas diferentes e na escala', () => {
-  const notas = new Set(), esc = M.escala(A);
-  for (let c = 0; c < M.compassosAbertura(); c++) { const p = M.abertura(c); for (const e of p.eventos) if (e.tipo === 'guitarra' || e.tipo === 'lead') { assert.ok(esc.includes(((e.nota - p.tom) % 12 + 12) % 12), 'fora da escala ' + e.nota); notas.add(e.nota); } }
-  assert.ok(notas.size >= 10, 'só ' + notas.size + ' notas');
-  const r = abSecao('riff'), barras = [0, 1, 2, 3].map(k => M.abertura(r + k).eventos.filter(e => e.tipo === 'guitarra').map(e => e.nota).join(','));
-  assert.equal(new Set(barras).size, 4, 'os 4 compassos do riff são iguais');
+test('abertura: refrão cheio com melodia composta, guitarra, acordes, baixo e crash', () => {
+  const r = abSecao('refrao'), tipos = new Set(M.abertura(r).eventos.map(e => e.tipo));
+  for (const k of ['bumbo', 'caixa', 'crash', 'guitarra', 'acorde', 'lead', 'baixo', 'palma']) assert.ok(tipos.has(k), 'refrão sem ' + k);
+  const notas = []; for (let k = 0; k < 8; k++) M.abertura(r + k).eventos.filter(e => e.tipo === 'lead' && e.vol > 0.5).forEach(e => notas.push(e.nota));
+  assert.ok(notas.length >= 40, 'melodia curta: ' + notas.length);
+  assert.ok(new Set(notas).size >= 7, 'poucas notas diferentes: ' + new Set(notas).size);
+  let rep = 0; for (let k = 1; k < notas.length; k++) if (notas[k] === notas[k - 1]) rep++;
+  assert.ok(rep / notas.length < 0.35, 'repete demais');
 });
-test('abertura: começa só com a guitarra e explode com bateria de rock, acordes e melodia', () => {
-  const t0 = new Set(M.abertura(abSecao('riff')).eventos.map(e => e.tipo));
-  assert.ok(!t0.has('bumbo') && t0.has('riser'));
-  const tudo = new Set(M.abertura(abSecao('tudo')).eventos.map(e => e.tipo));
-  for (const k of ['bumbo', 'caixa', 'crash', 'guitarra', 'power', 'lead', 'baixo']) assert.ok(tudo.has(k), 'tudo sem ' + k);
-  assert.ok(M.abertura(abSecao('entrada') + 3).eventos.some(e => e.tipo === 'tom'), 'sem virada de tons');
+test('abertura: notas na escala do trecho e último refrão um tom acima', () => {
+  const esc = M.escala(A);
+  for (let c = 0; c < M.compassosAbertura(); c++) { const p = M.abertura(c); for (const e of p.eventos) if (e.tipo === 'guitarra' || e.tipo === 'lead' || e.tipo === 'baixo') assert.ok(esc.includes(((e.nota - p.tom) % 12 + 12) % 12), 'c' + c + ' fora da escala ' + e.nota); }
+  assert.equal(M.abertura(abSecao('refrao2')).tom, A.tom + 2);
+  assert.equal(M.abertura(abSecao('refrao')).tom, A.tom);
 });
-test('abertura toca em laço', () => {
-  assert.equal(M.proximaAbertura(M.compassosAbertura() - 1), 0);
+test('abertura em laço volta direto para o refrão (sem repetir o começo)', () => {
+  assert.equal(M.proximaAbertura(M.compassosAbertura() - 1), abSecao('refrao'));
   assert.equal(M.proximaAbertura(0), 1);
 });
 

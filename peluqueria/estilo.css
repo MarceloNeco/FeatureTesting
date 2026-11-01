@@ -11,7 +11,7 @@ button:focus-visible { outline: 3px solid var(--lima); outline-offset: 3px; }
 .tela.ativa { display: flex; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
-#inicio, #fim, #desligado { flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 16px calc(24px + env(safe-area-inset-bottom)); text-align: center; }
+#entrada, #inicio, #fim, #desligado { flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 16px calc(24px + env(safe-area-inset-bottom)); text-align: center; }
 .faixa { position: absolute; top: calc(8px + env(safe-area-inset-top)); right: 8px; display: flex; gap: 6px; }
 .mini { background: rgba(26,20,70,.85); border-radius: 12px; font-size: 1.1rem; padding: 0 10px; }
 .logo { font-size: clamp(2.6rem, 13vw, 5rem); font-weight: 700; letter-spacing: .5px; color: #fff; text-shadow: 0 0 18px var(--rosa), 0 4px 0 #8a1f5c; }
@@ -51,8 +51,8 @@ html.tv { font-size: 150%; }
 html.tv button:focus { outline: 4px solid var(--lima); outline-offset: 4px; }
 
 /* ---------- abertura com luz e movimento (v0.3.0) ---------- */
-#inicio { position: relative; overflow: hidden; isolation: isolate; }
-#inicio > :not(.luzes):not(.flutuantes):not(.faixa) { position: relative; z-index: 2; }
+#inicio, #entrada { position: relative; overflow: hidden; isolation: isolate; }
+#inicio > :not(.luzes):not(.flutuantes):not(.faixa), #entrada > :not(.luzes) { position: relative; z-index: 2; }
 #inicio > .faixa { z-index: 3; }
 .luzes, .flutuantes { position: absolute; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; }
 .luzes { z-index: 0; }
@@ -76,7 +76,7 @@ html.tv .feixe { mix-blend-mode: normal; opacity: .6; }
   .brilhos { animation: pisca 1.6s steps(2) infinite; }
   .flutuantes img { animation: flutua var(--d) linear var(--atraso) infinite; }
   .logo { animation: brilho 5s linear infinite; }
-  #inicio .grande { animation: pulsa 1.3s ease-in-out infinite; }
+  #inicio .grande, #entrada .grande { animation: pulsa 1.3s ease-in-out infinite; }
 }
 @keyframes varreA { from { transform: rotate(-38deg); } to { transform: rotate(18deg); } }
 @keyframes varreB { from { transform: rotate(-26deg); } to { transform: rotate(26deg); } }
@@ -144,3 +144,5 @@ body.marcar { overflow-y: auto; }
 .ct-camera video, .ct-camera canvas { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
 .ct-camera video { transform: scaleX(-1); }
 .tv-podio p { flex-basis: 100%; font-size: 2rem; color: var(--ouro); font-weight: 700; }
+
+.entrar { font-size: 1.5rem; padding: 18px 30px; margin-top: 10px; }

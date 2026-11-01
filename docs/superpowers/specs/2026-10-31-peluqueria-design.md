@@ -215,6 +215,11 @@ o som ligado/desligado e o "Minhas imagens". **Nenhuma imagem é salva nem expor
   acordes diferentes, acordes com sétima, refrão de 8 compassos (frase, resposta, parte nova mais aguda e
   fechamento), melodia própria no verso, arpejo, viradas de bateria e de baixo a cada 4 compassos e subida de
   um tom no último refrão; a melodia evita repetir a mesma nota em seguida.
+- **v0.4.1 (dono: "cadê a música na introdução? tem que ser a melhor delas, uma nova"):** abertura nova, 136 BPM,
+  mi menor (i–VI–III–VII): 2 compassos de "explosão" (bumbo, virada de caixa e tons, chiado subindo), refrão de 8
+  compassos com melodia composta nota a nota, ponte, subida e último refrão um tom acima com segunda voz; em laço
+  volta ao refrão. **Tela de entrada** "🎵 Toque para começar a festa!": o navegador só deixa tocar som depois de
+  um toque; esse toque solta a abertura e mostra o menu. Na TV, a música começa no primeiro botão do controle.
 - **v0.3.2 (dono: "mais sofisticadas, umas 15 no mínimo"):** 16 músicas, 6 estilos de bateria (house, disco,
   electro, funk, tropical, synthwave) e 6 timbres de melodia (saw, pluck, square, sino, flauta, metais); acordes
   encadeados (inversão perto do meio da região), segunda voz em terça no último refrão, notas fantasmas na caixa,
