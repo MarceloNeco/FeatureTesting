@@ -169,3 +169,21 @@ button:focus-visible, input:focus-visible, .carta:focus-visible { outline: 3px s
 
 @media (max-height: 430px) { .topo { padding-top: calc(3px + var(--st)); padding-bottom: 3px; } .topo .mini { min-height: 40px; min-width: 40px; font-size: 1.05rem; } .ferramenta { width: 48px; height: 48px; font-size: 1.35rem; } .cor { width: 34px; height: 34px; min-width: 34px; min-height: 34px; } .num { width: 46px; height: 46px; } .num > span { width: 34px; height: 34px; } }
 @media (prefers-reduced-motion: reduce) { .logo span { animation: none; } .painel, .janela-caixa, .aviso { animation: none; } }
+
+/* ---------- painel de adesivos (jeito teclado de emojis: categorias pequenas no alto, adesivos já à vista) ---------- */
+.topo-adesivos { position: sticky; top: -10px; z-index: 1; background: #241c5a; margin: -10px -14px 0; padding: 8px 14px 6px; display: grid; gap: 6px; box-shadow: 0 6px 10px -6px rgba(0, 0, 0, .5); }
+.abas-ad { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.abas-ad::-webkit-scrollbar { display: none; }
+.aba-ad { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 58px; padding: 4px 6px; border-radius: 14px; background: var(--card); font-size: .7rem; line-height: 1.1; border: 2px solid transparent; }
+.aba-ad .ico { font-size: 1.6rem; line-height: 1.15; }
+.aba-ad[aria-selected="true"] { background: var(--ouro); color: #3a2400; border-color: #fff; }
+.mov-ad { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; font-size: .85rem; color: var(--muted); }
+.mov-ad .mov { min-width: 40px; min-height: 40px; border-radius: 12px; background: var(--card); font-size: 1.2rem; border: 2px solid transparent; }
+.mov-ad .mov[aria-pressed="true"] { border-color: var(--ouro); background: var(--card2); }
+.sec-ad { display: grid; gap: 6px; scroll-margin-top: 110px; }
+.grade-ad { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 6px; }
+.item-ad { min-height: 56px; border-radius: 14px; background: var(--card); font-size: 2rem; display: grid; place-items: center; border: 3px solid transparent; padding: 2px; }
+.item-ad.vivo { font-size: .7rem; gap: 0; }
+.item-ad.vivo canvas { width: 100%; max-width: 72px; aspect-ratio: 1; }
+.item-ad[aria-pressed="true"] { border-color: var(--ouro); background: var(--card2); }
+.grade-ad:has(.vivo) { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
