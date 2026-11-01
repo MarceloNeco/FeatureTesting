@@ -43,6 +43,14 @@
       "pagina": "purpurina/"
     },
     {
+      "id": "rabiscolandia",
+      "nome": {
+        "pt": "Rabiscolândia (Bolinho de Chuva)",
+        "en": "Rabiscolândia (Rain Dumpling)"
+      },
+      "pagina": "rabiscolandia/"
+    },
+    {
       "id": "arch-one",
       "nome": {
         "pt": "ArchONE (mapa vivo, protótipo)",
