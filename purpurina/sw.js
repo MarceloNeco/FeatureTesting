@@ -2,7 +2,7 @@
    Código (html, js, css, json): rede primeiro com 4 s de espera, senão a cópia; fonte e imagens:
    cópia primeiro. Cache com o nome do app: só apaga caches "purpurina-" (nunca os dos outros apps
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
-var VERSAO = '0.7.0';
+var VERSAO = '0.8.0';
 var CACHE = 'purpurina-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'pecas.js', 'visual.js', 'boneca.js', 'som.js', 'app.js', 'sala.js', 'musica.js', 'tv.js', 'baixar.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 self.addEventListener('install', function (e) {

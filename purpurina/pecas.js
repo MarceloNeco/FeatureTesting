@@ -80,10 +80,10 @@
   // ---------- grupos (abas) ----------
   var GRUPOS = [
     { id: 'eu', ico: '👧', pt: 'Eu', en: 'Me' },
-    { id: 'make', ico: '💄', pt: 'Maquiagem', en: 'Makeup' },
+    { id: 'make', ico: '💄', pt: 'Maquiagem', en: 'Makeup', curto: { pt: 'Make', en: 'Makeup' } },
     { id: 'roupa', ico: '👗', pt: 'Roupas', en: 'Clothes' },
     { id: 'joias', ico: '💎', pt: 'Joias', en: 'Jewelry' },
-    { id: 'acess', ico: '👑', pt: 'Acessórios', en: 'Accessories' },
+    { id: 'acess', ico: '👑', pt: 'Acessórios', en: 'Accessories', curto: { pt: 'Enfeites', en: 'Extras' } },
     { id: 'fundo', ico: '🏞️', pt: 'Cenário', en: 'Scene' }
   ];
 
