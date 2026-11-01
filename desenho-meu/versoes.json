@@ -1,0 +1,30 @@
+{
+  "app": "desenho-meu",
+  "versoes": [
+    {
+      "versao": "0.1.0",
+      "data": "01/Nov/2026",
+      "hora": "17:30:00",
+      "pt": [
+        "Nasceu o Desenho Meu, sexta brincadeira do Bolinho de Chuva: desenhar livre, livro de colorir e pintar por números.",
+        "Pincéis: canetinha, lápis, giz de cera, pincel macio, spray, borracha e balde de tinta que respeita o contorno — e pincéis vivos que mexem sozinhos: arco-íris, neon, purpurina e minhoca dançante.",
+        "Livro de colorir com colinha 👀 (como pode ficar) e outras cores 🎨 para cada desenho; pintar por números com dica 🪄 e festa de fogos ao terminar.",
+        "Adesivos de emoji e adesivos animados (fogos, sorriso, estrela, coração, bolhas, borboleta…), com movimento à escolha, e paisagens de fundo — várias com movimento — ou uma foto sua.",
+        "Folha esperta: gire o aparelho e o menu fica no mesmo lugar; o desenho se ajusta para caber na tela inteira. Dois dedos fazem zoom; na TV e no computador, botões de zoom.",
+        "🖐 Desenhar com a mão na frente da câmera: mão aberta mira, mão fechada desenha, mão parada em cima de um botão aperta.",
+        "📺 Na TV com o celular de controle: deslizar o dedo, mexer o celular ou a mão na câmera do celular; até 4 desenhando juntos.",
+        "Música de fundo com liga e desliga, Meus desenhos guardados no aparelho, foto para salvar e compartilhar, PT e EN."
+      ],
+      "en": [
+        "Desenho Meu is born, the sixth Bolinho de Chuva game: free drawing, coloring book and paint by numbers.",
+        "Brushes: marker, pencil, crayon, soft brush, spray, eraser and a paint bucket that respects the outline — plus live brushes that move by themselves: rainbow, neon, glitter and a dancing worm.",
+        "Coloring book with a cheat sheet 👀 (how it can look) and other color sets 🎨 for each picture; paint by numbers with a hint 🪄 and fireworks when finished.",
+        "Emoji stickers and animated stickers (fireworks, smiley, star, heart, bubbles, butterfly…) with a chosen motion, and landscape backgrounds — many of them moving — or your own photo.",
+        "Smart sheet: turn the device and the menu stays in place; the drawing adjusts to fill the whole screen. Two fingers zoom; on the TV and computer, zoom buttons.",
+        "🖐 Draw with your hand in front of the camera: open hand aims, closed hand draws, holding still over a button presses it.",
+        "📺 On the TV with the phone as remote: slide a finger, move the phone or your hand in the phone camera; up to 4 drawing together.",
+        "Background music with on/off, My drawings kept on the device, photo to save and share, PT and EN."
+      ]
+    }
+  ]
+}

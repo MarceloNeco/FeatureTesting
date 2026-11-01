@@ -43,6 +43,14 @@
       "pagina": "purpurina/"
     },
     {
+      "id": "desenho-meu",
+      "nome": {
+        "pt": "Desenho Meu (Bolinho de Chuva)",
+        "en": "Desenho Meu (Rain Dumpling)"
+      },
+      "pagina": "desenho-meu/"
+    },
+    {
       "id": "arch-one",
       "nome": {
         "pt": "ArchONE (mapa vivo, protótipo)",

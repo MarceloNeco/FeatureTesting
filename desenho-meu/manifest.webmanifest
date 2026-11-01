@@ -1,0 +1,16 @@
+{
+  "name": "Desenho Meu — Bolinho de Chuva",
+  "short_name": "Desenho Meu",
+  "description": "Desenhar, colorir e pintar por números, com pincéis vivos, adesivos animados, música e a mão na câmera. / Draw, color and paint by numbers with live brushes, animated stickers, music and your hand in the camera.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1b1446",
+  "theme_color": "#1b1446",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
