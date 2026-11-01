@@ -1,8 +1,8 @@
-/* Vruuum! — telas, menu, controles (toque, teclado, controle da TV, videogame, inclinar o celular)
+/* Vruuum! — telas, menu, controles (toque, teclado, controle da TV, videogame, acelerômetro do celular)
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.2.0';
+  var APP_VERSION = '0.3.1';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -15,7 +15,6 @@
   var pref = ler('vruuum.pref', null) || {};
   if (pref.jogadores !== 2) pref.jogadores = 1;
   if (NIVEIS.indexOf(pref.nivel) < 0) pref.nivel = 'crianca';
-  if (pref.volante !== 'inclinar') pref.volante = 'toque';
   if (pref.lingua !== 'en' && pref.lingua !== 'pt') pref.lingua = (navigator.language || 'pt').slice(0, 2) === 'pt' ? 'pt' : 'en';
   if (!pref.carros || pref.carros.length !== 2) pref.carros = [{ cor: 0, piloto: 0 }, { cor: 2, piloto: 1 }];
   function salvar() { gravar('vruuum.pref', pref); }
@@ -68,7 +67,6 @@
   function marcar() {
     Array.prototype.forEach.call(document.querySelectorAll('[data-jogadores]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-jogadores') === pref.jogadores)); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-nivel]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-nivel') === pref.nivel)); });
-    Array.prototype.forEach.call(document.querySelectorAll('[data-volante]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-volante') === pref.volante)); });
     Array.prototype.forEach.call(document.querySelectorAll('.piloto'), function (card) {
       var j = +card.getAttribute('data-j'), c = pref.carros[j];
       card.hidden = j >= pref.jogadores;
@@ -77,7 +75,6 @@
       Array.prototype.forEach.call(card.querySelectorAll('[data-piloto]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-piloto') === c.piloto)); });
       if (!card.hidden) D.previa(card.querySelector('.previa'), D.CORES[c.cor], D.PILOTOS[c.piloto]);
     });
-    $('grupoVolante').hidden = !(TOQUE && pref.jogadores === 1 && 'DeviceOrientationEvent' in window);
     $('recordeMenu').textContent = ler('vruuum.recorde.' + pref.nivel, 0);
   }
   function opcao(atributo, fn) {
@@ -87,7 +84,6 @@
   }
   opcao('data-jogadores', function (v) { pref.jogadores = +v; });
   opcao('data-nivel', function (v) { pref.nivel = v; });
-  opcao('data-volante', function (v) { pref.volante = v; });
   $('btLingua').addEventListener('click', function () { pref.lingua = pref.lingua === 'en' ? 'pt' : 'en'; salvar(); traduzir(); marcar(); });
   $('btSom').addEventListener('click', function () { Som.iniciar(); var lig = Som.alternar(); $('btSom').textContent = lig ? '🔊' : '🔇'; });
   $('btAjuda').addEventListener('click', function () { var a = $('ajuda'); a.hidden = !a.hidden; $('btAjuda').setAttribute('aria-expanded', String(!a.hidden)); });
@@ -119,7 +115,8 @@
 
   function iniciarCorrida() {
     Som.iniciar();
-    if (pref.volante === 'inclinar' && pref.jogadores === 1) ligarInclinar();
+    if (TOQUE && pref.jogadores === 1) ligarMovimento();
+    mov.zerar(); mov.calibrar();
     estado = M.novaCorrida(pref.nivel, (Date.now() % 1000000007) | 0, pref.jogadores);
     jogs = pref.carros.slice(0, pref.jogadores).map(function (c) { return { cor: D.CORES[c.cor], piloto: D.PILOTOS[c.piloto] }; });
     D.preparar(estado, jogs, pref.lingua);
@@ -150,6 +147,7 @@
 
   var SONS = { estrela: 1, cone: 1, batida: 1, lama: 1, turbo: 1, pulo: 1, perdeu: 1, tum: 1, bip: 1, vai: 1, mundo: 1, chegou: 1 };
   function tratar(ev) {
+    if (ev.tipo === 'vai') mov.fimCalibrar();   // no 3-2-1 só descobre o sinal do sensor; o meio é o reto de verdade
     if (ev.tipo === 'estrela' && ev.ar) Som.tocar('estrelaAr');
     else if (SONS[ev.tipo]) Som.tocar(ev.tipo);
     if (ev.tipo === 'batida' && navigator.vibrate) try { navigator.vibrate(90); } catch (e) { /* sem vibrar */ }
@@ -234,7 +232,7 @@
   // ---------- controles ----------
   var pularPend = [false, false];
   function pular(j) { if (estado && j < estado.jogadores.length && !pausado) pularPend[j] = true; }
-  var teclas = {}, ponteiros = {}, inclinacao = 0, inclinarLigado = false, botoesAntes = [{}, {}];
+  var teclas = {}, ponteiros = {}, botoesAntes = [{}, {}];
   function nomeTecla(e) {
     var k = e.key || '', c = e.keyCode || e.which || 0;
     if (k === 'ArrowLeft' || k === 'Left' || c === 37) return 'esq';
@@ -318,20 +316,20 @@
   }
   cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
-  // inclinar o celular como volante
-  function aoInclinar(e) {
-    var ang = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : (window.orientation || 0), g;
-    if (ang === 90) g = e.beta; else if (ang === -90 || ang === 270) g = -e.beta; else if (ang === 180) g = -e.gamma; else g = e.gamma;
-    g = g || 0;
-    var morta = 4;
-    inclinacao = Math.abs(g) < morta ? 0 : Math.max(-1, Math.min(1, (g - (g > 0 ? morta : -morta)) / 22));
+  // acelerômetro: inclinar o celular vira, toquinho para cima pula (1 jogador, celular/tablet)
+  var mov = window.VruuumMovimento.criar(), movLigado = false;
+  function aoMover(e) {
+    var ang = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : (window.orientation || 0);
+    mov.ler(e.accelerationIncludingGravity, e.acceleration, ang, Date.now());
   }
-  function ligarInclinar() {
-    if (inclinarLigado) return;
-    var ligar = function () { inclinarLigado = true; window.addEventListener('deviceorientation', aoInclinar); };
-    if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      DeviceOrientationEvent.requestPermission().then(function (r) { if (r === 'granted') ligar(); }).catch(function () { /* sem permissão: fica no toque */ });
-    } else ligar();
+  function ligarMovimento() {
+    if (movLigado || !('DeviceMotionEvent' in window)) return;
+    // escuta sempre; sem permissão os eventos só não chegam (e o toque continua valendo)
+    movLigado = true; window.addEventListener('devicemotion', aoMover);
+    // iPhone e Chrome novo pedem permissão (precisa vir do toque em "Correr")
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      try { var p = DeviceMotionEvent.requestPermission(); if (p && p.catch) p.catch(function () { /* sem permissão: fica no toque */ }); } catch (e) { /* idem */ }
+    }
   }
 
   function lerEntradas() {
@@ -345,7 +343,8 @@
       ent[1].dir = (teclas.esq ? -1 : 0) + (teclas.dir ? 1 : 0); ent[1].freio = !!teclas.baixo;
     }
     for (var id in ponteiros) { var p = ponteiros[id]; if (p.j < n) ent[p.j].dir += p.dir; }
-    if (inclinarLigado && pref.volante === 'inclinar' && n === 1) ent[0].dir += inclinacao;
+    var usaMov = movLigado && n === 1 && estado.fase === 'corrida';
+    if (usaMov) ent[0].dir += mov.direcao();
     var pads = navigator.getGamepads ? navigator.getGamepads() : [];
     for (k = 0; k < Math.min(2, pads.length); k++) {
       var gp = pads[k]; if (!gp) continue;
@@ -361,26 +360,34 @@
       botoesAntes[k] = { pul: pul, buz: buz, pausa: pausa };
     }
     for (k = 0; k < n; k++) { ent[k].dir = Math.max(-1, Math.min(1, ent[k].dir)); ent[k].pular = pularPend[k]; pularPend[k] = false; }
+    if (usaMov && mov.pulou()) ent[0].pular = true;
     return ent;
   }
 
-  // ---------- guardar no celular: instalar (atalho) ou baixar o arquivo do jogo ----------
+  // ---------- guardar no celular: UM botão só ----------
+  // Se o navegador deixa instalar, instala (vira ícone na tela, abre sem internet). Senão, baixa o
+  // arquivo vruuum.html com o jogo inteiro dentro (abre direto do celular, sem internet).
   var pedidoInstalar = null;
-  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); pedidoInstalar = e; $('btInstalar').hidden = false; });
-  $('btInstalar').addEventListener('click', function () {
-    if (!pedidoInstalar) return;
-    pedidoInstalar.prompt();
-    pedidoInstalar.userChoice.then(function () { pedidoInstalar = null; $('btInstalar').hidden = true; }).catch(function () {});
-  });
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); pedidoInstalar = e; });
   var EM_ARQUIVO = !!window.JOGO_EM_ARQUIVO || location.protocol === 'file:' || location.protocol === 'content:';
-  if (EM_ARQUIVO || !window.BaixarJogo) $('guardar').hidden = true;
-  $('btBaixar').addEventListener('click', function () {
-    var aviso = $('baixarAviso');
+  var INSTALADO = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  if (EM_ARQUIVO || INSTALADO || !window.BaixarJogo) $('guardar').hidden = true;
+  window.addEventListener('appinstalled', function () { $('guardar').hidden = true; });
+  $('btGuardar').addEventListener('click', function () {
+    var aviso = $('guardarAviso');
+    if (pedidoInstalar) {
+      var p = pedidoInstalar; pedidoInstalar = null;
+      p.prompt();
+      p.userChoice.then(function (r) {
+        aviso.textContent = r && r.outcome === 'accepted' ? t('Pronto! O Vruuum! ficou na tela do celular, com ícone. Abre até sem internet.', 'Done! Vruuum! is on your home screen. It opens even offline.') : t('Tudo bem. Se mudar de ideia, toque de novo: aí baixa o arquivo do jogo.', 'No problem. Tap again to download the game file instead.');
+      }).catch(function () {});
+      return;
+    }
     aviso.textContent = t('Preparando o arquivo…', 'Preparing the file…');
     BaixarJogo.baixar('vruuum.html').then(function () {
       aviso.textContent = t('Pronto! O arquivo vruuum.html foi para os Downloads. Toque nele para jogar, mesmo sem internet.', 'Done! vruuum.html went to Downloads. Tap it to play, even offline.');
     }).catch(function () {
-      aviso.textContent = t('Não deu para baixar agora. Abra o jogo com internet e tente de novo.', "Couldn't download now. Open the game online and try again.");
+      aviso.textContent = t('Não deu agora. Abra o jogo com internet e tente de novo.', "Couldn't do it now. Open the game online and try again.");
     });
   });
 

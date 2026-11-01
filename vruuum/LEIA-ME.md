@@ -35,7 +35,7 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 | Onde | Como |
 |---|---|
 | Celular / tablet | segurar o **lado esquerdo ou direito** da tela para virar; **⬆ PULAR** é o botão redondo acima da seta da direita (ou deslizar o dedo para cima). Com 2 jogadores, cada um usa o **seu pedaço** da tela (lado a lado com o aparelho deitado, um em cima do outro em pé). A corrida abre em **tela cheia**, e placar e botões ficam longe do recorte da câmera e dos cantos. |
-| Celular inclinado | no menu (1 jogador), **📱 Inclinar o celular**: o celular vira volante. No iPhone ele pede permissão. |
+| Celular como volante (acelerômetro) | sempre ligado com 1 jogador no celular/tablet: **inclinar** para um lado vira o carro; um **toquinho do celular para cima** faz pular. Vale deitado ou em pé, segurando como volante ou mais deitado no colo. O meio é o **reto de verdade** (celular retinho = carro reto), com folga de uns 5° para a mão tremendo; até a 0.3.0 o meio era o jeito de segurar no 3‑2‑1, e isso fazia o carro puxar para um lado. Funciona junto com o toque. No iPhone, ele pede permissão ao tocar em Correr. Com 2 jogadores no mesmo aparelho fica desligado (o celular é de todo mundo). |
 | Teclado | 1 jogador: setas ou A/D para virar, ⬆ / W / espaço para pular. 2 jogadores: jogador 1 = **A, D e W**, jogador 2 = **setas e ⬆**. H = buzina, para baixo / S = freio, Esc ou P = pausa. |
 | Controle da TV | setas viram, **OK** pula, **Voltar** pausa. No menu, as setas andam entre os botões. |
 | Controle de videogame | alavanca ou setas viram; A pula; X buzina; B freia; Start pausa. Dois controles = dois jogadores. |
@@ -51,11 +51,10 @@ apagada) ou no 🔊 do menu. O navegador só deixa tocar depois do primeiro toqu
 
 - Depois da primeira abertura com internet, o jogo funciona **sem internet** no mesmo endereço (o `sw.js` guarda a
   pasta toda no aparelho).
-- **📲 Instalar no celular** (no menu, quando o navegador oferece) ou, no Chrome, ⋮ → **Adicionar à tela inicial**:
-  vira um ícone na tela do celular.
-- **📥 Baixar o jogo (arquivo)** (no menu): baixa o `vruuum.html` com o jogo inteiro dentro (uns 190 KB). Ele vai
-  para a pasta **Downloads**; tocando nele, abre no navegador e joga sem internet e sem login. Quem monta o
-  arquivo é o `baixar.js`, aqui no aparelho, a partir dos arquivos do próprio jogo (sempre a versão atual).
+- **📲 Guardar no celular** (um botão só, no menu): se o navegador deixa instalar, instala com ícone na tela do
+  celular; se não deixa (ou a pessoa recusou), baixa o `vruuum.html` com o jogo inteiro dentro (uns 200 KB), que
+  vai para **Downloads** e abre direto, sem internet e sem login. O botão some quando o jogo já está instalado ou
+  aberto pelo arquivo. Quem monta o arquivo é o `baixar.js`, aqui no aparelho, sempre na versão atual.
 
 ## Mapa dos arquivos
 
@@ -69,6 +68,7 @@ apagada) ou no 🔊 do menu. O navegador só deixa tocar depois do primeiro toqu
 | `desenho.js` | a estrada em 3D (pseudo-3D por pedaços), céu, fundo, enfeites, carros, efeitos, placar e tela dividida. |
 | `som.js` | música, motor, buzina e efeitos sintetizados (WebAudio). |
 | `app.js` | menu, controles, tela cheia, bordas seguras, laço da corrida, pausa, resultado, recorde, instalar e baixar. `APP_VERSION` aqui. |
+| `movimento.js` | **puro**: acelerômetro → direção do volante e pulo pelo toquinho (com calibração no 3‑2‑1), testado no Node. |
 | `baixar.js` | monta o `vruuum.html` de arquivo único (genérico: serve para outro jogo do Bolinho de Chuva; scripts com `data-fora-do-arquivo` ficam de fora). |
 | `sw.js` | cache `vruuum-v…` para funcionar sem internet. `VERSAO` aqui. |
 | `versoes.json` | novidades de cada versão (PT e EN). |

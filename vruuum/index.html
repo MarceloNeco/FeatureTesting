@@ -17,7 +17,7 @@
   Corrida de carrinho em 3D: desviar do trânsito, dos cones e da lama, pegar estrelas, turbo de
   arco-íris e rampas, passando por 4 mundos (praia, floresta, doces, neve, cidade neon).
   1 jogador ou 2 na mesma tela (dividida). Toque, teclado, controle de videogame, controle da TV
-  ou inclinar o celular. Sem login, sem banco, sem cookie: só arquivos estáticos (cache no aparelho
+  ou o acelerômetro do celular. Sem login, sem banco, sem cookie: só arquivos estáticos (cache no aparelho
   pelo sw.js). Nenhum script inline: a CSP acima não permite. Mapa dos arquivos: LEIA-ME.md.
   Versão: APP_VERSION em app.js, VERSAO em sw.js e versoes.json.
 -->
@@ -42,7 +42,8 @@
 
   <div id="ajuda" class="ajuda" hidden>
     <p data-t="O carro acelera sozinho. Você vira para a esquerda e para a direita e aperta ⬆ PULAR para passar por cima dos cones, da lama e dos carrinhos. Pegue as ⭐ estrelas, passe pelo 🌈 arco-íris para ganhar TURBO e suba na rampa para um pulão até as estrelas do ar. Ninguém perde: bater só deixa o carro mais lento e derruba umas estrelas.|The car speeds up by itself. Steer left and right and press ⬆ JUMP to hop over cones, mud and cars. Grab the ⭐ stars, drive through the 🌈 rainbow for TURBO and hit the ramp for a big jump to the stars in the air. Nobody loses: crashing only slows you down and drops a few stars."></p>
-    <p data-t="👆 Celular ou tablet (deitado ou em pé): segure o lado esquerdo ou direito da tela para virar; toque no botão ⬆ ou deslize o dedo para cima para pular. Com 2 jogadores, cada um no seu pedaço da tela. 📱 Ou incline o celular como um volante.|👆 Phone or tablet (sideways or upright): hold the left or right side of the screen to steer; tap the ⬆ button or swipe up to jump. With 2 players, each one on their own half. 📱 Or tilt the phone like a steering wheel."></p>
+    <p data-t="👆 Celular ou tablet (deitado ou em pé): segure o lado esquerdo ou direito da tela para virar; toque no botão ⬆ ou deslize o dedo para cima para pular. Com 2 jogadores, cada um no seu pedaço da tela.|👆 Phone or tablet (sideways or upright): hold the left or right side of the screen to steer; tap the ⬆ button or swipe up to jump. With 2 players, each one on their own half."></p>
+    <p data-t="📱 Com 1 jogador, o celular também é volante: incline para um lado e o carro vira; dê um toquinho com o celular para cima e o carro pula. Celular retinho = carro reto.|📱 With 1 player, the phone is also a steering wheel: tilt it and the car turns; give the phone a little flick up and the car jumps. Phone level = car straight."></p>
     <p data-t="⌨️ Teclado: setas para virar e ⬆ (ou espaço) para pular; com 2 jogadores, jogador 1 usa A, D e W, jogador 2 as setas. H = buzina, para baixo = freio. 📺 Controle da TV: setas para virar, OK para pular. 🎮 Controle de videogame: A pula, X buzina.|⌨️ Keyboard: arrows to steer and ⬆ (or space) to jump; with 2 players, player 1 uses A, D and W, player 2 the arrows. H = horn, down = brake. 📺 TV remote: arrows to steer, OK to jump. 🎮 Game controller: A jumps, X honks."></p>
   </div>
 
@@ -78,20 +79,11 @@
     </div>
   </div>
 
-  <div id="grupoVolante" class="grupo" hidden>
-    <p class="rotulo" data-t="Como dirigir no celular|How to steer on the phone"></p>
-    <div class="opcoes" role="group">
-      <button class="opcao" type="button" data-volante="toque" data-t="👆 Tocar nos lados|👆 Tap the sides"></button>
-      <button class="opcao" type="button" data-volante="inclinar" data-t="📱 Inclinar o celular|📱 Tilt the phone"></button>
-    </div>
-  </div>
-
   <button id="btCorrer" class="grande" type="button" data-t="🏁 Correr!|🏁 Race!"></button>
   <p class="recorde-menu"><span data-t="Recorde de estrelas neste nível|Star record on this level"></span>: <b id="recordeMenu">0</b></p>
   <div id="guardar" class="guardar">
-    <button id="btInstalar" class="medio" type="button" hidden data-t="📲 Instalar no celular|📲 Install on the phone"></button>
-    <button id="btBaixar" class="medio" type="button" data-t="📥 Baixar o jogo (arquivo)|📥 Download the game (file)"></button>
-    <p id="baixarAviso" class="dica" aria-live="polite" data-t="Funciona sem internet e sem login. O arquivo baixado abre direto no celular.|Works offline, no login. The downloaded file opens right on the phone."></p>
+    <button id="btGuardar" class="medio" type="button" data-t="📲 Guardar no celular|📲 Save on the phone"></button>
+    <p id="guardarAviso" class="dica" aria-live="polite" data-t="Para jogar sem internet, com ícone na tela. Sem login.|To play offline, with an icon on the home screen. No login."></p>
   </div>
   <p class="rodape"><span id="ver"></span> · SolverONE · <a href="https://solverone.com.br/bolinho-de-chuva/" data-t="🍩 Mais brincadeiras|🍩 More games"></a></p>
 </section>
@@ -128,6 +120,7 @@
 <script src="sprites.js"></script>
 <script src="desenho.js"></script>
 <script src="som.js"></script>
+<script src="movimento.js"></script>
 <script src="baixar.js"></script>
 <script src="../recursos.js" data-app="feature-tester" data-fora-do-arquivo></script>
 <script src="app.js"></script>
