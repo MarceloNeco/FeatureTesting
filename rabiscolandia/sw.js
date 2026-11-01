@@ -4,7 +4,7 @@
    Músicas gravadas (musicas/*.mp3): o service worker não mexe (o navegador busca direto).
    Cache com o nome do app: só apaga caches "rabiscolandia-" (nunca os dos outros apps da mesma origem).
    Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
-var VERSAO = '0.1.5';
+var VERSAO = '0.1.6';
 var CACHE = 'rabiscolandia-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'folha.js', 'paginas.js', 'fundos.js', 'adesivos.js', 'som.js', 'pintura.js', 'mao.js', 'app.js', 'sala.js', 'tv.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 self.addEventListener('install', function (e) {

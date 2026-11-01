@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.6.3', APP_UPDATED = '01/11/2026';
+  var APP_VERSION = '0.6.4', APP_UPDATED = '01/11/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -324,4 +324,15 @@
       novaRodada: function (nivel) { pref.nivel = nivel; jogar(); this.passo(3 * CONTAGEM * 1000 + 50); }
     };
   } else requestAnimationFrame(quadro);
+})();
+
+/* Botão "📲 Instalar" do Bolinho de Chuva: o cartão abre o jogo com ?instalar=1 e só então carrega a barra
+   "Instalar o aplicativo" (bolinho-de-chuva/instalar.js, do Portal, mesmo endereço). Quem só quer jogar não baixa nada a mais. */
+(function () {
+  if (!/[?&]instalar\b/.test(location.search) || location.protocol === 'file:') return;
+  var s = document.createElement('script');
+  s.src = '/bolinho-de-chuva/instalar.js';
+  s.setAttribute('data-nome', 'Peluqueria'); s.setAttribute('data-icone', 'icone-192.png');
+  s.setAttribute('data-so-com', 'instalar'); s.setAttribute('data-flutuante', ''); s.setAttribute('data-sw', 'nao');
+  document.body.appendChild(s);
 })();

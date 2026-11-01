@@ -4,7 +4,7 @@
    (banco "rabiscolandia"). Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.5';
+  var APP_VERSION = '0.1.6';
   var $ = function (id) { return document.getElementById(id); };
   var F = window.DesenhoFolha, P = window.DesenhoPaginas || { LISTA: [], CATEGORIAS: [] }, Pt = window.DesenhoPintura;
   var Som = window.DesenhoSom || { iniciar: function () {}, musica: function () {}, musicaLigada: function () { return false; }, efeito: function () {}, efeitos: function () {}, efeitosLigados: function () { return false; }, proxima: function () {}, nomeAtual: function () { return ''; } };
@@ -680,4 +680,15 @@
     motor: function () { criarMotor(); return motor; }, abrirLivre: abrirLivre, abrirPagina: abrirPagina, montarBarra: montarBarra, atual: function () { return atual; },
     CORES: CORES, PINCEIS_LIVRES: PINCEIS_LIVRES, iconeBorracha: iconeBorracha, TV: TV, tipoAparelho: tipoAparelho, versao: APP_VERSION
   };
+})();
+
+/* Botão "📲 Instalar" do Bolinho de Chuva: o cartão abre o jogo com ?instalar=1 e só então carrega a barra
+   "Instalar o aplicativo" (bolinho-de-chuva/instalar.js, do Portal, mesmo endereço). Quem só quer jogar não baixa nada a mais. */
+(function () {
+  if (!/[?&]instalar\b/.test(location.search) || location.protocol === 'file:') return;
+  var s = document.createElement('script');
+  s.src = '/bolinho-de-chuva/instalar.js';
+  s.setAttribute('data-nome', 'Rabiscolândia'); s.setAttribute('data-icone', 'icone-192.png');
+  s.setAttribute('data-so-com', 'instalar'); s.setAttribute('data-flutuante', ''); s.setAttribute('data-sw', 'nao');
+  document.body.appendChild(s);
 })();

@@ -2,6 +2,17 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.10.4",
+      "data": "01/Nov/2026",
+      "hora": "23:30:00",
+      "pt": [
+        "Botão 📲 Instalar no cartão do jogo no Bolinho de Chuva: abre o jogo com a barra \"Instalar o aplicativo\", para ele ganhar ícone próprio no celular e abrir sem internet (sem internet não dá para ligar na TV)."
+      ],
+      "en": [
+        "📲 Install button on the game's card in Bolinho de Chuva: opens the game with the \"Install app\" bar, so it gets its own icon on the phone and opens offline (no TV without internet)."
+      ]
+    },
+    {
       "versao": "0.10.3",
       "data": "01/Nov/2026",
       "hora": "19:35:01",
