@@ -15,7 +15,9 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
   (base, blush, sombra, delineado, 12 cílios, 💅 unhas, batom, glitter, adesivos), **👗 Roupas** (13 vestidos, 11 blusas,
   8 saias, 9 calças, 9 estampas, 28 sapatos), **💎 Joias** (18 brincos, 14 colares, pulseiras, anéis e broches),
   **👑 Acessórios** (coroas, chapéus, tiaras e faixas, laços e presilhas, óculos, bolsas) e **🏞️ Cenário** (8 lugares). Cada parte tem
-  estilos (com miniatura do resultado) e bolinhas de cor.
+  estilos (com miniatura do resultado) e bolinhas de cor. Escolher é em dois passos, para caber no celular: primeiro
+  aparecem as partes da aba, grandes; tocou numa, as partes recolhem no botão **⬅ Partes**, o palco diminui um pouco e
+  as opções ganham a tela (o Voltar do celular também volta para as partes).
 - **🔍 Zoom**: ao escolher uma parte da maquiagem, dos olhos ou dos brincos, o palco chega perto do rosto sozinho; no
   colar e no broche, do busto; na pulseira e no anel, das mãos; no cabelo e nas coroas, da cabeça. Nas roupas e no
   cenário volta a mostrar a personagem inteira. O botão 🔍 do topo liga o zoom e o 🧍 desliga.
