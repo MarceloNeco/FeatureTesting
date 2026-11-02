@@ -76,17 +76,20 @@
        Contínuo, como um boneco 3D: a cabeça é tratada como uma esfera. Olhos, sobrancelhas, nariz e boca andam
        sobre ela e encolhem de lado (ver cabecaVirada); o contorno do rosto vai virando, aos poucos, o perfil
        (testa, nariz, lábios e queixo); o cabelo da frente gira junto com o rosto e o de trás vai para trás.
-       O corpo só fica um pouco mais estreito de lado e, passando de 90°, aparece de costas; passando de ~100°,
-       a cabeça também fica de costas (só cabelo). */
+       O corpo afina até virar o corpo de perfil e, passando de 90°, aparece de costas. A cabeça gira a volta
+       inteira sem pular: a pele do rosto é uma região presa na cabeça (linha do cabelo, costeletas, queixo) que
+       vai sumindo atrás dela, e de costas sobra só cabelo. */
     function normal(a) { a = (((a || 0) % 360) + 360) % 360; return a < 0.5 || a > 359.5 ? 0 : a; }
     // opcoes.olhar: só a cabeça vira (o corpo fica de frente) — no desfile ela olha para os lados
     var angB = normal(op.angulo), ang = angB || normal(op.olhar);
     var rad = ang * Math.PI / 180, radS = ang > 180 ? rad - 2 * Math.PI : rad, cos = ang ? Math.cos(rad) : 1, sen = ang ? Math.sin(rad) : 0, cosB = Math.cos(angB * Math.PI / 180);
-    var corpoCostas = cosB < 0, costas = cos < -0.17, virada = !!ang && !costas, escalaX = 1 - 0.55 * Math.pow(Math.abs(Math.sin(angB * Math.PI / 180)), 1.5);
+    var corpoCostas = cosB < 0, costas = false, virada = !!ang, escalaX = 1 - 0.55 * Math.pow(Math.abs(Math.sin(angB * Math.PI / 180)), 1.5);
     // opcoes.sorriso: sorriso aberto; opcoes.tchau: braço levantado dando tchau (mexendo, com opcoes.anim)
     e.sorrindo = !!op.sorriso; var tchau = !!op.tchau && !angB;
     // de lado, o cabelo de trás e o pescoço não afinam junto com o corpo
-    if (virada) out.push(grupo(torcer(cabeloTras(e, I, cab, cabE), true, radS)), pescoco());
+    // de frente e de lado o cabelo de trás fica atrás do corpo; de costas ele vai por cima (ver cabecaVirada)
+    // (no alto, o cabelo de trás não passa do contorno da cabeça: sem bico em cima quando ela vira)
+    if (virada) { if (cos >= 0) out.push(grupo('<g clip-path="url(#' + I + 'trasC)">' + torcer(cabeloTras(e, I, cab, cabE), true, radS) + '</g>')); out.push(pescoco()); }
     var iniBoneca = out.length;
 
     // ---------- asas e cabelo de trás (de costas, vão por cima do corpo, lá embaixo) ----------
@@ -158,7 +161,9 @@
     if (vis('laco') && !(e.laco === 'alto' && (e.cabeca === 'chapeu' || e.cabeca === 'gorro'))) enfeites += lacos(e.laco, C('laco'), e.cabelo);
     if (vis('cabeca')) enfeites += cabeca(e.cabeca, C('cabeca'), I, peca);
     // enfeites de cabeça: de lado, vão um pouco para a frente e ficam mais estreitos (vistos de lado)
-    out.push(virada && enfeites ? '<g transform="translate(' + n(200 + sen * 22) + ' 0) scale(' + n(1 - 0.32 * Math.abs(sen)) + ' 1) translate(-200 0)">' + enfeites + '</g>' : enfeites);
+    if (virada && cos < -0.25 && ['tiara', 'diadema', 'unicornio'].indexOf(e.cabeca) >= 0) enfeites = enfeites.replace(cabeca(e.cabeca, C('cabeca'), I, peca), '');   // tiara fica na frente: de costas não aparece
+    // enfeites giram junto: de lado ficam mais estreitos; passando de 90° trocam de lado (o laço do lado direito vai para a esquerda)
+    out.push(virada && enfeites ? '<g transform="translate(' + n(200 + sen * 22) + ' 0) scale(' + n((cos >= 0 ? 1 : -1) * Math.max(0.68, Math.abs(cos)) * 1000) / 1000 + ' 1) translate(-200 0)">' + enfeites + '</g>' : enfeites);
     if (e.glitter === 'cabelo') out.push(virada ? torcer(glitter(e, C('glitter'), op.anim), false, radS, sen >= 0 ? 1 : -1).frente : glitter(e, C('glitter'), op.anim && !ang));
     var cabecaPronta = grupo(out.join(''));
     out = corpo;
@@ -261,16 +266,27 @@
       defs += '<clipPath id="' + I + 'rostoV"><path d="' + cont + '"/></clipPath><clipPath id="' + I + 'cabV"><path d="' + contV + '"/></clipPath>' +
         '<clipPath id="' + I + 'mE"><rect x="0" y="0" width="200" height="720"/></clipPath><clipPath id="' + I + 'mD"><rect x="200" y="0" width="200" height="720"/></clipPath>';
       var hf = torcer(cabeloFrente(e, I, cab, cabE), false, radS, sg);
-      defs += '<clipPath id="' + I + 'cabF"><path d="' + contV + '"/><rect x="' + (sg > 0 ? -400 : 200) + '" y="-200" width="600" height="1200"/></clipPath>';
+      // de três-quartos para trás, a franja fica dentro do contorno da cabeça (não sai um "bico" atrás)
+      defs += '<clipPath id="' + I + 'cabF"><path d="' + contV + '"/>' + (cos > 0.35 ? '<rect x="' + (sg > 0 ? -400 : 200) + '" y="-200" width="600" height="1200"/>' : '') + '</clipPath>';
+      // a pele do rosto (região presa na cabeça) e o contorno: traço da cor do cabelo onde é cabelo, da pele onde é rosto
+      var peleD = regiaoPele(radS, menino);
+      // cabelo de trás: no alto quem mostra o cabelo é a própria cabeça (já é de cabelo); dele só aparece o que desce,
+      // do meio da cabeça para baixo — assim não forma bico em cima. Coque, rabo, puffs e cachos ficam inteiros (passam da cabeça).
+      var alto = ['coque', 'coqueDuplo', 'coqueBaguncado', 'meio', 'rabinhoAlto', 'rabinhoCachos', 'puffs', 'rabo', 'chiquinhas', 'afro', 'cacheado', 'cachosCurtos', 'encaracolado', 'lateral'].indexOf(e.cabelo) >= 0;
+      defs += '<clipPath id="' + I + 'trasC">' + (alto ? '<rect x="-400" y="-400" width="1200" height="1400"/>' : '<path d="M-400,1400 L-400,0 Q200,330 800,0 L800,1400Z"/>' + (cos < 0 ? '<path d="' + contorno(radS, -3, e.rosto, e.nariz, menino) + '"/>' : '')) + '</clipPath>';
+      defs += '<clipPath id="' + I + 'peleR"><path d="' + peleD + '"/></clipPath>';
       // mecha do lado de lá (vai para trás da cabeça) e orelhas que ficam atrás do rosto
       s += hf.atras;
       if (zF > -0.35) s += orelha(xF, 12, false, -sg);
       if (zE <= 0.3) s += orelha(xE, 12, false, sg);
-      // rosto, maquiagem e feições (recortados pelo contorno)
-      s += pintar(cont, 'url(#' + I + 'pele)', peleE);
+      s += p(cont, { fill: 'none', stroke: cabE, 'stroke-width': 4.4, 'stroke-linejoin': 'round' }) + '<g clip-path="url(#' + I + 'peleR)">' + p(cont, { fill: 'none', stroke: peleE, 'stroke-width': 4.4, 'stroke-linejoin': 'round' }) + '</g>';
+      // a cabeça toda é cabelo (com fios que giram junto) e a pele vai por cima
+      s += p(cont, { fill: 'url(#' + I + 'cab)' }) + '<g clip-path="url(#' + I + 'rostoV)">' + fiosCabeca() + p('M146,126 Q200,104 254,126', { fill: 'none', stroke: '#fff', 'stroke-width': 8, opacity: 0.22, 'stroke-linecap': 'round' }) +
+        p(peleD, { fill: 'url(#' + I + 'pele)' }) + p(peleD, { fill: 'none', stroke: cabE, 'stroke-width': 1.8, opacity: 0.6, 'stroke-linejoin': 'round' }) + '</g>';
+      // maquiagem e feições: só onde é pele
       var fe = '';
-      if (e.base === 'natural') fe += p(cont, { fill: mistura(pele, '#ffd9c7', 0.3), opacity: 0.45 });
-      if (e.base === 'bronze') fe += p(cont, { fill: '#c8743f', opacity: 0.13 });
+      if (e.base === 'natural') fe += p(peleD, { fill: mistura(pele, '#ffd9c7', 0.3), opacity: 0.45 });
+      if (e.base === 'bronze') fe += p(peleD, { fill: '#c8743f', opacity: 0.13 });
       var bs = e.base === 'natural' ? '' : base(e.base, pele, rosto); if (e.base === 'bronze') bs = bs.replace(/^<path[^>]*\/>/, '');
       var xn = xa(0, 84), cn = esc(pele, 0.28);
       defs += '<linearGradient id="' + I + 'sombV" gradientUnits="userSpaceOnUse" x1="' + n(xn - sg * 6) + '" y1="0" x2="' + n(xn + sg * 70) + '" y2="0"><stop offset="0" stop-color="#e88a90" stop-opacity="0"/><stop offset="1" stop-color="#e88a90" stop-opacity="' + n(0.14 * as) + '"/></linearGradient>';
@@ -279,21 +295,23 @@
       var olhar = sen * 11;
       fe += proj(lados + olho(164, -1, e, I, C, olhar, op.anim) + linha(sobr[0], sob, sobr[2]), 164, -26.3, 81.4, 'mE');
       fe += proj(lados + olho(236, 1, e, I, C, olhar, op.anim) + linha(sobr[1], sob, sobr[2]), 236, 26.3, 81.4, 'mD');
-      // sombra macia do lado de longe do rosto e embaixo do queixo
-      fe += p(cont, { fill: 'url(#' + I + 'sombV)' });
+      fe += p(peleD, { fill: 'url(#' + I + 'sombV)' });
       // nariz: a curvinha de frente some aos poucos e aparece a lateral do nariz
       if (cos > 0.05) fe += '<g opacity="' + n(cos) + '">' + proj(narizFrente(e.nariz, pele), 200, 0, 84, null, 0.05) + '</g>';
-      if (as > 0.12) fe += linha('M' + n(xn - sg * 9 * as) + ',226 Q' + n(xn - sg * 2 * as) + ',240 ' + n(xn - sg * 6 * as) + ',250', cn, 2, n(Math.min(0.55, as)) ) +
+      if (as > 0.12 && cos > -0.2) fe += linha('M' + n(xn - sg * 9 * as) + ',226 Q' + n(xn - sg * 2 * as) + ',240 ' + n(xn - sg * 6 * as) + ',250', cn, 2, n(Math.min(0.55, as)) ) +
         linha('M' + n(xn - sg * 11 * as) + ',250 Q' + n(xn - sg * 7 * as) + ',245 ' + n(xn - sg * 3 * as) + ',251', cn, 2.2, n(Math.min(0.8, as * 1.2)));
       fe += proj(boca(e, C('batom'), pele, I), 200, 0, 68, null, -0.3);
-      s += '<g clip-path="url(#' + I + 'rostoV)">' + fe + '</g>';
-      // cabelo que cobre a parte de trás e de cima da cabeça (aparece quando ela vira)
-      s += touca(sg, xE, contV);
+      s += '<g clip-path="url(#' + I + 'rostoV)"><g clip-path="url(#' + I + 'peleR)">' + fe + '</g></g>';
+      // de costas, o cabelo de trás cai por cima da cabeça e das costas
+      if (cos < 0) s += '<g clip-path="url(#' + I + 'trasC)">' + torcer(cabeloTras(e, I, cab, cabE), true, radS) + '</g>';
       // cabelo da frente: gira junto com o rosto; o que passaria da cabeça do lado para onde ela olha é cortado
-      // virando, do lado de cá da têmpora quem mostra o cabelo é a touca (a franja termina na linha do cabelo)
-      var xT = xa(-sg * 56, 86), xP = xa(-sg * 34, 86) + sg * 6, xH = xa(-sg * 44, 86), mv = -sg * 300 * (1 - Math.min(1, as / 0.4)), xL = 200 + sg * 900;
-      defs += '<clipPath id="' + I + 'cabY"><path d="M' + n(xL) + ',-200 L' + n(xP + sg * 64 + mv) + ',-200 L' + n(xP + mv) + ',116 Q' + n(xH + mv) + ',134 ' + n(xT + mv) + ',168 Q' + n(xT + sg * 4 + mv) + ',204 ' + n(xT + sg * 16 + mv) + ',240 L' + n(xT + sg * 30 + mv) + ',900 L' + n(xL) + ',900Z"/></clipPath>';
-      s += '<g clip-path="url(#' + I + 'cabF)"><g clip-path="url(#' + I + 'cabY)">' + hf.frente + '</g></g>' + hf.lado;
+      // virando, do lado de cá da têmpora a franja termina na linha do cabelo
+      if (cos > -0.1) {
+        var xT = xa(-sg * 56, 86), xP = xa(-sg * 34, 86) + sg * 6, xH = xa(-sg * 44, 86), mv = -sg * 300 * (1 - Math.min(1, as / 0.4)), xL = 200 + sg * 900;
+        defs += '<clipPath id="' + I + 'cabY"><path d="M' + n(xL) + ',-200 L' + n(xP + sg * 64 + mv) + ',-200 L' + n(xP + mv) + ',116 Q' + n(xH + mv) + ',134 ' + n(xT + mv) + ',168 Q' + n(xT + sg * 4 + mv) + ',204 ' + n(xT + sg * 16 + mv) + ',240 L' + n(xT + sg * 30 + mv) + ',900 L' + n(xL) + ',900Z"/></clipPath>';
+        s += '<g clip-path="url(#' + I + 'cabF)"><g clip-path="url(#' + I + 'cabY)">' + hf.frente + '</g></g>';
+      }
+      s += hf.lado;
       // orelha do lado de cá (com o desenho de dentro), por cima do cabelo, como cabelo preso atrás da orelha
       if (zE > 0.3) s += orelha(xE, 11 + 6 * zE, true, sg);
       // brincos nas orelhas que aparecem
@@ -305,7 +323,7 @@
       if (vis('oculos')) {
         var oc = oculos(e.oculos, C('oculos')), kO = Math.cos(-sg * 26.3 * G + rad), xO = xa(-sg * 26.3, 81.4);
         s += proj(oc, 164, -26.3, 81.4, 'mE', 0.05) + proj(oc, 236, 26.3, 81.4, 'mD', 0.05);
-        if (as > 0.3) s += linha('M' + n(xO - sg * 26 * Math.max(kO, 0.3)) + ',208 L' + n(xE + sg * 6) + ',206', C('oculos').hex, 3.5);
+        if (as > 0.3 && kO > 0.05) s += linha('M' + n(xO - sg * 26 * Math.max(kO, 0.3)) + ',208 L' + n(xE + sg * 6) + ',206', C('oculos').hex, 3.5);
       }
       return s;
     }
@@ -315,23 +333,15 @@
         elip(x + fr * w * 0.12, 219, w * 0.32, 6, { fill: esc(pele, 0.14), opacity: 0.7 });
       return s;
     }
-    // a "touca" de cabelo: cobre o alto e a parte de trás da cabeça, com a linha do cabelo na frente da orelha
-    function toucaD(sg, xE) {
-      var G = Math.PI / 180;
-      function xa(az) { return 200 + 86 * Math.sin(az * G + rad); }
-      return 'M' + n(xa(-sg * 34) + sg * 70) + ',20 L' + n(xa(-sg * 34) + sg * 6) + ',116 Q' + n(xa(-sg * 44)) + ',134 ' + n(xa(-sg * 56)) + ',168 Q' + n(xa(-sg * 62)) + ',190 ' + n(xE + sg * 15) + ',198' +
-        ' L' + n(xE + sg * 11) + ',232 Q' + n(xE) + ',244 ' + n(xE - sg * 14) + ',236 Q' + n(xE - sg * 20) + ',262 ' + n(xE - sg * 32) + ',304 L' + n(xE - sg * 240) + ',330 L' + n(xE - sg * 240) + ',20Z';
-    }
-    function touca(sg, xE, contV) {
-      var as = Math.abs(sen);
-      if (as < 0.08) return '';
-      var d = toucaD(sg, xE);
-      defs += '<clipPath id="' + I + 'touca"><path d="' + d + '"/></clipPath>';
-      var fios = '';
-      for (var i = 0; i < 6; i++) fios += linha('M' + n(xE + sg * (78 - i * 13)) + ',' + (106 + i * 4) + ' Q' + n(xE - sg * (8 + i * 12)) + ',' + (134 + i * 12) + ' ' + n(xE - sg * (34 + i * 7)) + ',300', i % 2 ? '#fff' : cabE, i % 2 ? 2 : 1.6, i % 2 ? 0.16 : 0.45);
-      var brilho = linha('M' + n(xE - sg * 60) + ',176 Q' + n(xE - sg * 34) + ',118 ' + n(xE + sg * 40) + ',112', '#fff', 8, 0.24);
-      return '<g clip-path="url(#' + I + 'cabV)" opacity="' + n(Math.min(1, as * 5)) + '"><g clip-path="url(#' + I + 'touca)">' + pintar(contV, 'url(#' + I + 'cab)', cabE) + fios + brilho + '</g>' +
-        p(d, { fill: 'none', stroke: cabE, 'stroke-width': 2, 'stroke-linejoin': 'round' }) + '</g>';
+    /* fios do cabelo na cabeça: "meridianos" presos na cabeça, que giram junto (só a parte do lado de cá aparece) */
+    function fiosCabeca() {
+      var d1 = '', d2 = '';
+      for (var k = 0; k < 12; k++) {
+        var az = (k * 30 + 15) * Math.PI / 180, pts = [];
+        for (var y = 104; y <= 300; y += 14) { var a2 = az + radS, c2 = Math.cos(a2); if (c2 < 0.05) { pts = null; break; } pts.push(n(200 + raioCabeca(y, menino) * Math.sin(a2)) + ',' + y); }
+        if (pts && pts.length > 2) { if (k % 2) d2 += 'M' + pts.join(' L'); else d1 += 'M' + pts.join(' L'); }
+      }
+      return (d1 ? p(d1, { fill: 'none', stroke: cabE, 'stroke-width': 1.6, opacity: 0.4, 'stroke-linejoin': 'round' }) : '') + (d2 ? p(d2, { fill: 'none', stroke: '#fff', 'stroke-width': 1.8, opacity: 0.14, 'stroke-linejoin': 'round' }) : '');
     }
 
     function fechar() {
@@ -613,6 +623,31 @@
     });
     return d;
   }
+  // raio da cabeça (de lado a lado) em cada altura: crânio e maxilar
+  function raioCabeca(y, menino) {
+    var a = (y - 197) / 90, b = (y - 247) / 52, r1 = Math.abs(a) < 1 ? 86 * Math.sqrt(1 - a * a) : 0, r2 = Math.abs(b) < 1 ? (menino ? 75 : 70) * Math.sqrt(1 - b * b) : 0;
+    return Math.max(r1, r2, 8);
+  }
+  /* a pele do rosto como uma região presa na cabeça: linha do cabelo (testa → têmporas → costeletas na frente da
+     orelha), os lados do rosto e o queixo, em "ângulo de lugar" (az) e altura. Girando de th, cada ponto vai para
+     x = 200 + raio·sen(az + th); o que passa para trás da cabeça encosta na borda (por fora, 3 px) — assim a
+     pele some aos poucos, sem pulo, e de costas sobra só cabelo. */
+  var PELE_AZ = (function () {
+    var pts = [], k;
+    for (k = 0; k <= 24; k++) { var az = -88 + k * 176 / 24; pts.push([az, 125 + 85 * Math.pow(Math.abs(az) / 88, 2.2)]); }
+    for (k = 1; k <= 6; k++) pts.push([88, 210 + k * 16]);
+    for (k = 1; k <= 8; k++) pts.push([88 - k * 22, 306]);
+    for (k = 1; k <= 5; k++) pts.push([-88, 306 - k * 19]);
+    return pts;
+  })();
+  function regiaoPele(th, menino) {
+    return PELE_AZ.map(function (q, i) {
+      // th vai de -180° a 180°: o que passa de 90° para um lado encosta na borda desse lado (de costas, tudo de um lado só)
+      var a = q[0] * Math.PI / 180 + th, r = raioCabeca(q[1], menino);
+      var x = Math.abs(a) <= Math.PI / 2 ? 200 + r * Math.sin(a) : 200 + (a > 0 ? 1 : -1) * (r + 3);
+      return (i ? 'L' : 'M') + n(x) + ',' + n(q[1]);
+    }).join('') + 'Z';
+  }
   // pinta o contorno sem as linhas de dentro: primeiro o traço grosso, depois o recheio por cima
   function pintar(d, recheio, traco, larg) { return p(d, { fill: 'none', stroke: traco, 'stroke-width': (larg || 2.2) * 2, 'stroke-linejoin': 'round' }) + p(d, { fill: recheio }); }
   // nariz de frente, em cada formato (desenhado em volta de x = 200)
@@ -640,8 +675,12 @@
       var f = Math.asin(u);
       if (tras) f = Math.PI - f;
       var a = f + th, some = !tras && Math.abs(a) > M;
-      if (tras) a = a > 3 * M ? 3 * M + (a - 3 * M) * 0.3 : a < M ? M - (M - a) * 0.3 : a;   // o de trás quase não passa para a frente: arredonda na borda
+      var aperta = 0.3 + 0.7 * Math.max(0, Math.min(1, 1 - Math.cos(th)));   // de frente o de trás quase não passa para a frente; de costas ele aparece inteiro
+      if (tras) a = a > 3 * M ? 3 * M + (a - 3 * M) * aperta : a < M ? M - (M - a) * aperta : a;
       var sa = Math.sin(a), x2 = 200 + R * (some ? (a > 0 ? 1 : -1) : sa) + exc * Math.abs(sa);
+      // cabelo de trás: o que passa da borda é como um raio maior (de costas fica espelhado, sem bico no alto)
+      // (só a partir de três-quartos de costas; antes disso fica como sempre foi, escondido atrás da cabeça)
+      if (tras && Math.cos(th) < 0) x2 = 200 + (R + Math.abs(exc)) * sa;
       // de lado, o cabelo comprido de trás desce colado nas costas (embaixo da cabeça fica mais estreito)
       if (tras) x2 = 200 + (x2 - 200) * (1 - Math.abs(Math.sin(th)) * 0.62 * Math.max(0, Math.min(1, (y - 280) / 90)));
       return [x2, some];

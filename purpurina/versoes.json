@@ -2,6 +2,19 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.12.0",
+      "data": "02/Nov/2026",
+      "hora": "09:25:24",
+      "pt": [
+        "🔄 Volta completa de verdade: a cabeça gira os 360° sem pular para o desenho de costas. A pele do rosto agora é uma região presa na cabeça (linha do cabelo, têmporas, costeletas e queixo) que vai sumindo atrás dela aos poucos; de costas sobra só cabelo, com fios que giram junto.",
+        "💇 De costas, o cabelo comprido cai por cima das costas; no alto da cabeça não forma mais bico. Laços e presilhas trocam de lado ao girar, e a tiara não aparece quando ela está de costas."
+      ],
+      "en": [
+        "🔄 A real full turn: the head spins all 360° without jumping to the back drawing. The face skin is now a region attached to the head (hairline, temples, sideburns and chin) that slowly disappears behind it; from the back only hair is left, with strands that turn along.",
+        "💇 From the back, long hair falls over her back; no more spike on top of the head. Bows and clips swap sides as she turns, and the tiara does not show when she is facing away."
+      ]
+    },
+    {
       "versao": "0.11.2",
       "data": "02/Nov/2026",
       "hora": "09:10:15",
