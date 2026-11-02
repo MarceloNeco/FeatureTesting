@@ -32,7 +32,10 @@ lustre balança e muda a cor da luz, o interruptor acende e apaga, a janela abre
 torto, o cachorrinho anda, late e corre atrás da bola; no jardim, a árvore solta folhas, os passarinhos voam e o
 balanço balança. Na cozinha, geladeira e torneira; no banheiro, bolhas de sabão e o papel higiênico que desenrola; no
 parquinho, escorregador, gangorra e castelo de areia. Bichos: o **Picolé** (o cavachon da família, desenhado em código),
-o gato, o papagaio que fala, a tartaruga e os passarinhos. Nos últimos segundos a mamãe vem chegando. O Bagunçômetro
+o gato, o papagaio que fala, a tartaruga e os passarinhos. Nos últimos segundos a mamãe vem chegando. As setinhas ◀ ▶
+(nos cantos de baixo; setas no controle da TV) levam ao cômodo vizinho, e cada cômodo guarda a bagunça. Em cada lugar há
+aparelhos que funcionam ao toque (TV, pianinho, aquário, móbile, cuco, torradeira, micro-ondas, chuveiro, descarga,
+sapo, irrigador, varal, correio, pipa…): a tabela `APAR` do `casa.js`. O Bagunçômetro
 (no alto) vai de 0 a 100 %; chegar a 100 % dá bônus. O motor mora em `casa.js`.
 
 **Música do jogo e botões de som**: o jogo toca música o tempo todo, uma diferente a cada rodada: 13 músicas de

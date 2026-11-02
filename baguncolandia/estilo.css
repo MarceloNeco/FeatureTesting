@@ -198,3 +198,17 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 /* "Quem vai jogar" com duas pessoas no mesmo aparelho: o nome da 2ª (o último usado já vem escrito) */
 .nome2 { display: flex; align-items: center; justify-content: center; gap: .5rem; flex-wrap: wrap; color: var(--text); font-weight: 600; }
 .nome2 input { width: 11rem; max-width: 60vw; font: inherit; padding: .5rem .7rem; border-radius: 12px; border: 2px solid var(--border); background: var(--card); color: var(--text); }
+/* celular deitado: o palco nunca estica (fica 16:9 no meio; os botões vão para a faixa do lado) */
+#tvPalco { width: min(100%, calc(100vh * 16 / 9)); width: min(100%, calc(100dvh * 16 / 9)); }
+@media (max-height: 460px) {
+  #tvSair, #tv.jogando #localPausa, #tv.toque.jogando #localBoneco, #tvSom button { width: 38px; height: 38px; min-height: 38px; font-size: 1rem; }
+  #tv.jogando #localPausa { top: calc(1.5vh + 44px); }
+  #tv.toque.jogando #localBoneco { top: calc(1.5vh + 88px); }
+  #tvSom { gap: 6px; top: calc(1.5vh + 44px); }
+  #tv.local.jogando #tvSom { top: calc(1.5vh + 88px); }
+  #tv.local.toque.jogando #tvSom { top: calc(1.5vh + 132px); }
+}
+/* 🧸 Bagunça: setinhas para o cômodo vizinho, nos cantos de baixo */
+#casaNav { display: none; position: absolute; left: 1.5vh; right: 1.5vh; bottom: 1.5vh; z-index: 9; justify-content: space-between; pointer-events: none; }
+#tv.local.casa.jogando #casaNav { display: flex; }
+#casaNav button { pointer-events: auto; background: rgba(0,0,0,.55); color: #fff; border: 2px solid rgba(255,255,255,.4); border-radius: 999px; padding: .35rem .9rem; font-size: 1rem; min-height: 44px; }

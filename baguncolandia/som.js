@@ -64,6 +64,17 @@
     mamae: function (t) { varre(300, 700, t, 0.25, 'triangle', 0.18); varre(700, 260, t + 0.25, 0.4, 'triangle', 0.16); },
     gangorra: function (t) { varre(300, 380, t, 0.18, 'sawtooth', 0.04); nota(200, t + 0.2, 0.1, 'square', 0.08); },
     areia: function (t) { ruido(t, 0.5, 0.2, 1500); ruido(t + 0.15, 0.4, 0.15, 900); },
+    tv: function (t) { ruido(t, 0.15, 0.2, 5000); [523, 659, 784, 1047].forEach(function (f, i) { nota(f, t + 0.15 + i * 0.08, 0.15, 'square', 0.06); }); },
+    cuco: function (t) { [0, 0.45].forEach(function (d) { nota(784, t + d, 0.18, 'sine', 0.3); nota(622, t + d + 0.2, 0.25, 'sine', 0.3); }); },
+    tambor: function (t) { varre(160, 60, t, 0.25, 'sine', 0.6); ruido(t, 0.1, 0.25, 300); },
+    torradeira: function (t) { nota(1500, t, 0.04, 'square', 0.1); varre(300, 900, t + 0.04, 0.15, 'sine', 0.2); },
+    liquidificador: function (t) { varre(180, 420, t, 1.2, 'sawtooth', 0.06); varre(190, 430, t, 1.2, 'square', 0.03); },
+    microondas: function (t) { nota(1760, t, 0.12, 'sine', 0.2); nota(1760, t + 0.18, 0.12, 'sine', 0.2); },
+    descarga: function (t) { ruido(t, 1.2, 0.3, 700); ruido(t + 0.2, 1, 0.2, 1500); varre(400, 150, t, 1.2, 'sine', 0.06); },
+    espelho: function (t) { [1568, 2093, 2637].forEach(function (f, i) { nota(f, t + i * 0.06, 0.3, 'sine', 0.06); }); },
+    sapo: function (t) { [0, 0.2].forEach(function (d) { varre(140, 90, t + d, 0.15, 'square', 0.12); ruido(t + d, 0.12, 0.12, 400); }); },
+    correio: function (t) { nota(1319, t, 0.5, 'sine', 0.2); nota(1047, t + 0.15, 0.6, 'sine', 0.18); },
+    porta: function (t) { varre(300, 500, t, 0.25, 'sawtooth', 0.03); nota(220, t + 0.25, 0.1, 'square', 0.08); },
     tchau: function (t) { varre(1200, 200, t, 0.6, 'sine', 0.2); [784, 988, 1175].forEach(function (f, i) { nota(f, t + 0.1 + i * 0.08, 0.2, 'triangle', 0.12); }); },
     corte: function (t) { ruido(t, 0.12, 0.35, 3200); nota(880, t, 0.08, 'square', 0.08); nota(1320, t + 0.03, 0.1, 'triangle', 0.12); },
     pegou: function (t) { [523, 659, 784].forEach(function (f, i) { nota(f, t + i * 0.06, 0.18, 'triangle', 0.25); }); },
@@ -81,6 +92,7 @@
     fim: function (t) { [523, 659, 784, 1047, 784, 1047, 1319].forEach(function (f, i) { nota(f, t + i * 0.12, 0.3, 'triangle', 0.22); }); },
     perdeu: function (t) { nota(300, t, 0.15, 'sine', 0.12); }
   };
+  [523.25, 587.33, 659.25, 698.46, 783.99, 880, 987.77, 1046.5].forEach(function (f, i) { SONS['nota' + i] = function (t) { nota(f, t, 0.45, 'triangle', 0.28); nota(f * 2, t, 0.2, 'sine', 0.05); }; });   // pianinho: dó a dó
   function tocar(nome) { if (!ctx || mudo || !SONS[nome]) return; try { SONS[nome](ctx.currentTime); } catch (e) {} }
 
   /* ---------- música em laço: pop dançante sintetizado (sem amostras, sem plágio) ----------

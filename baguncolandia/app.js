@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.12', APP_UPDATED = '02/11/2026';
+  var APP_VERSION = '0.8.13', APP_UPDATED = '02/11/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -218,6 +218,7 @@
       if (m.acao === 'pularCalibracao') { if (tv.calib) tv.calib.pular(); return; }
       if (m.acao === 'bpm') { if (tv.partida) tv.partida.batida(m.bpm); tv.bpm = m.bpm; return; }
       if (m.acao === 'som') { aplicarSom(m.semSom, m.semMusica); return; }
+      if (m.acao === 'casa') { if (tv.partida && tv.partida.irPara && (tv.fase === 'jogando' || tv.fase === 'pausa')) { tv.partida.irPara(m.dir); navCasa(); } return; }   // 🧸 setinhas: cômodo vizinho
       if (m.acao === 'boneco') { var chave = m.id || 'local'; (tv.bonecos[chave] = tv.bonecos[chave] || {})[m.j] = m.boneco; aplicarBonecos(); return; }
       if (m.acao === 'musica') { tv.titulo = m.texto || ''; $('tvTitulo').style.display = tv.titulo ? 'block' : 'none'; $('tvTitulo').textContent = '🎵 ' + tv.titulo; return; }
       youtubeComando(m);
@@ -280,6 +281,11 @@
         tic();
       });
     }
+    /* setinhas ◀ ▶ do 🧸 Bagunça: mostram o nome do cômodo vizinho */
+    function navCasa() {
+      var casa = !!(tv.partida && tv.partida.vizinhos); $('tv').classList.toggle('casa', casa); if (!casa) return;
+      var v = tv.partida.vizinhos(); $('casaAnt').querySelector('span').textContent = T(Casa.NOMES[v.ant][0], Casa.NOMES[v.ant][1]); $('casaProx').querySelector('span').textContent = T(Casa.NOMES[v.prox][0], Casa.NOMES[v.prox][1]);
+    }
     function rodada() {
       var figs = Figuras.lista(tv.cfg.turmas);
       if (!figs.some(function (f) { return f.papel === 'fruta'; })) figs = Figuras.lista();   // sem fruta nenhuma não dá para cortar
@@ -288,7 +294,7 @@
       Object.keys(tv.caixas).forEach(function (j) { var c = tv.caixas[j]; if (c) { tv.partida.zonaChute(+j, Math.min(0.95, c.y + c.h * 0.6)); tv.partida.calibrar(+j, c); } });
       if (tv.toque) { tv.dedoCorpo = {}; for (var jt = 0; jt < tv.cfg.jogadores; jt++) { tv.partida.calibrar(jt, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }); tv.partida.corpo(jt, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }, performance.now()); } }
       Desenho.limpar(); Desenho.ambiente(tv.cfg.ambiente, tv.cfg.cena);
-      $('tv').classList.toggle('paisagem', tv.cfg.ambiente === 'paisagem' || tv.cfg.modo === 'bagunca');
+      $('tv').classList.toggle('paisagem', tv.cfg.ambiente === 'paisagem' || tv.cfg.modo === 'bagunca'); navCasa();
       tv.partida.comecar(); tv.fase = 'jogando'; if (tv.cfg.modo === 'bagunca') dizer('Hora da bagunça! Bata em tudo!', 'Mayhem time! Hit everything!');   // na fase de jogo a legenda some sozinha tv.fimMusica = false; $('tv').classList.add('jogando');
       if (tv.cfg.duracao === 0 && tv.player && !tv.tocando) { try { tv.player.playVideo(); } catch (e) {} }
       window.BaguncaDebug = tv;   // só para testes automáticos (nada de segredo aqui)
@@ -407,6 +413,8 @@
       $('localComecar').onclick = function () { if (tv.fase === 'lobby' || tv.fase === 'fim') comecar(); };
       $('localPausa').onclick = function () { comando({ acao: 'pausar' }); };
       $('localMudo').onclick = function () { aplicarSom(!SOM.mudo, SOM.semMusica); };
+      $('casaAnt').onclick = function () { comando({ acao: 'casa', dir: -1 }); };
+      $('casaProx').onclick = function () { comando({ acao: 'casa', dir: 1 }); };
       $('nome2').addEventListener('input', function () { tv.nome2 = $('nome2').value.replace(/\s+/g, ' ').trim().slice(0, 14); try { localStorage.setItem('bagunca:nome2', tv.nome2); } catch (e) {} var c = $('lobbyNomeJ2'); if (c) c.textContent = tv.nome2 || T('2ª pessoa', '2nd player'); });
       $('localMusica').onclick = function () { aplicarSom(SOM.mudo, !SOM.semMusica); };
       $('localCamera').onclick = function () { CelApp.trocarCameraLocal(); };
@@ -418,6 +426,7 @@
         if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;   // digitando um nome
         if (!$('tv').classList.contains('ativa')) return;
         if (!tv.vozLiberada) { tv.vozLiberada = true; Voz.liberar(); Som.iniciar(); }
+        if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && tv.partida && tv.partida.irPara && tv.fase === 'jogando') { comando({ acao: 'casa', dir: e.key === 'ArrowLeft' ? -1 : 1 }); return; }   // controle da TV: ◀ ▶ trocam de cômodo
         if (e.key === 'Enter' || e.key === ' ') { if (tv.fase === 'lobby' || tv.fase === 'fim') comecar(); else if (tv.fase === 'jogando' || tv.fase === 'pausa') comando({ acao: 'pausar' }); else if (tv.fase === 'calibrando' && tv.calib) tv.calib.pular(); }
       });
     }
@@ -712,6 +721,8 @@
     $('btCamera').onclick = $('btCameraTopo').onclick = function () { if (cel.sala) cel.sala.trocarCamera().then(function () { cel.visao && cel.visao.zerar(); }).catch(function () {}); };
     $('btSair').onclick = function () { sair(); Nav.fechar(1); };
     $('btMudo').onclick = function () { mandarSom(!SOM.mudo, SOM.semMusica); };
+    $('btCasaAnt').onclick = function () { comando({ acao: 'casa', dir: -1 }); };
+    $('btCasaProx').onclick = function () { comando({ acao: 'casa', dir: 1 }); };
     $('btMusica').onclick = function () { mandarSom(SOM.mudo, !SOM.semMusica); };
     $('btTocarLink').onclick = function () { tocarLink(); };
     $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') tocarLink(); });
@@ -728,6 +739,7 @@
           else { g.querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); var v = b.getAttribute('data-v'); cel.cfg[k] = isNaN(+v) ? v : +v; }
           $('linhaCelulares').style.display = cel.cfg.jogadores === 2 && !cel.local ? '' : 'none';
           $('linhaCena').style.display = cel.cfg.ambiente === 'paisagem' ? '' : 'none';
+          $('linhaCasa').style.display = cel.cfg.modo === 'bagunca' ? '' : 'none';
           mandarConfig();
         };
       });

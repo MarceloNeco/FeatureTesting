@@ -113,3 +113,25 @@ test('nos últimos segundos a mamãe chega e, no fim, vê a bagunça', () => {
   assert.ok(M.mae.viu, 'a mamãe não viu a bagunça');
   assert.ok(p.eventos().some((e) => e.som === 'mamae'));
 });
+
+test('setinhas: vai ao cômodo vizinho e, na volta, a bagunça está lá', () => {
+  const p = partida('sala');
+  passar(p, [880, 180], [1200, 200], 1000); correr(p, 2000);
+  const antes = p.estado().bagunca;
+  assert.deepStrictEqual(p.vizinhos(), { ant: 'parquinho', prox: 'quarto' });
+  p.irPara(1); assert.strictEqual(p.cena, 'quarto'); assert.strictEqual(p.estado().casa.cena, 'quarto');
+  p.irPara(-1); assert.strictEqual(p.cena, 'sala');
+  assert.ok(p.estado().bagunca >= antes - 0.01 && antes > 0, 'a bagunça da sala sumiu');
+  assert.ok(p.eventos().some((e) => e.som === 'porta' && e.troca === 'quarto'));
+});
+
+test('aparelhos: TV liga, piano toca nota, torradeira solta torradas, sapo coaxa', () => {
+  const toca = (p, x, y, t) => { p.movimento(0, [[x / 1280, y / 720, 100]], t); p.avancar(16); };
+  let p = partida('sala'), M = p.estado().casa, tv = M.aparelhos.find((a) => a.tipo === 'tv'), pi = M.aparelhos.find((a) => a.tipo === 'piano');
+  toca(p, tv.x + 50, tv.y + 50, 1000); assert.strictEqual(tv.on, true, 'a TV não ligou');
+  toca(p, pi.x + 5, pi.y + 30, 2000); assert.ok(p.eventos().some((e) => /^nota\d$/.test(e.som)), 'o piano não tocou');
+  p = partida('cozinha'); M = p.estado().casa; const to = M.aparelhos.find((a) => a.tipo === 'torradeira'), n0 = M.obs.length;
+  toca(p, to.x + 30, to.y + 20, 1000); assert.strictEqual(M.obs.length, n0 + 2, 'as torradas não pularam');
+  p = partida('jardim'); M = p.estado().casa; const sp = M.aparelhos.find((a) => a.tipo === 'sapo');
+  toca(p, sp.x, sp.y - 20, 1000); assert.ok(sp.croac > 0 && sp.pulo, 'o sapo não pulou');
+});
