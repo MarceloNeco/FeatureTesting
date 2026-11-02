@@ -11,10 +11,10 @@ test('o pedido descreve o mesmo personagem, renderizado, e nunca uma pessoa real
 });
 
 test('chave: confere o formato de cada provedor', () => {
-  assert.ok(IA.chaveValida('gemini', 'AIzaSyABCDEFGHIJKLMNOPQRSTUVWX'));
-  assert.ok(IA.chaveValida('gemini', 'AQ.ABCDEFGHIJKLMNOPQRSTUVWX12'));
-  assert.ok(!IA.chaveValida('gemini', 'sk-ABCDEFGHIJKLMNOPQRSTUVWX'));
-  assert.ok(IA.chaveValida('openai', 'sk-proj-ABCDEFGHIJKLMNOPQRSTUVWX'));
+  assert.ok(IA.chaveValida('gemini', 'AIza' + 'x'.repeat(30)));
+  assert.ok(IA.chaveValida('gemini', 'AQ.' + 'x'.repeat(30)));
+  assert.ok(!IA.chaveValida('gemini', 'sk-' + 'x'.repeat(30)));
+  assert.ok(IA.chaveValida('openai', 'sk-proj-' + 'x'.repeat(30)));
   assert.ok(!IA.chaveValida('openai', 'sk-curta'));
   assert.ok(!IA.chaveValida('openai', 'sk-com espaco no meio da chave 123'));
 });

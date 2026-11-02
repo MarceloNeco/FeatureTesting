@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.8', APP_UPDATED = '02/11/2026';
+  var APP_VERSION = '0.8.9', APP_UPDATED = '02/11/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -14,6 +14,30 @@
   function tela(id) { document.querySelectorAll('.tela').forEach(function (s) { s.classList.toggle('ativa', s.id === id); }); }
   function cheia(id) { document.querySelectorAll('.cheia').forEach(function (s) { s.classList.toggle('ativa', s.id === id); }); }
   var TESTE = /[?&]teste\b/.test(location.search);   // página de teste: sem pareamento, pontos falsos pelo window.BaguncaTeste
+  /* Botão Voltar do celular: cada tela aberta (entrar, jogo) ganha uma entrada no histórico; o Voltar fecha só a
+     de cima, e só da tela inicial é que se sai. Um ponto só no código: nada de pushState espalhado.
+     abrir(aoVoltar) = nova camada; fechar(n) = a tela já foi fechada pelo botão dela, tira n entradas sem chamar nada.
+     No menu inicial o Voltar não sai direto: avisa "Toque em Voltar de novo para sair" e só o segundo sai. Para isso,
+     depois do primeiro toque da pessoa entra uma entrada de guarda (o Chrome ignora entrada criada sem toque). */
+  var Nav = (function () {
+    var pilha = [], ignorar = 0, guarda = false, avisoTimer = 0;
+    try { history.replaceState({ bagunca: 0, inicio: 1 }, ''); } catch (e) {}
+    function armar() { if (guarda) return; guarda = true; try { history.pushState({ bagunca: 'guarda' }, ''); } catch (e) {} }
+    document.addEventListener('pointerdown', armar, true); document.addEventListener('keydown', armar, true);
+    function avisarSaida() {
+      var a = $('avisoSair'); a.textContent = T('Toque em Voltar de novo para sair da Bagunçolândia', 'Tap Back again to leave Mayhemland');
+      a.classList.add('ativo'); clearTimeout(avisoTimer); avisoTimer = setTimeout(function () { a.classList.remove('ativo'); }, 2500);
+    }
+    window.addEventListener('popstate', function () {
+      if (ignorar) { ignorar--; return; }
+      var c = pilha.pop(); if (c) { try { c(); } catch (e) {} return; }
+      guarda = false; avisarSaida();   // chegou na entrada do início: o próximo Voltar sai (a guarda volta no próximo toque)
+    });
+    return {
+      abrir: function (aoVoltar) { pilha.push(aoVoltar); try { history.pushState({ bagunca: pilha.length }, ''); } catch (e) {} },
+      fechar: function (n) { n = Math.min(n || 1, pilha.length); if (!n) return; pilha.length -= n; ignorar++; history.go(-n); }
+    };
+  })();
 
   if (window.SolverRecursos && !SolverRecursos.ligado('baguncolandia', true)) { tela('desligado'); return; }
   try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
@@ -407,11 +431,11 @@
       if (!cel.toque && (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.RTCPeerConnection)) { erro.textContent = T('Este navegador não deixa usar a câmera. Abra no Chrome ou no Safari.', 'This browser cannot use the camera. Open it in Chrome or Safari.'); erro.style.display = 'block'; return; }
       try { localStorage.setItem('bagunca:nome', nome); if (!cel.local) localStorage.setItem('bagunca:codigo', cod); } catch (e) {}
       $('btEntrar').disabled = true; Som.iniciar(); Voz.liberar();
-      if (cel.toque) { TVApp.iniciar({ local: true, toque: true, nome: nome, gesto: true }); TVApp.comando(Object.assign({ acao: 'config' }, cel.cfg, { celulares: 1 })); mandarBonecos(); $('btEntrar').disabled = false; return; }
+      if (cel.toque) { TVApp.iniciar({ local: true, toque: true, nome: nome, gesto: true }); TVApp.comando(Object.assign({ acao: 'config' }, cel.cfg, { celulares: 1 })); mandarBonecos(); Nav.abrir(function () { sairDoJogoLocal('entrar'); }); $('btEntrar').disabled = false; return; }
       if (cel.local) { entrarLocal(nome, erro); return; }
       cel.sala = Sala.celular({ nome: nome, codigo: cod, video: $('cam'), T: T, aoStatus: status, aoTV: daTV, aoConectado: function () { Som.tocar('ok'); mandarConfig(); }, aoCamera: function (c) { $('cam').style.transform = 'scaleX(-1)'; }, aoCameras: cameras });
       cel.sala.pronto.then(function () {
-        tela('jogo'); $('jogoNome').textContent = nome; $('jogoCodigo').textContent = cod; status(T('Procurando a TV…', 'Looking for the TV…'));
+        tela('jogo'); Nav.abrir(sair); $('jogoNome').textContent = nome; $('jogoCodigo').textContent = cod; status(T('Procurando a TV…', 'Looking for the TV…'));
         cel.visao = Sala.criarVisao($('cam')); cel.timer = setInterval(medir, 100);
         mandarConfig();
       }).catch(function (e) { $('btEntrar').disabled = false; erro.textContent = (e && e.name === 'NotAllowedError') ? T('Você precisa permitir a câmera.', 'You need to allow the camera.') : T('Não deu para conectar: ', 'Could not connect: ') + (e && e.message || e); erro.style.display = 'block'; });
@@ -431,7 +455,7 @@
         var v = document.createElement('video'); v.autoplay = true; v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.srcObject = s; v.play().catch(function () {});
         cel.streamLocal = s; cel.videoLocal = v; cel.ladoLocal = 'user'; cel.visao = Sala.criarVisao(v);
         TVApp.iniciar({ local: true, visao: cel.visao, video: v, nome: nome, gesto: true, esqueleto: cel.esqueleto && Esqueleto.pronto() });
-        TVApp.comando(Object.assign({ acao: 'config' }, cel.cfg, { celulares: 1 })); mandarBonecos();
+        TVApp.comando(Object.assign({ acao: 'config' }, cel.cfg, { celulares: 1 })); mandarBonecos(); Nav.abrir(function () { sairDoJogoLocal('entrar'); });
         $('btEntrar').disabled = false;
       }).catch(function (e) { $('btEntrar').disabled = false; erro.textContent = (e && e.name === 'NotAllowedError') ? T('Você precisa permitir a câmera.', 'You need to allow the camera.') : T('Não deu: ', 'Failed: ') + (e && e.message || e); erro.style.display = 'block'; });
     }
@@ -647,7 +671,7 @@
     $('btCalibrar').onclick = function () { comando({ acao: 'calibrar' }); };
     $('btPularCal').onclick = function () { if (cel.calib) cel.calib.pular(); };
     $('btCamera').onclick = $('btCameraTopo').onclick = function () { if (cel.sala) cel.sala.trocarCamera().then(function () { cel.visao && cel.visao.zerar(); }).catch(function () {}); };
-    $('btSair').onclick = sair;
+    $('btSair').onclick = function () { sair(); Nav.fechar(1); };
     $('btTocarLink').onclick = function () { tocarLink(); };
     $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') tocarLink(); });
     $('btBuscar').onclick = function () { window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(T('música animada para crianças dançar', 'kids dance songs')), '_blank', 'noopener'); };
@@ -675,10 +699,11 @@
 
   /* ---------- papel ---------- */
   $('btTV').onclick = function () { TVApp.iniciar({ gesto: true }); };
-  $('btCel').onclick = function () { CelApp.cel.local = false; CelApp.cel.toque = false; $('codigo').style.display = ''; $('lblCodigo').style.display = ''; $('btEntrar').textContent = T('Entrar e ligar a câmera', 'Join and start the camera'); tela('entrar'); try { $('nome').value = localStorage.getItem('bagunca:nome') || ''; $('codigo').value = localStorage.getItem('bagunca:codigo') || ''; } catch (e) {} ($('nome').value ? $('codigo') : $('nome')).focus(); };
-  $('btToque').onclick = function () { CelApp.cel.local = true; CelApp.cel.toque = true; tela('entrar'); $('codigo').style.display = 'none'; $('lblCodigo').style.display = 'none'; $('btEntrar').textContent = T('Começar', 'Start'); try { $('nome').value = localStorage.getItem('bagunca:nome') || ''; } catch (e) {} $('nome').focus(); };
-  $('btSolo').onclick = function () { CelApp.cel.toque = false; CelApp.cel.local = true; tela('entrar'); $('codigo').style.display = 'none'; $('lblCodigo').style.display = 'none'; $('btEntrar').textContent = T('Começar', 'Start'); try { $('nome').value = localStorage.getItem('bagunca:nome') || ''; } catch (e) {} $('nome').focus(); };
-  $('tvSair').onclick = function () { TVApp.sairLocal(); if (CelApp.cel.streamLocal) CelApp.cel.streamLocal.getTracks().forEach(function (t) { t.stop(); }); tela('inicio'); };
+  $('btCel').onclick = function () { CelApp.cel.local = false; CelApp.cel.toque = false; $('codigo').style.display = ''; $('lblCodigo').style.display = ''; $('btEntrar').textContent = T('Entrar e ligar a câmera', 'Join and start the camera'); tela('entrar'); Nav.abrir(function () { tela('inicio'); }); try { $('nome').value = localStorage.getItem('bagunca:nome') || ''; $('codigo').value = localStorage.getItem('bagunca:codigo') || ''; } catch (e) {} ($('nome').value ? $('codigo') : $('nome')).focus(); };
+  $('btToque').onclick = function () { CelApp.cel.local = true; CelApp.cel.toque = true; tela('entrar'); Nav.abrir(function () { tela('inicio'); }); $('codigo').style.display = 'none'; $('lblCodigo').style.display = 'none'; $('btEntrar').textContent = T('Começar', 'Start'); try { $('nome').value = localStorage.getItem('bagunca:nome') || ''; } catch (e) {} $('nome').focus(); };
+  $('btSolo').onclick = function () { CelApp.cel.toque = false; CelApp.cel.local = true; tela('entrar'); Nav.abrir(function () { tela('inicio'); }); $('codigo').style.display = 'none'; $('lblCodigo').style.display = 'none'; $('btEntrar').textContent = T('Começar', 'Start'); try { $('nome').value = localStorage.getItem('bagunca:nome') || ''; } catch (e) {} $('nome').focus(); };
+  function sairDoJogoLocal(destino) { TVApp.sairLocal(); if (CelApp.cel.streamLocal) CelApp.cel.streamLocal.getTracks().forEach(function (t) { t.stop(); }); tela(destino); }
+  $('tvSair').onclick = function () { sairDoJogoLocal('inicio'); Nav.fechar(2); };
   if (/[?&]tv=auto\b/.test(location.search)) TVApp.iniciar({ gesto: false });   // casca da LG: já entra como TV
   else if (/[?&]tv\b/.test(location.search)) $('btTV').focus();
   if (TESTE) { window.BaguncaApp = { TVApp: TVApp, CelApp: CelApp, Bagunca: Bagunca, Figuras: Figuras, Boneco: Boneco }; }
