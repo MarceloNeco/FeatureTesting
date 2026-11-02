@@ -59,3 +59,4 @@ reaproveitados). Criada em 31/Out/2026, com autorização do dono.
 - **02/Nov/2026:** Vruuum! 1.4.0 — mais 10 rocks animados (39 músicas), cabeça 3D cheia e bonita no giro, skatista com proporção de criança.
 - **02/Nov/2026:** Vruuum! 1.5.0 — curvas fortes que jogavam para fora consertadas; skatista de lado no skate, com os braços seguindo as curvas.
 - **02/Nov/2026:** Vruuum! 1.5.1 — braços do skatista com cotovelo de verdade (abertos e dobrados, contrapeso nas curvas).
+- **02/Nov/2026:** 1.4.1 — ArchONE (`arch-one/`) ganha ícone próprio na aba (mini diagrama, igual ao do portal), no lugar do globo genérico.
