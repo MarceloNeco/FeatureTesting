@@ -2,7 +2,7 @@
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '1.7.0';
+  var APP_VERSION = '1.8.0';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -13,7 +13,7 @@
   function ler(k, padrao) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : padrao; } catch (e) { return padrao; } }
   function gravar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* aparelho sem espaço ou modo privado: segue sem gravar */ } }
   var pref = ler('vruuum.pref', null) || {};
-  if (pref.jogadores !== 2) pref.jogadores = 1;
+  pref.jogadores = 1;   // sempre abre com 1 jogador (2 jogadores só quando alguém escolhe, nesta vez)
   if (NIVEIS.indexOf(pref.nivel) < 0) pref.nivel = 'crianca';
   if (pref.controle !== 'maos') pref.controle = 'toque';
   if (pref.rivais !== 'sem') pref.rivais = 'com';
@@ -25,7 +25,7 @@
   var VE = window.VruuumVeiculos, SE = window.VruuumSelfie;
   // a selfie do jogador k, se ele escolheu usar a foto (fica só neste aparelho: selfie.js)
   function fotoDe(k) { return k >= 0 && pref.carros[k] && pref.carros[k].foto && SE ? SE.carregar(k) : null; }
-  pref.carros.forEach(function (c, k) { if (!VE.achar(c.veic)) c.veic = k ? 'gt' : 'classico'; });
+  pref.carros.forEach(function (c, k) { if (!VE.achar(c.veic)) c.veic = k ? 'gt' : 'classico'; if (c.corpo !== 'menino') c.corpo = 'menina'; });
   function salvar() { gravar('vruuum.pref', pref); }
 
   // ---------- idioma ----------
@@ -88,13 +88,17 @@
         var bc = botao('bicho camera', t('Tirar selfie', 'Take a selfie'), abrirSelfie); bc.textContent = '📸'; $('bichos').appendChild(bc);
       }
       if (PE) PE.LISTA.forEach(function (p) {   // personagens de domínio público como piloto
-        var b = botao('bicho pers', p.nome[0], function () { pref.carros[editando].personagem = p.id; pref.carros[editando].foto = false; salvar(); Som.tocar('buzina', editando); marcar(); });
+        var b = botao('bicho pers', p.nome[0], function () { var cc = pref.carros[editando]; cc.personagem = p.id; cc.foto = false; if (PE.corpoDe(p.id)) cc.corpo = PE.corpoDe(p.id); salvar(); Som.tocar('buzina', editando); marcar(); });
         b.setAttribute('data-personagem', p.id); b.title = p.nome[0];
         var cv = document.createElement('canvas'); cv.width = cv.height = 80; p.frente(cv.getContext('2d'), 40, 46, 26); b.appendChild(cv);
         $('personagens').appendChild(b);
       });
       Array.prototype.forEach.call(document.querySelectorAll('[data-aba]'), function (b) {
         b.addEventListener('click', function () { editando = +b.getAttribute('data-aba'); Som.tocar('clique'); marcar(); });
+      });
+      $('tirarJ2').addEventListener('click', function () { pref.jogadores = 1; editando = 0; salvar(); Som.tocar('clique'); marcar(); });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-corpo]'), function (b) {
+        b.addEventListener('click', function () { pref.carros[editando].corpo = b.getAttribute('data-corpo'); salvar(); Som.tocar('clique'); marcar(); });
       });
       traduzir();
     }
@@ -107,7 +111,7 @@
     var passo = function () {
       if (estadoTela !== 'menu') { animPrevia = 0; return; }
       var c = pref.carros[editando];
-      D.previa($('previa'), D.CORES[c.cor], D.PILOTOS[c.piloto], c.veic, fotoDe(editando), c.personagem);
+      D.previa($('previa'), D.CORES[c.cor], D.PILOTOS[c.piloto], c.veic, fotoDe(editando), c.personagem, c.corpo);
       animPrevia = requestAnimationFrame(passo);
     };
     animPrevia = requestAnimationFrame(passo);
@@ -202,9 +206,11 @@
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-veic]'), function (b) {
       b.setAttribute('aria-pressed', String(b.getAttribute('data-veic') === c.veic));
-      D.miniatura(b.querySelector('canvas'), D.CORES[c.cor], D.PILOTOS[c.piloto], b.getAttribute('data-veic'), fotoDe(editando), c.personagem);
+      D.miniatura(b.querySelector('canvas'), D.CORES[c.cor], D.PILOTOS[c.piloto], b.getAttribute('data-veic'), fotoDe(editando), c.personagem, c.corpo);
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-cor]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-cor') === c.cor)); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-corpo]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-corpo') === c.corpo)); });
+    $('btCorrer').textContent = pref.jogadores === 2 ? t('🏁 Correr! · 2 jogadores', '🏁 Race! · 2 players') : t('🏁 Correr!', '🏁 Race!');
     Array.prototype.forEach.call(document.querySelectorAll('[data-piloto]'), function (b) { b.setAttribute('aria-pressed', String(!c.foto && !c.personagem && +b.getAttribute('data-piloto') === c.piloto)); });
     Array.prototype.forEach.call(document.querySelectorAll('[data-personagem]'), function (b) { b.setAttribute('aria-pressed', String(c.personagem === b.getAttribute('data-personagem'))); });
     var bf = $('btFoto'), fot = SE && SE.carregar(editando);
@@ -262,7 +268,7 @@
     Som.iniciar();
     if (TOQUE && pref.jogadores === 1 && pref.controle !== 'maos') ligarMovimento();   // com as mãos na câmera, o celular fica parado (sem inclinar)
     mov.zerar(); mov.calibrar();
-    jogs = pref.carros.slice(0, pref.jogadores).map(function (c) { return { cor: D.CORES[c.cor], piloto: D.PILOTOS[c.piloto], veic: c.veic, foto: fotoDe(pref.carros.indexOf(c)), personagem: c.personagem || null }; });
+    jogs = pref.carros.slice(0, pref.jogadores).map(function (c) { return { cor: D.CORES[c.cor], piloto: D.PILOTOS[c.piloto], veic: c.veic, foto: fotoDe(pref.carros.indexOf(c)), personagem: c.personagem || null, corpo: c.corpo || 'menina' }; });
     // rivais: personagens sorteados (fora os escolhidos), no chão ou no céu como o jogador 1
     var configs = [];
     if (pref.rivais === 'com' && PE) {

@@ -52,8 +52,8 @@
   <div class="grupo">
     <p class="rotulo" data-t="Quantos vão correr?|How many racers?"></p>
     <div class="opcoes" role="group">
-      <button class="opcao" type="button" data-jogadores="1" data-t="🚗 1 jogador|🚗 1 player"></button>
-      <button class="opcao" type="button" data-jogadores="2" data-t="🚗🚙 2 jogadores|🚗🚙 2 players"></button>
+      <button class="opcao" type="button" data-jogadores="1" data-t="👤 1 jogador|👤 1 player"></button>
+      <button class="opcao" type="button" data-jogadores="2" data-t="👥 2 jogadores (tela dividida)|👥 2 players (split screen)"></button>
     </div>
   </div>
 
@@ -97,6 +97,7 @@
       <div id="abas" class="abas" role="tablist" hidden>
         <button class="aba" type="button" role="tab" data-aba="0"></button>
         <button class="aba" type="button" role="tab" data-aba="1"></button>
+        <button id="tirarJ2" class="aba tirar" type="button" data-t="✕ Só 1 jogador|✕ Just 1 player"></button>
       </div>
       <canvas id="previa" class="previa" width="560" height="340" aria-hidden="true"></canvas>
       <p id="nomeVeic" class="nome-veic" aria-live="polite"></p>
@@ -111,6 +112,11 @@
       <div id="veiculos" class="veiculos"></div>
       <p class="rotulo" data-t="Cor|Color"></p>
       <div id="cores" class="cores" role="group" aria-label="Cor / Color"></div>
+      <p class="rotulo" data-t="Corpo|Body"></p>
+      <div class="opcoes corpo" role="group" aria-label="Corpo / Body">
+        <button class="opcao" type="button" data-corpo="menina" data-t="👧 Menina|👧 Girl"></button>
+        <button class="opcao" type="button" data-corpo="menino" data-t="👦 Menino|👦 Boy"></button>
+      </div>
       <p class="rotulo" data-t="Piloto|Driver"></p>
       <div id="bichos" class="bichos" role="group" aria-label="Piloto / Driver"></div>
       <p class="rotulo" data-t="Personagens de histórias (domínio público e licença livre)|Story characters (public domain and free license)"></p>

@@ -11,7 +11,7 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 ## Como jogar
 
 - Toque em **🔑 Toque para ligar o motor!** (o navegador só deixa tocar som depois de um toque).
-- Escolha **1 ou 2 jogadores**, o **nível**, a **cor do carro** e o **bichinho piloto**, e toque em **🏁 Correr!**.
+- Escolha **1 ou 2 jogadores** (o jogo sempre abre com 1; com 2, a tela divide e a garagem tem "✕ Só 1 jogador"), o **nível**, a **cor do carro** e o **bichinho piloto**, e toque em **🏁 Correr!**.
 - Depois do 3‑2‑1‑VAI!, a corrida dura uns 2 minutos e passa por **4 mundos** (sorteados entre Praia, Floresta,
   Terra dos Doces, Montanha de Neve e Cidade Neon), com um portal na entrada de cada um.
 - ⭐ **Estrela** = 1 ponto · 🌈 **Arco-íris** = TURBO por 2,5 s · rampa amarela = **pulão** (no ar dá para pegar as
@@ -68,6 +68,10 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 
 ## O piloto e a selfie
 
+- **Corpo** (desde a 1.8.0): 👧 Menina ou 👦 Menino na garagem; no skate a menina usa saia rodada e blusinha com coração.
+  Escolher um personagem já ajusta o corpo (`corpoDe` em `personagens.js`); bichinhos ficam com a escolha da criança.
+- **Guia dos controles**: no 3-2-1 e nos 4 primeiros segundos, setas e botão de pular piscam com a explicação; com 2
+  jogadores, cada metade mostra "Jogador 1/2, esta metade da tela é sua".
 - **Túneis** (desde a 1.7.0): corredor em 3D com paredes e teto contínuos, boca em arco num morro do mundo e luz de
   fora clareando as pontas. **Troca dia/noite** (Misto) e **troca de mundo** são graduais em tudo: cor do chão e da pista,
   zebra e fios de neon, grade do chão, postes, pórticos, enfeites, itens, nuvens, lanternas e faróis.

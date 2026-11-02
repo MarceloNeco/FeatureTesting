@@ -107,6 +107,10 @@
       costas: function (c, x, y, r) { elipse(c, x + r * 0.15, y + r * 0.95, r * 0.3, r * 0.5, '#c43d0a', 0.3); elipse(c, x, y + r * 0.2, r * 1.0, r * 1.05, '#d9480f'); fios(c, x, y, r, 'rgba(0,0,0,.15)'); chapeuBruxa(c, x, y, r); } }
 
   ];
+  // corpo de quem pilota o skate (e o que aparece de corpo nos outros veículos): menina ou menino
+  var MENINAS = ['emilia', 'cuca', 'iara', 'chapeuzinho', 'alice', 'branca', 'cinderela', 'rapunzel', 'sereia', 'dorothy', 'pepper'];
+  var SEM_CORPO = ['tux', 'bunny'];   // bichinhos: vale a escolha da criança
+  function corpoDe(id) { return MENINAS.indexOf(id) >= 0 ? 'menina' : SEM_CORPO.indexOf(id) >= 0 || !id ? null : 'menino'; }
   function achar(id) { for (var k = 0; k < LISTA.length; k++) if (LISTA[k].id === id) return LISTA[k]; return null; }
   // sorteia n personagens diferentes, fora os já escolhidos pelos jogadores
   function sortear(n, fora, aleatorio) {
@@ -115,7 +119,7 @@
     return livres.slice(0, n);
   }
 
-  var VruuumPersonagens = { LISTA: LISTA, achar: achar, sortear: sortear };
+  var VruuumPersonagens = { LISTA: LISTA, achar: achar, sortear: sortear, corpoDe: corpoDe };
   if (typeof module !== 'undefined' && module.exports) module.exports = VruuumPersonagens;
   else raiz.VruuumPersonagens = VruuumPersonagens;
 })(this);

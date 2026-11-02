@@ -24,3 +24,11 @@ test('sortear: sem repetir e sem os já escolhidos pelos jogadores', () => {
   assert.equal(new Set(s.map(p => p.id)).size, 3);
   assert.ok(s.every(p => p.id !== 'emilia' && p.id !== 'saci'));
 });
+
+test('corpo do personagem: menina, menino ou livre (bichinhos)', () => {
+  assert.equal(P.corpoDe('branca'), 'menina');
+  assert.equal(P.corpoDe('emilia'), 'menina');
+  assert.equal(P.corpoDe('noel'), 'menino');
+  assert.equal(P.corpoDe('tux'), null);
+  for (const p of P.LISTA) assert.ok([null, 'menina', 'menino'].includes(P.corpoDe(p.id)), p.id);
+});

@@ -128,11 +128,11 @@
     lingua = lang || 'pt';
     ESTILO = visual === 'colorido' || visual === 'neon' ? visual : 'misto';
     base = S.basicos();
-    carrosJog = jogadores.map(function (j) { return S.carroJogador(j.cor, null, j.veic); });
+    carrosJog = jogadores.map(function (j) { return S.carroJogador(j.cor, null, j.veic, undefined, j.corpo); });
     INFO = jogadores.map(function (j) { return infoPiloto(j.cor, j.piloto, j.foto, j.personagem); });
     VEIC = jogadores.map(function (j) { return V() ? V().achar(j.veic) : null; });
     VOA = jogadores.map(function (j) { return !!(V() && V().voa(j.veic)); });
-    RIV = (estado.rivais || []).map(function (r) { return { spr: S.carroJogador(r.cor, null, r.veic), veic: V() ? V().achar(r.veic) : null, voa: !!(V() && V().voa(r.veic)), info: infoPiloto(r.cor, '', null, r.id) }; });
+    RIV = (estado.rivais || []).map(function (r) { var P3 = raiz.VruuumPersonagens; return { spr: S.carroJogador(r.cor, null, r.veic, undefined, (P3 && P3.corpoDe(r.id)) || (r.r % 2 ? 'menino' : 'menina')), veic: V() ? V().achar(r.veic) : null, voa: !!(V() && V().voa(r.veic)), info: infoPiloto(r.cor, '', null, r.id) }; });
     prepararPaletas(estado.pista);
     portais = estado.pista.mundos.map(function (m) { var tm = TEMAS[m]; return S.arco(tm.emoji + ' ' + t(tm.nome[0], tm.nome[1]), tm.cor, '#ffffff', false); });
     largada = S.arco(t('🚦 VAI! 🚦', '🚦 GO! 🚦'), '#ff4fa3', '#ffffff', false);
@@ -776,11 +776,28 @@
     }
     // setas de toque
     if (op.toque && !j.chegou) {
-      c.globalAlpha = 0.28; c.fillStyle = '#ffffff';
+      // no começo (3-2-1 e primeiros segundos) as setas e o botão de pular acendem, com a explicação
+      var guia = e.fase === 'contagem' || (e.fase === 'corrida' && e.t < 4), dois = e.jogadores.length > 1, pis = 0.6 + 0.4 * Math.sin(Date.now() / 180);
+      c.globalAlpha = guia ? 0.55 + 0.4 * pis : (dois ? 0.42 : 0.28); c.fillStyle = '#ffffff';
       var ay = h - ml.b - u * 3.4, as = u * 1.3, xl = ml.l + u * 1.2, xr = w - ml.r - u * 1.2;
       poligono(c, xl, ay, xl + as, ay - as, xl + as, ay + as, xl, ay, '#fff');
       poligono(c, xr, ay, xr - as, ay - as, xr - as, ay + as, xr, ay, '#fff');
       c.globalAlpha = 1;
+      if (guia) {
+        var fs = Math.round(u * 0.62), bpg = botaoPulo(v, ml);
+        c.font = '700 ' + fs + 'px ' + FONTE + ',' + EMOJI; c.textBaseline = 'middle'; c.lineWidth = fs * 0.22; c.strokeStyle = '#1a1446'; c.fillStyle = '#ffffff';
+        c.textAlign = 'left'; c.strokeText(t('segure: virar', 'hold: steer'), xl, ay - as - fs * 0.7); c.fillText(t('segure: virar', 'hold: steer'), xl, ay - as - fs * 0.7);
+        c.textAlign = 'right'; c.strokeText(t('segure: virar', 'hold: steer'), xr, ay - as - fs * 0.7); c.fillText(t('segure: virar', 'hold: steer'), xr, ay - as - fs * 0.7);
+        c.textAlign = 'center'; c.strokeText(t('toque: pular', 'tap: jump'), bpg.x - v.x, bpg.y - v.y - bpg.r - fs * 0.8); c.fillText(t('toque: pular', 'tap: jump'), bpg.x - v.x, bpg.y - v.y - bpg.r - fs * 0.8);
+        if (dois) {   // de quem é cada metade da tela
+          var tj = (op.jogadores && op.jogadores[ji] ? (op.jogadores[ji].piloto || '') + ' ' : '') + t('Jogador ', 'Player ') + (ji + 1), fj = Math.round(Math.min(u * 0.95, w / 11));
+          c.font = '700 ' + fj + 'px ' + FONTE + ',' + EMOJI; c.lineWidth = fj * 0.22;
+          c.strokeText(tj, w / 2, h * 0.6); c.fillStyle = ji ? '#7cf9ff' : '#ffd166'; c.fillText(tj, w / 2, h * 0.6);
+          var t2 = t('esta metade da tela é sua', 'this half of the screen is yours'), f2 = Math.round(fj * 0.6);
+          c.font = '700 ' + f2 + 'px ' + FONTE; c.lineWidth = f2 * 0.22; c.fillStyle = '#ffffff';
+          c.strokeText(t2, w / 2, h * 0.6 + fj * 0.95); c.fillText(t2, w / 2, h * 0.6 + fj * 0.95);
+        }
+      }
       var bp = botaoPulo(v, ml), bx2 = bp.x - v.x, by2 = bp.y - v.y, pronto = j.recarga <= 0 && j.pulo <= 0;
       c.globalAlpha = pronto ? 0.85 : 0.45;
       c.fillStyle = 'rgba(26,20,70,.55)'; c.beginPath(); c.arc(bx2, by2, bp.r, 0, Math.PI * 2); c.fill();
@@ -807,14 +824,14 @@
 
   // prévia da garagem: o veículo grande, animado (hélice, rotor, fogo), na estrada ou no céu
   var cachePrevia = {};
-  function spritePrevia(cor, veic) {
-    var k = cor + '|' + veic;
-    if (!cachePrevia[k]) cachePrevia[k] = S.carroJogador(cor, null, veic, 360);
+  function spritePrevia(cor, veic, corpo) {
+    var k = cor + '|' + veic + '|' + (corpo || '');
+    if (!cachePrevia[k]) cachePrevia[k] = S.carroJogador(cor, null, veic, 360, corpo);
     return cachePrevia[k];
   }
-  function previa(cv, cor, piloto, veic, foto, pers) {
+  function previa(cv, cor, piloto, veic, foto, pers, corpo) {
     var c = cv.getContext('2d'), W = cv.width, H = cv.height, vv = V() ? V().achar(veic) : null, voa = !!(V() && V().voa(veic)), tt = Date.now() / 1000;
-    var spr = spritePrevia(cor, veic);
+    var spr = spritePrevia(cor, veic, corpo);
     var g = c.createLinearGradient(0, 0, 0, H), neon = ESTILO !== 'colorido';
     if (neon) { g.addColorStop(0, '#05030f'); g.addColorStop(1, voa ? '#1d1450' : '#160f35'); }
     else if (voa) { g.addColorStop(0, '#38b6ff'); g.addColorStop(1, '#c9f0ff'); } else { g.addColorStop(0, '#2a2160'); g.addColorStop(1, '#3a2f73'); }
@@ -854,8 +871,8 @@
     c.restore();
   }
   // miniatura parada (cartões da garagem)
-  function miniatura(cv, cor, piloto, veic, foto, pers) {
-    var c = cv.getContext('2d'), spr = spritePrevia(cor, veic), W = cv.width, H = cv.height;
+  function miniatura(cv, cor, piloto, veic, foto, pers, corpo) {
+    var c = cv.getContext('2d'), spr = spritePrevia(cor, veic, corpo), W = cv.width, H = cv.height;
     c.clearRect(0, 0, W, H);
     var esc = Math.min(W * 0.9 / spr.w, H * 0.9 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
     var vvM = V() ? V().achar(veic) : null;
