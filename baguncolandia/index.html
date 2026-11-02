@@ -33,10 +33,16 @@
   <h1><span class="titulo">Bagunçolândia</span></h1>
   <p class="sub" data-t="Frutas, doces e personagens voando na TV. Você corta, pega e chuta com o corpo. Uma ou duas pessoas. Nada para instalar, nada para cadastrar.|Fruit, sweets and characters flying on the TV. You slice, catch and kick with your body. One or two people. Nothing to install, no sign-up.">Frutas, doces e personagens voando na TV. Você corta, pega e chuta com o corpo. Uma ou duas pessoas. Nada para instalar, nada para cadastrar.</p>
   <div class="col">
-    <button class="big" id="btTV" type="button">📺 <span data-t="Esta é a TV|This is the TV">Esta é a TV</span></button>
-    <button class="big sec" id="btCel" type="button">📱 <span data-t="Este é o celular|This is the phone">Este é o celular</span></button>
-    <button class="big sec" id="btSolo" type="button">🎧 <span data-t="Só o celular (sem TV)|Phone only (no TV)">Só o celular (sem TV)</span></button>
-    <button class="big sec" id="btToque" type="button">🖐️ <span data-t="No dedo (celular ou tablet, sem câmera)|By finger (phone or tablet, no camera)">No dedo (celular ou tablet, sem câmera)</span></button>
+    <div class="caixa">
+      <h2 data-t="Com a TV|With the TV">Com a TV</h2>
+      <button class="big" id="btTV" type="button">📺 <span data-t="Esta é a TV|This is the TV">Esta é a TV</span><small data-t="Aperte aqui no navegador da TV|Press this in the TV browser">Aperte aqui no navegador da TV</small></button>
+      <button class="big sec" id="btCel" type="button">📱 <span data-t="Este é o celular|This is the phone">Este é o celular</span><small data-t="Ele filma quem joga e manda para a TV|It films the players and sends it to the TV">Ele filma quem joga e manda para a TV</small></button>
+    </div>
+    <div class="caixa">
+      <h2 data-t="Sem a TV|Without the TV">Sem a TV</h2>
+      <button class="big sec" id="btSolo" type="button">🤸 <span data-t="Jogar com o corpo|Play with your body">Jogar com o corpo</span><small data-t="A câmera filma você e o jogo aparece no próprio celular|The camera films you and the game shows on the phone itself">A câmera filma você e o jogo aparece no próprio celular</small></button>
+      <button class="big sec" id="btToque" type="button">👆 <span data-t="Jogar com o dedo|Play with your finger">Jogar com o dedo</span><small data-t="Sem câmera: toque e deslize na tela. Bom para tablet|No camera: tap and swipe on the screen. Great on a tablet">Sem câmera: toque e deslize na tela. Bom para tablet</small></button>
+    </div>
   </div>
   <details class="como">
     <summary data-t="❓ Como usar|❓ How to use">❓ Como usar</summary>
@@ -65,6 +71,7 @@
   </div>
   <div id="tvRodape"><div id="tvCanto"></div><div id="tvTitulo"></div></div>
   <button id="tvSair" type="button" aria-label="Sair / Exit">✕</button>
+  <div id="tvSom"><button class="sec btMudo" id="localMudo" type="button" aria-pressed="false">🔊</button><button class="sec btMusica" id="localMusica" type="button" aria-pressed="false">🎵</button></div>
   <div id="tvLocalBar"><p id="dicaGire" class="muted" data-t="Fica melhor com o aparelho deitado 🔄|Better with the device in landscape 🔄">Fica melhor com o aparelho deitado 🔄</p>
     <div class="grupo" id="localModos">
       <button class="sec opt ativo" data-v="corta" type="button">🍉</button><button class="sec opt" data-v="pega" type="button">🎈</button><button class="sec opt" data-v="chuta" type="button">⚽</button><button class="sec opt" data-v="pula" type="button">🪵</button><button class="sec opt" data-v="bolas" type="button">🎳</button><button class="sec opt" data-v="mistura" type="button">🎪</button>
@@ -103,6 +110,7 @@
     <h2 data-t="Quem vai jogar|Who’s playing">Quem vai jogar</h2>
     <div id="lobbyJogadores" class="lobbyLista"></div>
     <div id="lobbyResumo" class="resumo"></div>
+    <p id="lobbyDica" class="dicaLobby"></p>
     <p class="muted" data-t="Escolha o modo no celular e toque em ▶ Começar (ou OK no controle da TV).|Pick the mode on the phone and tap ▶ Start (or OK on the TV remote).">Escolha o modo no celular e toque em ▶ Começar (ou OK no controle da TV).</p>
   </div>
 </div>
@@ -138,6 +146,8 @@
       <button class="big" id="btComecar" type="button">▶ <span data-t="Começar|Start">Começar</span></button>
       <button class="sec" id="btPausa" type="button" title="Pausar / continuar" style="flex:0 0 auto">⏸</button>
       <button class="sec" id="btParar" type="button" title="Parar" style="flex:0 0 auto">⏹</button>
+      <button class="sec btMudo" id="btMudo" type="button" aria-pressed="false" style="flex:0 0 auto">🔊</button>
+      <button class="sec btMusica" id="btMusica" type="button" aria-pressed="false" style="flex:0 0 auto">🎵</button>
     </div>
     <div class="row">
       <button class="sec" id="btPularCal" type="button" style="display:none" data-t="Pular a calibração|Skip calibration">Pular a calibração</button>

@@ -177,3 +177,21 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #avisoSair { position: fixed; left: 50%; bottom: 2rem; transform: translate(-50%, 1rem); z-index: 1000; max-width: calc(100% - 2rem); background: var(--card); color: var(--text); border: 2px solid var(--lima); border-radius: 14px; padding: .8rem 1.1rem; font-weight: 600; text-align: center; opacity: 0; pointer-events: none; transition: opacity .2s ease-out, transform .2s ease-out; }
 #avisoSair.ativo { opacity: 1; transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: reduce) { #avisoSair { transition: none; } }
+/* tela inicial: os botões em duas caixas, "Com a TV" e "Sem a TV", cada um com uma linha dizendo o que faz */
+.caixa { display: flex; flex-direction: column; gap: .75rem; border: 2px solid var(--border); border-radius: 18px; padding: .9rem; }
+.caixa h2 { font-size: 1.05rem; font-weight: 700; color: var(--muted); margin: 0 0 -.15rem .2rem; }
+.caixa button small { display: block; font-size: .85rem; font-weight: 500; opacity: .85; margin-top: .3rem; line-height: 1.3; }
+/* modos sem TV: ⏸ só durante a rodada; os 6 modos numa fileira só; 🔊 e 🎵 sempre à mão, na coluna da direita */
+#localPausa { display: none; }
+#tvLocalBar .grupo { flex-wrap: nowrap; }
+#tvLocalBar .grupo button { flex: 1 1 0; min-width: 0; max-width: 4.6rem; padding: .4rem 0; }
+#tvSom { display: none; position: absolute; right: 1.5vh; top: calc(1.5vh + 52px); z-index: 9; flex-direction: column; gap: 8px; }
+#tv.local #tvSom { display: flex; }
+#tv.local.jogando #tvSom { top: calc(1.5vh + 104px); }
+#tv.local.toque.jogando #tvSom { top: calc(1.5vh + 156px); }
+#tvSom button { width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; font-size: 1.1rem; border: 0; }
+.btMusica { position: relative; }
+.btMusica.off { opacity: .55; }
+.btMusica.off::after { content: ''; position: absolute; left: 22%; right: 22%; top: 50%; height: 3px; background: var(--erro); border-radius: 2px; transform: rotate(-45deg); }
+.dicaLobby { color: var(--ouro); font-size: 1rem; text-align: center; max-width: 32rem; margin: 0 auto; }
+.dicaLobby:empty { display: none; }

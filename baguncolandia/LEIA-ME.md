@@ -26,6 +26,10 @@ Endereço: `https://solverone.com.br/FeatureTesting/baguncolandia/` (atalho para
 **Música**: em 🎵 Música no celular, cole um link do YouTube (vídeo ou playlist); a TV toca num
 cantinho. Com tempo "🎵 a música", a rodada dura a música inteira.
 
+**Música do jogo e botões de som**: o jogo toca música o tempo todo, uma diferente a cada rodada: 13 músicas de
+verdade em `musicas/` (domínio público, ver `CREDITOS.md`). Sem internet, toca as que o próprio jogo cria. **🔊** deixa tudo mudo (efeitos, música e voz); **🎵** liga ou desliga só a música. Ficam na coluna
+da direita nos modos sem TV e ao lado de ⏸ ⏹ no celular ligado à TV; a escolha fica guardada no aparelho.
+
 **Música da sala pelo microfone**: em 🎵 Música, toque em **🎤 Seguir a música da sala** e deixe o celular
 ouvir (ele pede o microfone uma vez). Toque qualquer música em qualquer aparelho: o jogo acelera no ritmo
 e as bordas da TV pulsam na batida. O som não sai do celular.
@@ -56,9 +60,9 @@ armadura), cor da roupa, acessório (laço, coroa, tiara, óculos, boné, chapé
 fica fixa no topo enquanto você escolhe. Boneco 1 e Boneco 2 (para duas pessoas no mesmo celular). Fica
 guardado no celular. O desenho do boneco mora em `boneco.js`.
 
-**Só o celular (sem TV)**: na tela inicial, 🎧. O jogo roda no próprio celular, com a câmera frontal.
+**🤸 Jogar com o corpo (sem TV)**: na tela inicial, caixa "Sem a TV". O jogo roda no próprio celular, com a câmera frontal.
 
-**🖐️ No dedo (celular ou tablet, sem câmera)**: na tela inicial, 🖐️. Deite o aparelho. O dedo corta, pega
+**👆 Jogar com o dedo (sem TV e sem câmera)**: na tela inicial, caixa "Sem a TV". Deite o aparelho. O dedo corta, pega
 e chuta; deslize para cima para pular e para baixo para abaixar; o boneco anda com o dedo. 👥 2 = duas
 pessoas no mesmo tablet, uma em cada metade. Sem calibração. É a "versão de bolso": no fim, o jogo
 convida a chamar a TV e jogar com o corpo todo.
@@ -96,12 +100,13 @@ Tire uma foto dessa caixa e mande: é o que falta para achar o problema. O desen
 | `boneco.js` | o boneco personalizável (corpo em pé, cabeças, cabelos, roupas, acessórios, marionete) |
 | `sala.js` | pareamento (Supabase broadcast), WebRTC, câmera, visão (diferença entre quadros) |
 | `calibrar.js` | calibração guiada: fundo → silhueta → braços → chute → pulo |
-| `voz.js` / `som.js` | fala (speechSynthesis, regras SolverONE) e sons sintetizados (WebAudio) |
+| `voz.js` / `som.js` | fala (speechSynthesis, regras SolverONE), sons sintetizados (WebAudio) e as músicas |
+| `musicas/` | 13 MP3 de domínio público (FreePD, CC0); lista em `TRILHA` no `som.js` |
 | `batida.js` | microfone → batida e BPM (sem IA; `estimarBpm` é pura e testada no Node) |
 | `esqueleto.js` | esqueleto por IA (MediaPipe Pose em `libs/mediapipe/`, carregado só quando a pessoa liga); devolve 13 pontos espelhados |
 | `spotify.js` / `config.js` | Spotify como controle remoto (PKCE, sem segredo); `config.js` guarda só o Client ID público |
 | `sw.js` | cache da pasta; `VERSAO` tem de ser igual a `APP_VERSION` |
-| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js` e `voltar.test.js` (Chromium) |
+| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js`, `voltar.test.js`, `som.test.js` e `musica.test.js` (Chromium) |
 
 Rodar os testes: `node --test baguncolandia/teste/*.test.js` e `node baguncolandia/teste/pagina.test.js`.
 
