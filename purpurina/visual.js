@@ -75,7 +75,7 @@
   function ids(cat, semNenhum) { return cat.opcoes.map(function (x) { return x.id; }).filter(function (id) { return !semNenhum || id !== 'nenhum'; }); }
   function cores(cat) { return P.CORES[cat.cores].map(function (x) { return x.id; }); }
 
-  /* Surpresa: sorteia tudo, mas com bom senso — pele, rosto, nariz, cabelo, mechas e olhos ficam (é a personagem dela),
+  /* Surpresa: sorteia tudo, mas com bom senso — pele, rosto, nariz, olhos (cor, formato e distância), boca, cabelo e mechas ficam (é a personagem dela),
      roupa e maquiagem combinando, acessório às vezes sim, às vezes não. Cenário fica. */
   function surpresa(e0, r) {
     r = r || Math.random;

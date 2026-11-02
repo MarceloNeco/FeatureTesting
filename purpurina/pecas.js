@@ -102,11 +102,24 @@
     ] },
     { id: 'rosto', grupo: 'eu', ico: '🙂', pt: 'Rosto', en: 'Face shape', area: A.rosto, zoom: 'rosto', opcoes: [
       o('oval', 'Oval', 'Oval'), o('redondo', 'Redondinho', 'Round'), o('coracao', 'Coração', 'Heart'), o('fininho', 'Fininho', 'Slim'),
-      o('bochechudo', 'Bochechudo', 'Chubby cheeks')
+      o('bochechudo', 'Bochechudo', 'Chubby cheeks'), o('largo', 'Largo', 'Wide'), o('quadradinho', 'Quadradinho', 'Square'),
+      o('comprido', 'Comprido', 'Long')
     ] },
     { id: 'nariz', grupo: 'eu', ico: '👃', pt: 'Nariz', en: 'Nose', area: A.rosto, zoom: 'rosto', opcoes: [
       o('botao', 'Botãozinho', 'Button'), o('arrebitado', 'Arrebitado', 'Upturned'), o('fininho', 'Fininho', 'Slim'),
-      o('redondinho', 'Redondinho', 'Round tip'), o('pequenino', 'Pequenininho', 'Tiny')
+      o('redondinho', 'Redondinho', 'Round tip'), o('pequenino', 'Pequenininho', 'Tiny'), o('batatinha', 'Batatinha', 'Button bulb'),
+      o('largo', 'Largo', 'Wide'), o('reto', 'Reto', 'Straight')
+    ] },
+    { id: 'formaOlho', grupo: 'eu', ico: '👁️', pt: 'Formato dos olhos', en: 'Eye shape', area: A.olhos, zoom: 'rosto', opcoes: [
+      o('redondos', 'Redondinhos', 'Round'), o('amendoados', 'Amendoados', 'Almond'), o('grandes', 'Grandões', 'Big'),
+      o('pequenos', 'Pequenos', 'Small'), o('puxadinhos', 'Puxadinhos', 'Upturned'), o('caidos', 'Caidinhos', 'Downturned')
+    ] },
+    { id: 'distOlhos', grupo: 'eu', ico: '↔️', pt: 'Olhos perto ou longe', en: 'Eye spacing', area: A.olhos, zoom: 'rosto', opcoes: [
+      o('juntos', 'Mais juntinhos', 'Closer together'), o('normal', 'No meio', 'Middle'), o('afastados', 'Mais afastados', 'Farther apart')
+    ] },
+    { id: 'formaBoca', grupo: 'eu', ico: '👄', pt: 'Boca', en: 'Mouth', area: A.boca, zoom: 'rosto', opcoes: [
+      o('coracao', 'Coraçãozinho', 'Little heart'), o('fininha', 'Fininha', 'Thin'), o('cheinha', 'Cheinha', 'Full'),
+      o('larga', 'Larga', 'Wide'), o('pequenininha', 'Pequenininha', 'Tiny'), o('sorrisinho', 'Sorrisinho', 'Little smile')
     ] },
     { id: 'cabelo', grupo: 'eu', ico: '💇', pt: 'Cabelo', en: 'Hair', cores: 'cabelo', area: A.cabeca, zoom: 'cabeca', opcoes: [
       o('longo', 'Longo e liso', 'Long and straight'), o('ondulado', 'Ondulado', 'Wavy'), o('cacheado', 'Cacheado', 'Curly'),
@@ -126,7 +139,8 @@
       o('chanelPontas', 'Chanel de pontas para dentro', 'Rounded bob', ['escola', 'festa']), o('pontasFora', 'Pontas para fora', 'Flipped ends', ['pop', 'festa']),
       o('cachinhos', 'Cachinhos de molinha', 'Spiral curls', ['princesa', 'festa']), o('encaracolado', 'Encaracolado volumoso', 'Big curly hair', ['pop', 'praia']),
       o('rabinhoCachos', 'Rabo de cachos', 'Curly ponytail', ['festa', 'pop']),
-      o('curtinho', 'Curtinho', 'Short cut', ['escola', 'esporte']), o('topete', 'Topete', 'Quiff', ['pop', 'escola'])
+      o('curtinho', 'Curtinho', 'Short cut', ['escola', 'esporte']), o('topete', 'Topete', 'Quiff', ['pop', 'escola']),
+      o('armado', 'Ondulado armadinho', 'Big wavy hair', ['casual', 'praia']), o('armadoLongo', 'Ondulado armado longo', 'Long big waves', ['praia', 'festa'])
     ] },
     { id: 'mechas', grupo: 'eu', ico: '🌈', pt: 'Mechas', en: 'Highlights', cores: 'cabelo', area: A.cabeloTodo, zoom: 'cabeca', opcoes: [
       NENHUM('Sem mechas', 'No highlights'), o('pontas', 'Pontas coloridas', 'Colored tips', ['pop']), o('frente', 'Mechas na frente', 'Front streaks', ['pop']),
@@ -278,7 +292,11 @@
     ] },
     { id: 'oculos', grupo: 'acess', ico: '🕶️', pt: 'Óculos', en: 'Glasses', cores: 'roupa', area: A.rosto, zoom: 'rosto', opcoes: [
       NENHUM('Sem óculos', 'No glasses'), o('sol', 'De sol', 'Sunglasses', ['praia', 'verao', 'pop']), o('coracao', 'De coração', 'Heart glasses', ['pop', 'festa']),
-      o('estrela', 'De estrela', 'Star glasses', ['pop', 'festa']), o('redondo', 'Redondinho', 'Round glasses', ['casual', 'escola'])
+      o('estrela', 'De estrela', 'Star glasses', ['pop', 'festa']), o('redondo', 'Redondinho', 'Round glasses', ['casual', 'escola']),
+      o('retangular', 'Retangular', 'Rectangle frames', ['escola', 'casual']), o('quadrado', 'Quadradão', 'Square frames', ['escola', 'pop']),
+      o('gatinho', 'Gatinho', 'Cat-eye frames', ['festa', 'pop']), o('oval', 'Oval', 'Oval frames', ['escola', 'casual']),
+      o('redondoGrande', 'Redondo grandão', 'Big round frames', ['pop', 'casual']), o('aviador', 'Aviador', 'Aviator', ['pop', 'verao']),
+      o('meioAro', 'Meio aro', 'Half-rim', ['escola']), o('fininho', 'Aro fininho', 'Thin wire', ['escola', 'casual'])
     ] },
     { id: 'bolsa', grupo: 'acess', ico: '👜', pt: 'Bolsas', en: 'Bags', cores: 'roupa', area: A.corpo, opcoes: [
       NENHUM('Sem bolsa', 'No bag'), o('mao', 'Bolsinha de mão', 'Clutch', ['festa', 'princesa']), o('ombro', 'Bolsa de ombro', 'Shoulder bag', ['casual', 'pop']),
@@ -295,7 +313,7 @@
 
   // como a personagem começa (e o que volta no "começar de novo")
   var PADRAO = {
-    pele: 'p3', personagem: 'menina', rosto: 'oval', nariz: 'botao', cabelo: 'ondulado', cabeloCor: 'castanho', mechas: 'nenhum', mechasCor: 'rosa', olhos: 'castanho',
+    pele: 'p3', personagem: 'menina', rosto: 'oval', nariz: 'botao', formaOlho: 'redondos', distOlhos: 'normal', formaBoca: 'coracao', cabelo: 'ondulado', cabeloCor: 'castanho', mechas: 'nenhum', mechasCor: 'rosa', olhos: 'castanho',
     base: 'nenhum', blush: 'nenhum', blushCor: 'rosa', sombra: 'nenhum', sombraCor: 'lilas', delineado: 'nenhum', delineadoCor: 'preto',
     cilios: 'curtos', ciliosCor: 'preto', unhas: 'nenhum', unhasCor: 'chiclete', batom: 'nenhum', batomCor: 'rosaclaro', glitter: 'nenhum', glitterCor: 'dourado', adesivo: 'nenhum',
     vestido: 'nenhum', vestidoCor: 'lilas', blusa: 'camiseta', blusaCor: 'rosaclaro', saia: 'nenhum', saiaCor: 'chiclete',

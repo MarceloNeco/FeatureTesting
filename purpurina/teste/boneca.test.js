@@ -156,3 +156,16 @@ test('volta completa sem pular: a cabeça é sempre a girada (de 1° a 359°) e 
   assert.ok(larg(180) < larg(10) * 0.02, 'de costas quase sem pele');
   assert.ok(!/<path d="M126,152 Q200,96 274,152"/.test(B.svg(e, { id: 't', angulo: 180 })), 'tiara não aparece de costas');
 });
+
+test('traços novos desenham de frente, girando e de costas', () => {
+  const L = [{ formaOlho: 'amendoados', distOlhos: 'afastados', formaBoca: 'sorrisinho', nariz: 'batatinha', rosto: 'largo', cabelo: 'armado', oculos: 'retangular' },
+    { formaOlho: 'caidos', distOlhos: 'juntos', formaBoca: 'cheinha', nariz: 'reto', rosto: 'quadradinho', cabelo: 'armadoLongo', oculos: 'gatinho' },
+    { formaOlho: 'puxadinhos', formaBoca: 'larga', nariz: 'largo', rosto: 'comprido', oculos: 'aviador' }, { formaOlho: 'pequenos', formaBoca: 'fininha', oculos: 'meioAro' },
+    { formaOlho: 'grandes', formaBoca: 'pequenininha', oculos: 'redondoGrande' }, { oculos: 'quadrado' }, { oculos: 'oval' }, { oculos: 'fininho' }];
+  for (const l of L) for (const a of [0, 40, 90, 140, 200, 300]) {
+    const s = B.svg(Object.assign(V.novo(), l), { id: 'n', angulo: a, anim: true }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), JSON.stringify(l) + a);
+  }
+  // olhos afastados ficam mais longe um do outro (e a lente do óculos vai junto)
+  const lente = (d) => (B.svg(Object.assign(V.novo(), { distOlhos: d, oculos: 'retangular' }), { id: 'o', fundo: false }).match(/translate\((-?\d+) 0\)/) || [0, '0'])[1];
+  assert.equal(lente('afastados'), '-9'); assert.equal(lente('juntos'), '7');
+});
