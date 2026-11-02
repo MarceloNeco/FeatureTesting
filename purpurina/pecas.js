@@ -40,13 +40,13 @@
     cabelo: [
       c('preto', '#2a1d1b', 'Preto', 'Black'), c('escuro', '#4a2c20', 'Castanho-escuro', 'Dark brown'),
       c('castanho', '#7b4a2b', 'Castanho', 'Brown'), c('ruivo', '#c4572c', 'Ruivo', 'Red'),
-      c('loiro', '#e3b85c', 'Loiro', 'Blonde'), c('platinado', '#f4e3ab', 'Loiro clarinho', 'Light blonde'),
+      c('loiroEscuro', '#bf8f4f', 'Loiro escuro', 'Dark blonde'), c('loiro', '#e3b85c', 'Loiro', 'Blonde'), c('platinado', '#f4e3ab', 'Loiro clarinho', 'Light blonde'),
       c('rosa', '#ff8fc8', 'Rosa', 'Pink', ['fantasia']), c('lilas', '#b892ff', 'Lilás', 'Lilac', ['fantasia']),
       c('azul', '#6fb8ff', 'Azul', 'Blue', ['fantasia']), c('menta', '#6fe0c0', 'Verde-água', 'Aqua', ['fantasia'])
     ],
     olhos: [
       c('castanho', '#6b3e26', 'Castanhos', 'Brown'), c('preto', '#2a1c1a', 'Pretos', 'Black'), c('verde', '#3e9a5a', 'Verdes', 'Green'),
-      c('azul', '#3b7fd6', 'Azuis', 'Blue'), c('mel', '#b9822f', 'Cor de mel', 'Hazel'), c('violeta', '#8a55d6', 'Violeta', 'Violet')
+      c('azul', '#3b7fd6', 'Azuis', 'Blue'), c('mel', '#b9822f', 'Cor de mel', 'Hazel'), c('cinza', '#6f8a9c', 'Azul-acinzentados', 'Grey-blue'), c('verdeClaro', '#7f9c78', 'Verde-acinzentados', 'Grey-green'), c('violeta', '#8a55d6', 'Violeta', 'Violet')
     ],
     blush: [
       c('rosa', '#ff8fb1', 'Rosa', 'Pink'), c('pessego', '#ffab8a', 'Pêssego', 'Peach'), c('coral', '#ff7f6b', 'Coral', 'Coral'),
@@ -110,6 +110,9 @@
       o('redondinho', 'Redondinho', 'Round tip'), o('pequenino', 'Pequenininho', 'Tiny'), o('batatinha', 'Batatinha', 'Button bulb'),
       o('largo', 'Largo', 'Wide'), o('reto', 'Reto', 'Straight')
     ] },
+    { id: 'testa', grupo: 'eu', ico: '🙆', pt: 'Testa', en: 'Forehead', area: A.cabeca, zoom: 'cabeca', opcoes: [
+      o('baixa', 'Baixinha', 'Low'), o('normal', 'No meio', 'Middle'), o('alta', 'Alta', 'High'), o('bemAlta', 'Testona', 'Very high')
+    ] },
     { id: 'formaOlho', grupo: 'eu', ico: '👁️', pt: 'Formato dos olhos', en: 'Eye shape', area: A.olhos, zoom: 'rosto', opcoes: [
       o('redondos', 'Redondinhos', 'Round'), o('amendoados', 'Amendoados', 'Almond'), o('grandes', 'Grandões', 'Big'),
       o('pequenos', 'Pequenos', 'Small'), o('puxadinhos', 'Puxadinhos', 'Upturned'), o('caidos', 'Caidinhos', 'Downturned'),
@@ -141,7 +144,7 @@
       o('cachinhos', 'Cachinhos de molinha', 'Spiral curls', ['princesa', 'festa']), o('encaracolado', 'Encaracolado volumoso', 'Big curly hair', ['pop', 'praia']),
       o('rabinhoCachos', 'Rabo de cachos', 'Curly ponytail', ['festa', 'pop']),
       o('curtinho', 'Curtinho', 'Short cut', ['escola', 'esporte']), o('topete', 'Topete', 'Quiff', ['pop', 'escola']),
-      o('armado', 'Ondulado armadinho', 'Big wavy hair', ['casual', 'praia']), o('armadoLongo', 'Ondulado armado longo', 'Long big waves', ['praia', 'festa'])
+o('cachosSoltos', 'Cacheado solto (risca no meio)', 'Loose curls (middle part)', ['casual', 'praia', 'festa']),       o('armado', 'Ondulado armadinho', 'Big wavy hair', ['casual', 'praia']), o('armadoLongo', 'Ondulado armado longo', 'Long big waves', ['praia', 'festa'])
     ] },
     { id: 'mechas', grupo: 'eu', ico: '🌈', pt: 'Mechas', en: 'Highlights', cores: 'cabelo', area: A.cabeloTodo, zoom: 'cabeca', opcoes: [
       NENHUM('Sem mechas', 'No highlights'), o('pontas', 'Pontas coloridas', 'Colored tips', ['pop']), o('frente', 'Mechas na frente', 'Front streaks', ['pop']),
@@ -314,7 +317,7 @@
 
   // como a personagem começa (e o que volta no "começar de novo")
   var PADRAO = {
-    pele: 'p3', personagem: 'menina', rosto: 'oval', nariz: 'botao', formaOlho: 'redondos', distOlhos: 'normal', formaBoca: 'coracao', cabelo: 'ondulado', cabeloCor: 'castanho', mechas: 'nenhum', mechasCor: 'rosa', olhos: 'castanho',
+    pele: 'p3', personagem: 'menina', rosto: 'oval', nariz: 'botao', testa: 'normal', formaOlho: 'redondos', distOlhos: 'normal', formaBoca: 'coracao', cabelo: 'ondulado', cabeloCor: 'castanho', mechas: 'nenhum', mechasCor: 'rosa', olhos: 'castanho',
     base: 'nenhum', blush: 'nenhum', blushCor: 'rosa', sombra: 'nenhum', sombraCor: 'lilas', delineado: 'nenhum', delineadoCor: 'preto',
     cilios: 'curtos', ciliosCor: 'preto', unhas: 'nenhum', unhasCor: 'chiclete', batom: 'nenhum', batomCor: 'rosaclaro', glitter: 'nenhum', glitterCor: 'dourado', adesivo: 'nenhum',
     vestido: 'nenhum', vestidoCor: 'lilas', blusa: 'camiseta', blusaCor: 'rosaclaro', saia: 'nenhum', saiaCor: 'chiclete',

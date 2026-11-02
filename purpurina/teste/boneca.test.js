@@ -169,3 +169,11 @@ test('traços novos desenham de frente, girando e de costas', () => {
   const lente = (d) => (B.svg(Object.assign(V.novo(), { distOlhos: d, oculos: 'retangular' }), { id: 'o', fundo: false }).match(/translate\((-?\d+) 0\)/) || [0, '0'])[1];
   assert.equal(lente('afastados'), '-9'); assert.equal(lente('juntos'), '7');
 });
+
+test('testa: a linha do cabelo sobe ou desce, de frente e girando, e o cacheado solto desenha', () => {
+  for (const testa of ['baixa', 'normal', 'alta', 'bemAlta']) for (const cabelo of ['cachosSoltos', 'franja', 'longo', 'coqueDuplo']) for (const a of [0, 60, 180]) {
+    const s = B.svg(Object.assign(V.novo(), { testa, cabelo, cabeloCor: 'loiroEscuro', olhos: 'cinza' }), { id: 't', angulo: a }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), testa + cabelo + a);
+  }
+  const franja = (t) => B.svg(Object.assign(V.novo(), { cabelo: 'franja', testa: t }), { id: 'f', fundo: false });
+  assert.notEqual(franja('alta'), franja('normal')); assert.notEqual(franja('baixa'), franja('normal'));
+});
