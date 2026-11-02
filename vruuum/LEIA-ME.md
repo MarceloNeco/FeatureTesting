@@ -127,7 +127,9 @@ mostra as mãos e o volante (`maos.js`, MediaPipe Hand Landmarker no próprio ap
 
 A "rádio" do jogo (`som.js`) toca dois tipos de rock, sem parar:
 
-- **Gravadas** (`musicas/*.mp3`, 26 músicas, ~47 MB): rock de verdade, com bateria, baixo e guitarra. 18 do
+- **Gravadas** (`musicas/*.mp3`, 36 músicas, ~67 MB): rock de verdade, com bateria, baixo e guitarra. Na 1.4.0
+  entraram mais 10 animados: 4 da banda **Anthem of Rain** (instrumentais, CC BY 4.0), Way of the Samurai do
+  HoliznaCC0 e 5 do Kevin MacLeod (RetroFuture Clean, Zap Beat, El Magicia, Gearhead, Bet You Can ver 2). 18 do
   **Kevin MacLeod** (incompetech.com), licença **CC BY 4.0**: Volatile Reaction, Heroic Age, Unholy Knight e, desde a
   1.3.0, Metalmania, Ready Aim Fire, Summon the Rawk, Noise Attack, RetroFuture Nasty, Hotrock, Neolith, Iron Bacon,
   Take the Lead, Exhilarate, Cool Hard Facts, Bet You Can, Pump, Breakdown e What You Want; 5 do **HoliznaCC0**
@@ -165,7 +167,7 @@ No arquivo baixado (📲 Guardar no celular) tocam só as feitas pelo jogo, para
 | `veiculos.js` | a garagem: os 9 veículos (desenho, nome, grupo, velocidade e curva), testada no Node. |
 | `sprites.js` | todos os desenhos, feitos em código uma vez num canvas escondido. |
 | `desenho.js` | a estrada em 3D (pseudo-3D por pedaços), céu, fundo, enfeites, carros, efeitos, placar e tela dividida. |
-| `musicas/` | as 26 músicas gravadas (MP3: CC BY 4.0, CC BY-SA e CC0) e `LICENCAS.md`. |
+| `musicas/` | as 36 músicas gravadas (MP3: CC BY 4.0, CC BY-SA e CC0) e `LICENCAS.md`. |
 | `rock.js` | a banda de rock e as 3 músicas (partitura em `MUSICAS`), testadas no Node. |
 | `som.js` | motor, buzina e efeitos sintetizados (WebAudio); liga e desliga a música do `rock.js`. |
 | `app.js` | menu, controles, tela cheia, bordas seguras, laço da corrida, pausa, resultado, recorde, instalar e baixar. `APP_VERSION` aqui. |

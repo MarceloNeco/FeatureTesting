@@ -1,13 +1,13 @@
 /* Vruuum! — service worker: guarda a pasta no aparelho para abrir sem internet.
    Código (html, js, css, json): rede primeiro com 4 s de espera, senão a cópia; fonte e imagens:
-   cópia primeiro. Músicas gravadas (26 MP3, ~47 MB): baixadas em segundo plano, uma por vez, depois de instalar
+   cópia primeiro. Músicas gravadas (36 MP3, ~67 MB): baixadas em segundo plano, uma por vez, depois de instalar
    (no 4G ou com economia de dados, só 6) e na primeira vez que tocam; sempre servidas inteiras da cópia (o <audio> pede pedaços, o cache não). Cache com o nome do app: só apaga caches "vruuum-" (nunca os dos outros apps
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
-var VERSAO = '1.3.0';
+var VERSAO = '1.4.0';
 var CACHE = 'vruuum-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'pista.js', 'motor.js', 'sprites.js', 'veiculos.js', 'personagens.js', 'cabeca.js', 'desenho.js', 'rock.js', 'som.js', 'movimento.js', 'maos.js', 'selfie.js', 'app.js', 'baixar.js', 'rosto.tflite', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
 var CACHE_MUSICAS = 'vruuum-musicas-v1';   // não muda a cada versão: as músicas não baixam de novo
-var MUSICAS = ['musicas/volatile-reaction.mp3', 'musicas/kart-grand-prix.mp3', 'musicas/heroic-age.mp3', 'musicas/lava.mp3', 'musicas/unholy-knight.mp3', 'musicas/las-dunas-champions.mp3', 'musicas/metalmania.mp3', 'musicas/ready-aim-fire.mp3', 'musicas/summon-the-rawk.mp3', 'musicas/noise-attack.mp3', 'musicas/retrofuture-nasty.mp3', 'musicas/hotrock.mp3', 'musicas/neolith.mp3', 'musicas/iron-bacon.mp3', 'musicas/take-the-lead.mp3', 'musicas/exhilarate.mp3', 'musicas/cool-hard-facts.mp3', 'musicas/bet-you-can.mp3', 'musicas/pump.mp3', 'musicas/breakdown.mp3', 'musicas/what-you-want.mp3', 'musicas/holizna-jams.mp3', 'musicas/holizna-punk.mp3', 'musicas/holizna-americana.mp3', 'musicas/holizna-grunge.mp3', 'musicas/holizna-classic.mp3'];
+var MUSICAS = ['musicas/volatile-reaction.mp3', 'musicas/kart-grand-prix.mp3', 'musicas/heroic-age.mp3', 'musicas/lava.mp3', 'musicas/unholy-knight.mp3', 'musicas/las-dunas-champions.mp3', 'musicas/metalmania.mp3', 'musicas/ready-aim-fire.mp3', 'musicas/summon-the-rawk.mp3', 'musicas/noise-attack.mp3', 'musicas/retrofuture-nasty.mp3', 'musicas/hotrock.mp3', 'musicas/neolith.mp3', 'musicas/iron-bacon.mp3', 'musicas/take-the-lead.mp3', 'musicas/exhilarate.mp3', 'musicas/cool-hard-facts.mp3', 'musicas/bet-you-can.mp3', 'musicas/pump.mp3', 'musicas/breakdown.mp3', 'musicas/what-you-want.mp3', 'musicas/holizna-jams.mp3', 'musicas/holizna-punk.mp3', 'musicas/holizna-americana.mp3', 'musicas/holizna-grunge.mp3', 'musicas/holizna-classic.mp3', 'musicas/anthem-rock-this-house.mp3', 'musicas/anthem-bad-nostalgia.mp3', 'musicas/anthem-so-my-love.mp3', 'musicas/anthem-leave-the-country.mp3', 'musicas/holizna-way-of-the-samurai.mp3', 'musicas/retrofuture-clean.mp3', 'musicas/zap-beat.mp3', 'musicas/el-magicia.mp3', 'musicas/gearhead.mp3', 'musicas/bet-you-can-2.mp3'];
 // guarda as músicas uma de cada vez, em segundo plano. Com "economia de dados" ligada ou no 4G, só as 6 primeiras;
 // as outras ficam guardadas na primeira vez que tocam (o fetch abaixo guarda toda música tocada)
 function guardarMusicas() {

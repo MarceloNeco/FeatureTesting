@@ -1,7 +1,7 @@
 # Músicas gravadas — licenças
 
-O jogo toca 26 músicas gravadas, todas de licença livre. Alterações: conversão para MP3, para tocar em todo celular,
-e, nas 20 que entraram na 1.3.0, volume igualado (normalização de loudness para -11 LUFS). O jogo mostra no menu o nome da música que está tocando, o autor e a licença.
+O jogo toca 36 músicas gravadas, todas de licença livre. Alterações: conversão para MP3, para tocar em todo celular,
+e, nas 30 que entraram na 1.3.0 e na 1.4.0, volume igualado (normalização de loudness para -11 LUFS). O jogo mostra no menu o nome da música que está tocando, o autor e a licença.
 
 ## Kevin MacLeod (incompetech.com) — CC BY 4.0
 
@@ -68,3 +68,36 @@ Licença: CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/
 | `holizna-americana.mp3` | Americana |
 | `holizna-grunge.mp3` | Grunge |
 | `holizna-classic.mp3` | Classic |
+
+## Mais 10 rocks animados (entraram na 1.4.0)
+
+### Anthem of Rain — CC BY 4.0
+
+Banda de rock; versões instrumentais publicadas com o crédito no jogo de código aberto GearHead Caramel
+(https://github.com/jwvhewitt/gearhead-caramel, pasta `music/`, créditos em `credits.md`), convertidas de OGG para
+MP3 de 96 kbps com volume igualado. Licença: https://creativecommons.org/licenses/by/4.0/
+
+| Arquivo | Crédito |
+|---|---|
+| `anthem-rock-this-house.mp3` | "Rock This House (Instrumental)" by Anthem of Rain, CC BY 4.0 |
+| `anthem-bad-nostalgia.mp3` | "Bad Nostalgia (Instrumental)" by Anthem of Rain, CC BY 4.0 |
+| `anthem-so-my-love.mp3` | "So My Love (Instrumental)" by Anthem of Rain, CC BY 4.0 |
+| `anthem-leave-the-country.mp3` | "Leave the Country (Instrumental)" by Anthem of Rain, CC BY 4.0 |
+
+### HoliznaCC0 — CC0 (domínio público)
+
+| Arquivo | Música |
+|---|---|
+| `holizna-way-of-the-samurai.mp3` | Way of the Samurai (do mesmo repositório GearHead Caramel) |
+
+### Kevin MacLeod (incompetech.com) — CC BY 4.0
+
+Da mesma pasta "Royalty Free Rock" (https://github.com/jeffrey-stellar/stellar-grooves).
+
+| Arquivo | Crédito |
+|---|---|
+| `retrofuture-clean.mp3` | "RetroFuture Clean" by Kevin MacLeod (incompetech.com), Creative Commons: By Attribution 4.0 |
+| `zap-beat.mp3` | "Zap Beat" by Kevin MacLeod (incompetech.com), Creative Commons: By Attribution 4.0 |
+| `el-magicia.mp3` | "El Magicia" by Kevin MacLeod (incompetech.com), Creative Commons: By Attribution 4.0 |
+| `gearhead.mp3` | "Gearhead" by Kevin MacLeod (incompetech.com), Creative Commons: By Attribution 4.0 |
+| `bet-you-can-2.mp3` | "Bet You Can (ver 2)" by Kevin MacLeod (incompetech.com), Creative Commons: By Attribution 4.0 |
