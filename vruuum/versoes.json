@@ -2,6 +2,17 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "1.6.1",
+      "data": "02/Nov/2026",
+      "hora": "18:30:00",
+      "pt": [
+        "Transição de cor bem mais longa e natural: andando para a frente, o piso vai mudando de cor aos poucos ao longo de 150 pedaços da pista na troca dia/noite (começa antes e termina depois da virada) e de 170 na troca de mundo. A grade neon do chão acende aos poucos, e o chão lá longe se mistura com a cor do céu, como uma névoa, para o trecho de noite que vem à frente não aparecer como uma faixa escura de repente."
+      ],
+      "en": [
+        "Much longer, more natural color transition: as you drive forward, the ground changes color little by little over 150 road pieces at the day/night change (starting before and ending after the switch) and over 170 at a world change. The neon ground grid fades in, and the far-away ground blends with the sky color like haze, so the night stretch ahead no longer shows up as a sudden dark band."
+      ]
+    },
+    {
       "versao": "1.6.0",
       "data": "02/Nov/2026",
       "hora": "14:30:00",
