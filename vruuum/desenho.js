@@ -27,18 +27,22 @@
   };
   Object.keys(NEON).forEach(function (k) { var a = NEON[k], b = TEMAS[k]; a.nome = b.nome; a.emoji = b.emoji; a.cor = b.cor; a.noite = true; a.sol = null; });
   // visual: 'neon' (noite), 'colorido' (dia) ou 'misto' (alterna dia e noite a cada BLOCO pedaços da pista)
-  var ESTILO = 'misto', BLOCO = 260, TRANSICAO = 70;
+  var ESTILO = 'misto', BLOCO = 260, TRANSICAO = 150;   // a troca dia/noite dura 150 pedaços: 75 antes e 75 depois da virada
   function ehNeon(i) { return ESTILO === 'neon' || (ESTILO === 'misto' && Math.floor(i / BLOCO) % 2 === 1); }
   // quanto de noite no pedaço i (0 a 1), com o céu escurecendo/clareando aos poucos na troca
   function noiteEm(i) {
     if (ESTILO !== 'misto') return ESTILO === 'neon' ? 1 : 0;
-    var p = i % BLOCO, f = Math.min(1, p / TRANSICAO), noiteBloco = Math.floor(i / BLOCO) % 2 === 1;
-    return noiteBloco ? f : 1 - f;
+    var b = Math.floor(i / BLOCO), p = i - b * BLOCO, meio = TRANSICAO / 2, v = b % 2 === 1 ? 1 : 0;
+    function sv(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+    if (p < meio && b > 0) return (1 - v) + (v - (1 - v)) * sv(0.5 + p / TRANSICAO);              // começo do bloco: ainda vindo do anterior
+    if (BLOCO - p < meio) return v + ((1 - v) - v) * sv(0.5 - (BLOCO - p) / TRANSICAO);          // fim do bloco: já indo para o próximo
+    return v;
   }
   function tema(nome, i) { return (i == null ? ESTILO !== 'colorido' : ehNeon(i)) ? NEON[nome] : TEMAS[nome]; }
   // ---------- cores da pista misturadas aos poucos ----------
   /* A cor do chão, da pista, das bordas e das faixas de cada pedaço vem da mistura de 4 paletas: o mundo de antes e o
-     de agora (troca devagar, 45 pedaços antes e depois do portal) e o dia e a noite (troca em TRANSICAO pedaços).
+     de agora (troca devagar, 85 pedaços antes e depois do portal) e o dia e a noite (TRANSICAO pedaços em volta da
+     virada). Cada pedaço tem a sua mistura: andando para a frente, o piso vai mudando de cor aos poucos.
      Assim a estrada não muda de marrom para cinza (ou de clara para neon) de uma vez. */
   var cachePal = [], inicioMundo = [], mundosPal = [];
   function hexRgb(h) { var n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
@@ -59,13 +63,13 @@
   function corPedaco(pista, s) {
     var i = s.i, c = cachePal[i];
     if (c && c.estilo === ESTILO) return c;
-    var noite = noiteEm(i), m = s.mundo, MEIO = 45;
+    var noite = noiteEm(i), m = s.mundo, MEIO = 85;
     function doMundo(k) { var p = mundosPal[k] || mundosPal[0]; return mixPal(p.dia, p.noite, noite); }
     var pal = doMundo(m);
     // perto de um portal: mistura com o mundo vizinho
     if (m > 0 && i - inicioMundo[m] < MEIO) pal = mixPal(doMundo(m - 1), pal, suaveT((i - inicioMundo[m] + MEIO) / (2 * MEIO)));
     else if (inicioMundo[m + 1] && inicioMundo[m + 1] - i <= MEIO) pal = mixPal(pal, doMundo(m + 1), suaveT((i - inicioMundo[m + 1] + MEIO) / (2 * MEIO)));
-    c = { estilo: ESTILO, noite: noite, grama: pal.grama.map(css), pista: pal.pista.map(css), borda: pal.borda.map(css), faixa: css(pal.faixa),
+    c = { estilo: ESTILO, noite: noite, num: pal, grama: pal.grama.map(css), pista: pal.pista.map(css), borda: pal.borda.map(css), faixa: css(pal.faixa),
       bordaNoite: css(mixRgb(pal.borda[0], [255, 255, 255], 0.05)) };
     cachePal[i] = c;
     return c;
@@ -254,6 +258,11 @@
     };
     if (noiteAqui < 1) desenhaCeu(TEMAS, 1);
     if (noiteAqui > 0) desenhaCeu(NEON, noiteAqui);
+    // névoa da distância: o chão lá longe vai virando a cor do pé do céu (assim o trecho de noite que vem lá na
+    // frente não aparece como uma faixa escura embaixo de um céu ainda claro)
+    var corCeuDia = mixRgb(hexRgb(TEMAS[pista.mundos[m > 0 ? m - 1 : m]].ceu[1]), hexRgb(TEMAS[pista.mundos[m]].ceu[1]), f);
+    var corCeuNoite = mixRgb(hexRgb(NEON[pista.mundos[m > 0 ? m - 1 : m]].ceu[1]), hexRgb(NEON[pista.mundos[m]].ceu[1]), f);
+    var nevoa = mixRgb(corCeuDia, corCeuNoite, noiteAqui);
     var diaN = (TEMAS[pista.mundos[m]].noite ? 1 : 0), noite = Math.max(noiteAqui, diaN);
     if (noite > 0) camada(c, base.estrelasCeu, w, cy, cy, vs.nuvemX * 0.5, noite);
     var solCor = TEMAS[pista.mundos[m]].sol;
@@ -290,6 +299,13 @@
       x += dx; dx += s.curva;
       if (z1 <= PROF || Y2 >= Y1 || Y2 >= maxy) continue;
       var nS = ehNeon(s.i), ts = tema(pista.mundos[s.mundo], s.i), par = s.listra, pc = corPedaco(pista, s), nt = pc.noite;
+      var fn = Math.max(0, (n - cnt * 0.4) / (cnt * 0.6)), fog = Math.min(0.8, Math.pow(fn, 1.4) * 0.8);
+      if (fog > 0.01) {   // longe: mistura com a névoa
+        var pn = pc.num;
+        pc = { noite: nt * (1 - fog), num: pn, grama: [css(mixRgb(pn.grama[0], nevoa, fog)), css(mixRgb(pn.grama[1], nevoa, fog))], pista: [css(mixRgb(pn.pista[0], nevoa, fog)), css(mixRgb(pn.pista[1], nevoa, fog))],
+          borda: [css(mixRgb(pn.borda[0], nevoa, fog)), css(mixRgb(pn.borda[1], nevoa, fog))], faixa: css(mixRgb(pn.faixa, nevoa, fog)), bordaNoite: pc.bordaNoite };
+        nt = pc.noite;
+      }
       c.fillStyle = pc.grama[par]; c.fillRect(0, Y2, w, Y1 - Y2 + 1);
       var r1 = W1 / 7, r2 = W2 / 7;
       Y1 += 1;   // 1 pixel de sobra: sem risquinhos entre um pedaço e outro
@@ -323,16 +339,24 @@
         for (var fx = -1 / 3; fx < 0.5; fx += 2 / 3) poligono(c, X1 + W1 * fx - l1, Y1, X1 + W1 * fx + l1, Y1, X2 + W2 * fx + l2, Y2, X2 + W2 * fx - l2, Y2, pc.faixa);
         c.globalAlpha = 1;
       }
-      if (grade && nt > 0.5 && !s.tunel) {
+      if (grade && nt > 0.02 && !s.tunel) {   // a grade do chão acende aos poucos, junto com a noite
         corGrade = corGrade || ts.borda[0];
-        if (s.i % 2 === 0) { c.fillStyle = rgba(ts.borda[0], 0.2); c.fillRect(0, Y1 - 1, Math.max(0, X1 - W1 * 1.12), 1.2); c.fillRect(X1 + W1 * 1.12, Y1 - 1, Math.max(0, w - X1 - W1 * 1.12), 1.2); }
-        for (var gk = 0; gk < GRADE.length; gk++) { grade[gk][0].push(X1 - W1 * GRADE[gk], Y1); grade[gk][1].push(X1 + W1 * GRADE[gk], Y1); }
-      }
+        if (s.i % 2 === 0) { c.fillStyle = rgba(NEON[pista.mundos[s.mundo]].borda[0], 0.2 * nt); c.fillRect(0, Y1 - 1, Math.max(0, X1 - W1 * 1.12), 1.2); c.fillRect(X1 + W1 * 1.12, Y1 - 1, Math.max(0, w - X1 - W1 * 1.12), 1.2); }
+        for (var gk = 0; gk < GRADE.length; gk++) { grade[gk][0].push([X1 - W1 * GRADE[gk], Y1, nt]); grade[gk][1].push([X1 + W1 * GRADE[gk], Y1, nt]); }
+      } else if (grade) for (var gq = 0; gq < GRADE.length; gq++) { grade[gq][0].push(null); grade[gq][1].push(null); }   // sem grade aqui: corta a linha
       maxy = Y2;
     }
-    if (grade) {
-      c.strokeStyle = rgba(corGrade || '#2bf4ff', 0.28); c.lineWidth = 1.2;
-      grade.forEach(function (par2) { par2.forEach(function (pts) { if (pts.length < 4) return; c.beginPath(); c.moveTo(pts[0], pts[1]); for (var q = 2; q < pts.length; q += 2) c.lineTo(pts[q], pts[q + 1]); c.stroke(); }); });
+    if (grade) {   // linhas da grade em 4 níveis de brilho (mais apagadas onde ainda é dia)
+      c.lineWidth = 1.2;
+      for (var nv = 1; nv <= 4; nv++) {
+        c.strokeStyle = rgba(corGrade || '#2bf4ff', 0.28 * nv / 4); c.beginPath(); var tem = false;
+        grade.forEach(function (par2) { par2.forEach(function (pts) {
+          for (var q = 1; q < pts.length; q++) { var a = pts[q - 1], b2 = pts[q]; if (!a || !b2) continue;
+            if (Math.max(1, Math.ceil(Math.min(a[2], b2[2]) * 4 - 0.001)) !== nv) continue;
+            c.moveTo(a[0], a[1]); c.lineTo(b2[0], b2[1]); tem = true; }
+        }); });
+        if (tem) c.stroke();
+      }
     }
 
     // quem voa: névoa sobre o chão lá embaixo (dá a sensação de altura) e a rota no ar, um caminho de luz
