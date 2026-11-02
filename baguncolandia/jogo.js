@@ -28,7 +28,7 @@
 
   /* ---------- validação das mensagens do canal (segurança: nada de fora entra sem passar aqui) ---------- */
   var ID = /^[a-z0-9]{6,12}$/i;
-  var ACOES = ['comecar', 'pausar', 'continuar', 'parar', 'config', 'carregar', 'playlist', 'indice', 'proxima', 'anterior', 'pausa', 'reiniciar', 'calibrar', 'pularCalibracao', 'fale', 'batida', 'bpm', 'musica', 'boneco', 'som'];
+  var ACOES = ['comecar', 'pausar', 'continuar', 'parar', 'config', 'carregar', 'playlist', 'indice', 'proxima', 'anterior', 'pausa', 'reiniciar', 'calibrar', 'pularCalibracao', 'fale', 'batida', 'bpm', 'musica', 'boneco', 'som', 'casa'];
   function validar(m) {
     if (!m || typeof m !== 'object' || Array.isArray(m)) return null;
     var t = m.t, o = { t: t };
@@ -75,6 +75,7 @@
         if ('passo' in m) o.passo = String(m.passo).slice(0, 20);
         if ('ok' in m) o.ok = !!m.ok;
         if ('bpm' in m) o.bpm = clamp(+m.bpm || 0, 0, 220);
+        if (m.acao === 'casa') o.dir = m.dir === -1 ? -1 : 1;   // 🧸 Bagunça: ir ao cômodo vizinho
         if (m.acao === 'som') { o.semSom = m.semSom === true; o.semMusica = m.semMusica === true; }
         return o;
       case 'estado': {   // da TV para os celulares: também conferido, porque qualquer um no canal pode mandar

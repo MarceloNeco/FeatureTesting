@@ -2,6 +2,21 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.13",
+      "data": "02/Nov/2026",
+      "hora": "13:10:00",
+      "pt": [
+        "Celular deitado: a tela do jogo não estica mais (fica na proporção certa, no meio) e os botões cabem do lado, menores em tela baixa.",
+        "🧸 Bagunça: setinhas ◀ ▶ para ir ao cômodo do lado durante a rodada (sala, quarto, banheiro, cozinha, jardim, parquinho). Cada cômodo guarda a bagunça que você deixou. No controle da TV, as setas fazem o mesmo; no celular ligado à TV, os botões ◀ Cômodo ▶.",
+        "Mais de 20 coisas novas para mexer: TV com desenho animado, pianinho que toca notas, aquário com peixinhos, móbile que espalha estrelas no escuro, caixa-surpresa, tambor, relógio cuco, torradeira, micro-ondas, liquidificador, chuveiro, descarga, espelho que embaça, sapo, irrigador, varal, caixa de correio e pipa."
+      ],
+      "en": [
+        "Phone in landscape: the game no longer stretches (it keeps the right shape, centred) and the buttons fit on the side, smaller on short screens.",
+        "🧸 Mayhem: ◀ ▶ arrows to go to the next room during the round (living room, bedroom, bathroom, kitchen, garden, playground). Each room keeps the mess you left. The TV remote's arrows do the same; on a phone linked to the TV, the ◀ Room ▶ buttons.",
+        "20+ new things to play with: TV with cartoons, toy piano with real notes, fish tank, mobile that spreads stars in the dark, jack-in-the-box, drum, cuckoo clock, toaster, microwave, blender, shower, toilet flush, foggy mirror, frog, sprinkler, clothesline, mailbox and kite."
+      ]
+    },
+    {
       "versao": "0.8.12",
       "data": "02/Nov/2026",
       "hora": "12:45:00",
