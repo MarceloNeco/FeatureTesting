@@ -36,7 +36,7 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
   tema, e mostra **3 dicas** que ganham ✅ na hora. No desfile, cada dica cumprida vale uma estrela; **ninguém
   perde** (sempre pelo menos 1 ⭐). A melhor nota de cada desafio fica guardada no aparelho. As dicas ficam numa
   faixa logo abaixo da personagem (nunca por cima dela).
-- **🔄 Girar**: arrastar o dedo para os lados em cima da personagem gira ela suave, grau por grau (o rosto vai para o lado do dedo): olhos, nariz e boca andam numa esfera e o contorno do rosto vira o perfil aos poucos; o cabelo da frente gira junto e o de trás vai para trás; passando de ~100° ela fica de costas. Um toque nela
+- **🔄 Girar**: arrastar o dedo para os lados em cima da personagem gira ela suave, grau por grau (o rosto vai para o lado do dedo): olhos, nariz e boca andam numa esfera e o contorno do rosto vira o perfil aos poucos; o cabelo da frente gira junto e o de trás vai para trás; a volta é inteira, sem trocar de desenho: a pele do rosto (`regiaoPele`) é uma região presa na cabeça que some atrás dela aos poucos, e de costas sobra só cabelo. Um toque nela
   ou no **↻** dá uma volta inteira com rastro de luz (cópias do desenho que vão sumindo; não pisca a tela). O **🙂** volta
   para a frente. No desfile ela dá uma volta sozinha. Com "reduzir movimento" no aparelho, a volta é em 4 paradas.
 - **🚫 Tirar**: toda parte que dá para tirar tem a bolinha com a diagonal; em cima das opções aparece **🚫 Tirar: …** quando

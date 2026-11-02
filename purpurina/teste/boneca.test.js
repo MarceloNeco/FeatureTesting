@@ -69,7 +69,7 @@ test('anel e pulseira: só a parte da frente (arco aberto, sem círculo inteiro)
 test('perfil: de lado a cabeça vira de verdade (contorno do perfil) para os dois lados', () => {
   const e = Object.assign(V.novo(), { oculos: 'sol', brincos: 'perola', batom: 'gloss', cilios: 'arco' });
   for (const a of [70, 90, 95, 265, 270, 290]) { const s = B.svg(e, { id: 'p', angulo: a }); assert.equal(bemFormado(s), ''); assert.match(s, /p-rostoV/, 'cabeça girada em ' + a); }
-  assert.ok(!/p-rostoV/.test(B.svg(e, { id: 'p', angulo: 110 })), 'passando de 100° a cabeça fica de costas');
+  assert.match(B.svg(e, { id: 'p', angulo: 110 }), /p-rostoV/, 'passando de 100° a cabeça continua girando (sem pular para as costas)');
   assert.ok(!/p-rostoV/.test(B.svg(e, { id: 'p', angulo: 0 })), 'de frente é o desenho de frente');
 });
 
@@ -141,4 +141,18 @@ test('de lado: corpo de perfil próprio (sem o corpo de frente apertado), para o
   }
   assert.ok(!/translate\(200 0\) scale\(/.test(B.svg(V0, { id: 'l', angulo: 90 })), 'de lado não usa o corpo de frente apertado');
   assert.match(B.svg(V0, { id: 'l', angulo: 30 }), /translate\(200 0\) scale\(/, 'de três-quartos ainda é o corpo de frente');
+});
+
+test('volta completa sem pular: a cabeça é sempre a girada (de 1° a 359°) e a pele some aos poucos', () => {
+  const e = Object.assign(V.novo(), { cabelo: 'ondasLongas', cabeca: 'tiara', laco: 'lado' });
+  for (let a = 5; a < 360; a += 5) {
+    const s = B.svg(e, { id: 'v', angulo: a }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), 'ângulo ' + a);
+    assert.match(s, /v-peleR/, 'cabeça girada (sem trocar para outro desenho) em ' + a);
+  }
+  // área da pele do rosto (fórmula do laço): diminui de frente para costas, sem pular
+  const larg = (a) => { const d = (B.svg(e, { id: 'w', angulo: a }).match(/id="w-peleR"><path d="([^"]+)"/) || [])[1]; const pts = [...d.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(m => [+m[1], +m[2]]); let ar = 0; pts.forEach((q, i) => { const r = pts[(i + 1) % pts.length]; ar += q[0] * r[1] - r[0] * q[1]; }); return Math.abs(ar) / 2; };
+  let antes = larg(10);
+  for (let a = 30; a <= 170; a += 20) { const l = larg(a); assert.ok(l <= antes + 50, 'pele não cresce de novo em ' + a); antes = l; }
+  assert.ok(larg(180) < larg(10) * 0.02, 'de costas quase sem pele');
+  assert.ok(!/<path d="M126,152 Q200,96 274,152"/.test(B.svg(e, { id: 't', angulo: 180 })), 'tiara não aparece de costas');
 });
