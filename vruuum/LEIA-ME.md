@@ -68,6 +68,9 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 
 ## O piloto e a selfie
 
+- **Túneis** (desde a 1.7.0): corredor em 3D com paredes e teto contínuos, boca em arco num morro do mundo e luz de
+  fora clareando as pontas. **Troca dia/noite** (Misto) e **troca de mundo** são graduais em tudo: cor do chão e da pista,
+  zebra e fios de neon, grade do chão, postes, pórticos, enfeites, itens, nuvens, lanternas e faróis.
 - O piloto fica **de costas**, olhando a estrada: nuca, orelhas e pelo de cada bichinho (no kart e na moto, o capacete
   com listra). A cada ~7 s ele **vira para trás, olha e sorri** por 2 s, e volta. Na garagem vira mais vezes.
   O giro é em **3D**: a cabeça continua redonda e gira como uma bola e olha **por cima do ombro** (uns 130°, rosto de

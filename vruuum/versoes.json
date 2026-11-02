@@ -2,7 +2,7 @@
   "app": "vruuum",
   "versoes": [
     {
-      "versao": "1.6.2",
+      "versao": "1.7.1",
       "data": "02/Nov/2026",
       "hora": "15:03:27",
       "pt": [
@@ -10,6 +10,19 @@
       ],
       "en": [
         "🖥️ Full-screen button: on tablets and phones, when the address bar shows up (for example after locking and unlocking the tablet), a small tab appears on the left edge — one tap and the screen is full again. After locking, the first tap on returning goes full screen by itself."
+      ]
+    },
+    {
+      "versao": "1.7.0",
+      "data": "02/Nov/2026",
+      "hora": "19:30:00",
+      "pt": [
+        "Túnel refeito em 3D: paredes e teto contínuos (antes eram molduras empilhadas que tapavam a tela em degraus), entrada em forma de arco num morro do mundo (rocha com neve, arenito, chocolate com glacê, prédio neon) e luz de fora clareando as paredes perto da entrada e da saída, com um brilho suave na boca da saída.",
+        "Tudo acompanha a troca dia/noite aos poucos, junto com a cor da pista: postes e pórticos de neon acendem devagar, enfeites dos lados escurecem aos poucos, estrelas e itens trocam para a versão neon misturando as duas, nuvens do céu, lanternas dos carros e faróis acendem gradualmente. Nada muda mais de uma vez."
+      ],
+      "en": [
+        "Tunnel rebuilt in 3D: continuous walls and ceiling (before they were stacked frames covering the screen in steps), an arched entrance in a hill of the world (snowy rock, sandstone, chocolate with icing, neon building) and outside light brightening the walls near the entrance and the exit, with a soft glow at the exit.",
+        "Everything follows the day/night change gradually, together with the road color: neon posts and gates light up slowly, roadside decorations darken little by little, stars and items blend into their neon version, sky clouds, car tail lights and headlights come on gradually. Nothing switches all at once anymore."
       ]
     },
     {
