@@ -2,6 +2,32 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "1.6.1",
+      "data": "02/Nov/2026",
+      "hora": "18:30:00",
+      "pt": [
+        "Transição de cor bem mais longa e natural: andando para a frente, o piso vai mudando de cor aos poucos ao longo de 150 pedaços da pista na troca dia/noite (começa antes e termina depois da virada) e de 170 na troca de mundo. A grade neon do chão acende aos poucos, e o chão lá longe se mistura com a cor do céu, como uma névoa, para o trecho de noite que vem à frente não aparecer como uma faixa escura de repente."
+      ],
+      "en": [
+        "Much longer, more natural color transition: as you drive forward, the ground changes color little by little over 150 road pieces at the day/night change (starting before and ending after the switch) and over 170 at a world change. The neon ground grid fades in, and the far-away ground blends with the sky color like haze, so the night stretch ahead no longer shows up as a sudden dark band."
+      ]
+    },
+    {
+      "versao": "1.6.0",
+      "data": "02/Nov/2026",
+      "hora": "14:30:00",
+      "pt": [
+        "Transições suaves: a cor do chão, da pista, das bordas e das faixas agora muda aos poucos na troca de mundo (perto do portal) e na troca entre dia e noite. Antes a estrada mudava de marrom para cinza, ou de clara para neon, de uma vez.",
+        "No neon nada parece mais flutuar: o chão ganhou faixas e uma cor diferente do céu, e carros, rivais e o outro jogador têm sombra no chão (à noite, com um brilho fraco por baixo).",
+        "Mais 11 personagens famosos que podem entrar, como piloto ou como rival: Branca de Neve, Cinderela, Rapunzel, Pequena Sereia, Peter Pan, Aladim, Dorothy e o Espantalho (contos e O Mágico de Oz, domínio público, desenhos próprios), Tux (mascote do Linux), Big Buck Bunny (Blender) e Pepper (Pepper&Carrot), estes três de licença livre com crédito. Agora são 23."
+      ],
+      "en": [
+        "Smooth transitions: the color of the ground, road, edges and lane lines now changes little by little when the world changes (near the portal) and between day and night. Before, the road switched from brown to grey, or from light to neon, all at once.",
+        "In neon nothing looks like it is floating anymore: the ground got stripes and a color different from the sky, and cars, rivals and the other player have a shadow on the ground (with a faint glow underneath at night).",
+        "11 more famous characters that are allowed in, as driver or rival: Snow White, Cinderella, Rapunzel, the Little Mermaid, Peter Pan, Aladdin, Dorothy and the Scarecrow (fairy tales and The Wizard of Oz, public domain, original drawings), Tux (the Linux mascot), Big Buck Bunny (Blender) and Pepper (Pepper&Carrot), these three under free licenses with credit. Now there are 23."
+      ]
+    },
+    {
       "versao": "1.5.1",
       "data": "02/Nov/2026",
       "hora": "12:45:00",

@@ -19,23 +19,61 @@
   };
   // visual NEON (padrão): os mesmos mundos à noite, estrada escura com bordas de neon
   var NEON = {
-    praia: { ceu: ['#040714', '#1b1150'], grama: ['#0b1626', '#091321'], pista: ['#15161f', '#121319'], borda: ['#00e5ff', '#ff3df0'], faixa: '#00e5ff' },
-    floresta: { ceu: ['#020a08', '#0e2a22'], grama: ['#07140e', '#06110c'], pista: ['#131614', '#101311'], borda: ['#39ff88', '#ffd166'], faixa: '#39ff88' },
-    doces: { ceu: ['#0f0316', '#3a0d3f'], grama: ['#170819', '#140716'], pista: ['#1a1219', '#161015'], borda: ['#ff4fd8', '#7cf9ff'], faixa: '#ff4fd8' },
-    neve: { ceu: ['#030714', '#142650'], grama: ['#141b2b', '#121827'], pista: ['#151a24', '#12161f'], borda: ['#7cc8ff', '#ffffff'], faixa: '#7cc8ff' },
-    neon: { ceu: ['#05010f', '#2a0b55'], grama: ['#0c0620', '#0a051b'], pista: ['#120d24', '#0f0b1f'], borda: ['#ff2bd6', '#2bf4ff'], faixa: '#2bf4ff' }
+    praia: { ceu: ['#040714', '#1b1150'], grama: ['#0f1e36', '#182b4d'], pista: ['#15161f', '#121319'], borda: ['#00e5ff', '#ff3df0'], faixa: '#00e5ff' },
+    floresta: { ceu: ['#020a08', '#0e2a22'], grama: ['#0b1d14', '#132b1f'], pista: ['#131614', '#101311'], borda: ['#39ff88', '#ffd166'], faixa: '#39ff88' },
+    doces: { ceu: ['#0f0316', '#3a0d3f'], grama: ['#1f0b23', '#2d1133'], pista: ['#1a1219', '#161015'], borda: ['#ff4fd8', '#7cf9ff'], faixa: '#ff4fd8' },
+    neve: { ceu: ['#030714', '#142650'], grama: ['#18213a', '#232f4f'], pista: ['#151a24', '#12161f'], borda: ['#7cc8ff', '#ffffff'], faixa: '#7cc8ff' },
+    neon: { ceu: ['#05010f', '#2a0b55'], grama: ['#130a30', '#1e1146'], pista: ['#120d24', '#0f0b1f'], borda: ['#ff2bd6', '#2bf4ff'], faixa: '#2bf4ff' }
   };
   Object.keys(NEON).forEach(function (k) { var a = NEON[k], b = TEMAS[k]; a.nome = b.nome; a.emoji = b.emoji; a.cor = b.cor; a.noite = true; a.sol = null; });
   // visual: 'neon' (noite), 'colorido' (dia) ou 'misto' (alterna dia e noite a cada BLOCO pedaços da pista)
-  var ESTILO = 'misto', BLOCO = 260, TRANSICAO = 40;
+  var ESTILO = 'misto', BLOCO = 260, TRANSICAO = 150;   // a troca dia/noite dura 150 pedaços: 75 antes e 75 depois da virada
   function ehNeon(i) { return ESTILO === 'neon' || (ESTILO === 'misto' && Math.floor(i / BLOCO) % 2 === 1); }
   // quanto de noite no pedaço i (0 a 1), com o céu escurecendo/clareando aos poucos na troca
   function noiteEm(i) {
     if (ESTILO !== 'misto') return ESTILO === 'neon' ? 1 : 0;
-    var p = i % BLOCO, f = Math.min(1, p / TRANSICAO), noiteBloco = Math.floor(i / BLOCO) % 2 === 1;
-    return noiteBloco ? f : 1 - f;
+    var b = Math.floor(i / BLOCO), p = i - b * BLOCO, meio = TRANSICAO / 2, v = b % 2 === 1 ? 1 : 0;
+    function sv(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+    if (p < meio && b > 0) return (1 - v) + (v - (1 - v)) * sv(0.5 + p / TRANSICAO);              // começo do bloco: ainda vindo do anterior
+    if (BLOCO - p < meio) return v + ((1 - v) - v) * sv(0.5 - (BLOCO - p) / TRANSICAO);          // fim do bloco: já indo para o próximo
+    return v;
   }
   function tema(nome, i) { return (i == null ? ESTILO !== 'colorido' : ehNeon(i)) ? NEON[nome] : TEMAS[nome]; }
+  // ---------- cores da pista misturadas aos poucos ----------
+  /* A cor do chão, da pista, das bordas e das faixas de cada pedaço vem da mistura de 4 paletas: o mundo de antes e o
+     de agora (troca devagar, 85 pedaços antes e depois do portal) e o dia e a noite (TRANSICAO pedaços em volta da
+     virada). Cada pedaço tem a sua mistura: andando para a frente, o piso vai mudando de cor aos poucos.
+     Assim a estrada não muda de marrom para cinza (ou de clara para neon) de uma vez. */
+  var cachePal = [], inicioMundo = [], mundosPal = [];
+  function hexRgb(h) { var n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function mixRgb(a, b, f) { return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; }
+  function css(c) { return 'rgb(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ')'; }
+  function suaveT(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+  function paleta(t) { return { grama: t.grama.map(hexRgb), pista: t.pista.map(hexRgb), borda: t.borda.map(hexRgb), faixa: hexRgb(t.faixa) }; }
+  function mixPal(a, b, f) {
+    if (f <= 0) return a; if (f >= 1) return b;
+    return { grama: [0, 1].map(function (k) { return mixRgb(a.grama[k], b.grama[k], f); }), pista: [0, 1].map(function (k) { return mixRgb(a.pista[k], b.pista[k], f); }),
+      borda: [0, 1].map(function (k) { return mixRgb(a.borda[k], b.borda[k], f); }), faixa: mixRgb(a.faixa, b.faixa, f) };
+  }
+  function prepararPaletas(pista) {
+    cachePal = []; inicioMundo = [0]; mundosPal = pista.mundos.map(function (m) { return { dia: paleta(TEMAS[m]), noite: paleta(NEON[m]) }; });
+    for (var i = 1; i < pista.segs.length; i++) if (pista.segs[i].mundo !== pista.segs[i - 1].mundo) inicioMundo[pista.segs[i].mundo] = i;
+  }
+  // paleta do pedaço i: { grama, pista, borda, faixa (já em texto css), noite: 0 a 1 }
+  function corPedaco(pista, s) {
+    var i = s.i, c = cachePal[i];
+    if (c && c.estilo === ESTILO) return c;
+    var noite = noiteEm(i), m = s.mundo, MEIO = 85;
+    function doMundo(k) { var p = mundosPal[k] || mundosPal[0]; return mixPal(p.dia, p.noite, noite); }
+    var pal = doMundo(m);
+    // perto de um portal: mistura com o mundo vizinho
+    if (m > 0 && i - inicioMundo[m] < MEIO) pal = mixPal(doMundo(m - 1), pal, suaveT((i - inicioMundo[m] + MEIO) / (2 * MEIO)));
+    else if (inicioMundo[m + 1] && inicioMundo[m + 1] - i <= MEIO) pal = mixPal(pal, doMundo(m + 1), suaveT((i - inicioMundo[m + 1] + MEIO) / (2 * MEIO)));
+    c = { estilo: ESTILO, noite: noite, num: pal, grama: pal.grama.map(css), pista: pal.pista.map(css), borda: pal.borda.map(css), faixa: css(pal.faixa),
+      bordaNoite: css(mixRgb(pal.borda[0], [255, 255, 255], 0.05)) };
+    cachePal[i] = c;
+    return c;
+  }
   function rgba(hex, a) { var n = parseInt(hex.slice(1), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; }
   function luz(c, x, y, r, hex, a) {   // brilho redondo somando luz (fica bonito no escuro)
     if (r < 0.8) return;
@@ -95,6 +133,7 @@
     VEIC = jogadores.map(function (j) { return V() ? V().achar(j.veic) : null; });
     VOA = jogadores.map(function (j) { return !!(V() && V().voa(j.veic)); });
     RIV = (estado.rivais || []).map(function (r) { return { spr: S.carroJogador(r.cor, null, r.veic), veic: V() ? V().achar(r.veic) : null, voa: !!(V() && V().voa(r.veic)), info: infoPiloto(r.cor, '', null, r.id) }; });
+    prepararPaletas(estado.pista);
     portais = estado.pista.mundos.map(function (m) { var tm = TEMAS[m]; return S.arco(tm.emoji + ' ' + t(tm.nome[0], tm.nome[1]), tm.cor, '#ffffff', false); });
     largada = S.arco(t('🚦 VAI! 🚦', '🚦 GO! 🚦'), '#ff4fa3', '#ffffff', false);
     chegada = S.arco(t('🏁 CHEGADA 🏁', '🏁 FINISH 🏁'), '#1a1446', '#ffffff', true);
@@ -169,6 +208,13 @@
   }
 
   // ---------- desenho ----------
+  // sombra no chão debaixo de quem anda (e, à noite, um brilho fraco): sem ela, no neon, carro e rival pareciam flutuar
+  function sombraChao(c, x, y, dw, noite, cor) {
+    if (dw < 3) return;
+    c.fillStyle = 'rgba(0,0,0,' + (0.28 + 0.2 * noite).toFixed(2) + ')';
+    c.beginPath(); if (c.ellipse) c.ellipse(x, y, dw * 0.46, Math.max(1, dw * 0.075), 0, 0, Math.PI * 2); else c.arc(x, y, dw * 0.4, 0, Math.PI * 2); c.fill();
+    if (noite > 0.3 && cor) { c.save(); c.globalCompositeOperation = 'lighter'; c.translate(x, y); c.scale(1, 0.22); luz(c, 0, 0, dw * 0.6, cor, 0.45 * noite); c.restore(); }
+  }
   function poligono(c, x1, y1, x2, y2, x3, y3, x4, y4, cor) { c.fillStyle = cor; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.lineTo(x3, y3); c.lineTo(x4, y4); c.closePath(); c.fill(); }
   function sprite(c, spr, esc, x, y, clip, w) {
     var dw = spr.w * esc, dh = spr.h * esc, dx = x - dw / 2, dy = y - dh;
@@ -212,6 +258,11 @@
     };
     if (noiteAqui < 1) desenhaCeu(TEMAS, 1);
     if (noiteAqui > 0) desenhaCeu(NEON, noiteAqui);
+    // névoa da distância: o chão lá longe vai virando a cor do pé do céu (assim o trecho de noite que vem lá na
+    // frente não aparece como uma faixa escura embaixo de um céu ainda claro)
+    var corCeuDia = mixRgb(hexRgb(TEMAS[pista.mundos[m > 0 ? m - 1 : m]].ceu[1]), hexRgb(TEMAS[pista.mundos[m]].ceu[1]), f);
+    var corCeuNoite = mixRgb(hexRgb(NEON[pista.mundos[m > 0 ? m - 1 : m]].ceu[1]), hexRgb(NEON[pista.mundos[m]].ceu[1]), f);
+    var nevoa = mixRgb(corCeuDia, corCeuNoite, noiteAqui);
     var diaN = (TEMAS[pista.mundos[m]].noite ? 1 : 0), noite = Math.max(noiteAqui, diaN);
     if (noite > 0) camada(c, base.estrelasCeu, w, cy, cy, vs.nuvemX * 0.5, noite);
     var solCor = TEMAS[pista.mundos[m]].sol;
@@ -247,24 +298,35 @@
       aX[n] = X1; aY[n] = Y1; aS[n] = sc1; aClip[n] = maxy; aZ[n] = z1;
       x += dx; dx += s.curva;
       if (z1 <= PROF || Y2 >= Y1 || Y2 >= maxy) continue;
-      var nS = ehNeon(s.i), ts = tema(pista.mundos[s.mundo], s.i), par = s.listra;
-      c.fillStyle = ts.grama[par]; c.fillRect(0, Y2, w, Y1 - Y2 + 1);
+      var nS = ehNeon(s.i), ts = tema(pista.mundos[s.mundo], s.i), par = s.listra, pc = corPedaco(pista, s), nt = pc.noite;
+      var fn = Math.max(0, (n - cnt * 0.4) / (cnt * 0.6)), fog = Math.min(0.8, Math.pow(fn, 1.4) * 0.8);
+      if (fog > 0.01) {   // longe: mistura com a névoa
+        var pn = pc.num;
+        pc = { noite: nt * (1 - fog), num: pn, grama: [css(mixRgb(pn.grama[0], nevoa, fog)), css(mixRgb(pn.grama[1], nevoa, fog))], pista: [css(mixRgb(pn.pista[0], nevoa, fog)), css(mixRgb(pn.pista[1], nevoa, fog))],
+          borda: [css(mixRgb(pn.borda[0], nevoa, fog)), css(mixRgb(pn.borda[1], nevoa, fog))], faixa: css(mixRgb(pn.faixa, nevoa, fog)), bordaNoite: pc.bordaNoite };
+        nt = pc.noite;
+      }
+      c.fillStyle = pc.grama[par]; c.fillRect(0, Y2, w, Y1 - Y2 + 1);
       var r1 = W1 / 7, r2 = W2 / 7;
       Y1 += 1;   // 1 pixel de sobra: sem risquinhos entre um pedaço e outro
-      if (nS) {
-        // asfalto escuro e bordas de neon: um brilho largo e fraco e um fio forte por cima
-        poligono(c, X1 - W1 * 1.06, Y1, X1 + W1 * 1.06, Y1, X2 + W2 * 1.06, Y2, X2 - W2 * 1.06, Y2, ts.pista[par]);
-        var e1 = W1 * 0.025, e2 = W2 * 0.025, cor0 = ts.borda[0];
-        c.globalAlpha = 0.22;
+      // de dia: zebra nas bordas; de noite: a zebra some no asfalto escuro e acende o fio de neon (troca aos poucos)
+      if (nt < 1) {
+        c.globalAlpha = 1 - nt;
+        poligono(c, X1 - W1 - r1, Y1, X1 - W1, Y1, X2 - W2, Y2, X2 - W2 - r2, Y2, pc.borda[par]);
+        poligono(c, X1 + W1 + r1, Y1, X1 + W1, Y1, X2 + W2, Y2, X2 + W2 + r2, Y2, pc.borda[par]);
+        c.globalAlpha = 1;
+      }
+      var lp = 1 + 0.06 * nt;
+      poligono(c, X1 - W1 * lp, Y1, X1 + W1 * lp, Y1, X2 + W2 * lp, Y2, X2 - W2 * lp, Y2, pc.pista[par]);
+      if (nt > 0) {
+        var e1 = W1 * 0.025, e2 = W2 * 0.025, cor0 = pc.bordaNoite;
+        c.globalAlpha = 0.22 * nt;
         poligono(c, X1 - W1 - e1 * 4, Y1, X1 - W1 + e1 * 4, Y1, X2 - W2 + e2 * 4, Y2, X2 - W2 - e2 * 4, Y2, cor0);
         poligono(c, X1 + W1 - e1 * 4, Y1, X1 + W1 + e1 * 4, Y1, X2 + W2 + e2 * 4, Y2, X2 + W2 - e2 * 4, Y2, cor0);
-        c.globalAlpha = 1;
+        c.globalAlpha = nt;
         poligono(c, X1 - W1 - e1, Y1, X1 - W1 + e1, Y1, X2 - W2 + e2, Y2, X2 - W2 - e2, Y2, cor0);
         poligono(c, X1 + W1 - e1, Y1, X1 + W1 + e1, Y1, X2 + W2 + e2, Y2, X2 + W2 - e2, Y2, cor0);
-      } else {
-        poligono(c, X1 - W1 - r1, Y1, X1 - W1, Y1, X2 - W2, Y2, X2 - W2 - r2, Y2, ts.borda[par]);
-        poligono(c, X1 + W1 + r1, Y1, X1 + W1, Y1, X2 + W2, Y2, X2 + W2 + r2, Y2, ts.borda[par]);
-        poligono(c, X1 - W1, Y1, X1 + W1, Y1, X2 + W2, Y2, X2 - W2, Y2, ts.pista[par]);
+        c.globalAlpha = 1;
       }
       if (s.xadrez) {
         for (var q = 0; q < 8; q++) {
@@ -273,20 +335,28 @@
         }
       } else if (!par) {
         var l1 = W1 / 32, l2 = W2 / 32;
-        if (nS) c.globalAlpha = 0.85;
-        for (var fx = -1 / 3; fx < 0.5; fx += 2 / 3) poligono(c, X1 + W1 * fx - l1, Y1, X1 + W1 * fx + l1, Y1, X2 + W2 * fx + l2, Y2, X2 + W2 * fx - l2, Y2, ts.faixa);
+        c.globalAlpha = 1 - 0.15 * nt;
+        for (var fx = -1 / 3; fx < 0.5; fx += 2 / 3) poligono(c, X1 + W1 * fx - l1, Y1, X1 + W1 * fx + l1, Y1, X2 + W2 * fx + l2, Y2, X2 + W2 * fx - l2, Y2, pc.faixa);
         c.globalAlpha = 1;
       }
-      if (grade && nS && !s.tunel) {
+      if (grade && nt > 0.02 && !s.tunel) {   // a grade do chão acende aos poucos, junto com a noite
         corGrade = corGrade || ts.borda[0];
-        if (s.i % 2 === 0) { c.fillStyle = rgba(ts.borda[0], 0.2); c.fillRect(0, Y1 - 1, Math.max(0, X1 - W1 * 1.12), 1.2); c.fillRect(X1 + W1 * 1.12, Y1 - 1, Math.max(0, w - X1 - W1 * 1.12), 1.2); }
-        for (var gk = 0; gk < GRADE.length; gk++) { grade[gk][0].push(X1 - W1 * GRADE[gk], Y1); grade[gk][1].push(X1 + W1 * GRADE[gk], Y1); }
-      }
+        if (s.i % 2 === 0) { c.fillStyle = rgba(NEON[pista.mundos[s.mundo]].borda[0], 0.2 * nt); c.fillRect(0, Y1 - 1, Math.max(0, X1 - W1 * 1.12), 1.2); c.fillRect(X1 + W1 * 1.12, Y1 - 1, Math.max(0, w - X1 - W1 * 1.12), 1.2); }
+        for (var gk = 0; gk < GRADE.length; gk++) { grade[gk][0].push([X1 - W1 * GRADE[gk], Y1, nt]); grade[gk][1].push([X1 + W1 * GRADE[gk], Y1, nt]); }
+      } else if (grade) for (var gq = 0; gq < GRADE.length; gq++) { grade[gq][0].push(null); grade[gq][1].push(null); }   // sem grade aqui: corta a linha
       maxy = Y2;
     }
-    if (grade) {
-      c.strokeStyle = rgba(corGrade || '#2bf4ff', 0.28); c.lineWidth = 1.2;
-      grade.forEach(function (par2) { par2.forEach(function (pts) { if (pts.length < 4) return; c.beginPath(); c.moveTo(pts[0], pts[1]); for (var q = 2; q < pts.length; q += 2) c.lineTo(pts[q], pts[q + 1]); c.stroke(); }); });
+    if (grade) {   // linhas da grade em 4 níveis de brilho (mais apagadas onde ainda é dia)
+      c.lineWidth = 1.2;
+      for (var nv = 1; nv <= 4; nv++) {
+        c.strokeStyle = rgba(corGrade || '#2bf4ff', 0.28 * nv / 4); c.beginPath(); var tem = false;
+        grade.forEach(function (par2) { par2.forEach(function (pts) {
+          for (var q = 1; q < pts.length; q++) { var a = pts[q - 1], b2 = pts[q]; if (!a || !b2) continue;
+            if (Math.max(1, Math.ceil(Math.min(a[2], b2[2]) * 4 - 0.001)) !== nv) continue;
+            c.moveTo(a[0], a[1]); c.lineTo(b2[0], b2[1]); tem = true; }
+        }); });
+        if (tem) c.stroke();
+      }
     }
 
     // quem voa: névoa sobre o chão lá embaixo (dá a sensação de altura) e a rota no ar, um caminho de luz
@@ -360,7 +430,10 @@
       if (cs) for (k2 = 0; k2 < cs.length; k2++) {
         var pc = noPonto(n, cs[k2].z), tx = pc.x + pc.esc * cs[k2].x * LARG, tyA = pc.y - pc.escY * (ALT_VOO + 200);
         if (voa) { sprite(c, base[sprCeu(cs[k2].tipo)], pc.esc, tx, tyA, 0, w); if (nS2 || s.tunel) luzesAviao(c, tx, tyA, pc.esc, idx); }
-        else { sprite(c, base[cs[k2].tipo], pc.esc, tx, pc.y, clip, w); if ((nS2 || s.tunel) && pc.y <= clip + 2) lanternasTransito(c, cs[k2].tipo, tx, pc.y, pc.esc); }
+        else {
+          if (pc.y <= clip + 2) sombraChao(c, tx, pc.y, base[cs[k2].tipo].w * pc.esc, corPedaco(pista, s).noite, '#ff3b6b');
+          sprite(c, base[cs[k2].tipo], pc.esc, tx, pc.y, clip, w); if ((nS2 || s.tunel) && pc.y <= clip + 2) lanternasTransito(c, cs[k2].tipo, tx, pc.y, pc.esc);
+        }
       }
       var rs = porSegR[idx];   // rivais neste pedaço (no céu se forem de avião)
       if (rs) for (k2 = 0; k2 < rs.length; k2++) {
@@ -368,6 +441,7 @@
         var pr = noPonto(n, rv.z), rX = pr.x + pr.esc * rv.x * LARG, rY = rd.voa ? pr.y - pr.escY * ALT_VOO : pr.y, rW = rd.spr.w * pr.esc, rH = rd.spr.h * pr.esc;
         var faseR = rd.spr.quadros ? faseSkate(rd, rv, e) : 0, vivo = rW > 24 && (rd.voa || voa || rY <= clip);
         rd.lado = (rd.lado || 0) + (Math.max(-1, Math.min(1, (rv.faixa - rv.x) * 4)) - (rd.lado || 0)) * 0.15;   // vira para onde está indo
+        if (!rd.voa && !voa && rY <= clip + 2) sombraChao(c, rX, rY, rW, corPedaco(pista, s).noite, rd.info.cor);
         if (vivo) bracos(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info.cor, faseR, rd.lado, 'longe');
         sprite(c, S.quadro(rd.spr, faseR), pr.esc, rX, rY, rd.voa || voa ? 0 : clip, w);
         if (vivo) { bracos(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info.cor, faseR, rd.lado, 'perto'); pilotoVivo(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info, 10 + rs[k2] * 2.1, 6); }
@@ -378,6 +452,7 @@
         var oVoa = !!VOA[outro.n];   // o outro pode estar voando enquanto eu vou de carro (e vice-versa)
         var po = noPonto(n, outro.z), oSpr = carrosJog[outro.n], oX = po.x + po.esc * outro.x * LARG, oY = (oVoa ? po.y - po.escY * ALT_VOO : po.y) - po.escY * lift;
         var faseO = VS[outro.n] && VS[outro.n].fPe != null ? VS[outro.n].fPe : 0.8, ladoO = VS[outro.n] ? VS[outro.n].lado : 0, oW = oSpr.w * po.esc, oH = oSpr.h * po.esc, oVivo = oW > 24 && (oVoa || voa || oY <= clip);
+        if (!oVoa && !voa && po.y <= clip + 2) sombraChao(c, oX, po.y, oW, corPedaco(pista, s).noite, INFO[outro.n].cor);
         if (oVivo) bracos(c, VEIC[outro.n], oX - oW / 2, oY - oH, oW, oH, INFO[outro.n].cor, faseO, ladoO, 'longe');
         sprite(c, S.quadro(oSpr, faseO), po.esc, oX, oY, oVoa || voa ? 0 : clip, w);
         if (oVivo) { bracos(c, VEIC[outro.n], oX - oW / 2, oY - oH, oW, oH, INFO[outro.n].cor, faseO, ladoO, 'perto'); pilotoVivo(c, VEIC[outro.n], oX - oW / 2, oY - oH, oW, oH, INFO[outro.n], outro.n * 3.3, 7); }
@@ -733,6 +808,6 @@
     if (Cab()) Cab().desenhar(c, V().achar(veic), (W - cw) / 2, H * 0.95 - ch, cw, ch, infoPiloto(cor, piloto, foto, pers), 50, 0, 1000);   // parado, de costas
   }
 
-  function definirEstilo(v) { ESTILO = v === 'colorido' || v === 'neon' ? v : 'misto'; }
+  function definirEstilo(v) { ESTILO = v === 'colorido' || v === 'neon' ? v : 'misto'; cachePal = []; }
   raiz.VruuumDesenho = { definirEstilo: definirEstilo, preparar: preparar, desenhar: desenhar, passo: passo, evento: evento, vistas: vistas, margemLocal: margemLocal, botaoPulo: botaoPulo, previa: previa, miniatura: miniatura, milhar: milhar, ALT_VOO: ALT_VOO, TEMAS: TEMAS, CORES: CORES, PILOTOS: PILOTOS };
 })(this);
