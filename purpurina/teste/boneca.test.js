@@ -56,7 +56,7 @@ test('giro: frente, lado e costas desenham; de costas não tem rosto', () => {
   }
   const frente = B.svg(e, { id: 'f', angulo: 0 }), costas = B.svg(e, { id: 'c', angulo: 180 });
   assert.match(frente, /olhoE/); assert.ok(!/clip-path="url\(#c-olho/.test(costas), 'de costas sem olhos');
-  assert.match(B.svg(e, { id: 'l', angulo: 90 }), /scale\(0\.62 1\)/, 'de lado o corpo só estreita um pouco');
+  assert.ok(!/translate\(200 0\) scale\(/.test(B.svg(e, { id: 'l', angulo: 90 })), 'de lado é o corpo de perfil, não o de frente apertado');
 });
 
 test('anel e pulseira: só a parte da frente (arco aberto, sem círculo inteiro)', () => {
@@ -130,4 +130,15 @@ test('desfile: passarela de show, sorriso, tchau e olhar para os lados', () => {
   const olhando = B.svg(e, { id: 'd', fundo: false, olhar: 38 });
   assert.match(olhando, /d-rostoV/, 'olhar vira a cabeça');
   assert.ok(!/translate\(200 0\) scale\(/.test(olhando), 'o corpo continua de frente');
+});
+
+test('de lado: corpo de perfil próprio (sem o corpo de frente apertado), para os dois lados e com todas as roupas', () => {
+  const V0 = V.novo();
+  for (const l of [{}, { vestido: 'princesa' }, { blusa: 'sueter', calca: 'shorts' }, { saia: 'longa', calca: 'nenhum' }, { sapatos: 'salto' }, { sapatos: 'botaCano' }, { sapatos: 'nenhum' }]) {
+    for (const a of [60, 90, 120, 270]) {
+      const s = B.svg(Object.assign({}, V0, l), { id: 'l', angulo: a }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), JSON.stringify(l) + a);
+    }
+  }
+  assert.ok(!/translate\(200 0\) scale\(/.test(B.svg(V0, { id: 'l', angulo: 90 })), 'de lado não usa o corpo de frente apertado');
+  assert.match(B.svg(V0, { id: 'l', angulo: 30 }), /translate\(200 0\) scale\(/, 'de três-quartos ainda é o corpo de frente');
 });

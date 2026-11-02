@@ -82,7 +82,7 @@
     // opcoes.olhar: só a cabeça vira (o corpo fica de frente) — no desfile ela olha para os lados
     var angB = normal(op.angulo), ang = angB || normal(op.olhar);
     var rad = ang * Math.PI / 180, radS = ang > 180 ? rad - 2 * Math.PI : rad, cos = ang ? Math.cos(rad) : 1, sen = ang ? Math.sin(rad) : 0, cosB = Math.cos(angB * Math.PI / 180);
-    var corpoCostas = cosB < 0, costas = cos < -0.17, virada = !!ang && !costas, escalaX = 0.62 + 0.38 * Math.abs(cosB);
+    var corpoCostas = cosB < 0, costas = cos < -0.17, virada = !!ang && !costas, escalaX = 1 - 0.55 * Math.pow(Math.abs(Math.sin(angB * Math.PI / 180)), 1.5);
     // opcoes.sorriso: sorriso aberto; opcoes.tchau: braço levantado dando tchau (mexendo, com opcoes.anim)
     e.sorrindo = !!op.sorriso; var tchau = !!op.tchau && !angB;
     // de lado, o cabelo de trás e o pescoço não afinam junto com o corpo
@@ -166,12 +166,76 @@
     if (angB) {
       // só o corpo afina um pouco; a cabeça fica do tamanho certo (de costas, espelhada: laço e cabelo trocam de lado)
       var boneca = out.splice(iniBoneca).join('');
-      out.push('<g transform="translate(200 0) scale(' + n((corpoCostas ? -1 : 1) * escalaX * 100) / 100 + ' 1) translate(-200 0)">' + boneca + '</g>');
+      // de lado, o corpo de frente vai se transformando no corpo de perfil (um braço na frente, pernas uma atrás da outra)
+      var sB = Math.abs(Math.sin(angB * Math.PI / 180)), wL = sB >= 0.82 ? 1 : 0;   // troca de uma vez (sem transparência)
+      if (wL < 1) out.push('<g transform="translate(200 0) scale(' + n((corpoCostas ? -1 : 1) * escalaX * 100) / 100 + ' 1) translate(-200 0)"' + (wL > 0 ? ' opacity="' + n(1 - wL) + '"' : '') + '>' + boneca + '</g>');
+      if (wL > 0) { var ladoB = Math.sin(angB * Math.PI / 180) >= 0 ? 1 : -1, cl = corpoLado(); out.push('<g' + (wL < 1 ? ' opacity="' + n(wL) + '"' : '') + (ladoB < 0 ? ' transform="translate(400 0) scale(-1 1)"' : '') + '>' + cl + '</g>'); }
       out.push(costas ? '<g transform="translate(400 0) scale(-1 1)">' + cabecaPronta + '</g>' : cabecaPronta);
     } else out.push(cabecaPronta);
     // o braço do tchau vai por cima de tudo (fica na frente do cabelo, do lado do rosto)
     if (tchau) out.push(bracoTchau(pele, peleE, esmalte, membro, op.anim));
     return fechar();
+
+    /* ---------- o corpo de perfil (virado para a direita; o espelho vira para a esquerda) ----------
+       Desenho próprio de lado, com as cores e a estampa das peças escolhidas: braço e perna do lado de lá atrás
+       (um pouco mais escuros), tronco de lado, saia, calça ou vestido de lado, braço do lado de cá na frente e
+       sapatos de lado. */
+    function corpoLado() {
+      var s = '', sombra = function (d, larg) { return p(d, { stroke: '#2a0a3c', 'stroke-width': larg, 'stroke-linecap': 'round', fill: 'none', opacity: 0.16 }); };
+      var temVest = vis('vestido'), corTop = temVest ? C('vestido') : (e.blusa !== 'nenhum' ? C('blusa') : null), catTop = temVest ? 'vestido' : 'blusa';
+      var compVest = { princesa: 640, gala: 640, sereia: 640, camisola: 600, festa: 560, rodado: 560, verao: 540, fada: 540, tomara: 560, casaco: 540, jardineira: 530, macacao: 640 }[e.vestido] || 560;
+      var compSaia = { curta: 510, tutu: 515, balone: 520, pregas: 540, jeans: 530, camadas: 560, longa: 630 }[e.saia] || 530;
+      var compCalca = { shorts: 505, bermuda: 545 }[e.calca] || 636;
+      var manga = temVest ? (['casaco', 'macacao'].indexOf(e.vestido) >= 0 ? 'longa' : ['tomara', 'verao', 'jardineira'].indexOf(e.vestido) >= 0 ? 'nada' : 'curta') :
+        (['sueter', 'jaqueta', 'pijama', 'moletom', 'camisa'].indexOf(e.blusa) >= 0 ? 'longa' : ['regata', 'ombro', 'colete', 'nenhum'].indexOf(e.blusa) >= 0 ? 'nada' : 'curta');
+      // braço e perna de lá (atrás)
+      var bracoLa = 'M197,356 Q186,424 182,492', pernaLa = 'M195,456 L190,640';
+      s += membro(pernaLa, 27) + sombra(pernaLa, 27);
+      if (vis('calca')) s += p(pernaLa.replace('640', String(compCalca)), { stroke: C('calca').hex, 'stroke-width': 31, 'stroke-linecap': 'round', fill: 'none' }) + sombra(pernaLa.replace('640', String(compCalca)), 31);
+      s += sapatoLado(190, true);
+      s += membro(bracoLa, 21) + (manga === 'longa' && corTop ? p(bracoLa, { stroke: corTop.hex, 'stroke-width': 24, 'stroke-linecap': 'round', fill: 'none' }) : '') + sombra(bracoLa, 22) + maoLado(182, 497, true);
+      // perna de cá
+      var pernaCa = 'M206,456 L210,640';
+      s += membro(pernaCa, 29);
+      if (vis('calca')) s += peca(['M191,450 L223,450 L' + (compCalca > 600 ? '226,' + compCalca + ' L196,' + compCalca : '227,' + compCalca + ' L192,' + compCalca) + 'Z'], C('calca'), 'calca');
+      s += sapatoLado(210, false);
+      // tronco de lado (peito na frente, costas atrás)
+      var tronco = 'M180,338 Q198,330 216,335 Q233,348 233,380 Q230,420 224,458 L178,458 Q171,420 172,382 Q170,350 180,338Z';
+      s += p(tronco, { fill: pele, stroke: peleE, 'stroke-width': 1.4 });
+      if (vis('saia')) s += peca('M181,448 L223,448 Q238,' + (compSaia - 30) + ' 248,' + compSaia + ' L156,' + compSaia + ' Q166,' + (compSaia - 30) + ' 181,448Z', C('saia'), 'saia');
+      if (temVest) s += peca('M181,450 L223,450 Q' + (compVest > 600 ? 250 : 244) + ',' + (compVest - 40) + ' ' + (compVest > 600 ? 262 : 252) + ',' + compVest + ' L' + (compVest > 600 ? 142 : 150) + ',' + compVest + ' Q' + (compVest > 600 ? 150 : 158) + ',' + (compVest - 40) + ' 181,450Z', C('vestido'), 'vestido');
+      if (corTop) {
+        var decote = e.blusa === 'ombro' || e.vestido === 'tomara' ? 'M180,352 Q200,346 226,350' : 'M184,340 Q196,346 210,338';
+        s += peca('M' + (decote.split(' ')[0].slice(1)) + ' Q233,350 233,380 Q230,420 225,' + (temVest ? 452 : 462) + ' L177,' + (temVest ? 452 : 462) + ' Q171,420 172,382 Q170,356 ' + decote.split(' ')[0].slice(1) + 'Z', corTop, catTop);
+        s += p(decote, { fill: 'none', stroke: esc(corTop.hex, 0.3), 'stroke-width': 1.6 });
+      }
+      // braço de cá, na frente do tronco
+      var bracoCa = 'M203,354 Q208,426 212,494';
+      s += membro(bracoCa, 23);
+      if (corTop && manga !== 'nada') s += manga === 'longa' ? p('M203,352 Q208,424 212,486', { stroke: corTop.hex, 'stroke-width': 26, 'stroke-linecap': 'round', fill: 'none' }) + p('M203,352 Q208,424 212,486', { stroke: esc(corTop.hex, 0.3), 'stroke-width': 26, 'stroke-linecap': 'round', fill: 'none', opacity: 0.18 })
+        : peca('M190,346 Q204,336 218,348 L220,392 Q206,398 192,392Z', corTop, catTop);
+      s += maoLado(212, 499, false);
+      return s;
+    }
+    // mão de lado: palma com o polegar para a frente e as unhas
+    function maoLado(x, y, la) {
+      var s = elip(x, y, 10, 12, { fill: pele, stroke: peleE, 'stroke-width': 2 }) + p('M' + (x + 6) + ',' + (y - 4) + ' Q' + (x + 13) + ',' + (y + 2) + ' ' + (x + 9) + ',' + (y + 8), { fill: 'none', stroke: peleE, 'stroke-width': 1.6, 'stroke-linecap': 'round' });
+      if (e.unhas !== 'nenhum' && !la) s += unhas([[x + 2, y + 11], [x + 6, y + 10]], { tipo: e.unhas, cor: C('unhas') }, pele);
+      return s + (la ? elip(x, y, 10, 12, { fill: '#2a0a3c', opacity: 0.16 }) : '');
+    }
+    // sapato de lado (bico para a frente); descalça mostra o pé
+    function sapatoLado(x, la) {
+      var t = e.sapatos, c = C('sapatos'), s;
+      if (t === 'nenhum') s = p('M' + (x - 8) + ',636 Q' + (x + 18) + ',634 ' + (x + 26) + ',648 Q' + (x + 14) + ',654 ' + (x - 8) + ',652Z', { fill: pele, stroke: peleE, 'stroke-width': 1.6 });
+      else {
+        var salto = ['salto', 'scarpin', 'saltoMedio', 'princesa', 'anabela', 'plataforma'].indexOf(t) >= 0, cano = t === 'bota' || t === 'galocha' || t === 'botaNeve' ? 600 : t === 'botaCano' ? 560 : 0;
+        var d = 'M' + (x - 10) + ',' + (cano || 632) + ' L' + (x + 8) + ',' + (cano || 632) + ' L' + (x + 8) + ',638 Q' + (x + 26) + ',638 ' + (x + 30) + ',' + (salto ? 652 : 648) + ' Q' + (x + 30) + ',656 ' + (x + 18) + ',656 L' + (x - 10) + ',656Z';
+        s = peca(d, c, 'sapatos');
+        if (salto) s += p('M' + (x - 10) + ',652 L' + (x - 3) + ',652 L' + (x - 5) + ',666 L' + (x - 9) + ',666Z', { fill: esc(c.hex, 0.25) });
+        if (t === 'tenis' || t === 'tenisAlto' || t === 'tenisLuz' || t === 'tenisGlitter') s += p('M' + (x - 10) + ',652 L' + (x + 26) + ',652', { stroke: '#fff', 'stroke-width': 3 }) + p('M' + (x - 2) + ',640 L' + (x + 10) + ',642', { stroke: '#fff', 'stroke-width': 1.6, opacity: 0.8 });
+      }
+      return s + (la ? p('M' + (x - 10) + ',634 L' + (x + 30) + ',634 L' + (x + 30) + ',666 L' + (x - 10) + ',666Z', { fill: '#2a0a3c', opacity: 0.12 }) : '');
+    }
 
     // pescoço girado: de lado fica um pouco mais largo e mais para trás, com a sombra do queixo
     function pescoco() {
@@ -574,8 +638,10 @@
       if (tras) f = Math.PI - f;
       var a = f + th, some = !tras && Math.abs(a) > M;
       if (tras) a = a > 3 * M ? 3 * M + (a - 3 * M) * 0.3 : a < M ? M - (M - a) * 0.3 : a;   // o de trás quase não passa para a frente: arredonda na borda
-      var sa = Math.sin(a);
-      return [200 + R * (some ? (a > 0 ? 1 : -1) : sa) + exc * Math.abs(sa), some];
+      var sa = Math.sin(a), x2 = 200 + R * (some ? (a > 0 ? 1 : -1) : sa) + exc * Math.abs(sa);
+      // de lado, o cabelo comprido de trás desce colado nas costas (embaixo da cabeça fica mais estreito)
+      if (tras) x2 = 200 + (x2 - 200) * (1 - Math.abs(Math.sin(th)) * 0.62 * Math.max(0, Math.min(1, (y - 280) / 90)));
+      return [x2, some];
     }
     var res = s.replace(/<(path|circle|ellipse)\s([^>]*?)(\/?)>/g, function (m, tag, atr, fecha) {
       // mecha comprida do lado? (começa abaixo da testa e desce bastante)
