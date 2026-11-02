@@ -19,7 +19,7 @@
   var PONTOS = { fruta: 10, doce: 10, heroi: 15, mascote: 30, vilaoPega: -5, chute: 10, gol: 30, comboCada: 5, desviou: 10, tocou: 5 };
   var DIFIC = { crianca: { intervalo: 1500, vel: 0.85 }, normal: { intervalo: 1000, vel: 1 }, maluco: { intervalo: 650, vel: 1.2 } };
   var LIMIAR = 35;   // força mínima do ponto de movimento (0..100) para contar
-  var MODOS = ['corta', 'pega', 'chuta', 'pula', 'bolas', 'mistura'];
+  var MODOS = ['corta', 'pega', 'chuta', 'pula', 'bolas', 'mistura', 'bagunca'];   // bagunca: motor próprio em casa.js
   var MODOS_MISTURA = ['corta', 'pega', 'chuta', 'pula', 'bolas'];
   var AMBIENTES = ['camera', 'paisagem'], CENAS = ['aleatoria', 'praia', 'floresta', 'espaco', 'cidade'];
   var TROCA_MISTURA = 20000;
@@ -147,6 +147,8 @@
   /* ---------- a partida ---------- */
   function criarPartida(cfg) {
     cfg = cfg || {};
+    var Casa = typeof self !== 'undefined' && self.Casa;
+    if (cfg.modo === 'bagunca' && Casa) return Casa.criar(cfg);   // 🧸 Bagunça: sala, quarto ou jardim (casa.js), mesma cara de partida
     var rnd = cfg.aleatorio || Math.random;
     var figs = (cfg.figuras || []).slice();
     var modoBase = MODOS.indexOf(cfg.modo) >= 0 ? cfg.modo : 'corta';

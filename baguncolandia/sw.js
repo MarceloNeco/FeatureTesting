@@ -4,7 +4,7 @@
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js). */
 var VERSAO = '0.8.11';
 var CACHE = 'bagunca-v' + VERSAO;
-var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'figuras.js', 'cenas.js', 'boneco.js', 'desenho.js', 'sala.js', 'voz.js', 'som.js', 'calibrar.js', 'config.js', 'batida.js', 'spotify.js', 'esqueleto.js', 'libs/supabase.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js', '../atualizar.js'];
+var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'casa.js', 'figuras.js', 'cenas.js', 'boneco.js', 'desenho.js', 'sala.js', 'voz.js', 'som.js', 'calibrar.js', 'config.js', 'batida.js', 'spotify.js', 'esqueleto.js', 'libs/supabase.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js', '../atualizar.js'];
 // A parte da câmera (MediaPipe em libs/mediapipe/, ~28 MB) só baixava na primeira vez que alguém ligava o boneco;
 // sem internet, essa primeira vez falhava. Agora fica guardada sozinha depois de abrir, mas só no Wi-Fi.
 var PESADOS = ['libs/mediapipe/vision_bundle.mjs', 'libs/mediapipe/vision_wasm_internal.js', 'libs/mediapipe/vision_wasm_internal.wasm', 'libs/mediapipe/pose_landmarker_lite.task', 'libs/mediapipe/hand_landmarker.task'];

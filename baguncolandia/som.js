@@ -29,7 +29,28 @@
     s.buffer = b; f.type = 'bandpass'; f.frequency.value = filtro || 2500; f.Q.value = 0.8;
     g.gain.value = vol || 0.3; s.connect(f); f.connect(g); g.connect(master); s.start(t0);
   }
+  function varre(f0, f1, t0, dur, tipo, vol) { var o = nota(f0, t0, dur, tipo, vol); o.frequency.exponentialRampToValueAtTime(f1, t0 + dur); return o; }
   var SONS = {
+    /* 🧸 Bagunça: um som para cada coisa da casa */
+    boing: function (t) { varre(180, 620, t, 0.18, 'sine', 0.35); varre(360, 1240, t, 0.12, 'triangle', 0.08); },
+    bloco: function (t) { [0, 0.05].forEach(function (d, i) { nota(i ? 520 : 760, t + d, 0.07, 'square', 0.07); ruido(t + d, 0.04, 0.25, 1800); }); },
+    tum: function (t) { varre(140, 60, t, 0.16, 'sine', 0.45); ruido(t, 0.08, 0.2, 500); },
+    fofo: function (t) { ruido(t, 0.18, 0.22, 700); varre(220, 110, t, 0.14, 'sine', 0.18); },
+    livro: function (t) { varre(140, 60, t, 0.14, 'sine', 0.4); ruido(t + 0.08, 0.25, 0.22, 4200); ruido(t + 0.2, 0.18, 0.15, 5200); },   // tum + páginas folheando
+    pato: function (t) { varre(900, 1500, t, 0.09, 'square', 0.1); varre(1500, 1100, t + 0.09, 0.1, 'square', 0.09); },
+    vrum: function (t) { varre(90, 260, t, 0.35, 'sawtooth', 0.12); varre(95, 270, t, 0.35, 'square', 0.05); },
+    piao: function (t) { for (var i = 0; i < 6; i++) nota(1200 + (i % 2) * 120, t + i * 0.05, 0.06, 'triangle', 0.08); },
+    robo: function (t) { [440, 660, 330, 880].forEach(function (f, i) { nota(f, t + i * 0.06, 0.07, 'square', 0.07); }); },
+    latido: function (t) { [0, 0.22].forEach(function (d) { varre(420, 190, t + d, 0.14, 'sawtooth', 0.22); varre(840, 380, t + d, 0.12, 'square', 0.05); ruido(t + d, 0.06, 0.2, 1100); }); },
+    interruptor: function (t) { ruido(t, 0.02, 0.5, 3000); nota(2400, t, 0.025, 'square', 0.08); },
+    janela: function (t) { varre(300, 520, t, 0.5, 'sawtooth', 0.04); ruido(t, 0.55, 0.12, 900); },   // rangido + vento
+    lustre: function (t) { [1568, 2093, 2637, 3136].forEach(function (f, i) { nota(f, t + i * 0.04, 0.6, 'sine', 0.07); }); },
+    quadro: function (t) { nota(300, t, 0.08, 'triangle', 0.25); varre(500, 420, t + 0.06, 0.2, 'sine', 0.08); },
+    folhas: function (t) { ruido(t, 0.6, 0.18, 5500); ruido(t + 0.1, 0.5, 0.12, 3500); },
+    passaro: function (t) { [0, 0.12, 0.2].forEach(function (d) { varre(2200, 3400, t + d, 0.07, 'sine', 0.12); }); },
+    balanco: function (t) { varre(600, 500, t, 0.3, 'triangle', 0.06); varre(500, 620, t + 0.3, 0.3, 'triangle', 0.05); },
+    flor: function (t) { nota(1760, t, 0.12, 'sine', 0.08); nota(2217, t + 0.05, 0.12, 'sine', 0.06); },
+    tchau: function (t) { varre(1200, 200, t, 0.6, 'sine', 0.2); [784, 988, 1175].forEach(function (f, i) { nota(f, t + 0.1 + i * 0.08, 0.2, 'triangle', 0.12); }); },
     corte: function (t) { ruido(t, 0.12, 0.35, 3200); nota(880, t, 0.08, 'square', 0.08); nota(1320, t + 0.03, 0.1, 'triangle', 0.12); },
     pegou: function (t) { [523, 659, 784].forEach(function (f, i) { nota(f, t + i * 0.06, 0.18, 'triangle', 0.25); }); },
     mascote: function (t) { [523, 659, 784, 1047, 1319].forEach(function (f, i) { nota(f, t + i * 0.07, 0.25, 'triangle', 0.25); }); },

@@ -15,7 +15,7 @@ Endereço: `https://solverone.com.br/FeatureTesting/baguncolandia/` (atalho para
    Deixe a câmera ligar (o celular pergunta uma vez).
 3. **Apoie o celular** deitado, virado para quem vai jogar, a uns 2 metros, com luz boa.
 4. No celular, escolha o **modo** (🍉 Corta-corta, 🎈 Pega-pega, ⚽ Chuta-chuta, 🪵 Pula e abaixa,
-   🎳 Bagunça de bolas, 🎪 Bagunça total), o **ambiente** (🏞️ Paisagem + boneco, com cenário à escolha, ou
+   🎳 Bagunça de bolas, 🎪 Bagunça total, 🧸 Bagunça na casa), o **ambiente** (🏞️ Paisagem + boneco, com cenário à escolha, ou
    📷 Câmera, em que você aparece na TV), quantas **pessoas** (1 ou 2), quantos **celulares** (1 filmando
    os dois, ou 2), o **tempo** e o **nível**.
 5. Toque em **▶ Começar** (ou OK no controle da TV). Siga a **voz e a legenda**: saia da frente da
@@ -25,6 +25,12 @@ Endereço: `https://solverone.com.br/FeatureTesting/baguncolandia/` (atalho para
 
 **Música**: em 🎵 Música no celular, cole um link do YouTube (vídeo ou playlist); a TV toca num
 cantinho. Com tempo "🎵 a música", a rodada dura a música inteira.
+
+**🧸 Bagunça na casa**: cada rodada num lugar (sala, quarto ou jardim), cheio de coisas arrumadas. Bata nelas e
+tudo vai bagunçando, sem quebrar: livro cai e abre, torre de blocos desaba, bola quica e sai pela janela aberta, o
+lustre balança e muda a cor da luz, o interruptor acende e apaga, a janela abre e fecha devagar, o quadro fica
+torto, o cachorrinho anda, late e corre atrás da bola; no jardim, a árvore solta folhas, os passarinhos voam e o
+balanço balança. O Bagunçômetro (no alto) vai de 0 a 100 %; chegar a 100 % dá bônus. O motor mora em `casa.js`.
 
 **Música do jogo e botões de som**: o jogo toca música o tempo todo, uma diferente a cada rodada: 13 músicas de
 verdade em `musicas/` (domínio público, ver `CREDITOS.md`). Sem internet, toca as que o próprio jogo cria. **🔊** deixa tudo mudo (efeitos, música e voz); **🎵** liga ou desliga só a música. Ficam na coluna
@@ -96,6 +102,7 @@ Tire uma foto dessa caixa e mande: é o que falta para achar o problema. O desen
 | `jogo.js` | motor puro (sem DOM): física, acertos, pontos, combos, vidas, poderes, validação de mensagens. Testável no Node. |
 | `desenho.js` | pinta o estado no canvas da TV: figuras, cortes, suco, rastros, placar, legendas, pódio |
 | `figuras.js` | catálogo de figuras (SVG): frutas, doces, bolas, turma própria, clássicos de domínio público, `meus/` |
+| `casa.js` | modo 🧸 Bagunça: os três lugares, as coisas, a física (cair, quicar, derrubar em cadeia) e os especiais (lustre, janela, interruptor, quadro, cachorro, árvore, passarinhos); `Casa.criar` tem a mesma cara de partida do `jogo.js` |
 | `cenas.js` | cenários vetoriais do ambiente Paisagem (praia, floresta, espaço, cidade) |
 | `boneco.js` | o boneco personalizável (corpo em pé, cabeças, cabelos, roupas, acessórios, marionete) |
 | `sala.js` | pareamento (Supabase broadcast), WebRTC, câmera, visão (diferença entre quadros) |
@@ -106,7 +113,7 @@ Tire uma foto dessa caixa e mande: é o que falta para achar o problema. O desen
 | `esqueleto.js` | esqueleto por IA (MediaPipe Pose em `libs/mediapipe/`, carregado só quando a pessoa liga); devolve 13 pontos espelhados |
 | `spotify.js` / `config.js` | Spotify como controle remoto (PKCE, sem segredo); `config.js` guarda só o Client ID público |
 | `sw.js` | cache da pasta; `VERSAO` tem de ser igual a `APP_VERSION` |
-| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js`, `voltar.test.js`, `som.test.js`, `musica.test.js` e `reacao.test.js` (Chromium) |
+| `teste/` | `jogo.test.js`, `figuras.test.js`, `batida.test.js` e `casa.test.js` (Node), `pagina.test.js`, `voltar.test.js`, `som.test.js`, `musica.test.js` e `reacao.test.js` (Chromium) |
 
 Rodar os testes: `node --test baguncolandia/teste/*.test.js` e `node baguncolandia/teste/pagina.test.js`.
 

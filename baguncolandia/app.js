@@ -184,7 +184,7 @@
       requestAnimationFrame(vivo);
     }
     function resumo() {
-      var c = tv.cfg, m = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), pula: T('🪵 Pula e abaixa', '🪵 Jump and duck'), bolas: T('🎳 Bagunça de bolas', '🎳 Ball mayhem'), mistura: T('🎪 Bagunça total', '🎪 Total mayhem') }[c.modo] || '';
+      var c = tv.cfg, m = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), pula: T('🪵 Pula e abaixa', '🪵 Jump and duck'), bolas: T('🎳 Bagunça de bolas', '🎳 Ball mayhem'), mistura: T('🎪 Bagunça total', '🎪 Total mayhem'), bagunca: T('🧸 Bagunça (sala, quarto ou jardim)', '🧸 Mayhem (living room, bedroom or garden)') }[c.modo] || '';
       var d = c.duracao ? (c.duracao >= 120 ? '2 min' : c.duracao + ' s') : T('🎵 a música inteira', '🎵 the whole song');
       var n = { crianca: T('Criança', 'Kids'), normal: 'Normal', maluco: T('Maluco', 'Crazy') }[c.dificuldade];
       var amb = c.ambiente === 'paisagem' ? T('🏞️ paisagem', '🏞️ landscape') : T('📷 câmera', '📷 camera');
@@ -283,12 +283,13 @@
     function rodada() {
       var figs = Figuras.lista(tv.cfg.turmas);
       if (!figs.some(function (f) { return f.papel === 'fruta'; })) figs = Figuras.lista();   // sem fruta nenhuma não dá para cortar
-      tv.partida = Bagunca.criarPartida({ modo: tv.cfg.modo, jogadores: tv.cfg.jogadores, duracao: tv.cfg.duracao, dificuldade: tv.cfg.dificuldade, figuras: figs });
+      tv.casaN = tv.casaN == null ? Math.floor(Math.random() * 3) : (tv.casaN + 1) % 3;   // 🧸 Bagunça: cada rodada num lugar (sala, quarto, jardim)
+      tv.partida = Bagunca.criarPartida({ modo: tv.cfg.modo, jogadores: tv.cfg.jogadores, duracao: tv.cfg.duracao, dificuldade: tv.cfg.dificuldade, figuras: figs, cenaCasa: window.Casa ? Casa.CENAS[tv.casaN] : null });
       Object.keys(tv.caixas).forEach(function (j) { var c = tv.caixas[j]; if (c) { tv.partida.zonaChute(+j, Math.min(0.95, c.y + c.h * 0.6)); tv.partida.calibrar(+j, c); } });
       if (tv.toque) { tv.dedoCorpo = {}; for (var jt = 0; jt < tv.cfg.jogadores; jt++) { tv.partida.calibrar(jt, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }); tv.partida.corpo(jt, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }, performance.now()); } }
       Desenho.limpar(); Desenho.ambiente(tv.cfg.ambiente, tv.cfg.cena);
-      $('tv').classList.toggle('paisagem', tv.cfg.ambiente === 'paisagem');
-      tv.partida.comecar(); tv.fase = 'jogando'; tv.fimMusica = false; $('tv').classList.add('jogando');
+      $('tv').classList.toggle('paisagem', tv.cfg.ambiente === 'paisagem' || tv.cfg.modo === 'bagunca');
+      tv.partida.comecar(); tv.fase = 'jogando'; if (tv.cfg.modo === 'bagunca') dizer('Hora da bagunça! Bata em tudo!', 'Mayhem time! Hit everything!');   // na fase de jogo a legenda some sozinha tv.fimMusica = false; $('tv').classList.add('jogando');
       if (tv.cfg.duracao === 0 && tv.player && !tv.tocando) { try { tv.player.playVideo(); } catch (e) {} }
       window.BaguncaDebug = tv;   // só para testes automáticos (nada de segredo aqui)
     }
@@ -321,7 +322,10 @@
       var erros = Desenho.erros().concat(tv.errosJs || []);
       b.textContent = 'v' + APP_VERSION + ' · ' + (Desenho.estaLeve() ? 'leve' : 'normal') + ' · ' + tv.dbgFps + ' fps · ' + tv.fase + ' · voz TV: ' + (Voz.disponivel() ? (tv.vozLiberada ? 'sim' : 'sim, sem toque') : 'não') + '\n' + navigator.userAgent.slice(0, 90) + (erros.length ? '\nERROS:\n' + erros.join('\n') : '\nsem erros');
     }
+    var somAte = {};
     function som(ev) {
+      if (ev.t === 'casa') { if (!ev.som) return; var agora = performance.now(); if (agora < (somAte[ev.som] || 0)) return; somAte[ev.som] = agora + (ev.silencioso ? 120 : 60); Som.tocar(ev.som); return; }   // 🧸 Bagunça: um som por coisa (sem embolar)
+      if (ev.t === 'bagunca100') { Som.tocar('fim'); dizer('Bagunça total!', 'Total mayhem!'); return; }
       if (ev.t === 'corte') Som.tocar('corte');
       else if (ev.t === 'pegou') Som.tocar(ev.mascote ? 'mascote' : 'pegou');
       else if (ev.t === 'chutou') Som.tocar('chute');
