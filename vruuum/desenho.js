@@ -399,40 +399,59 @@
     }
     // enfeites, coisas, trânsito e o outro jogador, do longe para o perto
     var outro = e.jogadores.length === 2 ? e.jogadores[1 - ji] : null, oSeg = outro ? Math.floor(outro.z / SEG) : -1;
+    var primeiro = 0; while (primeiro < cnt && aZ[primeiro] <= PROF) primeiro++;
+    var dentroTunel = !!segs[baseI].tunel;
     for (n = cnt - 1; n >= 0; n--) {
       if (aZ[n] <= PROF) continue;
       var idx = baseI + n; s = segs[idx];
       var esc = aS[n] * K, escY = aS[n] * KY, sx = aX[n], sy = aY[n], clip = aClip[n], k2;
       var syAr = sy - escY * ALT_VOO;   // a altura do voo neste pedaço
-      var nS2 = ehNeon(idx), tsN = tema(pista.mundos[s.mundo], idx);
-      if (s.tunel) tunel(c, s, idx, sx, sy, syAr, esc, w, h, voa, tsN, escY);
-      if (nS2 && !s.tunel && n > 2 && idx % 8 === 0) postesNeon(c, idx, sx, sy, esc, clip, tsN, w, escY);
-      if (nS2 && !s.tunel && n > 3 && idx % 48 === 24) portico(c, idx, sx, voa ? syAr : sy, esc, voa ? 0 : clip, tsN, w, escY, voa);
+      var nS2 = ehNeon(idx), tsN = tema(pista.mundos[s.mundo], idx), ntS = noiteEm(idx);   // ntS: quanto de noite aqui (0 a 1)
+      if (s.tunel) {
+        var temB = n + 1 < cnt && aZ[n + 1] > PROF && segs[idx + 1] && segs[idx + 1].tunel === s.tunel;
+        tunel(c, s, idx, { x: sx, y: sy, e: esc, eY: escY }, temB ? { x: aX[n + 1], y: aY[n + 1], e: aS[n + 1] * K, eY: aS[n + 1] * KY } : (segs[idx + 1] && !segs[idx + 1].tunel && n + 1 < cnt ? { x: aX[n + 1], y: aY[n + 1], e: aS[n + 1] * K, eY: aS[n + 1] * KY } : null), w, h, voa, NEON[pista.mundos[s.mundo]], pista, nevoa, n === primeiro && dentroTunel);
+      }
+      // postes e pórticos de neon acendem aos poucos com a noite (e somem aos poucos de dia)
+      if (ntS > 0.02 && !s.tunel && n > 2 && idx % 8 === 0) { c.globalAlpha = ntS; postesNeon(c, idx, sx, sy, esc, clip, NEON[pista.mundos[s.mundo]], w, escY); c.globalAlpha = 1; }
+      if (ntS > 0.02 && !s.tunel && n > 3 && idx % 48 === 24) { c.globalAlpha = ntS; portico(c, idx, sx, voa ? syAr : sy, esc, voa ? 0 : clip, NEON[pista.mundos[s.mundo]], w, escY, voa); c.globalAlpha = 1; }
       for (k2 = 0; n > 3 && k2 < s.enfeites.length; k2++) {   // enfeite colado na câmera taparia a tela
-        var en = s.enfeites[k2], arco = en.tipo === 'portal' || en.tipo === 'chegada' || en.tipo === 'largada', spr = en.tipo === 'portal' ? portais[en.mundo] : en.tipo === 'chegada' ? chegada : en.tipo === 'largada' ? largada : enfeiteSpr(en.tipo, nS2);
+        var en = s.enfeites[k2], arco = en.tipo === 'portal' || en.tipo === 'chegada' || en.tipo === 'largada', spr = en.tipo === 'portal' ? portais[en.mundo] : en.tipo === 'chegada' ? chegada : en.tipo === 'largada' ? largada : enfeiteSpr(en.tipo, ntS >= 0.5);
         if (!spr) continue;
         if (voa && arco) sprite(c, spr, esc, sx + esc * en.x * LARG, syAr + escY * 1900, 0, w);   // no céu, o portal fica na altura do voo
+        else if (!arco && ntS > 0.02 && ntS < 0.98) {   // na troca dia/noite: o enfeite claro e o escurecido se misturam
+          var claro = enfeiteSpr(en.tipo, false), escuro = enfeiteSpr(en.tipo, true);
+          c.globalAlpha = 1 - ntS; sprite(c, claro, esc, sx + esc * en.x * LARG, sy, clip, w);
+          c.globalAlpha = ntS; sprite(c, escuro, esc, sx + esc * en.x * LARG, sy, clip, w); c.globalAlpha = 1;
+        }
         else sprite(c, spr, esc, sx + esc * en.x * LARG, sy, clip, w);
       }
       if (voa && n > 3 && idx % 6 === 0) {   // nuvens dos lados, em alturas diferentes
         var hz = hash(idx), lado = hz < 0.5 ? -1 : 1, tm2 = tema(pista.mundos[s.mundo], idx);
-        sprite(c, base[tm2.noite || nS2 ? 'nuvemNoite' : 'nuvemFofa'], esc, sx + esc * lado * (2.2 + hash(idx + 7) * 1.6) * LARG, syAr + escY * (hash(idx + 3) - 0.35) * 2600, 0, w);
+        var nN = tm2.noite ? 1 : ntS, nxC = sx + esc * lado * (2.2 + hash(idx + 7) * 1.6) * LARG, nyC = syAr + escY * (hash(idx + 3) - 0.35) * 2600;
+        if (nN < 0.98) { c.globalAlpha = 1 - nN; sprite(c, base.nuvemFofa, esc, nxC, nyC, 0, w); }
+        if (nN > 0.02) { c.globalAlpha = nN; sprite(c, base.nuvemNoite, esc, nxC, nyC, 0, w); }
+        c.globalAlpha = 1;
       }
       for (k2 = 0; k2 < s.coisas.length; k2++) {
         var co = s.coisas[k2];
         if (co.pego[ji]) continue;
         var alt = co.alt;
         if (co.tipo === 'estrela') alt += Math.sin(e.t * 5 + idx) * 80;
-        if (voa) sprite(c, base[nS2 && co.tipo === 'estrela' ? 'estrelaNeon' : sprCeu(co.tipo)], esc, sx + esc * co.x * LARG, syAr - escY * (alt + (co.tipo === 'anel' || co.tipo === 'turbo' ? -150 : 0)), 0, w);
-        else sprite(c, base[nS2 && ITEM_NEON[co.tipo] ? ITEM_NEON[co.tipo] : co.tipo], esc, sx + esc * co.x * LARG, sy - escY * alt, clip, w);
+        // itens com versão de neon (estrela, turbo, lama...): misturam as duas versões na troca dia/noite
+        var nomeDia = voa ? sprCeu(co.tipo) : co.tipo, nomeNoite = voa ? (co.tipo === 'estrela' ? 'estrelaNeon' : nomeDia) : (ITEM_NEON[co.tipo] || co.tipo);
+        var ix = sx + esc * co.x * LARG, iy = voa ? syAr - escY * (alt + (co.tipo === 'anel' || co.tipo === 'turbo' ? -150 : 0)) : sy - escY * alt, icl = voa ? 0 : clip;
+        if (nomeNoite === nomeDia || ntS <= 0.02) sprite(c, base[ntS >= 0.98 ? nomeNoite : nomeDia], esc, ix, iy, icl, w);
+        else if (ntS >= 0.98) sprite(c, base[nomeNoite], esc, ix, iy, icl, w);
+        else { c.globalAlpha = 1 - ntS; sprite(c, base[nomeDia], esc, ix, iy, icl, w); c.globalAlpha = ntS; sprite(c, base[nomeNoite], esc, ix, iy, icl, w); c.globalAlpha = 1; }
       }
       var cs = porSeg[idx];
       if (cs) for (k2 = 0; k2 < cs.length; k2++) {
         var pc = noPonto(n, cs[k2].z), tx = pc.x + pc.esc * cs[k2].x * LARG, tyA = pc.y - pc.escY * (ALT_VOO + 200);
-        if (voa) { sprite(c, base[sprCeu(cs[k2].tipo)], pc.esc, tx, tyA, 0, w); if (nS2 || s.tunel) luzesAviao(c, tx, tyA, pc.esc, idx); }
+        var luzT = s.tunel ? 1 : ntS;   // lanternas acesas: à noite e no túnel (acendendo aos poucos)
+        if (voa) { sprite(c, base[sprCeu(cs[k2].tipo)], pc.esc, tx, tyA, 0, w); if (luzT > 0.02) { c.globalAlpha = luzT; luzesAviao(c, tx, tyA, pc.esc, idx); c.globalAlpha = 1; } }
         else {
           if (pc.y <= clip + 2) sombraChao(c, tx, pc.y, base[cs[k2].tipo].w * pc.esc, corPedaco(pista, s).noite, '#ff3b6b');
-          sprite(c, base[cs[k2].tipo], pc.esc, tx, pc.y, clip, w); if ((nS2 || s.tunel) && pc.y <= clip + 2) lanternasTransito(c, cs[k2].tipo, tx, pc.y, pc.esc);
+          sprite(c, base[cs[k2].tipo], pc.esc, tx, pc.y, clip, w); if (luzT > 0.02 && pc.y <= clip + 2) { c.globalAlpha = luzT; lanternasTransito(c, cs[k2].tipo, tx, pc.y, pc.esc); c.globalAlpha = 1; }
         }
       }
       var rs = porSegR[idx];   // rivais neste pedaço (no céu se forem de avião)
@@ -445,7 +464,8 @@
         if (vivo) bracos(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info.cor, faseR, rd.lado, 'longe');
         sprite(c, S.quadro(rd.spr, faseR), pr.esc, rX, rY, rd.voa || voa ? 0 : clip, w);
         if (vivo) { bracos(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info.cor, faseR, rd.lado, 'perto'); pilotoVivo(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info, 10 + rs[k2] * 2.1, 6); }
-        if (!rd.voa && (nS2 || s.tunel) && rY <= clip + 2) { c.save(); c.globalCompositeOperation = 'lighter'; luz(c, rX - rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7); luz(c, rX + rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7); c.restore(); }
+        var luzR = s.tunel ? 1 : ntS;
+        if (!rd.voa && luzR > 0.02 && rY <= clip + 2) { c.save(); c.globalCompositeOperation = 'lighter'; luz(c, rX - rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7 * luzR); luz(c, rX + rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7 * luzR); c.restore(); }
       }
       if (idx === oSeg && outro.z > j.z - JOG_Z * 0.6) {
         var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / (outro.puloMax || raiz.VruuumMotor.PULO))) * 1400 * (outro.puloMax || 1.1) / 1.1 : 0;
@@ -468,38 +488,75 @@
   // ---------- túnel ----------
   // no chão: molduras encaixadas uma na frente da outra (cada pedaço pinta tudo FORA da sua abertura),
   // com faixas de luz correndo; na entrada, uma parede grande em volta da boca. No céu: anéis de luz.
-  function tunel(c, s, idx, sx, sy, syAr, esc, w, h, voa, ts, escY) {
-    var meia = esc * LARG * 1.32, x1 = sx - meia, x2 = sx + meia, neon = ehNeon(idx), tt = Date.now() / 1000;
+  // ---------- túnel ----------
+  /* No chão o túnel é um corredor em 3D: paredes e teto ligando um pedaço ao seguinte (como a pista), uma boca em
+     forma de arco na entrada (rocha, areia, doce, gelo ou prédio, conforme o mundo) e luz de fora clareando as
+     paredes perto da entrada e da saída. As cores misturam dia e noite aos poucos, como o resto. No céu, um tubo de
+     anéis de luz em volta da rota. A: este pedaço (perto); B: o seguinte (longe), ou null. */
+  // boca do túnel por mundo: [cor de dia, cor de noite, cobertura no topo (dia), cobertura (noite)]
+  var BOCA = { praia: ['#b98a52', '#2a2238', '#e9cf94', '#3a2f4a'], floresta: ['#6e6a5e', '#1a2420', '#4cc35a', '#163a24'], doces: ['#7a4a33', '#2a1426', '#ffb6e1', '#5a2050'], neve: ['#7d8aa3', '#1e2638', '#f4f8ff', '#3a4a6a'], neon: ['#2c2752', '#15122e', '#ff2bd6', '#ff2bd6'] };
+  function tunel(c, s, idx, A, B, w, h, voa, ts, pista, nevoa, cobrirTela) {
+    var nt = noiteEm(idx), tt = Date.now() / 1000, sx = A.x, sy = A.y, esc = A.e, escY = A.eY;
+    var meia = esc * LARG * 1.32, x1 = sx - meia, x2 = sx + meia;
     var aceso = ((idx - tt * 26) % 18 + 18) % 18 < 3;   // luz que corre pelo túnel
-    var corA = neon ? ts.borda[(Math.floor(idx / 3)) % 2] : '#ffd166';
-    c.save(); c.globalCompositeOperation = 'source-over';
-    if (voa) {   // tubo de anéis de luz em volta da rota no céu
+    var corLuzNoite = hexRgb(ts.borda[(Math.floor(idx / 3)) % 2] || '#2bf4ff'), corLuz = css(mixRgb([255, 209, 102], corLuzNoite, nt));
+    c.save();
+    if (voa) {
       if (idx % 3 === 0) {
-        var yT = syAr - escY * 2400, yB = syAr + escY * 900, lw = Math.max(1.2, esc * 60);
+        var yT = A.y - escY * ALT_VOO - escY * 2400, yB = A.y - escY * ALT_VOO + escY * 900, lw = Math.max(1.2, esc * 60);
         c.globalCompositeOperation = 'lighter';
-        c.strokeStyle = rgba(corA, aceso ? 0.35 : 0.14); c.lineWidth = lw * 4; c.strokeRect(x1, yT, x2 - x1, yB - yT);
-        c.strokeStyle = rgba(corA, aceso ? 1 : 0.55); c.lineWidth = lw; c.strokeRect(x1, yT, x2 - x1, yB - yT);
+        c.strokeStyle = 'rgba(255,255,255,0)';
+        c.globalAlpha = aceso ? 0.35 : 0.14; c.strokeStyle = corLuz; c.lineWidth = lw * 4; c.strokeRect(x1, yT, x2 - x1, yB - yT);
+        c.globalAlpha = aceso ? 1 : 0.55; c.lineWidth = lw; c.strokeRect(x1, yT, x2 - x1, yB - yT);
       }
       c.restore(); return;
     }
-    var alto = escY * 2700, yT2 = sy - alto, yB2 = sy + 1;
-    var parede = neon ? (idx % 2 ? '#0b0a19' : '#0e0c20') : (idx % 2 ? '#4a4f5c' : '#454a57');
-    var fx1 = -10, fx2 = w + 10, fy = -10;
-    if (s.entrada) { fx1 = sx - meia * 3.4; fx2 = sx + meia * 3.4; fy = sy - escY * 7000; parede = neon ? '#14112a' : '#6b7080'; }
-    c.fillStyle = parede; c.beginPath(); c.rect(fx1, fy, fx2 - fx1, yB2 - fy); c.rect(x1, yT2, x2 - x1, yB2 - yT2);
-    try { c.fill('evenodd'); } catch (e) { c.fill(); }
-    if (s.entrada) {   // contorno de luz na boca do túnel
+    var t = pista.tuneis[s.tunel - 1] || [idx, idx + 1], ini = t[0], fim = t[1] - 1;
+    // cor das paredes: dia (cinza) / noite (quase preto), mais clara perto das bocas (luz de fora entrando)
+    var par = idx % 2, base0 = mixRgb(par ? [74, 79, 92] : [69, 74, 87], par ? [14, 12, 32] : [11, 10, 25], nt);
+    var luzFora = Math.max(suaveT(1 - (fim - idx) / 16), suaveT(1 - (idx - ini) / 10)) * (0.6 - 0.35 * nt);
+    var parede = mixRgb(base0, nevoa, luzFora), teto = mixRgb(parede, [255, 255, 255], 0.07), lado2 = mixRgb(parede, [0, 0, 0], 0.12);
+    var alto = escY * 2700, yC = sy - alto, yF = sy + 1;
+    if (B) {
+      var meiaB = B.e * LARG * 1.32, xL2 = B.x - meiaB, xR2 = B.x + meiaB, yC2 = B.y - B.eY * 2700, yF2 = B.y + 1;
+      poligono(c, x1, yF, x1, yC, xL2, yC2, xL2, yF2, css(parede));       // parede esquerda
+      poligono(c, x2, yF, x2, yC, xR2, yC2, xR2, yF2, css(lado2));        // parede direita (um pouco mais escura)
+      poligono(c, x1, yC, x2, yC, xR2, yC2, xL2, yC2, css(teto));         // teto
+      if (idx % 3 === 0) {   // lâmpada no teto e filetes de luz nos cantos
+        c.globalCompositeOperation = 'lighter';
+        poligono(c, sx - meia * 0.14, yC, sx + meia * 0.14, yC, B.x + meiaB * 0.14, yC2, B.x - meiaB * 0.14, yC2, corLuz);
+        c.globalAlpha = aceso ? 0.9 : 0.35; c.strokeStyle = corLuz; c.lineWidth = Math.max(1, esc * 40);
+        c.beginPath(); c.moveTo(x1, yC); c.lineTo(xL2, yC2); c.moveTo(x2, yC); c.lineTo(xR2, yC2); c.stroke();
+        c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
+      }
+    }
+    if (cobrirTela) {   // dentro do túnel: o pedaço mais perto cobre o resto da tela com parede e teto
+      c.fillStyle = css(parede); c.beginPath(); c.rect(-10, -10, w + 20, yF + 10); c.rect(x1, yC, x2 - x1, yF - yC);
+      try { c.fill('evenodd'); } catch (e2) { c.fill(); }
+    }
+    if (idx === fim && B) {   // saída: a luz lá de fora espalha um pouco em volta da boca
       c.globalCompositeOperation = 'lighter';
-      c.strokeStyle = rgba(neon ? ts.borda[0] : '#ffd166', 0.9); c.lineWidth = Math.max(1.5, esc * 90);
-      c.beginPath(); c.moveTo(x1, yB2); c.lineTo(x1, yT2); c.lineTo(x2, yT2); c.lineTo(x2, yB2); c.stroke();
-    } else if (idx % 3 === 0) {   // faixas de luz nas paredes e no teto
-      c.globalCompositeOperation = 'lighter';
-      var lw2 = Math.max(1, esc * 45);
-      c.strokeStyle = rgba(corA, aceso ? 0.3 : 0.1); c.lineWidth = lw2 * 4;
-      c.beginPath(); c.moveTo(x1, yB2); c.lineTo(x1, yT2); c.lineTo(x2, yT2); c.lineTo(x2, yB2); c.stroke();
-      c.strokeStyle = rgba(corA, aceso ? 1 : 0.45); c.lineWidth = lw2;
-      c.beginPath(); c.moveTo(x1, yB2); c.lineTo(x1, yT2); c.lineTo(x2, yT2); c.lineTo(x2, yB2); c.stroke();
-      if (!neon) { c.fillStyle = 'rgba(255,240,180,.9)'; c.fillRect(sx - meia * 0.12, yT2, meia * 0.24, Math.max(1, esc * 60)); }
+      var gl = c.createRadialGradient(B.x, (yC2 + yF2) / 2, meiaB * 0.6, B.x, (yC2 + yF2) / 2, meiaB * 2.2);
+      gl.addColorStop(0, 'rgba(255,255,255,' + (0.28 * (1 - 0.6 * nt)).toFixed(3) + ')'); gl.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = gl; c.fillRect(B.x - meiaB * 2.3, yC2 - meiaB * 1.5, meiaB * 4.6, (yF2 - yC2) + meiaB * 3);
+      c.globalCompositeOperation = 'source-over';
+    }
+    if (idx === ini) {   // boca do túnel: um morro (ou prédio) com abertura em arco
+      var bc = BOCA[pista.mundos[s.mundo]] || BOCA.floresta, cor = mixRgb(hexRgb(bc[0]), hexRgb(bc[1]), nt);
+      var L = meia * 4.2, topo = sy - escY * 6200, r = meia;
+      c.fillStyle = css(cor); c.beginPath();
+      c.moveTo(sx - L, yF); c.lineTo(sx - L, topo + escY * 1800); c.quadraticCurveTo(sx - L * 0.7, topo, sx, topo); c.quadraticCurveTo(sx + L * 0.7, topo, sx + L, topo + escY * 1800); c.lineTo(sx + L, yF); c.closePath();
+      c.moveTo(x1, yF); c.lineTo(x1, yC + r * 0.55); c.quadraticCurveTo(x1, yC - r * 0.15, sx, yC - r * 0.15); c.quadraticCurveTo(x2, yC - r * 0.15, x2, yC + r * 0.55); c.lineTo(x2, yF); c.closePath();
+      try { c.fill('evenodd'); } catch (e3) { c.fill(); }
+      // cobertura no alto do morro (neve, grama, areia clara, glacê de doce; no neon, um fio de luz)
+      c.save(); c.beginPath(); c.moveTo(sx - L, topo + escY * 1800); c.quadraticCurveTo(sx - L * 0.7, topo, sx, topo); c.quadraticCurveTo(sx + L * 0.7, topo, sx + L, topo + escY * 1800);
+      c.lineTo(sx + L, topo + escY * 2500); c.quadraticCurveTo(sx + L * 0.7, topo + escY * 700, sx, topo + escY * 700); c.quadraticCurveTo(sx - L * 0.7, topo + escY * 700, sx - L, topo + escY * 2500); c.closePath();
+      c.fillStyle = css(mixRgb(hexRgb(bc[2]), hexRgb(bc[3]), nt)); c.fill(); c.restore();
+      // sombra por dentro da boca e contorno de luz (amarelo de dia, neon à noite)
+      c.strokeStyle = 'rgba(0,0,0,.25)'; c.lineWidth = Math.max(1, esc * 160);
+      c.beginPath(); c.moveTo(x1, yF); c.lineTo(x1, yC + r * 0.55); c.quadraticCurveTo(x1, yC - r * 0.15, sx, yC - r * 0.15); c.quadraticCurveTo(x2, yC - r * 0.15, x2, yC + r * 0.55); c.lineTo(x2, yF); c.stroke();
+      c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.55 + 0.35 * nt; c.strokeStyle = corLuz; c.lineWidth = Math.max(1.5, esc * 70); c.stroke();
+      c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
     }
     c.restore();
   }
@@ -583,9 +640,9 @@
     var vv = VEIC[j.n], voa = !!VOA[j.n], tt = Date.now() / 1000;
     if (voa) lift += Math.sin(tt * 2.2) * K * 0.012;   // flutuando no ar
     if (lift > 0 && !voa) { c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse ? c.ellipse(g.cx, chao, cw * 0.45 * (1 - lift / K), ch * 0.06, 0, 0, Math.PI * 2) : c.arc(g.cx, chao, cw * 0.4, 0, Math.PI * 2); c.fill(); }
-    var segAqui = P.achar(e.pista, j.z), acesas = ehNeon(segAqui.i) || !!segAqui.tunel;
+    var segAqui = P.achar(e.pista, j.z), forcaLuz = segAqui.tunel ? 1 : noiteEm(segAqui.i), acesas = forcaLuz > 0.02;   // faróis acendem aos poucos ao anoitecer
     if (acesas) {
-      c.save(); c.globalCompositeOperation = 'lighter';
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = forcaLuz;
       // faróis iluminando a estrada à frente
       var yF = chao - lift - ch * 0.25, yL = g.cy + g.KY * 0.3;
       [-1, 1].forEach(function (l) {
@@ -619,7 +676,7 @@
     extrasDepois(c, vv, cw, ch, tt, j.turbo > 0);
     if (acesas && !voa) {   // lanternas brilhando
       c.globalCompositeOperation = 'lighter';
-      luz(c, -cw * 0.36, -ch * 0.4, cw * 0.22, '#ff2a2a', 0.75); luz(c, cw * 0.36, -ch * 0.4, cw * 0.22, '#ff2a2a', 0.75);
+      luz(c, -cw * 0.36, -ch * 0.4, cw * 0.22, '#ff2a2a', 0.75 * forcaLuz); luz(c, cw * 0.36, -ch * 0.4, cw * 0.22, '#ff2a2a', 0.75 * forcaLuz);
       c.globalCompositeOperation = 'source-over';
     }
     c.restore();
