@@ -145,6 +145,12 @@
       b.addEventListener('click', function () { Array.prototype.forEach.call(cores.children, function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); ctrl.sala.mandar({ t: 'ferramenta', id: ctrl.id, cor: c }); });
       cores.appendChild(b);
     });
+    var gros = $('ctrlTamanhos'); gros.innerHTML = '';
+    function montarGrossuras(tam) {
+      gros.innerHTML = '';
+      gros.appendChild(A.grossuras(tam, '#ffffff', function (tm, nome) { ctrl.sala.mandar({ t: 'ferramenta', id: ctrl.id, tam: tm }); montarGrossuras(tm); A.aviso('✏️ ' + nome, 1000); }));
+    }
+    montarGrossuras(26);
     var pinc = $('ctrlPinceis'); pinc.innerHTML = '';
     A.PINCEIS_LIVRES.concat(['balde', 'borracha']).forEach(function (id, i) {
       var info = window.DesenhoPintura.PINCEIS.filter(function (p) { return p.id === id; })[0];

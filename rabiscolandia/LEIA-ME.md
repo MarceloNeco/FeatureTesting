@@ -11,8 +11,9 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/rabiscoland
 
 ## Como brincar
 
-- **🎨 Desenhar livre**: embaixo ficam o pincel, a cor, o tamanho, o 🪣 balde, a 🧽 borracha, os ⭐ adesivos, o ✋ mover
-  adesivo e o 🏞️ fundo, e uma faixa de cores. Tocar no pincel de novo abre todos os pincéis:
+- **🎨 Desenhar livre**: embaixo ficam o pincel, a cor, o 🪣 balde, a 🧽 borracha, os ⭐ adesivos, o ✋ mover
+  adesivo e o 🏞️ fundo, e uma faixa que começa com a **grossura do traço** (cinco traços, do fininho ao bem grosso:
+  é só tocar no que quiser) e segue com as cores. Tocar no pincel de novo abre todos os pincéis:
   canetinha, lápis, giz de cera, pincel macio, spray e os **✨ vivos**, que mexem sozinhos — 🌈 arco-íris que corre,
   💡 neon que pisca, ✨ purpurina que brilha e 🐛 minhoca que dança (com carinha!).
 - **📚 Livro de colorir**: 23 desenhos originais em 7 temas (bichinhos, casa, passeio, festa, fantasia, natureza, veículos); escolha um; o 🪣 balde enche a área sem passar do contorno, e todos os pincéis
