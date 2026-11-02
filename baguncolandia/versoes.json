@@ -6,10 +6,12 @@
       "data": "02/Nov/2026",
       "hora": "08:45:00",
       "pt": [
-        "A tela de entrada já abre com os textos dos botões (antes aparecia só o ícone e o texto vinha um instante depois)."
+        "A tela de entrada já abre com os textos dos botões (antes aparecia só o ícone e o texto vinha um instante depois).",
+        "Botão Voltar do celular: volta uma tela por vez (do jogo para a tela do nome e do boneco, e dela para o menu). Só no menu é que ele sai do jogo."
       ],
       "en": [
-        "The start screen now opens with the button labels already there (before, only the icon showed and the text came a moment later)."
+        "The start screen now opens with the button labels already there (before, only the icon showed and the text came a moment later).",
+        "Phone Back button: goes back one screen at a time (from the game to the name and avatar screen, then to the menu). Only on the menu does it leave the game."
       ]
     },
     {
