@@ -11,8 +11,9 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/rabiscoland
 
 ## Como brincar
 
-- **🎨 Desenhar livre**: embaixo ficam o pincel, a cor, o tamanho, o 🪣 balde, a 🧽 borracha, os ⭐ adesivos, o ✋ mover
-  adesivo e o 🏞️ fundo, e uma faixa de cores. Tocar no pincel de novo abre todos os pincéis:
+- **🎨 Desenhar livre**: embaixo ficam o pincel, a cor, o 🪣 balde, a 🧽 borracha, os ⭐ adesivos, o ✋ mover
+  adesivo e o 🏞️ fundo, e uma faixa que começa com a **grossura do traço** (cinco traços, do fininho ao bem grosso:
+  é só tocar no que quiser) e segue com as cores. Tocar no pincel de novo abre todos os pincéis:
   canetinha, lápis, giz de cera, pincel macio, spray e os **✨ vivos**, que mexem sozinhos — 🌈 arco-íris que corre,
   💡 neon que pisca, ✨ purpurina que brilha e 🐛 minhoca que dança (com carinha!).
 - **📚 Livro de colorir**: 23 desenhos originais em 7 temas (bichinhos, casa, passeio, festa, fantasia, natureza, veículos); escolha um; o 🪣 balde enche a área sem passar do contorno, e todos os pincéis
@@ -33,6 +34,13 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/rabiscoland
   escolher. As gravadas só baixam quando tocam (e ficam guardadas). Se o navegador recusar tocar, a música começa no próximo toque
   na tela; se uma não abrir ou parar, pula para a próxima; sem internet, seguem as do app.
 - **🖼️ Meus desenhos**: tudo fica guardado sozinho enquanto desenha (até 40, só neste aparelho); toque para continuar.
+
+## 🎓 Passo a passo com o Rabisquinho
+
+Na primeira vez em cada jeito de brincar (desenhar, colorir, pintar por números), o **Rabisquinho 🖍️** aparece: a tela
+escurece, o botão explicado fica iluminado e um balão animado sai dele, lido em **voz alta** (voz do próprio aparelho,
+em português do Brasil). ▶ próximo · ◀ voltar · ✕ sair · 🔊 liga/desliga a voz · tocar em qualquer lugar avança.
+Para ver de novo: **❓** na tela de desenhar ou **🎓 Aprender a brincar** no menu. Os balões ficam em `tour.js`.
 
 ## Em pé ou deitado (folha esperta)
 
@@ -89,6 +97,7 @@ diminuída junto). Nada vai para a internet; não há login, cookie nem coleta.
 | `mao.js` | mão na câmera: regra aberta/fechada e rastreador (puros, testados) + MediaPipe Hand Landmarker. |
 | `sala.js` | canal TV ↔ celular; confere toda mensagem. |
 | `tv.js` | modo TV (código, até 4 miras) e celular-controle (dedo, giroscópio, mão). |
+| `tour.js` | passo a passo do Rabisquinho: balões animados apontando os botões, lidos em voz alta (Web Speech). Balão novo = um item em `PASSOS`. |
 | `app.js` | telas, barra, painéis, colinha, Meus desenhos, mão na tela, foto, instalar, teclado/TV. `APP_VERSION` aqui. |
 | `sw.js` | cache `rabiscolandia-v…` para funcionar sem internet. `VERSAO` aqui. |
 | `versoes.json` | novidades de cada versão (PT e EN). |

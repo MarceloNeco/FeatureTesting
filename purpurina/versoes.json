@@ -2,6 +2,30 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.11.2",
+      "data": "02/Nov/2026",
+      "hora": "09:10:15",
+      "pt": [
+        "👦 Menino com cara de menino, de um jeito natural: cabelo curto de verdade (orelhas à mostra, nuca curtinha, franjinha repicada; o topete virou um topete de verdade), olhos um pouco menores e mais retos, sobrancelha reta, bochecha quase sem rosado e o queixo um pouquinho mais largo.",
+        "✨ O aviso de versão nova agora é um só: o novo aviso do topo (\"Versão nova — Atualizar\"), que vale para todos os jogos do Bolinho de Chuva."
+      ],
+      "en": [
+        "👦 The boy now looks like a boy, in a natural way: really short hair (ears showing, short at the nape, a choppy little fringe; the quiff is a real quiff now), slightly smaller and calmer eyes, straight eyebrows, almost no pink on the cheeks and a slightly wider chin.",
+        "✨ There is now a single new-version notice: the new one at the top (\"New version — Update\"), shared by all Bolinho de Chuva games."
+      ]
+    },
+    {
+      "versao": "0.11.1",
+      "data": "02/Nov/2026",
+      "hora": "12:00:00",
+      "pt": [
+        "Aviso de versão nova dentro do jogo: quando sai uma atualização, aparece no topo \"✨ Versão nova — Atualizar\". Um toque baixa a versão nova, troca a cópia guardada no aparelho (para continuar funcionando sem internet) e recarrega. Nunca recarrega sozinho no meio da partida."
+      ],
+      "en": [
+        "New-version notice inside the game: when an update is out, \"✨ New version — Update\" shows at the top. One tap downloads it, replaces the copy saved on the device (so it keeps working offline) and reloads. It never reloads by itself mid-game."
+      ]
+    },
+    {
       "versao": "0.11.0",
       "data": "01/Nov/2026",
       "hora": "22:53:47",

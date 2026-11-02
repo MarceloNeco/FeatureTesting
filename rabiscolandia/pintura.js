@@ -182,7 +182,7 @@
     var fundo = { tipo: 'papel', v: '#ffffff' }, fundoCache = null, fundoImg = null;
     var pag = null, modo = 'livre', varIdx = -1, cores = null, feitos = {}, quandoFeito = {}, selNum = 1, mascara = null;
     var hit = document.createElement('canvas').getContext('2d');
-    var ferr = { pincel: 'canetinha', cor: '#ff4f6d', tam: 24, adesivo: { tipo: 'emoji', v: '🐶', mov: 'pula' }, tamAdesivo: 170 };
+    var ferr = { pincel: 'canetinha', cor: '#ff4f6d', tam: 26, adesivo: { tipo: 'emoji', v: '🐶', mov: 'pula' }, tamAdesivo: 170 };
     var ferrDe = {};                                   // ferramenta própria de cada celular na TV
     var fontes = {}, cursores = {}, festa = null;
     var calmo = !!op.calmo, sujo = true, rodando = false, ultimoQuadro = 0;

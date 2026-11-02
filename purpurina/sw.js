@@ -3,9 +3,9 @@
    cópia primeiro. Músicas gravadas (MP3, ~17 MB): baixadas em segundo plano depois de instalar e na primeira
    vez que tocam, num cache próprio que não muda a cada versão (não baixam de novo). Cache com o nome do app: só apaga caches "purpurina-" (nunca os dos outros apps
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
-var VERSAO = '0.11.0';
+var VERSAO = '0.11.2';
 var CACHE = 'purpurina-v' + VERSAO;
-var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'pecas.js', 'visual.js', 'boneca.js', 'som.js', 'app.js', 'sala.js', 'musica.js', 'tv.js', 'baixar.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
+var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'pecas.js', 'visual.js', 'boneca.js', 'som.js', 'app.js', 'sala.js', 'musica.js', 'tv.js', 'baixar.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js', '../atualizar.js'];
 var CACHE_MUSICAS = 'purpurina-musicas-v1';
 var MUSICAS = ['musicas/disco-medusae.mp3', 'musicas/shoepop.mp3', 'musicas/sunglasses.mp3', 'musicas/electrodoodle.mp3', 'musicas/beach.mp3', 'musicas/walking-shoes.mp3', 'musicas/friend-to-friend.mp3', 'musicas/yippee.mp3'];
 function guardarMusicas() {

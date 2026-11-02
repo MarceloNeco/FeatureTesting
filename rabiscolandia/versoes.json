@@ -2,6 +2,43 @@
   "app": "rabiscolandia",
   "versoes": [
     {
+      "versao": "0.1.9",
+      "data": "02/Nov/2026",
+      "hora": "09:15:28",
+      "pt": [
+        "🎓 Passo a passo com o Rabisquinho 🖍️: a tela escurece, o botão fica iluminado e um balão animado explica cada função — e o balão é lido em voz alta. Abre sozinho na primeira vez de desenhar, colorir e pintar por números; o ❓ na tela de desenhar e o 🎓 Aprender a brincar no menu mostram de novo.",
+        "No balão: ▶ próximo, ◀ voltar, ✕ sair e 🔊 liga ou desliga a voz. Tocar em qualquer lugar também avança; o Voltar do celular fecha só o passo a passo."
+      ],
+      "en": [
+        "🎓 Tour with Scribbly 🖍️: the screen dims, the button lights up and an animated speech balloon explains each feature — read aloud too. It opens by itself the first time you draw, color or paint by numbers; ❓ on the drawing screen and 🎓 Learn to play on the menu show it again.",
+        "In the balloon: ▶ next, ◀ back, ✕ leave and 🔊 voice on/off. Tapping anywhere also moves on; the phone Back button closes only the tour."
+      ]
+    },
+    {
+      "versao": "0.1.8",
+      "data": "02/Nov/2026",
+      "hora": "09:10:58",
+      "pt": [
+        "Grossura do traço fácil de achar: no começo da faixa de cores aparecem cinco traços de verdade, do fininho ao bem grosso, na cor escolhida. É só tocar no traço que quiser (também muda o tamanho do adesivo).",
+        "No celular de controle da TV também dá para escolher a grossura do traço."
+      ],
+      "en": [
+        "Line thickness is easy to find: five real lines, from very thin to very thick, show at the start of the color strip in the chosen color. Just tap the one you want (it also changes sticker size).",
+        "The TV remote phone can choose the line thickness too."
+      ]
+    },
+    {
+      "versao": "0.1.7",
+      "data": "02/Nov/2026",
+      "hora": "12:00:00",
+      "pt": [
+        "Aviso de versão nova dentro do jogo: quando sai uma atualização, aparece no topo \"✨ Versão nova — Atualizar\". Um toque baixa a versão nova, troca a cópia guardada no aparelho (para continuar funcionando sem internet) e recarrega. Nunca recarrega sozinho no meio da partida."
+      ],
+      "en": [
+        "New-version notice inside the game: when an update is out, \"✨ New version — Update\" shows at the top. One tap downloads it, replaces the copy saved on the device (so it keeps working offline) and reloads. It never reloads by itself mid-game."
+      ]
+    },
+    {
       "versao": "0.1.6",
       "data": "01/Nov/2026",
       "hora": "23:30:00",

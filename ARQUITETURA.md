@@ -47,5 +47,9 @@ A mesma página serve a **TV** e o **celular**:
 - **Guardado no aparelho** (`localStorage`, chaves `danca:*`): nome, código, títulos, últimas músicas e a chave
   opcional da YouTube Data API da própria pessoa (`danca:ytkey`, para a busca dentro do app).
 - **Bibliotecas de fora**: `supabase-js` (jsDelivr) e a API de iframe do YouTube.
+- **TV sempre com um OK**: no navegador da TV a página foca "Esta é a TV" e espera um OK; nunca entra sozinha,
+  porque sem esse toque a LG bloqueia o som (YouTube preto/parado). Só o app da pasta `tv-lg/` (`?tv=auto`) entra direto.
+- **Diagnóstico**: `?debug` no endereço da TV mostra no canto a versão, se o toque liberou o som e os últimos
+  eventos e erros do YouTube (para foto quando algo falhar).
 
 Deixados de fora de propósito, por ser laboratório: módulo `Fundo`, cache offline no `sw.js` e zip de entrega.

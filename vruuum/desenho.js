@@ -366,16 +366,21 @@
       if (rs) for (k2 = 0; k2 < rs.length; k2++) {
         var rv = e.rivais[rs[k2]], rd = RIV[rs[k2]]; if (!rd || rv.z < j.z - JOG_Z * 0.6) continue;
         var pr = noPonto(n, rv.z), rX = pr.x + pr.esc * rv.x * LARG, rY = rd.voa ? pr.y - pr.escY * ALT_VOO : pr.y, rW = rd.spr.w * pr.esc, rH = rd.spr.h * pr.esc;
-        sprite(c, S.quadro(rd.spr, rd.spr.quadros ? faseSkate(rd, rv, e) : 0), pr.esc, rX, rY, rd.voa || voa ? 0 : clip, w);
-        if (rW > 24 && (rd.voa || voa || rY <= clip)) pilotoVivo(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info, 10 + rs[k2] * 2.1, 6);
+        var faseR = rd.spr.quadros ? faseSkate(rd, rv, e) : 0, vivo = rW > 24 && (rd.voa || voa || rY <= clip);
+        rd.lado = (rd.lado || 0) + (Math.max(-1, Math.min(1, (rv.faixa - rv.x) * 4)) - (rd.lado || 0)) * 0.15;   // vira para onde está indo
+        if (vivo) bracos(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info.cor, faseR, rd.lado, 'longe');
+        sprite(c, S.quadro(rd.spr, faseR), pr.esc, rX, rY, rd.voa || voa ? 0 : clip, w);
+        if (vivo) { bracos(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info.cor, faseR, rd.lado, 'perto'); pilotoVivo(c, rd.veic, rX - rW / 2, rY - rH, rW, rH, rd.info, 10 + rs[k2] * 2.1, 6); }
         if (!rd.voa && (nS2 || s.tunel) && rY <= clip + 2) { c.save(); c.globalCompositeOperation = 'lighter'; luz(c, rX - rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7); luz(c, rX + rW * 0.36, rY - rH * 0.4, rW * 0.25, '#ff2a2a', 0.7); c.restore(); }
       }
       if (idx === oSeg && outro.z > j.z - JOG_Z * 0.6) {
         var lift = outro.pulo > 0 ? Math.sin(Math.PI * (1 - outro.pulo / (outro.puloMax || raiz.VruuumMotor.PULO))) * 1400 * (outro.puloMax || 1.1) / 1.1 : 0;
         var oVoa = !!VOA[outro.n];   // o outro pode estar voando enquanto eu vou de carro (e vice-versa)
         var po = noPonto(n, outro.z), oSpr = carrosJog[outro.n], oX = po.x + po.esc * outro.x * LARG, oY = (oVoa ? po.y - po.escY * ALT_VOO : po.y) - po.escY * lift;
-        sprite(c, S.quadro(oSpr, VS[outro.n] && VS[outro.n].fPe != null ? VS[outro.n].fPe : 0.8), po.esc, oX, oY, oVoa || voa ? 0 : clip, w);
-        if (oSpr.w * po.esc > 24 && (oVoa || voa || oY <= clip)) pilotoVivo(c, VEIC[outro.n], oX - oSpr.w * po.esc / 2, oY - oSpr.h * po.esc, oSpr.w * po.esc, oSpr.h * po.esc, INFO[outro.n], outro.n * 3.3, 7);
+        var faseO = VS[outro.n] && VS[outro.n].fPe != null ? VS[outro.n].fPe : 0.8, ladoO = VS[outro.n] ? VS[outro.n].lado : 0, oW = oSpr.w * po.esc, oH = oSpr.h * po.esc, oVivo = oW > 24 && (oVoa || voa || oY <= clip);
+        if (oVivo) bracos(c, VEIC[outro.n], oX - oW / 2, oY - oH, oW, oH, INFO[outro.n].cor, faseO, ladoO, 'longe');
+        sprite(c, S.quadro(oSpr, faseO), po.esc, oX, oY, oVoa || voa ? 0 : clip, w);
+        if (oVivo) { bracos(c, VEIC[outro.n], oX - oW / 2, oY - oH, oW, oH, INFO[outro.n].cor, faseO, ladoO, 'perto'); pilotoVivo(c, VEIC[outro.n], oX - oW / 2, oY - oH, oW, oH, INFO[outro.n], outro.n * 3.3, 7); }
       }
     }
 
@@ -474,6 +479,8 @@
     c.restore();
   }
 
+  // braços do skatista (desenhados ao vivo, seguem a curva): o de trás antes do boneco, o da frente depois
+  function bracos(c, vv, x0, y0, w, h, cor, fase, lado, qual) { if (vv && vv.bracos && V()) V().bracosSkate(c, x0, y0, w, h, cor || '#7b2cbf', fase, lado, qual); }
   // em que momento da remada está o skatista (obj guarda o ritmo): mais rápido, rema mais depressa;
   // pulando ou parado, os dois pés ficam no shape
   function faseSkate(obj, cor, e) {
@@ -529,7 +536,10 @@
     c.rotate(vs.lado * inclina + (j.rodando > 0 ? Math.sin(j.rodando * 22) * 0.25 : 0));
     if (j.rodando > 0) c.scale(Math.max(0.25, Math.abs(Math.cos(j.rodando * 9))) * (Math.cos(j.rodando * 9) < 0 ? -1 : 1), 1);
     extrasAntes(c, vv, cw, ch, tt);
-    c.drawImage((spr.quadros ? S.quadro(spr, faseSkate(vs, j, e)) : spr).img, -cw / 2, -ch, cw, ch);
+    var faseQ = spr.quadros ? faseSkate(vs, j, e) : 0, corJ = INFO[j.n] && INFO[j.n].cor;
+    bracos(c, vv, -cw / 2, -ch, cw, ch, corJ, faseQ, vs.lado, 'longe');
+    c.drawImage((spr.quadros ? S.quadro(spr, faseQ) : spr).img, -cw / 2, -ch, cw, ch);
+    bracos(c, vv, -cw / 2, -ch, cw, ch, corJ, faseQ, vs.lado, 'perto');
     pilotoVivo(c, vv, -cw / 2, -ch, cw, ch, INFO[j.n], j.n * 3.3, 7);
     extrasDepois(c, vv, cw, ch, tt, j.turbo > 0);
     if (acesas && !voa) {   // lanternas brilhando
@@ -701,7 +711,12 @@
     var esc = Math.min(W * 0.78 / spr.w, H * 0.8 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
     c.save(); c.translate(W / 2, H * 0.94 + (voa ? Math.sin(tt * 2.2) * H * 0.02 - H * 0.06 : Math.sin(tt * 9) * 1.2));
     if (voa) c.rotate(Math.sin(tt * 0.9) * 0.08);
-    extrasAntes(c, vv, cw, ch, tt); c.drawImage(S.quadro(spr, tt * 0.8).img, -cw / 2, -ch, cw, ch);
+    var faseP = tt * 0.8, ladoP = vv && vv.bracos ? Math.sin(tt * 0.9) * 0.9 : 0;   // na garagem o skatista faz curvas para os dois lados
+    if (ladoP) c.rotate(ladoP * 0.12);
+    extrasAntes(c, vv, cw, ch, tt);
+    bracos(c, vv, -cw / 2, -ch, cw, ch, cor, faseP, ladoP, 'longe');
+    c.drawImage(S.quadro(spr, faseP).img, -cw / 2, -ch, cw, ch);
+    bracos(c, vv, -cw / 2, -ch, cw, ch, cor, faseP, ladoP, 'perto');
     pilotoVivo(c, vv, -cw / 2, -ch, cw, ch, infoPiloto(cor, piloto, foto, pers), 1.2, 4.5);   // na garagem vira mais vezes
     extrasDepois(c, vv, cw, ch, tt, false);
     c.restore();
@@ -711,7 +726,10 @@
     var c = cv.getContext('2d'), spr = spritePrevia(cor, veic), W = cv.width, H = cv.height;
     c.clearRect(0, 0, W, H);
     var esc = Math.min(W * 0.9 / spr.w, H * 0.9 / spr.h), cw = spr.w * esc, ch = spr.h * esc;
+    var vvM = V() ? V().achar(veic) : null;
+    bracos(c, vvM, (W - cw) / 2, H * 0.95 - ch, cw, ch, cor, 0.3, 0, 'longe');
     c.drawImage(S.quadro(spr, 0.3).img, (W - cw) / 2, H * 0.95 - ch, cw, ch);   // o skate aparece empurrando
+    bracos(c, vvM, (W - cw) / 2, H * 0.95 - ch, cw, ch, cor, 0.3, 0, 'perto');
     if (Cab()) Cab().desenhar(c, V().achar(veic), (W - cw) / 2, H * 0.95 - ch, cw, ch, infoPiloto(cor, piloto, foto, pers), 50, 0, 1000);   // parado, de costas
   }
 
