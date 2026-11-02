@@ -2,6 +2,21 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.11.0",
+      "data": "01/Nov/2026",
+      "hora": "22:53:47",
+      "pt": [
+        "🧍 Corpo de perfil de verdade: girando, quando ela fica de lado, aparece um corpo desenhado de lado — um braço na frente e o outro atrás, uma perna na frente da outra, sapatos de lado e a roupa de lado com as cores e a estampa escolhidas (vestido, blusa, saia, calça ou shorts). Antes era o corpo de frente apertado.",
+        "💇 O cabelo comprido de trás desce colado nas costas quando ela está de lado (antes parecia uma tábua solta).",
+        "🔄 De frente até três-quartos, o corpo afina aos poucos, e a troca para o corpo de lado é quase imperceptível."
+      ],
+      "en": [
+        "🧍 A real side-view body: while spinning, when she turns sideways a body drawn from the side shows up — one arm in front and the other behind, one leg in front of the other, side-view shoes and the outfit seen from the side with the chosen colors and print (dress, top, skirt, pants or shorts). Before, it was the front body squeezed.",
+        "💇 Long back hair falls along her back when she is sideways (before it looked like a loose board).",
+        "🔄 From the front to three-quarters the body slims down little by little, and the switch to the side body is barely noticeable."
+      ]
+    },
+    {
       "versao": "0.10.4",
       "data": "01/Nov/2026",
       "hora": "23:30:00",
