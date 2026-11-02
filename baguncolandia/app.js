@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.14', APP_UPDATED = '02/11/2026';
+  var APP_VERSION = '0.8.15', APP_UPDATED = '02/11/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -55,7 +55,7 @@
   if (window.SolverRecursos && !SolverRecursos.ligado('baguncolandia', true)) { tela('desligado'); return; }
   try { if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js'); } catch (e) {}
 
-  var CFG_PADRAO = { modo: 'corta', jogadores: 1, celulares: 1, duracao: 60, dificuldade: 'normal', ambiente: 'paisagem', cena: 'aleatoria', turmas: { propria: true, publica: true, minhas: true } };
+  var CFG_PADRAO = { modo: 'bagunca', jogadores: 1, celulares: 1, duracao: 60, dificuldade: 'normal', ambiente: 'paisagem', cena: 'aleatoria', turmas: { propria: true, publica: true, minhas: true } };
   function idYouTube(s) { s = (s || '').trim(); var m = s.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/); if (m) return m[1]; return /^[A-Za-z0-9_-]{11}$/.test(s) ? s : ''; }
   function idPlaylist(s) { var m = (s || '').match(/[?&]list=([A-Za-z0-9_-]{10,})/); return m ? m[1] : ''; }
 

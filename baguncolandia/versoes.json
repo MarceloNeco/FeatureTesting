@@ -2,6 +2,17 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.15",
+      "data": "02/Nov/2026",
+      "hora": "13:40:00",
+      "pt": [
+        "Como o nome é Bagunçolândia, 🧸 Bagunça e 🧹 Arrumar agora são as duas primeiras opções (e a Bagunça já vem escolhida). Depois vêm Corta-corta, Pega-pega, Chuta-chuta, Pula e abaixa, Bagunça de bolas e Bagunça total."
+      ],
+      "en": [
+        "Since the game is called Bagunçolândia (Mayhem Land), 🧸 Mayhem and 🧹 Tidy up are now the first two options (and Mayhem is picked by default). Then come Slice, Catch, Kick, Jump and duck, Ball mayhem and Total mayhem."
+      ]
+    },
+    {
       "versao": "0.8.14",
       "data": "02/Nov/2026",
       "hora": "13:25:00",

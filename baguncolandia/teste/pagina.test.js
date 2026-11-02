@@ -129,6 +129,7 @@ function ok(msg) { console.log('✓ ' + msg); }
   dedo.on('pageerror', e => erros.push('dedo pageerror: ' + e.message));
   await dedo.goto(base + '?teste'); await dedo.click('#btToque'); await dedo.fill('#nome', 'Téo'); await dedo.click('#btEntrar');
   await dedo.waitForFunction(() => window.BaguncaApp.TVApp.tv.fase === 'lobby', null, { timeout: 20000 });
+  await dedo.click('#localModos button[data-v="corta"]');   // o padrão agora é 🧸 Bagunça
   await dedo.click('#localComecar');
   await dedo.waitForFunction(() => window.BaguncaApp.TVApp.tv.fase === 'jogando', null, { timeout: 30000 });
   for (let i = 0; i < 40; i++) {
