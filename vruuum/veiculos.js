@@ -248,25 +248,38 @@
     return 0.9 - 0.55 * suave((fase - 0.9) / 0.1);
   }
   /* braços do skatista, desenhados ao vivo (seguem a curva). lado: -1 virando à esquerda, 1 à direita.
-     Como um avião inclinando: o braço de DENTRO da curva desce e o de FORA sobe (virando à esquerda, o esquerdo
-     desce e o direito sobe). qual: 'longe' (o esquerdo, atrás do corpo: desenhar ANTES do boneco) ou 'perto'
-     (o direito, na frente: desenhar DEPOIS). x0, y0, W, H: onde o boneco está desenhado. */
+     Cada braço tem dois ângulos, o do ombro (braço) e o do cotovelo (antebraço), medidos a partir de "reto
+     para baixo", para fora do corpo. Andando reto: braços um pouco abertos e cotovelos dobrados, antebraço para a
+     frente, prontos para equilibrar. Na curva o corpo inclina para dentro e os braços fazem o contrapeso: o de
+     DENTRO se estica para o lado da curva, mais baixo, quase reto; o de FORA sobe, com o cotovelo bem dobrado e a
+     mão no alto (virando à esquerda: esquerdo baixo e esticado, direito alto e dobrado). Remando, balançam ao
+     contrário das pernas. qual: 'longe' (o esquerdo, atrás do corpo: desenhar ANTES do boneco) ou 'perto' (o
+     direito, na frente: desenhar DEPOIS). x0, y0, W, H: onde o boneco está desenhado. */
+  var POSE = {   // [ombro, cotovelo (absoluto), tamanho do antebraço visto]
+    reto: [32, 82, 0.86],
+    fora: [72, 128, 0.92],
+    dentro: [26, 42, 1]
+  };
   function bracosSkate(c, x0, y0, W, H, cor, fase, lado, qual) {
     fase = ((fase || 0) % 1 + 1) % 1; lado = Math.max(-1, Math.min(1, lado || 0));
-    var g = giroCorpo(fase), cg = Math.cos(g), A = 0.13 * Math.sqrt(cg * cg + 0.43 * Math.sin(g) * Math.sin(g));
-    var bal = fase < 0.65 ? Math.sin(fase / 0.65 * Math.PI * 2) * 0.5 : 0, s = qual === 'longe' ? -1 : 1;
-    var esq = Math.max(0, -lado), dir = Math.max(0, lado);   // quanto vira para cada lado
-    var desce = s < 0 ? esq : dir, sobe = s < 0 ? dir : esq;  // este braço está do lado de dentro (desce) ou de fora (sobe)?
-    var ox = 0.5 + s * 0.13 * cg * (s < 0 ? 0.9 : 1.05), oy = s < 0 ? 0.24 : 0.25;
-    var hx = ox + s * (0.1 + 0.07 * sobe + 0.02 * desce) + (s < 0 ? -0.02 : 0.015) * bal;
-    var hy = (s < 0 ? 0.43 : 0.47) - 0.17 * sobe + 0.05 * desce - 0.02 * bal * s;
-    var om = [x0 + W * ox, y0 + H * oy], mao = [x0 + W * hx, y0 + H * hy];
-    var co = joelho(om[0], om[1], mao[0], mao[1], H * (s < 0 ? 0.23 : 0.25), s);
-    var k = s < 0 ? 0.85 : 1;   // o de trás parece um pouco menor
-    membro(c, om, co, W * 0.045 * k, W * 0.038 * k, PELE, PELE_SOMBRA); membro(c, co, mao, W * 0.038 * k, W * 0.03 * k, PELE, PELE_SOMBRA);
-    circ(c, mao[0], mao[1], W * 0.036 * k, PELE);
+    var g = giroCorpo(fase), cg = Math.cos(g), s = qual === 'longe' ? -1 : 1;
+    var bal = fase < 0.65 ? Math.sin(fase / 0.65 * Math.PI * 2) : 0;
+    var esq = Math.max(0, -lado), dir = Math.max(0, lado);
+    var dentro = s < 0 ? esq : dir, fora = s < 0 ? dir : esq;   // este braço está do lado de dentro ou de fora da curva?
+    var r = POSE.reto, f = POSE.fora, d = POSE.dentro;
+    function mix(k) { return r[k] + (f[k] - r[k]) * fora + (d[k] - r[k]) * dentro; }
+    var aU = (mix(0) + 12 * bal * s) * Math.PI / 180, aF = (mix(1) + 16 * bal * s) * Math.PI / 180, kF = mix(2);
+    var k = s < 0 ? 0.86 : 1, Lu = H * 0.125 * k, Lf = H * 0.115 * k * kF;   // o de trás parece um pouco menor
+    var om = [x0 + W * (0.5 + s * 0.13 * cg * (s < 0 ? 0.9 : 1.05)), y0 + H * (s < 0 ? 0.24 : 0.25)];
+    var co = [om[0] + s * Math.sin(aU) * Lu, om[1] + Math.cos(aU) * Lu];
+    var mao = [co[0] + s * Math.sin(aF) * Lf, co[1] + Math.cos(aF) * Lf];
+    membro(c, om, co, W * 0.046 * k, W * 0.04 * k, PELE, PELE_SOMBRA);
+    membro(c, co, mao, W * 0.04 * k, W * 0.031 * k, PELE, PELE_SOMBRA);
+    circ(c, co[0], co[1], W * 0.041 * k, PELE);                                   // cotovelo
+    oval(c, mao[0], mao[1], W * 0.037 * k, W * 0.032 * k, PELE);                  // mão
+    circ(c, mao[0] - s * W * 0.022 * k, mao[1] - W * 0.012 * k, W * 0.014 * k, PELE_SOMBRA);   // polegar
     // manga curta da camiseta
-    var mx = om[0] + (co[0] - om[0]) * 0.42, my = om[1] + (co[1] - om[1]) * 0.42;
+    var mx = om[0] + (co[0] - om[0]) * 0.45, my = om[1] + (co[1] - om[1]) * 0.45;
     membro(c, om, [mx, my], W * 0.06 * k, W * 0.052 * k, tom(cor, s < 0 ? -0.25 : 0.05), null);
   }
 
