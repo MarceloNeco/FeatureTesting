@@ -2,6 +2,25 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.16",
+      "data": "02/Nov/2026",
+      "hora": "14:30:00",
+      "pt": [
+        "Boneco: tocar no cartão em \"Quem vai jogar\" volta para \"Meu boneco\" para trocar. As abas agora dizem \"1ª pessoa\" e \"2ª pessoa (quando jogam 2)\": quem joga sozinho usa sempre a 1ª.",
+        "🧹 Arrumar de verdade: o que estava no chão vai para caixas transparentes, uma por tipo (⚽ bolas, 🧱 blocos, 🧸 brinquedos, 🍳 cozinha, 🧴 banho, 🪣 parquinho), e as meias vão para o cesto. O que mora na prateleira volta para a prateleira.",
+        "💡 Dicas: sim / não. Ligadas, cada lugar vazio ganha um tracejado e, depois de 5 segundos parado, uma seta mostra o próximo. A dica e a coisa na mão aparecem por cima do boneco.",
+        "O risco verde do dedo não fica mais preso na tela.",
+        "Na casa, o boneco tem tamanho de criança perto dos móveis. A mamãe ficou maior que a criança, anda balançando, fala enquanto chega (\"Crianças?\", \"Já vou aí!\") e no fim balança a cabeça e sacode o dedo."
+      ],
+      "en": [
+        "Avatar: tapping the card in \"Who is playing\" goes back to \"My avatar\" to change it. The tabs now say \"1st player\" and \"2nd player (when 2 play)\": a single player always uses the 1st.",
+        "🧹 Real tidying: what was on the floor goes into clear boxes, one per kind (⚽ balls, 🧱 blocks, 🧸 toys, 🍳 kitchen, 🧴 bath, 🪣 playground), and socks go in the basket. What lives on a shelf goes back to the shelf.",
+        "💡 Hints: on / off. When on, every empty spot gets a dashed outline and, after 5 seconds idle, an arrow shows the next one. The hint and the thing in your hand are drawn over the avatar.",
+        "The green finger streak no longer stays stuck on the screen.",
+        "In the house, the avatar is child-sized next to the furniture. Mom is now taller than the child, sways as she walks, talks on her way (\"Kids?\", \"Coming!\") and at the end shakes her head and wags her finger."
+      ]
+    },
+    {
       "versao": "0.8.15",
       "data": "02/Nov/2026",
       "hora": "13:40:00",

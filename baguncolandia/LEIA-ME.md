@@ -42,7 +42,9 @@ sapo, irrigador, varal, correio, pipa…): a tabela `APAR` do `casa.js`. O Bagun
 arruma a mesma bagunça (todos os cômodos visitados); o modo 🧹 Arrumar começa com uma bagunça sorteada. Arraste cada
 coisa: aparece a sombra do lugar certo e, perto dele, ela encaixa. Um toque fecha livro, endireita o quadro, fecha a
 geladeira, desliga a torneira e acende a luz; passar o dedo varre as folhas; o que caiu de aparelhos (torrada, carta,
-roupa) vai para o cesto 🧺. 💡 Dica mostra o que arrumar primeiro (de baixo para cima). Sem relógio: acaba com festa.
+roupa, meia) vai para o cesto 🧺. O que morava no chão vai para **caixas transparentes**, uma por tipo (⚽ bolas, 🧱 blocos,
+🧸 brinquedos, 🍳 cozinha, 🧴 banho, 🪣 parquinho); o que mora na prateleira volta para a prateleira. **💡 Dicas: sim / não**
+(fica guardado): ligadas, cada lugar vazio tem um tracejado e, depois de 5 s parado, uma seta mostra o próximo. Sem relógio: acaba com festa.
 
 **Música do jogo e botões de som**: o jogo toca música o tempo todo, uma diferente a cada rodada: 13 músicas de
 verdade em `musicas/` (domínio público, ver `CREDITOS.md`). Sem internet, toca as que o próprio jogo cria. **🔊** deixa tudo mudo (efeitos, música e voz); **🎵** liga ou desliga só a música. Ficam na coluna

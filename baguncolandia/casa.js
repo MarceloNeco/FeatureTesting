@@ -324,7 +324,7 @@
     var rnd = cfg.aleatorio || Math.random;
     var nJog = cfg.jogadores === 2 ? 2 : 1;
     var duracao = typeof cfg.duracao === 'number' ? cfg.duracao : 60;
-    var arrumando = cfg.modo === 'arrumar', segurando = {}, semArrumar = 0;   // 🧹 arrumação: sem relógio, termina quando tudo volta ao lugar
+    var arrumando = cfg.modo === 'arrumar', segurando = {}, semArrumar = 0, dicasOn = cfg.dicas !== false;   // 🧹 arrumação: sem relógio, termina quando tudo volta ao lugar
     if (arrumando) duracao = 0;
     var cena = CENAS.indexOf(cfg.cenaCasa) >= 0 ? cfg.cenaCasa : CENAS[Math.floor(rnd() * CENAS.length) % CENAS.length];
     var M = montar(cena, rnd), visitados = {};
@@ -425,7 +425,7 @@
       for (var a = 0; a < obs.length; a++) {
         var A = obs[a]; if (A.fora) continue;
         for (var b = a + 1; b < obs.length; b++) {
-          var B = obs[b]; if (B.fora || (A.dorme && B.dorme) || A.segurado || B.segurado) continue;
+          var B = obs[b]; if (B.fora || (A.dorme && B.dorme) || A.segurado || B.segurado || A.guardado || B.guardado) continue;
           var dx = B.x - A.x, dy = B.y - A.y, d = Math.hypot(dx, dy), min = A.r + B.r;
           if (d >= min || d === 0) continue;
           var nx = dx / d, ny = dy / d, rel = (A.vx - B.vx) * nx + (A.vy - B.vy) * ny, sobra = min - d;
@@ -531,6 +531,7 @@
       } else if (c.troca < 0) { c.dir = rnd() < 0.5 ? -1 : 1; c.troca = 2500 + rnd() * 3500; }
       c.x += c.dir * vel * dt; c.passo += vel * dt * 0.08;
       if (c.x < 70) { c.x = 70; c.dir = 1; } if (c.x > W - 70) { c.x = W - 70; c.dir = -1; }
+      if (arrumando) { if (c.x < W - 360) c.dir = 1; else if (c.x > W - 100) c.dir = -1; }   // 🧹 arrumando: o Picolé fica no canto, longe das caixas
     }
     function sacudirArvore(j, x, y, pelaMao) {
       var A = M.arvore; if (!A || A.treme > 0.25) return;
@@ -544,12 +545,53 @@
     /* ======== 🧹 arrumação: arrastar cada coisa para o lugar dela ======== */
     var CESTO = { x: 22, y: 560, w: 110, h: 90 };   // as coisas soltas (torrada, carta, roupa) vão para o cesto
     function noLugar(o) { return o.dorme && !o.segurado && !baguncado(o); }
+    /* arrumar não é só devolver ao chão: o que morava no chão vai para caixas transparentes, uma por tipo
+       (bolas, blocos, brinquedos, cozinha, banho, parquinho). As meias vão para o cesto. O que mora na
+       prateleira volta para a prateleira; vaso, gnomo e regador continuam no chão (é o lugar deles). */
+    var GUARDA = { bola: ['bolas', '⚽'], bambole: ['bolas', '⚽'], bloco: ['blocos', '🧱'], carrinho: ['brinq', '🧸'], piao: ['brinq', '🧸'], ursinho: ['brinq', '🧸'], pato: ['brinq', '🦆'], robo: ['brinq', '🧸'],
+      cone: ['parque', '🪣'], balde: ['parque', '🪣'], pa: ['parque', '🪣'], tigela: ['cozinha', '🍳'], tampa: ['cozinha', '🍳'], panela: ['cozinha', '🍳'], caneca: ['cozinha', '🍳'], pote: ['cozinha', '🍳'], colher: ['cozinha', '🍳'],
+      sabonete: ['banho', '🧴'], frasco: ['banho', '🧴'], escova: ['banho', '🧴'], copo: ['banho', '🧴'] };
+    function noChao(o, n) {
+      if (n > 10) return false;
+      var mh = Math.abs(Math.cos(o.ang0 || 0)) * o.h0 / 2 + Math.abs(Math.sin(o.ang0 || 0)) * o.w0 / 2;
+      if (Math.abs(o.y0 + mh - M.chao) < 8) return true;
+      var a = o.apoio0 && o.apoio0.o != null ? porId(o.apoio0.o) : null;   // em cima de outra coisa do chão (a torre de blocos)
+      return !!a && noChao(a, n + 1);
+    }
+    function organizar() {
+      M.organizado = true; M.caixas = [];
+      jogadores.forEach(function (jg) { jg.corpo.x = 0.78; });   // o boneco espera no canto direito: o chão do meio é das caixas
+      var grupos = {}, ordem = [], ocupado = [[0, 150], [W - 400, W]];   // cantos: ◀ e o cesto; ▶ e o botão 💡
+      M.obs.forEach(function (o) {
+        if (o.extra || !noChao(o, 0)) return;
+        if (o.tipo === 'meia' || o.tipo === 'toalha') { o.extra = true; return; }   // roupa no chão: cesto
+        var g = GUARDA[o.tipo];
+        if (!g) { ocupado.push([o.x0 - o.w0 / 2 - 10, o.x0 + o.w0 / 2 + 10]); return; }   // fica no chão: a caixa não vai em cima
+        if (!grupos[g[0]]) { grupos[g[0]] = { id: g[0], icone: g[1], itens: [] }; ordem.push(grupos[g[0]]); }
+        grupos[g[0]].itens.push(o);
+      });
+      var x = 150;
+      ordem.forEach(function (g) {
+        var n = g.itens.length, linhas = n > 3 ? 2 : 1, cols = Math.ceil(n / linhas);
+        g.itens.forEach(function (o) { o.s = Math.min(1, 44 / Math.max(o.w0, o.h0)); });
+        var slot = Math.max.apply(null, g.itens.map(function (o) { return o.w0 * o.s; })) + 6, bw = Math.max(90, cols * slot + 20), bh = linhas === 2 ? 92 : 72;
+        var livre = function (x0) { return !ocupado.some(function (iv) { return x0 < iv[1] && x0 + bw > iv[0]; }); }, t = x;
+        while (t + bw < W - 400 && !livre(t)) t += 8;
+        if (t + bw >= W - 400) { t = 150; while (t + bw < W - 400 && !livre(t)) t += 8; if (t + bw >= W - 400) t = Math.min(x, W - 160 - bw); }   // sem vaga: fica onde der
+        var C = { id: g.id, icone: g.icone, x: t, y: M.chao + 6 - bh, w: bw, h: bh }; M.caixas.push(C); ocupado.push([t - 8, t + bw + 8]); x = t + bw + 12;
+        g.itens.forEach(function (o, i) {
+          var tras = linhas === 2 && i >= cols, col = tras ? i - cols : i, nl = tras ? n - cols : cols, base = M.chao + 2 - (tras ? 24 : 0);   // a fileira de trás fica um pouco mais alta
+          o.x0 = C.x + C.w / 2 + (col - (nl - 1) / 2) * slot; o.y0 = base - (o.tipo === 'bola' || o.tipo === 'bambole' ? o.r0 : o.h0 / 2) * o.s; o.ang0 = 0; o.apoio0 = null; o.caixa = C.id; o.tras = tras;
+        });
+      });
+      // quem estava guardado e não foi mexido continua bagunçado (está no chão, não na caixa)
+    }
     function pegar(k, j, nx, ny) {
       if (fase !== 'jogando' || !arrumando) return false;
       var x = nx * W, y = ny * H, melhor = null, dm = 1e9;
       M.obs.forEach(function (o) { if (o.fora || o.segurado) return; var d = Math.hypot(o.x - x, o.y - y), alcance = Math.max(o.r, Math.min(o.w, o.h) / 2) + 28; if (d > alcance) return; var nota = d + (noLugar(o) ? 60 : 0); if (nota < dm) { dm = nota; melhor = o; } });   // prefere o que está fora do lugar
       if (!melhor) { arrumarAoTocar(j, x, y); segurando[k] = { j: j, varre: true }; return false; }
-      var o = melhor; o.segurado = 1; o.dorme = false; o.apoio = null; o.vx = o.vy = o.va = 0;
+      var o = melhor; o.segurado = 1; o.dorme = false; o.apoio = null; o.vx = o.vy = o.va = 0; o.guardado = false;
       if (o.aberto) { o.aberto = false; o.w = o.w0; o.h = o.h0; o.r = o.r0; }   // pegou o livro: ele fecha
       segurando[k] = { j: j, o: o, dx: o.x - x, dy: o.y - y, ux: x, uy: y, ut: tempo, vx: 0, vy: 0 };
       M.dica = null; return true;
@@ -568,12 +610,13 @@
       if (o.extra) {
         if (dentro(o, CESTO, 30)) { o.fora = 1; M.obs.splice(M.obs.indexOf(o), 1); acertou(S.j, 5, 'guardou', CESTO.x + CESTO.w / 2, CESTO.y, '🧺 Guardou! +5', '🧺 Put away! +5'); return; }
       } else if (Math.hypot(o.x - o.x0, o.y - o.y0) < Math.max(48, o.r * 1.5)) {   // perto do lugar dele: encaixa
-        o.x = o.x0; o.y = o.y0; o.ang = o.ang0; o.vx = o.vy = o.va = 0; o.dorme = true; o.parado = 0; o.apoio = o.apoio0 ? { p: o.apoio0.p, o: o.apoio0.o } : { p: -1 };
+        o.x = o.x0; o.y = o.y0; o.ang = o.ang0; o.vx = o.vy = o.va = 0; o.dorme = true; o.parado = 0; o.apoio = o.apoio0 ? { p: o.apoio0.p, o: o.apoio0.o } : { p: -1 }; o.guardado = !!o.caixa;
         if (o.aberto) { o.aberto = false; o.w = o.w0; o.h = o.h0; o.r = o.r0; }
         if (o.tipo === 'rolo' && M.papel) M.papel.pts = [];   // o rolo voltou para o suporte: o papel enrola de novo
         var em = o.apoio0 && o.apoio0.o != null ? porId(o.apoio0.o) : null;
         if (em && !noLugar(em)) emitir({ t: 'casa', j: S.j, som: 'tum', x: o.x, y: o.y - 50, pontos: 0, texto: '⬇️ Comece pelo de baixo!', textoEn: '⬇️ Start from the bottom!' });
-        acertou(S.j, 10, 'arrumou', o.x, o.y, '✓ +10', '✓ +10'); return;
+        if (o.caixa) acertou(S.j, 10, 'guardou', o.x, o.y - 40, '📦 Guardou! +10', '📦 Put away! +10'); else acertou(S.j, 10, 'arrumou', o.x, o.y, '✓ +10', '✓ +10');
+        if (M.dica && M.dica.id === o.id) M.dica = null; return;
       }
       o.vx = clamp(S.vx * 0.3, -600, 600); o.vy = clamp(S.vy * 0.3, -600, 600); o.va = 0;   // longe do lugar: cai onde soltou
     }
@@ -592,9 +635,10 @@
       var fora = M.obs.filter(function (o) { return !o.fora && !o.segurado && (o.extra || baguncado(o)); });
       if (!fora.length) { M.dica = null; return; }
       fora.sort(function (a, b) { return (b.y0 || 0) - (a.y0 || 0); });   // de baixo para cima: a torre se monta pelo pé
-      var o = fora[0]; M.dica = { id: o.id, ate: tempo + 4000 };
+      var o = fora[0]; M.dica = { id: o.id, ate: tempo + 6000 };
       emitir({ t: 'casa', j: 0, som: 'espelho', x: o.x, y: o.y - 60, pontos: 0, texto: '💡', festa: false });
     }
+    function dicas(v) { dicasOn = !!v; if (dicasOn) dica(); else M.dica = null; }
     function arrumar() {   // depois do 🧸 Bagunça: a mesma bagunça vira arrumação (em todos os cômodos visitados)
       arrumando = true; duracao = 0; fase = 'jogando'; semArrumar = 0; M.tudoArrumado = false; M.fimEm = 0; M.chegou100 = true;
       Object.keys(visitados).forEach(function (k) { visitados[k].tudoArrumado = false; });
@@ -622,7 +666,7 @@
         tocar(j, ant || p, p, vx, vy, ts);
         recentes.push(p);
       });
-      jg.rastro = recentes.slice(-24);
+      jg.rastro = recentes.slice(-24); jg.rastroEm = tempo;
     }
     function tocar(j, a, b, vx, vy, ts) {
       var vel = Math.hypot(vx, vy), forte = vel > 250, pad = 16, seg = function (o, extra) { return distSeg(a, b, o) <= extra; };
@@ -679,10 +723,11 @@
       if (fase !== 'jogando') return;
       var dt = Math.min(dtMs, 50) / 1000; tempo += dtMs;
       // dois passos por quadro: a física fica estável mesmo no celular lento
+      if (arrumando && !M.organizado) organizar();   // primeira vez neste cômodo arrumando: monta as caixas
       passo(dt / 2); passo(dt / 2);
       var pct = bagunca();
       if (arrumando) {
-        semArrumar += dtMs; if (semArrumar > 10000) { semArrumar = 0; dica(); }   // muito tempo sem acertar: a dica aparece sozinha
+        semArrumar += dtMs; if (dicasOn && semArrumar > 5000) { semArrumar = 0; dica(); }   // dicas ligadas: muito tempo sem acertar, a dica aparece sozinha
         if (pct <= 0 && !M.tudoArrumado) {
           M.tudoArrumado = true; jogadores.forEach(function (jg) { jg.pontos += 50; });
           var falta = Object.keys(visitados).filter(function (k) { return visitados[k] !== M && bagunca(visitados[k]) > 0; });
@@ -721,15 +766,15 @@
     function estado() {
       return {
         fase: fase, modo: arrumando ? 'arrumar' : 'bagunca', modoBase: arrumando ? 'arrumar' : 'bagunca', arrumando: arrumando, tempo: tempo, restante: duracao ? Math.max(0, Math.ceil((duracao * 1000 - tempo) / 1000)) : null,
-        jogadores: jogadores.map(function (jg, j) { return { pontos: Math.round(jg.pontos), vidas: jg.vidas, combo: 0, poder: null, poderAte: 0, lento: false, raia: raia(j), zonaChute: 0.6, rastro: jg.rastro.slice(-8), corpo: jg.corpo, invencivel: false, esqueleto: null }; }),
-        coisas: [], trave: null, bpm: 0, casa: (M.arrumando = arrumando, M.cesto = arrumando ? CESTO : null, M.tempo = tempo, M), bagunca: ultimaPct
+        jogadores: jogadores.map(function (jg, j) { return { pontos: Math.round(jg.pontos), vidas: jg.vidas, combo: 0, poder: null, poderAte: 0, lento: false, raia: raia(j), zonaChute: 0.6, rastro: tempo - (jg.rastroEm || 0) < 400 ? jg.rastro.slice(-8) : [], corpo: jg.corpo, invencivel: false, esqueleto: null }; }),
+        coisas: [], trave: null, bpm: 0, casa: (M.arrumando = arrumando, M.cesto = arrumando ? CESTO : null, M.tempo = tempo, M.dicas = dicasOn, M), bagunca: ultimaPct
       };
     }
     return {
       comecar: comecar, pausar: pausar, continuar: continuar, terminar: terminar, avancar: avancar, movimento: movimento, esqueleto: esqueleto, corpo: corpo, calibrar: calibrar, estado: estado,
       batida: function () {}, zonaChute: function () {}, lancar: function () { return null; }, obstaculo: function () { return null; },
       eventos: function () { var e = eventos; eventos = []; return e; },
-      irPara: irPara, vizinhos: vizinhos, pegar: pegar, mover: mover, largar: largar, dica: dica, arrumar: arrumar, get cena() { return cena; }, W: W, H: H
+      irPara: irPara, vizinhos: vizinhos, pegar: pegar, mover: mover, largar: largar, dica: dica, dicas: dicas, arrumar: arrumar, get cena() { return cena; }, W: W, H: H
     };
   }
 
@@ -843,7 +888,9 @@
     if (M.balanco) balanco(ctx, M.balanco);
     if (M.flores) M.flores.forEach(function (fl) { flor(ctx, fl, M.chao); });
     M.folhasChao.forEach(function (fo) { folha(ctx, fo.x, fo.y, fo.rot, fo.cor); });
-    M.obs.forEach(function (o) { if (o.fora === 1) return; ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(o.ang); if (o.fora) { var e = 1 - o.fora; ctx.scale(e, e); } coisa(ctx, o, ts); ctx.restore(); });
+    if (M.caixas) M.caixas.forEach(function (C) { caixa(ctx, C, false); });
+    M.obs.forEach(function (o) { if (o.fora === 1 || o.segurado) return; ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(o.ang); if (o.fora) { var e = 1 - o.fora; ctx.scale(e, e); } if (o.guardado && o.s) ctx.scale(o.s, o.s); coisa(ctx, o, ts); ctx.restore(); });
+    if (M.caixas) M.caixas.forEach(function (C) { caixa(ctx, C, true); });
     if (M.geladeira) geladeira(ctx, M.geladeira, ts);
     if (M.torneira) torneira(ctx, M.torneira, ts);
     if (M.banheira) agua(ctx, M.banheira, ts);
@@ -854,7 +901,6 @@
     if (M.tartaruga) tartaruga(ctx, M.tartaruga, M.chao, ts);
     if (M.gato) gato(ctx, M.gato, ts);
     if (M.cachorro) cachorro(ctx, M, ts);
-    if (M.arrumando) guias(ctx, M, ts);
     if (M.papagaio) papagaio(ctx, M.papagaio, ts, M.jardim);
     if (M.mae) mae(ctx, M, ts);
     M.folhas.forEach(function (fo) { folha(ctx, fo.x, fo.y, fo.rot, fo.cor); });
@@ -1061,20 +1107,35 @@
     ctx.strokeStyle = '#3e5a1c'; ctx.lineWidth = 2.5; [[-16, -26], [6, -30], [22, -20], [-26, -16]].forEach(function (h) { ctx.beginPath(); for (var i = 0; i < 6; i++) { var a = i * 1.047; ctx.lineTo(h[0] + Math.cos(a) * 8, h[1] + Math.sin(a) * 7); } ctx.closePath(); ctx.stroke(); });
     ctx.restore();
   }
+  /* a mamãe: adulta (maior que a criança), vem andando e falando; no fim balança a cabeça e sacode o dedo */
+  var FALAS_MAE = [['Crianças?', 'Kids?'], ['Que barulho é esse?', 'What is that noise?'], ['Já vou aí!', 'Coming!'], ['O que está acontecendo?', 'What is going on?']];
+  var FALAS_BRAVA = [['Que bagunça é essa?!', 'What is this mess?!'], ['Vamos arrumar!', 'Let\'s tidy up!']];
   function mae(ctx, M, ts) {
-    var m = M.mae, k = m.k || 0, x = W + 90 - k * 290, y = M.chao, viu = !!m.viu;
-    ctx.save(); ctx.translate(x, y);
-    var passo = viu ? 0 : Math.sin(ts / 120) * 10;
-    ctx.strokeStyle = '#ffd9b3'; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-10, -70); ctx.lineTo(-12 + passo, -6); ctx.moveTo(10, -70); ctx.lineTo(12 - passo, -6); ctx.stroke();
+    var m = M.mae, k = m.k || 0, x = W + 120 - k * 320, y = M.chao + 4, viu = !!m.viu, fala = Math.floor(ts / 420) % 2 === 0;   // boca abre e fecha falando
+    var passo = viu ? 0 : Math.sin(ts / 120) * 12, bob = viu ? 0 : Math.abs(Math.sin(ts / 120)) * 5, pe = viu ? Math.max(0, Math.sin(ts / 110)) * 8 : 0;   // andando / batendo o pé
+    ctx.save(); ctx.translate(x, y - bob); ctx.scale(1.12, 1.12);
+    ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(0, bob / 1.12, 46, 9, 0, 0, PI2); ctx.fill();
+    ctx.strokeStyle = '#ffd9b3'; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-10, -70); ctx.lineTo(-12 + passo, -6); ctx.moveTo(10, -70); ctx.lineTo(12 - passo, -6 - pe); ctx.stroke();
+    ctx.fillStyle = '#37474f'; ctx.beginPath(); ctx.ellipse(-12 + passo, -3, 13, 6, 0, 0, PI2); ctx.ellipse(12 - passo + 4, -3 - pe, 13, 6, 0, 0, PI2); ctx.fill();   // sapatos
     ctx.fillStyle = '#5e35b1'; ctx.beginPath(); ctx.moveTo(-26, -170); ctx.lineTo(26, -170); ctx.lineTo(48, -64); ctx.lineTo(-48, -64); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#ffd9b3'; ctx.lineWidth = 11;
-    if (viu) { ctx.beginPath(); ctx.moveTo(-24, -160); ctx.lineTo(-52, -126); ctx.lineTo(-30, -100); ctx.moveTo(24, -160); ctx.lineTo(52, -126); ctx.lineTo(30, -100); ctx.stroke(); }   // mãos na cintura
-    else { ctx.beginPath(); ctx.moveTo(-24, -160); ctx.lineTo(-34 - passo, -100); ctx.moveTo(24, -160); ctx.lineTo(34 + passo, -100); ctx.stroke(); }
-    ctx.fillStyle = '#ffd9b3'; ctx.beginPath(); ctx.arc(0, -198, 28, 0, PI2); ctx.fill();
-    ctx.fillStyle = '#5d4037'; ctx.beginPath(); ctx.arc(0, -206, 29, Math.PI, 0); ctx.fill(); ctx.beginPath(); ctx.arc(0, -238, 14, 0, PI2); ctx.fill();   // cabelo com coque
-    ctx.fillStyle = '#212121'; ctx.beginPath(); ctx.arc(-10, -198, viu ? 4.5 : 3, 0, PI2); ctx.arc(10, -198, viu ? 4.5 : 3, 0, PI2); ctx.fill();
-    if (viu) { ctx.fillStyle = '#7a1f2e'; ctx.beginPath(); ctx.ellipse(0, -182, 7, 9, 0, 0, PI2); ctx.fill(); } else { ctx.strokeStyle = '#7a1f2e'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, -186, 8, 0.2, 2.9); ctx.stroke(); }
-    ctx.restore();
+    if (viu) {
+      var dedo = Math.sin(ts / 90) * 0.35;
+      ctx.beginPath(); ctx.moveTo(-24, -160); ctx.lineTo(-52, -126); ctx.lineTo(-30, -100); ctx.stroke();   // uma mão na cintura
+      ctx.save(); ctx.translate(24, -160); ctx.rotate(-2.2 + dedo); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 46); ctx.stroke(); ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(0, 46); ctx.lineTo(0, 64); ctx.stroke(); ctx.restore();   // a outra sacudindo o dedo
+    } else { ctx.beginPath(); ctx.moveTo(-24, -160); ctx.lineTo(-34 - passo, -100); ctx.moveTo(24, -160); ctx.lineTo(34 + passo, -100); ctx.stroke(); }
+    ctx.save(); ctx.translate(0, -198); ctx.rotate(viu ? Math.sin(ts / 140) * 0.14 : Math.sin(ts / 240) * 0.05);   // balança a cabeça
+    ctx.fillStyle = '#ffd9b3'; ctx.beginPath(); ctx.arc(0, 0, 28, 0, PI2); ctx.fill();
+    ctx.fillStyle = '#5d4037'; ctx.beginPath(); ctx.arc(0, -8, 29, Math.PI, 0); ctx.fill(); ctx.beginPath(); ctx.arc(0, -40, 14, 0, PI2); ctx.fill();   // cabelo com coque
+    ctx.fillStyle = '#212121'; ctx.beginPath(); ctx.arc(-10, 0, viu ? 4.5 : 3, 0, PI2); ctx.arc(10, 0, viu ? 4.5 : 3, 0, PI2); ctx.fill();
+    if (viu) { ctx.strokeStyle = '#5d4037'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-16, -12); ctx.lineTo(-5, -8); ctx.moveTo(16, -12); ctx.lineTo(5, -8); ctx.stroke(); }   // sobrancelhas bravas
+    ctx.fillStyle = '#7a1f2e'; ctx.beginPath(); ctx.ellipse(0, 14, 7, fala ? 8 : 2.5, 0, 0, PI2); ctx.fill();
+    ctx.restore(); ctx.restore();
+    // balão de fala
+    var lista = viu ? FALAS_BRAVA : FALAS_MAE, f = lista[Math.floor(ts / 1800) % lista.length], txt = /^en/i.test((typeof navigator !== 'undefined' && navigator.language) || '') ? f[1] : f[0];
+    ctx.save(); ctx.font = '700 24px system-ui'; var tw = ctx.measureText(txt).width + 30, bx = Math.min(W - tw - 10, x - tw + 30), by = y - 340;
+    ctx.fillStyle = 'rgba(255,255,255,.96)'; arred(ctx, bx, by, tw, 46, 20); ctx.fill(); ctx.beginPath(); ctx.moveTo(x - 30, by + 44); ctx.lineTo(x - 6, by + 70); ctx.lineTo(x - 2, by + 44); ctx.fill();
+    ctx.fillStyle = viu ? '#c62828' : '#311b92'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(txt, bx + 15, by + 24); ctx.restore();
   }
   function geladeira(ctx, G, ts) {
     var a = G.abre; ctx.save();
@@ -1282,13 +1343,34 @@
   function guias(ctx, M, ts) {
     var pisca = 0.55 + 0.35 * Math.sin(ts / 160);
     if (M.cesto && M.obs.some(function (o) { return o.extra && !o.fora; })) { var C = M.cesto; ctx.save(); ctx.fillStyle = '#d7a86e'; arred(ctx, C.x, C.y, C.w, C.h, 12); ctx.fill(); ctx.strokeStyle = '#a1742f'; ctx.lineWidth = 3; for (var i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(C.x, C.y + i * C.h / 4); ctx.lineTo(C.x + C.w, C.y + i * C.h / 4); ctx.stroke(); } ctx.font = '700 30px system-ui'; ctx.textAlign = 'center'; ctx.fillText('🧺', C.x + C.w / 2, C.y - 8); ctx.restore(); }
-    function sombra(o) { ctx.save(); ctx.globalAlpha = 0.35 + 0.25 * pisca; ctx.translate(o.x0, o.y0); ctx.rotate(o.ang0); var c = {}; for (var k in o) c[k] = o[k]; c.w = o.w0; c.h = o.h0; c.r = o.r0; c.aberto = false; c.gira = 0; coisa(ctx, c, ts); ctx.restore();
-      ctx.save(); ctx.strokeStyle = 'rgba(198,255,61,' + pisca + ')'; ctx.lineWidth = 4; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.arc(o.x0, o.y0, Math.max(o.w0, o.h0) / 2 + 12, 0, PI2); ctx.stroke(); ctx.restore(); }
+    function sombra(o) { ctx.save(); ctx.globalAlpha = 0.35 + 0.25 * pisca; ctx.translate(o.x0, o.y0); ctx.rotate(o.ang0); if (o.caixa) ctx.scale(o.s, o.s); var c = {}; for (var k in o) c[k] = o[k]; c.w = o.w0; c.h = o.h0; c.r = o.r0; c.aberto = false; c.gira = 0; coisa(ctx, c, ts); ctx.restore();
+      ctx.save(); ctx.strokeStyle = 'rgba(198,255,61,' + pisca + ')'; ctx.lineWidth = 4; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.arc(o.x0, o.y0, Math.max(o.w0, o.h0) / 2 * (o.caixa ? o.s : 1) + 12, 0, PI2); ctx.stroke(); ctx.restore(); }
+    if (M.dicas) M.obs.forEach(function (o) {   // dicas ligadas: um tracejado em cada lugar vazio
+      if (o.extra || o.fora || o.segurado || (o.dorme && Math.hypot(o.x - o.x0, o.y - o.y0) < 30)) return;
+      var rr = Math.max(o.w0, o.h0) / 2 * (o.caixa ? o.s : 1) + 6; ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 2.5; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.arc(o.x0, o.y0, rr, 0, PI2); ctx.stroke(); ctx.restore();
+    });
     M.obs.forEach(function (o) { if (o.segurado && !o.extra) sombra(o); if (o.segurado && o.extra && M.cesto) { ctx.save(); ctx.strokeStyle = 'rgba(198,255,61,' + pisca + ')'; ctx.lineWidth = 5; arred(ctx, M.cesto.x - 6, M.cesto.y - 6, M.cesto.w + 12, M.cesto.h + 12, 16); ctx.stroke(); ctx.restore(); } });
     var D = M.dica; if (D && M.tempo < D.ate) { var o = M.obs.filter(function (x) { return x.id === D.id; })[0]; if (o && !o.segurado) {
       var tx = o.extra ? M.cesto.x + M.cesto.w / 2 : o.x0, ty = o.extra ? M.cesto.y : o.y0; if (!o.extra) sombra(o);
       ctx.save(); ctx.strokeStyle = '#ffd166'; ctx.fillStyle = '#ffd166'; ctx.lineWidth = 6; ctx.setLineDash([14, 10]); ctx.lineDashOffset = -ts / 30; ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.quadraticCurveTo((o.x + tx) / 2, Math.min(o.y, ty) - 120, tx, ty); ctx.stroke(); ctx.setLineDash([]);
       ctx.beginPath(); ctx.arc(o.x, o.y, Math.max(o.w, o.h) / 2 + 14 + pisca * 6, 0, PI2); ctx.stroke(); ctx.font = '700 34px system-ui'; ctx.textAlign = 'center'; ctx.fillText('👆', o.x, o.y - Math.max(o.w, o.h) / 2 - 22 - pisca * 8); ctx.restore(); } }
+    M.obs.forEach(function (o) { if (!o.segurado) return; ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(o.ang); ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 8; coisa(ctx, o, ts); ctx.restore(); });   // na mão: por cima de tudo
+  }
+  /* caixa organizadora transparente: o fundo vai antes das coisas, a frente (plástico) depois */
+  function caixa(ctx, C, frente) {
+    ctx.save();
+    if (!frente) {
+      ctx.fillStyle = 'rgba(210,235,255,.35)'; arred(ctx, C.x + 6, C.y - 8, C.w - 12, C.h, 10); ctx.fill();
+      ctx.strokeStyle = 'rgba(120,170,220,.7)'; ctx.lineWidth = 2; ctx.stroke();
+    } else {
+      ctx.fillStyle = 'rgba(200,232,255,.30)'; arred(ctx, C.x, C.y + C.h * 0.3, C.w, C.h * 0.7, 10); ctx.fill();
+      ctx.strokeStyle = 'rgba(90,150,210,.95)'; ctx.lineWidth = 3; ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(C.x + 4, C.y + C.h * 0.3); ctx.lineTo(C.x + C.w - 4, C.y + C.h * 0.3); ctx.stroke();   // a borda de cima
+      ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(C.x + 14, C.y + C.h - 8); ctx.lineTo(C.x + 34, C.y + C.h * 0.36); ctx.stroke();   // brilho do plástico
+      var ex = C.x + 6, ey = C.y + C.h * 0.3; ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.beginPath(); ctx.arc(ex, ey, 15, 0, PI2); ctx.fill(); ctx.strokeStyle = 'rgba(90,150,210,.95)'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.font = '17px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#000'; ctx.fillText(C.icone, ex, ey + 1);   // etiqueta no canto
+    }
+    ctx.restore();
   }
   function medidor(ctx, pct, ts, arrumando) {
     if (arrumando) pct = 1 - pct;
@@ -1300,5 +1382,5 @@
     ctx.fillStyle = '#fff'; ctx.font = '700 18px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText((arrumando ? '🧹 ' : '🧸 ') + Math.round(pct * 100) + '%', W / 2, y + 14 + (pct >= 1 ? Math.sin(ts / 80) * 2 : 0));
     ctx.restore();
   }
-  return { criar: criar, desenhar: desenhar, luz: luz, medidor: medidor, CENAS: CENAS, CASA: CASA, NOMES: NOMES, W: W, H: H };
+  return { criar: criar, desenhar: desenhar, guias: guias, luz: luz, medidor: medidor, CENAS: CENAS, CASA: CASA, NOMES: NOMES, W: W, H: H };
 });
