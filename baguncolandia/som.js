@@ -2,7 +2,10 @@
    Som.iniciar() num toque (o navegador exige gesto); Som.tocar(nome); Som.musica(true/false, faixa) toca em laço
    uma das FAIXAS (0 = carregamento/lobby; as outras, uma por rodada), também sintetizadas.
    Som.mudo(v) cala tudo (efeitos e música); Som.semMusica(v) liga/desliga só a música; Som.abaixar(v) baixa a
-   música enquanto a voz explica (calibração). */
+   música enquanto a voz explica (calibração).
+   Música de verdade: as faixas de TRILHA (pasta musicas/, domínio público CC0 do FreePD, ver CREDITOS.md) tocam
+   por um <audio> ligado ao mesmo volume geral. Sem internet, com "economia de dados" ou se o arquivo falhar, toca
+   a versão sintetizada (FAIXAS) no lugar: nunca fica em silêncio. */
 (function (root) {
   'use strict';
   var AC = root.AudioContext || root.webkitAudioContext, ctx = null, master = null, mudo = false, loop = null, semMusica = false, desejada = null, baixo = false;
@@ -74,17 +77,44 @@
     { bpm: 128, tom: 3, ordem: [2, 1, 3, 0], batida: 'galope', lead: 'triangle', desloc: -2 },
     { bpm: 120, tom: 7, ordem: [0, 1, 3, 2], batida: 'reta', lead: 'sine', desloc: 1 }
   ];
-  function volMusica() { return baixo ? 0.14 : 0.42; }
-  function parar() { if (loop) { clearInterval(loop.timer); try { loop.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.4); } catch (e) {} var velho = loop; setTimeout(function () { try { velho.g.disconnect(); } catch (e) {} }, 1500); loop = null; } }
+  // 0 = tela "Quem vai jogar" (um laço curto); as outras se revezam nas rodadas
+  var TRILHA = ['comic-game-loop-mischief', 'funshine', 'happy-whistling-ukulele', 'ukulele-song', 'going-bananas', 'llama-in-pajama',
+    'my-giant-bunny-friend', 'spring-chicken', 'wakka-wakka', 'hippety-hop', 'silly-boy', 'city-sunshine', 'bit-bit-loop'];
+  function volMusica() { return loop && loop.audio ? (baixo ? 0.18 : 0.6) : (baixo ? 0.14 : 0.42); }
+  function parar() {
+    if (!loop) return;
+    var velho = loop; loop = null; clearInterval(velho.timer);
+    try { velho.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.4); } catch (e) {}
+    setTimeout(function () { if (velho.audio) { try { velho.audio.pause(); velho.audio.removeAttribute('src'); velho.audio.load(); } catch (e) {} } try { velho.g.disconnect(); } catch (e) {} }, 1500);
+  }
   function musica(ligar, faixa) {
     if (!ctx) return;
     if (!ligar) { desejada = null; parar(); return; }
-    desejada = (faixa >= 0 && faixa < FAIXAS.length) ? faixa : 0;
+    desejada = (faixa >= 0 && faixa < TRILHA.length) ? faixa : 0;
     if (semMusica) return;
     if (loop && loop.faixa === desejada) return;
-    parar(); tocarFaixa(desejada);
+    parar(); tocarArquivo(desejada);
   }
-  function tocarFaixa(fx) {
+  function sintetica(fx) { return fx === 0 ? 0 : 1 + (fx - 1) % (FAIXAS.length - 1); }
+  function tocarArquivo(fx) {
+    var con = root.navigator && root.navigator.connection;
+    if (!root.Audio || (root.navigator && root.navigator.onLine === false) || (con && con.saveData)) { tocarFaixa(sintetica(fx), fx); return; }
+    var a, item;
+    try {
+      a = new root.Audio(); a.loop = true; a.preload = 'auto'; a.src = 'musicas/' + TRILHA[fx] + '.mp3';
+      var g = ctx.createGain(); g.gain.value = 0.0001; ctx.createMediaElementSource(a).connect(g); g.connect(master);
+      item = { g: g, faixa: fx, audio: a, timer: 0 }; loop = item;
+      g.gain.setTargetAtTime(volMusica(), ctx.currentTime, 0.6);
+    } catch (e) { loop = null; tocarFaixa(sintetica(fx), fx); return; }
+    function falhou() {   // sem internet ou arquivo com problema: a sintetizada entra no lugar, na mesma vez
+      if (loop !== item) return;
+      loop = null; try { a.pause(); a.removeAttribute('src'); item.g.disconnect(); } catch (e) {}
+      tocarFaixa(sintetica(fx), fx);
+    }
+    a.addEventListener('error', falhou);
+    var p = a.play(); if (p && p.catch) p.catch(falhou);
+  }
+  function tocarFaixa(fx, rotulo) {
     var F = FAIXAS[fx], k = Math.pow(2, F.tom / 12);
     var g = ctx.createGain(); g.gain.value = 0.0001; g.connect(master); g.gain.setTargetAtTime(volMusica(), ctx.currentTime, 0.8);
     if (!reverb) { reverb = ctx.createConvolver(); reverb.buffer = impulso(); }
@@ -104,7 +134,7 @@
     function palma(t0) { for (var k = 0; k < 3; k++) ruidoEm(t0 + k * 0.012, 0.09, 0.28, 1900, g); ruidoEm(t0 + 0.03, 0.3, 0.12, 1500, reverb); }
     function chimbal(t0, forte) { ruidoEm(t0, forte ? 0.08 : 0.035, forte ? 0.12 : 0.07, 8000, g); }
     function ruidoEm(t0, dur, vol, f, dest) { var n = Math.floor(ctx.sampleRate * dur), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n); var s = ctx.createBufferSource(), e = ctx.createGain(), fl = ctx.createBiquadFilter(); s.buffer = b; fl.type = f > 5000 ? 'highpass' : 'bandpass'; fl.frequency.value = f; fl.Q.value = 0.9; e.gain.value = vol; s.connect(fl); fl.connect(e); e.connect(dest); s.start(t0); }
-    loop = { g: g, faixa: fx, timer: setInterval(function () {
+    loop = { g: g, faixa: rotulo != null ? rotulo : fx, timer: setInterval(function () {
       while (t < ctx.currentTime + 0.5) {
         var compasso = Math.floor(passo / 16) % 8, grau = F.ordem[compasso % 4], acorde = ACORDES[grau], semic = passo % 16, tempo = Math.floor(semic / 4), sub = semic % 4;
         // bateria
@@ -125,7 +155,8 @@
   function fixarMudo(v) { mudo = !!v; if (master) master.gain.setTargetAtTime(mudo ? 0 : 0.5, ctx.currentTime, 0.05); }
   function fixarSemMusica(v) { semMusica = !!v; if (!ctx) return; if (semMusica) parar(); else if (desejada != null) { var d = desejada; desejada = null; musica(true, d); } }
   function abaixar(v) { baixo = !!v; if (loop) loop.g.gain.setTargetAtTime(volMusica(), ctx.currentTime, 0.3); }
-  root.Som = { iniciar: iniciar, tocar: tocar, musica: musica, FAIXAS: FAIXAS.length, abaixar: abaixar,
+  root.Som = { iniciar: iniciar, tocar: tocar, musica: musica, FAIXAS: TRILHA.length, abaixar: abaixar,
+    tocandoArquivo: function () { return !!(loop && loop.audio && !loop.audio.paused); }, tocando: function () { return !!loop; },
     mudo: function (v) { if (v != null) fixarMudo(v); return mudo; },
     semMusica: function (v) { if (v != null) fixarSemMusica(v); return semMusica; },
     pronto: function () { return !!ctx; } };

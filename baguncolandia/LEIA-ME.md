@@ -26,8 +26,8 @@ Endereço: `https://solverone.com.br/FeatureTesting/baguncolandia/` (atalho para
 **Música**: em 🎵 Música no celular, cole um link do YouTube (vídeo ou playlist); a TV toca num
 cantinho. Com tempo "🎵 a música", a rodada dura a música inteira.
 
-**Música do jogo e botões de som**: o jogo toca música o tempo todo, uma diferente a cada rodada (todas criadas
-pelo próprio jogo). **🔊** deixa tudo mudo (efeitos, música e voz); **🎵** liga ou desliga só a música. Ficam na coluna
+**Música do jogo e botões de som**: o jogo toca música o tempo todo, uma diferente a cada rodada: 13 músicas de
+verdade em `musicas/` (domínio público, ver `CREDITOS.md`). Sem internet, toca as que o próprio jogo cria. **🔊** deixa tudo mudo (efeitos, música e voz); **🎵** liga ou desliga só a música. Ficam na coluna
 da direita nos modos sem TV e ao lado de ⏸ ⏹ no celular ligado à TV; a escolha fica guardada no aparelho.
 
 **Música da sala pelo microfone**: em 🎵 Música, toque em **🎤 Seguir a música da sala** e deixe o celular
@@ -100,12 +100,13 @@ Tire uma foto dessa caixa e mande: é o que falta para achar o problema. O desen
 | `boneco.js` | o boneco personalizável (corpo em pé, cabeças, cabelos, roupas, acessórios, marionete) |
 | `sala.js` | pareamento (Supabase broadcast), WebRTC, câmera, visão (diferença entre quadros) |
 | `calibrar.js` | calibração guiada: fundo → silhueta → braços → chute → pulo |
-| `voz.js` / `som.js` | fala (speechSynthesis, regras SolverONE) e sons sintetizados (WebAudio) |
+| `voz.js` / `som.js` | fala (speechSynthesis, regras SolverONE), sons sintetizados (WebAudio) e as músicas |
+| `musicas/` | 13 MP3 de domínio público (FreePD, CC0); lista em `TRILHA` no `som.js` |
 | `batida.js` | microfone → batida e BPM (sem IA; `estimarBpm` é pura e testada no Node) |
 | `esqueleto.js` | esqueleto por IA (MediaPipe Pose em `libs/mediapipe/`, carregado só quando a pessoa liga); devolve 13 pontos espelhados |
 | `spotify.js` / `config.js` | Spotify como controle remoto (PKCE, sem segredo); `config.js` guarda só o Client ID público |
 | `sw.js` | cache da pasta; `VERSAO` tem de ser igual a `APP_VERSION` |
-| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js`, `voltar.test.js` e `som.test.js` (Chromium) |
+| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js`, `voltar.test.js`, `som.test.js` e `musica.test.js` (Chromium) |
 
 Rodar os testes: `node --test baguncolandia/teste/*.test.js` e `node baguncolandia/teste/pagina.test.js`.
 

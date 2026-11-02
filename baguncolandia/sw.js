@@ -30,6 +30,7 @@ self.addEventListener('fetch', function (e) {
   var req = e.request; if (req.method !== 'GET') return;
   var url = new URL(req.url);
   if (url.origin !== location.origin) return;   // YouTube, Supabase, STUN: nunca passa pelo cache
+  if (/\/musicas\//.test(url.pathname)) return;   // músicas: o navegador baixa aos pedaços enquanto toca (sem internet, o jogo toca a sintetizada)
   var pesado = /\.(woff2|png|webp|jpg|jpeg|svg|wasm|task|mjs)$/i.test(url.pathname) || /\/libs\//.test(url.pathname);
   if (pesado) {
     e.respondWith(caches.match(req).then(function (r) { return r || fetch(req).then(function (resp) { if (resp.ok) caches.open(CACHE).then(function (c) { c.put(req, resp.clone()); }); return resp; }); }));
