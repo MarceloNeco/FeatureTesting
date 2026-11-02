@@ -2,14 +2,29 @@
    baixar de novo. Código (html, js, css, json): rede primeiro com 4 s de espera, senão a cópia;
    fonte, imagens e biblioteca: cópia primeiro. Cache com o nome do app (nunca apaga o dos outros apps
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js). */
-var VERSAO = '0.8.6';
+var VERSAO = '0.8.7';
 var CACHE = 'bagunca-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'figuras.js', 'cenas.js', 'boneco.js', 'desenho.js', 'sala.js', 'voz.js', 'som.js', 'calibrar.js', 'config.js', 'batida.js', 'spotify.js', 'esqueleto.js', 'libs/supabase.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js'];
+// A parte da câmera (MediaPipe em libs/mediapipe/, ~28 MB) só baixava na primeira vez que alguém ligava o boneco;
+// sem internet, essa primeira vez falhava. Agora fica guardada sozinha depois de abrir, mas só no Wi-Fi.
+var PESADOS = ['libs/mediapipe/vision_bundle.mjs', 'libs/mediapipe/vision_wasm_internal.js', 'libs/mediapipe/vision_wasm_internal.wasm', 'libs/mediapipe/pose_landmarker_lite.task', 'libs/mediapipe/hand_landmarker.task'];
+function guardarPesados() {
+  var con = self.navigator && self.navigator.connection;
+  if (con && (con.saveData || con.type === 'cellular')) return Promise.resolve();
+  return caches.open(CACHE).then(function (c) {
+    return PESADOS.reduce(function (fila, a) {
+      return fila.then(function () {
+        var url = new URL(a, self.registration.scope).href;
+        return c.match(url).then(function (r) { return r || fetch(url).then(function (resp) { if (resp.ok) return c.put(url, resp); }); }).catch(function () {});
+      });
+    }, Promise.resolve());
+  });
+}
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return Promise.all(ARQUIVOS.map(function (a) { return c.add(a).catch(function () {}); })); }).then(function () { return self.skipWaiting(); }));
 });
 self.addEventListener('activate', function (e) {
-  e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('bagunca-v') === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
+  e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k.indexOf('bagunca-v') === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }).then(function () { guardarPesados(); }));   // sem segurar a ativação
 });
 self.addEventListener('fetch', function (e) {
   var req = e.request; if (req.method !== 'GET') return;

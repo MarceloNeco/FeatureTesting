@@ -25,7 +25,7 @@ test('versão igual nos três lugares', () => {
   const a = ler('app.js').match(/APP_VERSION = '([\d.]+)'/)[1];
   const s = ler('sw.js').match(/VERSAO = '([\d.]+)'/)[1];
   const v = JSON.parse(ler('versoes.json')).versoes[0];
-  assert.equal(a, '0.6.3'); assert.equal(s, '0.6.3'); assert.equal(v.versao, '0.6.3');
+  assert.equal(a, '0.6.4'); assert.equal(s, '0.6.4'); assert.equal(v.versao, '0.6.4');
   for (const k of ['data', 'hora', 'pt', 'en']) assert.ok(v[k], 'versoes.json sem ' + k);
 });
 
