@@ -2,6 +2,17 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "1.5.1",
+      "data": "02/Nov/2026",
+      "hora": "12:45:00",
+      "pt": [
+        "Braços do skatista refeitos, com ombro e cotovelo de verdade: andando reto, ficam um pouco abertos e com os cotovelos dobrados, prontos para equilibrar. Na curva, o braço de dentro se estica para o lado da curva, mais baixo, e o de fora sobe com o cotovelo dobrado, fazendo contrapeso. Remando, balançam ao contrário das pernas. Antes só o ombro subia e o braço continuava para baixo."
+      ],
+      "en": [
+        "Skater arms remade with a real shoulder and elbow: riding straight they are slightly open with bent elbows, ready to balance. In a curve, the inside arm stretches toward the curve, lower, and the outside arm rises with a bent elbow as a counterweight. While pushing they swing opposite to the legs. Before, only the shoulder rose and the arm stayed down."
+      ]
+    },
+    {
       "versao": "1.5.0",
       "data": "02/Nov/2026",
       "hora": "11:30:00",
