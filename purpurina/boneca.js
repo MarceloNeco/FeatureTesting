@@ -130,8 +130,8 @@
 
     // ---------- cabeça (tudo aqui dentro vai para o grupo aumentado) ----------
     var corpo = out; out = [];
-    var rosto = contorno(0, 0, e.rosto, e.nariz), menino = e.personagem === 'menino';
-    var sobr = menino ? ['M143,182 Q163,175 184,179', 'M216,179 Q237,175 257,182', 7] : ['M144,184 Q163,172 183,181', 'M217,181 Q237,172 256,184', 5.5];
+    var menino = e.personagem === 'menino', rosto = contorno(0, 0, e.rosto, e.nariz, menino);
+    var sobr = menino ? ['M142,181 Q163,177 185,179', 'M215,179 Q237,177 258,181', 7.5] : ['M144,184 Q163,172 183,181', 'M217,181 Q237,172 256,184', 5.5];
     if (virada) out.push(cabecaVirada());
     else if (costas) {
       // de costas: a cabeça é só cabelo
@@ -143,7 +143,7 @@
       out.push(elip(116, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }), elip(284, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }));
       out.push(pintar(rosto, 'url(#' + I + 'pele)', peleE));
       var sob = mistura(cab, '#2a1c1a', 0.45);
-      out.push(luzLados(pele), luzMeio(pele), base(e.base, pele, rosto), blush(e, C('blush').hex, I), olho(164, -1, e, I, C, 0, op.anim), olho(236, 1, e, I, C, 0, op.anim));
+      out.push(luzLados(pele, menino), luzMeio(pele), base(e.base, pele, rosto), blush(e, C('blush').hex, I), olho(164, -1, e, I, C, 0, op.anim), olho(236, 1, e, I, C, 0, op.anim));
       out.push(linha(sobr[0], sob, sobr[2]), linha(sobr[1], sob, sobr[2]));
       out.push(narizFrente(e.nariz, pele));
       out.push(boca(e, C('batom'), pele, I));
@@ -250,7 +250,7 @@
        (cos(az+θ)) — some quando passa para trás. O contorno mistura o rosto de frente e o perfil. */
     function cabecaVirada() {
       var s = '', sg = sen >= 0 ? 1 : -1, as = Math.abs(sen), G = Math.PI / 180, sob = mistura(cab, '#2a1c1a', 0.45);
-      var cont = contorno(radS, 0, e.rosto, e.nariz), contV = contorno(radS, 10, e.rosto, e.nariz);
+      var cont = contorno(radS, 0, e.rosto, e.nariz, menino), contV = contorno(radS, 10, e.rosto, e.nariz, menino);
       function xa(az, R) { return 200 + R * Math.sin(az * G + rad); }
       function proj(conteudo, x0, az, R, corte, minimo) {
         var k = Math.cos(az * G + rad); if (k < (minimo === undefined ? 0.12 : minimo)) return '';
@@ -274,7 +274,7 @@
       var bs = e.base === 'natural' ? '' : base(e.base, pele, rosto); if (e.base === 'bronze') bs = bs.replace(/^<path[^>]*\/>/, '');
       var xn = xa(0, 84), cn = esc(pele, 0.28);
       defs += '<linearGradient id="' + I + 'sombV" gradientUnits="userSpaceOnUse" x1="' + n(xn - sg * 6) + '" y1="0" x2="' + n(xn + sg * 70) + '" y2="0"><stop offset="0" stop-color="#e88a90" stop-opacity="0"/><stop offset="1" stop-color="#e88a90" stop-opacity="' + n(0.14 * as) + '"/></linearGradient>';
-      var lados = luzLados(pele) + bs +
+      var lados = luzLados(pele, menino) + bs +
         blush(e, C('blush').hex, I) + (e.glitter === 'bochechas' || e.glitter === 'olhos' ? glitter(e, C('glitter'), op.anim) : '') + (vis('adesivo') ? adesivo(e.adesivo, 266, 250, 13) : '');
       var olhar = sen * 11;
       fe += proj(lados + olho(164, -1, e, I, C, olhar, op.anim) + linha(sobr[0], sob, sobr[2]), 164, -26.3, 81.4, 'mE');
@@ -474,7 +474,7 @@
         for (var rc = 0; rc <= 9; rc++) { var trc = rc / 9; s += circ(214 + trc * 92 - trc * trc * 26, 102 + trc * 250, 23 - trc * 8, f); }
         s += texturaCachos(262, 230, 34, 120, 14, cab, cabE, 5);
         break;
-      case 'curtinho': case 'topete': s = p('M108,210 Q100,100 200,95 Q300,100 292,210 Q294,250 264,262 Q200,274 136,262 Q106,250 108,210Z', f); break;
+      case 'curtinho': case 'topete': s = p('M110,200 Q102,100 200,94 Q298,100 290,200 Q292,226 276,234 Q200,246 124,234 Q108,226 110,200Z', f); break;   // nuca curtinha, orelhas à mostra
     }
     return s;
   }
@@ -562,10 +562,11 @@
         s += texturaCachos(200, 130, 80, 22, 10, cab, cabE, 9);
         brilho = false; break;
       case 'rabinhoCachos': s = p(liso, f) + circ(200, 86, 11, { fill: '#ff8fc8', stroke: '#c22a78', 'stroke-width': 2 }) + p('M192,84 Q200,78 208,84', { fill: 'none', stroke: '#fff', 'stroke-width': 1.6, opacity: 0.6 }); break;
-      case 'curtinho': s = p('M110,214 Q104,100 200,96 Q296,100 290,214 Q286,160 262,146 Q236,158 200,150 Q164,158 138,146 Q114,160 110,214Z', f); break;
+      case 'curtinho': s = p('M112,198 Q104,100 200,94 Q296,100 288,198 Q286,172 274,158 Q264,150 252,158 Q240,142 222,150 Q206,138 190,150 Q172,140 158,154 Q144,148 132,160 Q118,170 112,198Z', f) + p('M150,118 Q200,104 250,118', { fill: 'none', stroke: '#fff', 'stroke-width': 5, opacity: 0.22, 'stroke-linecap': 'round' }); brilho = false; break;   // franjinha curta repicada, lados acima da orelha
       case 'topete':
-        s = p('M110,214 Q104,100 200,96 Q296,100 290,214 Q286,160 262,146 Q236,158 200,150 Q164,158 138,146 Q114,160 110,214Z', f) +
-          p('M148,134 Q156,70 228,78 Q268,84 260,116 Q242,98 214,106 Q188,114 174,144Z', f) + p('M170,104 Q200,84 240,92', { fill: 'none', stroke: '#fff', 'stroke-width': 4, opacity: 0.3, 'stroke-linecap': 'round' });
+        s = p('M112,198 Q104,100 200,94 Q296,100 288,198 Q286,172 274,158 Q264,150 252,158 Q240,142 222,150 Q206,138 190,150 Q172,140 158,154 Q144,148 132,160 Q118,170 112,198Z', f) +
+          p('M138,142 Q142,98 194,90 Q248,86 266,116 Q250,106 230,110 Q208,114 192,128 Q172,136 158,152Z', f) + p('M160,120 Q192,96 236,100', { fill: 'none', stroke: '#fff', 'stroke-width': 4, opacity: 0.3, 'stroke-linecap': 'round' }) +
+          p('M170,128 Q200,108 244,110', { fill: 'none', stroke: cabE, 'stroke-width': 1.6, opacity: 0.5, 'stroke-linecap': 'round' });
         break;
       case 'trancas':
         s = p('M110,214 Q104,104 200,100 Q296,104 290,214 Q280,150 206,128 L200,104 L194,128 Q120,150 110,214Z', f);
@@ -602,8 +603,10 @@
   };
   var LABIOS_V = [{ c: [0, 61, 67], r: [13, 6, 7] }, { c: [0, 69, 65], r: [11, 6, 7] }];
   // contorno da cabeça girada de th (radianos; + olha para a direita): união das elipses; extra = folga (volume do cabelo)
-  function contorno(th, extra, forma, nariz) {
+  function contorno(th, extra, forma, nariz, menino) {
     var vs = (VOLUMES[forma] || VOLUMES.oval).concat(NARIZ_V[nariz] || NARIZ_V.botao, LABIOS_V), c = Math.cos(th), s = Math.sin(th), d = '';
+    // menino: queixo e maxilar um pouquinho mais largos (sem exagero)
+    if (menino) vs = vs.map(function (v, k) { return k === 1 || k === 2 ? { c: v.c, r: [v.r[0] + (k === 1 ? 5 : 4), v.r[1], v.r[2]] } : v; });
     vs.forEach(function (v) {
       var x = 200 + v.c[0] * c + v.c[2] * s, y = 205 + v.c[1], rx = Math.sqrt(v.r[0] * v.r[0] * c * c + v.r[2] * v.r[2] * s * s) + (extra || 0), ry = v.r[1] + (extra || 0);
       d += 'M' + n(x - rx) + ',' + n(y) + 'a' + n(rx) + ',' + n(ry) + ' 0 1,0 ' + n(2 * rx) + ',0a' + n(rx) + ',' + n(ry) + ' 0 1,0 ' + n(-2 * rx) + ',0Z';
@@ -675,10 +678,11 @@
   // luz e sombra do rosto de frente: dos lados (testa, bochechas, pálpebras) e do meio (nariz e queixo)
   /* luz do rosto: só luz e cor de pele saudável (rosado nas bochechas, brilho na testa, no nariz e no queixo).
      Nada de sombra escura na parte de baixo do rosto ou dos lados — de longe parecia barba. */
-  function luzLados(pele) {
-    return elip(152, 246, 26, 16, { fill: '#ff8f9a', opacity: 0.12 }) + elip(248, 246, 26, 16, { fill: '#ff8f9a', opacity: 0.12 }) +
+  function luzLados(pele, menino) {
+    var rosa = menino ? 0.04 : 0.12, dobra = menino ? 0.25 : 0.55;
+    return elip(152, 246, 26, 16, { fill: '#ff8f9a', opacity: rosa }) + elip(248, 246, 26, 16, { fill: '#ff8f9a', opacity: rosa }) +
       elip(200, 150, 40, 12, { fill: '#fff', opacity: 0.07 }) +
-      p('M146,201 Q164,178 182,199', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: 0.55 }) + p('M218,199 Q236,178 254,201', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: 0.55 });
+      p('M146,201 Q164,178 182,199', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: dobra }) + p('M218,199 Q236,178 254,201', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: dobra });
   }
   function luzMeio(pele) {
     return p('M203,226 Q208,240 205,250', { fill: 'none', stroke: esc(pele, 0.25), 'stroke-width': 3, opacity: 0.18, 'stroke-linecap': 'round' }) + elip(200, 238, 2.6, 7, { fill: '#fff', opacity: 0.35 }) +
@@ -787,7 +791,9 @@
     if (e.cilios === 'strass') [0.3, 0.5, 0.7].forEach(function (t3) { var g = naPalpebra(t3); s += circ(g[0], g[1] - 4, 2.4, { fill: '#fff', stroke: '#ff9fd2', 'stroke-width': 1 }); });
     if (e.cilios === 'coracao') s += p(coracao(cx + lado * 30, cy - 20, 4.2), { fill: '#ff4f8b', stroke: '#fff', 'stroke-width': 0.8 });
     if (e.cilios === 'fadinha') s += p(estrela4(cx + lado * 29, cy - 22, 4.5), { fill: '#fff' }) + circ(cx + lado * 22, cy - 28, 1.4, { fill: '#fff' });
-    if (!piscar) return sombraDoOlho + s;
+    // menino: olho um pouco menor e mais reto (mesmo desenho, sem cara de boneca)
+    var men = e.personagem === 'menino', abre = men ? '<g transform="translate(' + cx + ' 214) scale(.88 .84) translate(' + (-cx) + ' -214)">' : '', fecha0 = men ? '</g>' : '';
+    if (!piscar) return abre + sombraDoOlho + s + fecha0;
     /* piscar: a cada ~4,6 s o olho fecha por um instante — a pálpebra (cor da pele, com a sombra e o delineado)
        desce e os cílios ficam para baixo. Os dois olhos piscam juntos. */
     var pele = C('pele').hex, fecha = 'M' + (cx - 23) + ',' + (cy - 1) + 'Q' + cx + ',' + (cy + 15) + ' ' + (cx + 23) + ',' + (cy - 1);
@@ -802,8 +808,8 @@
       f += p('M' + n(fx0) + ',' + n(fy0) + 'Q' + n(fx0 + lado * Lj * 0.3) + ',' + n(fy0 + Lj * 0.7) + ' ' + n(fx0 + lado * Lj * 0.7) + ',' + n(fy0 + Lj * 0.85), { fill: 'none', stroke: e.cilios === 'arco' ? arco[j % arco.length] : cil, 'stroke-width': 2, 'stroke-linecap': 'round' });
     }
     var tempo = ' dur="4.6s" repeatCount="indefinite" keyTimes="0;0.92;0.935;0.975;0.99;1" calcMode="discrete"';
-    return sombraDoOlho + '<g>' + s + '<animate attributeName="opacity" values="1;1;0;0;1;1"' + tempo + '/></g>' +
-      '<g opacity="0">' + f + '<animate attributeName="opacity" values="0;0;1;1;0;0"' + tempo + '/></g>';
+    return abre + sombraDoOlho + '<g>' + s + '<animate attributeName="opacity" values="1;1;0;0;1;1"' + tempo + '/></g>' +
+      '<g opacity="0">' + f + '<animate attributeName="opacity" values="0;0;1;1;0;0"' + tempo + '/></g>' + fecha0;
   }
   function boca(e, cor, pele, I) {
     // sorriso aberto (desfile): cantos para cima, dentinhos e a cor do batom (ou a boca natural)
