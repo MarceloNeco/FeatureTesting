@@ -38,6 +38,12 @@ aparelhos que funcionam ao toque (TV, pianinho, aquário, móbile, cuco, torrade
 sapo, irrigador, varal, correio, pipa…): a tabela `APAR` do `casa.js`. O Bagunçômetro
 (no alto) vai de 0 a 100 %; chegar a 100 % dá bônus. O motor mora em `casa.js`.
 
+**🧹 Arrumar a bagunça** (por enquanto só no jogo com o dedo): no fim do 🧸 aparece o botão "🧹 Arrumar a bagunça", que
+arruma a mesma bagunça (todos os cômodos visitados); o modo 🧹 Arrumar começa com uma bagunça sorteada. Arraste cada
+coisa: aparece a sombra do lugar certo e, perto dele, ela encaixa. Um toque fecha livro, endireita o quadro, fecha a
+geladeira, desliga a torneira e acende a luz; passar o dedo varre as folhas; o que caiu de aparelhos (torrada, carta,
+roupa) vai para o cesto 🧺. 💡 Dica mostra o que arrumar primeiro (de baixo para cima). Sem relógio: acaba com festa.
+
 **Música do jogo e botões de som**: o jogo toca música o tempo todo, uma diferente a cada rodada: 13 músicas de
 verdade em `musicas/` (domínio público, ver `CREDITOS.md`). Sem internet, toca as que o próprio jogo cria. **🔊** deixa tudo mudo (efeitos, música e voz); **🎵** liga ou desliga só a música. Ficam na coluna
 da direita nos modos sem TV e ao lado de ⏸ ⏹ no celular ligado à TV; a escolha fica guardada no aparelho.

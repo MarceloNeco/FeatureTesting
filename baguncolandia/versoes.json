@@ -2,6 +2,21 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.14",
+      "data": "02/Nov/2026",
+      "hora": "13:25:00",
+      "pt": [
+        "🧹 Arrumar a bagunça (para testar, no jogo com o dedo): arraste cada coisa de volta para o lugar. Ao segurar, aparece a \"sombra\" de onde ela mora; perto do lugar, ela encaixa sozinha. Livro aberto fecha com um toque; quadro torto, geladeira aberta, torneira e luz se arrumam com um toque; folhas se varrem passando o dedo; torrada, carta e roupa vão para o cesto 🧺.",
+        "💡 Dica: mostra o que arrumar primeiro (sempre de baixo para cima). Se ficar 10 segundos parado, a dica aparece sozinha.",
+        "Dois jeitos: no fim do 🧸 Bagunça aparece \"🧹 Arrumar a bagunça\" (arruma a mesma bagunça que vocês fizeram, em todos os cômodos visitados), ou o modo 🧹 Arrumar, que já começa com uma bagunça sorteada. Sem relógio: termina quando tudo volta ao lugar, com festa."
+      ],
+      "en": [
+        "🧹 Tidy up (for testing, in finger mode): drag each thing back to its place. While you hold it, a \"shadow\" shows where it lives; near the spot it snaps in. Open books close with a tap; crooked picture, open fridge, tap and light are fixed with a tap; leaves are swept with your finger; toast, letters and clothes go in the basket 🧺.",
+        "💡 Hint: shows what to tidy first (always bottom to top). After 10 seconds without moving, the hint shows up by itself.",
+        "Two ways: at the end of 🧸 Mayhem a \"🧹 Tidy up the mess\" button appears (tidy the same mess you made, in every room you visited), or the 🧹 Tidy mode, which starts with a random mess. No clock: it ends when everything is back in place, with a party."
+      ]
+    },
+    {
       "versao": "0.8.13",
       "data": "02/Nov/2026",
       "hora": "13:10:00",

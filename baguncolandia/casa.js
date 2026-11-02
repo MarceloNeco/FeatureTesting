@@ -31,7 +31,8 @@
     function ob(tipo, x, yBase, o) {   // yBase = onde a coisa se apoia (topo da prateleira, chão…)
       o = o || {}; var w = o.w || 40, h = o.h || 40;
       var c = { id: ++M.seq, tipo: tipo, x: x, y: yBase - h / 2, w: w, h: h, r: o.r || Math.min(w, h) / 2, vx: 0, vy: 0, ang: o.ang || 0, va: 0, dorme: true, apoio: o.apoio || null, quica: o.quica != null ? o.quica : 0.35, cor: o.cor, cor2: o.cor2, letra: o.letra, aberto: false, fora: 0, gira: 0, toque: {}, parado: 0 };
-      c.x0 = c.x; c.y0 = c.y; c.ang0 = c.ang; M.obs.push(c); return c;
+      c.x0 = c.x; c.y0 = c.y; c.ang0 = c.ang; c.w0 = w; c.h0 = h; c.r0 = c.r; c.apoio0 = c.apoio ? { p: c.apoio.p, o: c.apoio.o } : null;   // o lugar certo (para a arrumação)
+      M.obs.push(c); return c;
     }
     function plat(x1, x2, y) { M.plats.push({ x1: x1, x2: x2, y: y }); return M.plats.length - 1; }
     function livros(x1, x2, y, p) { var x = x1; var i = 0; while (true) { var w = 22 + Math.floor(rnd() * 10), h = 62 + Math.floor(rnd() * 26); if (x + w > x2) break; ob('livro', x + w / 2, y, { w: w, h: h, cor: LIVROS[(i++ + Math.floor(rnd() * 3)) % LIVROS.length], apoio: { p: p }, quica: 0.25 }); x += w + 3; } }
@@ -323,6 +324,8 @@
     var rnd = cfg.aleatorio || Math.random;
     var nJog = cfg.jogadores === 2 ? 2 : 1;
     var duracao = typeof cfg.duracao === 'number' ? cfg.duracao : 60;
+    var arrumando = cfg.modo === 'arrumar', segurando = {}, semArrumar = 0;   // 🧹 arrumação: sem relógio, termina quando tudo volta ao lugar
+    if (arrumando) duracao = 0;
     var cena = CENAS.indexOf(cfg.cenaCasa) >= 0 ? cfg.cenaCasa : CENAS[Math.floor(rnd() * CENAS.length) % CENAS.length];
     var M = montar(cena, rnd), visitados = {};
     var eventos = [], fase = 'pronto', tempo = 0, ultimaPct = 0;
@@ -330,7 +333,8 @@
     function vizinhos() { var i = CASA.indexOf(M.cena); return { ant: CASA[(i + CASA.length - 1) % CASA.length], prox: CASA[(i + 1) % CASA.length] }; }
     function irPara(dir) {
       var v = vizinhos(), nova = dir < 0 ? v.ant : v.prox, mae = M.mae;
-      visitados[M.cena] = M; M = visitados[nova] || montar(nova, rnd); cena = nova;
+      visitados[M.cena] = M; var novo = !visitados[nova]; M = visitados[nova] || montar(nova, rnd); cena = nova;
+      if (novo && cfg.modo === 'arrumar') { M.baguncou = true; baguncarSozinho(); }   // 🧹 direto: cada cômodo novo já chega bagunçado
       if (mae) M.mae = mae;
       M.trocou = dir < 0 ? -1 : 1; if (M.cachorro) { M.cachorro.x = dir < 0 ? W - 140 : 140; M.cachorro.dir = dir < 0 ? -1 : 1; }
       var n = NOMES[nova]; emitir({ t: 'casa', j: 0, som: 'porta', x: W / 2, y: 320, pontos: 0, texto: n[0], textoEn: n[1], troca: nova });
@@ -347,15 +351,16 @@
     function porId(id) { for (var i = 0; i < M.obs.length; i++) if (M.obs[i].id === id) return M.obs[i]; return null; }
     function acordar(o) { if (o.dorme) { o.dorme = false; o.apoio = null; o.parado = 0; } }
     function baguncado(o) { return o.fora || o.aberto || Math.hypot(o.x - o.x0, o.y - o.y0) > 30 || Math.abs(Math.atan2(Math.sin(o.ang - o.ang0), Math.cos(o.ang - o.ang0))) > 0.5; }
-    function bagunca() {
-      var n = 0; M.obs.forEach(function (o) { if (!o.extra && baguncado(o)) n++; });   // o que um aparelho soltou (torrada, carta…) não conta
-      if (M.quadro && Math.abs(M.quadro.repouso) > 0.12) n++;
-      if (M.arvore && M.folhasChao.length >= 12) n++;
-      if (M.geladeira && M.geladeira.alvo > 0.5) n++;
-      if (M.torneira && M.torneira.ligada) n++;
-      if (M.papel && M.papel.pts.length >= 10) n++;
-      if (M.castelo && !M.castelo.inteiro) n++;
-      return Math.min(1, n / M.total);
+    function bagunca(R) {
+      R = R || M;
+      var n = 0, extras = 0; R.obs.forEach(function (o) { if (o.extra) { if (arrumando && !o.fora) extras++; return; } if (baguncado(o) || o.segurado) n++; });   // o que um aparelho soltou não conta na bagunça, mas tem de ir para o cesto na arrumação
+      if (R.quadro && Math.abs(R.quadro.repouso) > 0.12) n++;
+      if (R.arvore && (arrumando ? R.folhasChao.length > 0 : R.folhasChao.length >= 12)) n++;
+      if (R.geladeira && R.geladeira.alvo > 0.5) n++;
+      if (R.torneira && R.torneira.ligada) n++;
+      if (R.papel && R.papel.pts.length >= (arrumando ? 1 : 10)) n++;
+      if (R.castelo && !R.castelo.inteiro) n++;
+      return Math.min(1, (n + extras) / (R.total + extras));
     }
     function passo(dt) {
       var obs = M.obs;
@@ -366,7 +371,7 @@
         if (!a || !a.dorme || a.fora || Math.abs(a.x - o.x) > a.w * 0.6 + 4 || a.y - meiaAltura(a) - (o.y + meiaAltura(o)) > 8) acordar(o);
       });
       obs.forEach(function (o) {
-        if (o.dorme || o.fora) { if (o.gira > 0) o.gira = Math.max(0, o.gira - dt); return; }
+        if (o.dorme || o.fora || o.segurado) { if (o.gira > 0) o.gira = Math.max(0, o.gira - dt); return; }
         var antY = o.y + meiaAltura(o);
         o.vy += G * dt; o.x += o.vx * dt; o.y += o.vy * dt; o.ang += o.va * dt;
         if (o.gira > 0) o.gira = Math.max(0, o.gira - dt);
@@ -420,7 +425,7 @@
       for (var a = 0; a < obs.length; a++) {
         var A = obs[a]; if (A.fora) continue;
         for (var b = a + 1; b < obs.length; b++) {
-          var B = obs[b]; if (B.fora || (A.dorme && B.dorme)) continue;
+          var B = obs[b]; if (B.fora || (A.dorme && B.dorme) || A.segurado || B.segurado) continue;
           var dx = B.x - A.x, dy = B.y - A.y, d = Math.hypot(dx, dy), min = A.r + B.r;
           if (d >= min || d === 0) continue;
           var nx = dx / d, ny = dy / d, rel = (A.vx - B.vx) * nx + (A.vy - B.vy) * ny, sobra = min - d;
@@ -491,7 +496,7 @@
       g.x += g.dir * 55 * dt; g.passo += dt * 9;
       if (g.x < p.x1 + 20) { g.x = p.x1 + 20; g.dir = 1; } if (g.x > p.x2 - 20) { g.x = p.x2 - 20; g.dir = -1; }
       // derruba o que estiver no caminho
-      if (g.ops <= 0) M.obs.forEach(function (o) { if (g.ops > 0 || !o.dorme || o.fora) return; var mesma = g.plat >= 0 ? (o.apoio && o.apoio.p === g.plat) : (Math.abs(o.y + meiaAltura(o) - M.chao) < 4); if (!mesma || Math.abs(o.x - g.x) > o.w / 2 + 16 || (o.x - g.x) * g.dir < 0) return; acordar(o); o.vx = g.dir * (240 + rnd() * 120); o.vy = -160; o.va = g.dir * 4; o.ult = 0; g.ops = 4; emitir({ t: 'casa', j: 0, som: 'miau', x: g.x, y: g.y - 70, pontos: 0, texto: '😼 Ops!', textoEn: '😼 Oops!' }); });   // um empurrão de cada vez: a bagunça maior é da criança
+      if (g.ops <= 0 && !arrumando) M.obs.forEach(function (o) { if (g.ops > 0 || !o.dorme || o.fora) return; var mesma = g.plat >= 0 ? (o.apoio && o.apoio.p === g.plat) : (Math.abs(o.y + meiaAltura(o) - M.chao) < 4); if (!mesma || Math.abs(o.x - g.x) > o.w / 2 + 16 || (o.x - g.x) * g.dir < 0) return; acordar(o); o.vx = g.dir * (240 + rnd() * 120); o.vy = -160; o.va = g.dir * 4; o.ult = 0; g.ops = 4; emitir({ t: 'casa', j: 0, som: 'miau', x: g.x, y: g.y - 70, pontos: 0, texto: '😼 Ops!', textoEn: '😼 Oops!' }); });   // um empurrão de cada vez: a bagunça maior é da criança
       // fugindo do Picolé
       var c = M.cachorro; if (c && g.plat === -1 && Math.abs(c.x - g.x) < 120) { g.miau = 0.9; emitir({ t: 'casa', j: 0, som: 'miau', x: g.x, y: g.y - 80, pontos: 0, texto: '🙀 FFFF!', textoEn: '🙀 HISS!' }); pularGato(true); return; }
       if (g.t < 0) { if (rnd() < 0.35) { g.dorme = true; g.t = 5 + rnd() * 4; } else pularGato(false); }
@@ -515,7 +520,7 @@
       if (c.y < 0 || c.vy < 0) { c.vy += G * dt; c.y = Math.min(0, c.y + c.vy * dt); if (c.y === 0) c.vy = 0; }
       // procura uma bola no chão por perto
       var alvo = null, melhor = 520;
-      M.obs.forEach(function (o) { if (o.tipo !== 'bola' || o.fora || o.ult == null || o.y < M.chao - 60) return; var d = Math.abs(o.x - c.x); if (d < melhor) { melhor = d; alvo = o; } });   // só brinca com a bola que a criança já mexeu
+      if (!arrumando) M.obs.forEach(function (o) { if (o.tipo !== 'bola' || o.fora || o.ult == null || o.y < M.chao - 60) return; var d = Math.abs(o.x - c.x); if (d < melhor) { melhor = d; alvo = o; } });   // só brinca com a bola que a criança já mexeu
       var vel = c.late > 0 ? 0 : alvo ? 190 : 70;
       if (alvo) {
         c.dir = alvo.x > c.x ? 1 : -1;
@@ -536,8 +541,77 @@
     }
 
     /* ---- o toque/movimento da criança ---- */
+    /* ======== 🧹 arrumação: arrastar cada coisa para o lugar dela ======== */
+    var CESTO = { x: 22, y: 560, w: 110, h: 90 };   // as coisas soltas (torrada, carta, roupa) vão para o cesto
+    function noLugar(o) { return o.dorme && !o.segurado && !baguncado(o); }
+    function pegar(k, j, nx, ny) {
+      if (fase !== 'jogando' || !arrumando) return false;
+      var x = nx * W, y = ny * H, melhor = null, dm = 1e9;
+      M.obs.forEach(function (o) { if (o.fora || o.segurado) return; var d = Math.hypot(o.x - x, o.y - y), alcance = Math.max(o.r, Math.min(o.w, o.h) / 2) + 28; if (d > alcance) return; var nota = d + (noLugar(o) ? 60 : 0); if (nota < dm) { dm = nota; melhor = o; } });   // prefere o que está fora do lugar
+      if (!melhor) { arrumarAoTocar(j, x, y); segurando[k] = { j: j, varre: true }; return false; }
+      var o = melhor; o.segurado = 1; o.dorme = false; o.apoio = null; o.vx = o.vy = o.va = 0;
+      if (o.aberto) { o.aberto = false; o.w = o.w0; o.h = o.h0; o.r = o.r0; }   // pegou o livro: ele fecha
+      segurando[k] = { j: j, o: o, dx: o.x - x, dy: o.y - y, ux: x, uy: y, ut: tempo, vx: 0, vy: 0 };
+      M.dica = null; return true;
+    }
+    function mover(k, nx, ny) {
+      var S = segurando[k]; if (!S) return;
+      var x = nx * W, y = ny * H;
+      if (S.varre) { varrer(S.j, x, y); return; }
+      var o = S.o, dtS = Math.max(0.016, (tempo - S.ut) / 1000);
+      S.vx = (x - S.ux) / dtS; S.vy = (y - S.uy) / dtS; S.ux = x; S.uy = y; S.ut = tempo;
+      o.x = clamp(x + S.dx, 20, W - 20); o.y = clamp(y + S.dy, 20, M.chao - 10); o.ang += (o.ang0 - o.ang) * 0.25;   // vai se endireitando na mão
+    }
+    function largar(k) {
+      var S = segurando[k]; delete segurando[k]; if (!S || !S.o) return;
+      var o = S.o; o.segurado = 0;
+      if (o.extra) {
+        if (dentro(o, CESTO, 30)) { o.fora = 1; M.obs.splice(M.obs.indexOf(o), 1); acertou(S.j, 5, 'guardou', CESTO.x + CESTO.w / 2, CESTO.y, '🧺 Guardou! +5', '🧺 Put away! +5'); return; }
+      } else if (Math.hypot(o.x - o.x0, o.y - o.y0) < Math.max(48, o.r * 1.5)) {   // perto do lugar dele: encaixa
+        o.x = o.x0; o.y = o.y0; o.ang = o.ang0; o.vx = o.vy = o.va = 0; o.dorme = true; o.parado = 0; o.apoio = o.apoio0 ? { p: o.apoio0.p, o: o.apoio0.o } : { p: -1 };
+        if (o.aberto) { o.aberto = false; o.w = o.w0; o.h = o.h0; o.r = o.r0; }
+        if (o.tipo === 'rolo' && M.papel) M.papel.pts = [];   // o rolo voltou para o suporte: o papel enrola de novo
+        var em = o.apoio0 && o.apoio0.o != null ? porId(o.apoio0.o) : null;
+        if (em && !noLugar(em)) emitir({ t: 'casa', j: S.j, som: 'tum', x: o.x, y: o.y - 50, pontos: 0, texto: '⬇️ Comece pelo de baixo!', textoEn: '⬇️ Start from the bottom!' });
+        acertou(S.j, 10, 'arrumou', o.x, o.y, '✓ +10', '✓ +10'); return;
+      }
+      o.vx = clamp(S.vx * 0.3, -600, 600); o.vy = clamp(S.vy * 0.3, -600, 600); o.va = 0;   // longe do lugar: cai onde soltou
+    }
+    function acertou(j, n, som, x, y, txt, txtEn) { semArrumar = 0; ponto(j, n, som, x, y, { texto: txt, textoEn: txtEn, festa: true }); }
+    function varrer(j, x, y) { var antes = M.folhasChao.length; M.folhasChao = M.folhasChao.filter(function (f) { return Math.hypot(f.x - x, f.y - y) > 70; }); var n = antes - M.folhasChao.length; if (n) { semArrumar = 0; ponto(j, n, 'folhas', x, y - 30, n > 2 ? { texto: '🍃 +' + n } : {}); } }
+    function arrumarAoTocar(j, x, y) {
+      var b = { x: x, y: y };
+      var Q = M.quadro; if (Q && Math.abs(Q.repouso) > 0.12 && dentro(b, Q, 20)) { Q.repouso = 0; Q.va = 2; acertou(j, 5, 'quadro', Q.x + Q.w / 2, Q.y + 40, '🖼️ Endireitou! +5', '🖼️ Straight! +5'); return; }
+      var Gd = M.geladeira; if (Gd && Gd.alvo > 0.5 && dentro(b, Gd, 0)) { Gd.alvo = 0; acertou(j, 5, 'geladeira', Gd.x + Gd.w / 2, Gd.y + 120, '🧊 Fechou! +5', '🧊 Closed! +5'); return; }
+      var To = M.torneira; if (To && To.ligada && Math.hypot(x - To.x, y - To.y) < 55) { To.ligada = false; acertou(j, 5, 'agua', To.x, To.y - 20, '🚰 Fechou! +5', '🚰 Off! +5'); return; }
+      var I = M.interruptor; if (I && !M.luz && dentro(b, I, 22)) { M.luz = true; acertou(j, 5, 'interruptor', I.x, I.y, '💡 Acendeu! +5', '💡 Lights on! +5'); return; }
+      var Ca = M.castelo; if (Ca && !Ca.inteiro && Math.hypot(x - Ca.x, y - (Ca.y - 50)) < 90) { Ca.inteiro = true; acertou(j, 10, 'areia', Ca.x, Ca.y - 90, '🏰 Reconstruiu! +10', '🏰 Rebuilt! +10'); return; }
+      varrer(j, x, y);
+    }
+    function dica() {
+      var fora = M.obs.filter(function (o) { return !o.fora && !o.segurado && (o.extra || baguncado(o)); });
+      if (!fora.length) { M.dica = null; return; }
+      fora.sort(function (a, b) { return (b.y0 || 0) - (a.y0 || 0); });   // de baixo para cima: a torre se monta pelo pé
+      var o = fora[0]; M.dica = { id: o.id, ate: tempo + 4000 };
+      emitir({ t: 'casa', j: 0, som: 'espelho', x: o.x, y: o.y - 60, pontos: 0, texto: '💡', festa: false });
+    }
+    function arrumar() {   // depois do 🧸 Bagunça: a mesma bagunça vira arrumação (em todos os cômodos visitados)
+      arrumando = true; duracao = 0; fase = 'jogando'; semArrumar = 0; M.tudoArrumado = false; M.fimEm = 0; M.chegou100 = true;
+      Object.keys(visitados).forEach(function (k) { visitados[k].tudoArrumado = false; });
+      emitir({ t: 'casa', j: 0, som: 'passos', x: W / 2, y: 300, pontos: 0, texto: '🧹 Hora de arrumar!', textoEn: '🧹 Tidy-up time!', fala: ['Hora de arrumar! Arraste cada coisa para o lugar dela.', 'Tidy-up time! Drag each thing back to its place.'] });
+    }
+    function baguncarSozinho() {   // modo 🧹 direto: a casa já começa bagunçada (sorteio)
+      var ev0 = eventos.slice(), pts0 = jogadores.map(function (jg) { return jg.pontos; });
+      M.obs.forEach(function (o) { if (rnd() < 0.7) { acordar(o); o.vx = (rnd() - 0.5) * 1000; o.vy = -250 - rnd() * 550; o.va = (rnd() - 0.5) * 10; } });
+      if (M.geladeira && rnd() < 0.6) M.geladeira.alvo = 1; if (M.torneira && rnd() < 0.6) M.torneira.ligada = true;
+      if (M.quadro) M.quadro.repouso = (rnd() < 0.5 ? -1 : 1) * (0.25 + rnd() * 0.25); if (M.castelo) M.castelo.inteiro = false; if (M.interruptor && rnd() < 0.4) M.luz = false;
+      if (M.arvore) { M.arvore.treme = 0; sacudirArvore(0, M.arvore.copa.x, M.arvore.copa.y, true); }
+      for (var i = 0; i < 300; i++) passo(1 / 60);
+      M.folhas.forEach(function (f) { M.folhasChao.push({ x: f.x, y: M.chao + 4 - f.cam, rot: f.rot, cor: f.cor }); }); M.folhas = [];
+      eventos = ev0; jogadores.forEach(function (jg, i) { jg.pontos = pts0[i]; });   // o sorteio não conta pontos nem faz barulho
+    }
     function movimento(j, pontos, ts) {
-      if (fase !== 'jogando' || !jogadores[j]) return;
+      if (fase !== 'jogando' || !jogadores[j] || arrumando) return;
       var jg = jogadores[j], r = raia(j);
       var novos = (pontos || []).filter(function (p) { return p[2] >= 35; }).map(function (p) { return { x: r.x + p[0] * r.w, y: r.y + p[1] * r.h, f: p[2], ts: ts, lid: p[4] }; });
       var recentes = jg.rastro.filter(function (p) { return ts - p.ts < 350; });
@@ -607,13 +681,23 @@
       // dois passos por quadro: a física fica estável mesmo no celular lento
       passo(dt / 2); passo(dt / 2);
       var pct = bagunca();
-      if (pct >= 1 && !M.chegou100) { M.chegou100 = true; jogadores.forEach(function (jg) { jg.pontos += 100; }); emitir({ t: 'bagunca100' }); }
+      if (arrumando) {
+        semArrumar += dtMs; if (semArrumar > 10000) { semArrumar = 0; dica(); }   // muito tempo sem acertar: a dica aparece sozinha
+        if (pct <= 0 && !M.tudoArrumado) {
+          M.tudoArrumado = true; jogadores.forEach(function (jg) { jg.pontos += 50; });
+          var falta = Object.keys(visitados).filter(function (k) { return visitados[k] !== M && bagunca(visitados[k]) > 0; });
+          if (falta.length) { var n = NOMES[falta[0]]; emitir({ t: 'casa', j: 0, som: 'fim', x: W / 2, y: 300, pontos: 50, texto: '✨ Cômodo arrumado! Agora: ' + n[0], textoEn: '✨ Room done! Next: ' + n[1], festa: true, fala: ['Muito bem! Agora falta ' + n[0].replace(/^\S+ /, ''), 'Well done! Now the ' + n[1].replace(/^\S+ /, '')] }); }
+          else { emitir({ t: 'arrumado' }); M.fimEm = tempo + 3500; }
+        }
+        if (M.fimEm && tempo >= M.fimEm) terminar();
+      }
+      if (!arrumando && pct >= 1 && !M.chegou100) { M.chegou100 = true; jogadores.forEach(function (jg) { jg.pontos += 100; }); emitir({ t: 'bagunca100' }); }
       ultimaPct = pct;
-      if (duracao && !M.mae && duracao * 1000 - tempo <= 6000) { M.mae = { desde: tempo }; emitir({ t: 'casa', j: 0, som: 'passos', x: W - 260, y: 260, pontos: 0, texto: '🚶‍♀️ A mamãe está chegando! Rápido!', textoEn: '🚶‍♀️ Mom is coming! Hurry!', fala: ['A mamãe está chegando! Rápido!', 'Mom is coming! Hurry!'] }); }
+      if (duracao && !arrumando && !M.mae && duracao * 1000 - tempo <= 6000) { M.mae = { desde: tempo }; emitir({ t: 'casa', j: 0, som: 'passos', x: W - 260, y: 260, pontos: 0, texto: '🚶‍♀️ A mamãe está chegando! Rápido!', textoEn: '🚶‍♀️ Mom is coming! Hurry!', fala: ['A mamãe está chegando! Rápido!', 'Mom is coming! Hurry!'] }); }
       if (M.mae) M.mae.k = Math.min(1, (tempo - M.mae.desde) / 5000);
       if (duracao && tempo >= duracao * 1000) terminar();
     }
-    function comecar() { fase = 'jogando'; tempo = 0; }
+    function comecar() { fase = 'jogando'; tempo = 0; if (arrumando && !M.baguncou) { M.baguncou = true; baguncarSozinho(); } }
     function pausar() { if (fase === 'jogando') fase = 'pausa'; }
     function continuar() { if (fase === 'pausa') fase = 'jogando'; }
     function terminar() {
@@ -636,16 +720,16 @@
     }
     function estado() {
       return {
-        fase: fase, modo: 'bagunca', modoBase: 'bagunca', tempo: tempo, restante: duracao ? Math.max(0, Math.ceil((duracao * 1000 - tempo) / 1000)) : null,
+        fase: fase, modo: arrumando ? 'arrumar' : 'bagunca', modoBase: arrumando ? 'arrumar' : 'bagunca', arrumando: arrumando, tempo: tempo, restante: duracao ? Math.max(0, Math.ceil((duracao * 1000 - tempo) / 1000)) : null,
         jogadores: jogadores.map(function (jg, j) { return { pontos: Math.round(jg.pontos), vidas: jg.vidas, combo: 0, poder: null, poderAte: 0, lento: false, raia: raia(j), zonaChute: 0.6, rastro: jg.rastro.slice(-8), corpo: jg.corpo, invencivel: false, esqueleto: null }; }),
-        coisas: [], trave: null, bpm: 0, casa: M, bagunca: ultimaPct
+        coisas: [], trave: null, bpm: 0, casa: (M.arrumando = arrumando, M.cesto = arrumando ? CESTO : null, M.tempo = tempo, M), bagunca: ultimaPct
       };
     }
     return {
       comecar: comecar, pausar: pausar, continuar: continuar, terminar: terminar, avancar: avancar, movimento: movimento, esqueleto: esqueleto, corpo: corpo, calibrar: calibrar, estado: estado,
       batida: function () {}, zonaChute: function () {}, lancar: function () { return null; }, obstaculo: function () { return null; },
       eventos: function () { var e = eventos; eventos = []; return e; },
-      irPara: irPara, vizinhos: vizinhos, get cena() { return cena; }, W: W, H: H
+      irPara: irPara, vizinhos: vizinhos, pegar: pegar, mover: mover, largar: largar, dica: dica, arrumar: arrumar, get cena() { return cena; }, W: W, H: H
     };
   }
 
@@ -770,6 +854,7 @@
     if (M.tartaruga) tartaruga(ctx, M.tartaruga, M.chao, ts);
     if (M.gato) gato(ctx, M.gato, ts);
     if (M.cachorro) cachorro(ctx, M, ts);
+    if (M.arrumando) guias(ctx, M, ts);
     if (M.papagaio) papagaio(ctx, M.papagaio, ts, M.jardim);
     if (M.mae) mae(ctx, M, ts);
     M.folhas.forEach(function (fo) { folha(ctx, fo.x, fo.y, fo.rot, fo.cor); });
@@ -1193,13 +1278,26 @@
         ctx.fillStyle = o.cor || '#ccc'; arred(ctx, -w / 2, -h / 2, w, h, 6); ctx.fill();
     }
   }
-  function medidor(ctx, pct, ts) {
+  /* arrumação: o cesto, a sombra do lugar certo de quem está na mão e a seta da dica */
+  function guias(ctx, M, ts) {
+    var pisca = 0.55 + 0.35 * Math.sin(ts / 160);
+    if (M.cesto && M.obs.some(function (o) { return o.extra && !o.fora; })) { var C = M.cesto; ctx.save(); ctx.fillStyle = '#d7a86e'; arred(ctx, C.x, C.y, C.w, C.h, 12); ctx.fill(); ctx.strokeStyle = '#a1742f'; ctx.lineWidth = 3; for (var i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(C.x, C.y + i * C.h / 4); ctx.lineTo(C.x + C.w, C.y + i * C.h / 4); ctx.stroke(); } ctx.font = '700 30px system-ui'; ctx.textAlign = 'center'; ctx.fillText('🧺', C.x + C.w / 2, C.y - 8); ctx.restore(); }
+    function sombra(o) { ctx.save(); ctx.globalAlpha = 0.35 + 0.25 * pisca; ctx.translate(o.x0, o.y0); ctx.rotate(o.ang0); var c = {}; for (var k in o) c[k] = o[k]; c.w = o.w0; c.h = o.h0; c.r = o.r0; c.aberto = false; c.gira = 0; coisa(ctx, c, ts); ctx.restore();
+      ctx.save(); ctx.strokeStyle = 'rgba(198,255,61,' + pisca + ')'; ctx.lineWidth = 4; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.arc(o.x0, o.y0, Math.max(o.w0, o.h0) / 2 + 12, 0, PI2); ctx.stroke(); ctx.restore(); }
+    M.obs.forEach(function (o) { if (o.segurado && !o.extra) sombra(o); if (o.segurado && o.extra && M.cesto) { ctx.save(); ctx.strokeStyle = 'rgba(198,255,61,' + pisca + ')'; ctx.lineWidth = 5; arred(ctx, M.cesto.x - 6, M.cesto.y - 6, M.cesto.w + 12, M.cesto.h + 12, 16); ctx.stroke(); ctx.restore(); } });
+    var D = M.dica; if (D && M.tempo < D.ate) { var o = M.obs.filter(function (x) { return x.id === D.id; })[0]; if (o && !o.segurado) {
+      var tx = o.extra ? M.cesto.x + M.cesto.w / 2 : o.x0, ty = o.extra ? M.cesto.y : o.y0; if (!o.extra) sombra(o);
+      ctx.save(); ctx.strokeStyle = '#ffd166'; ctx.fillStyle = '#ffd166'; ctx.lineWidth = 6; ctx.setLineDash([14, 10]); ctx.lineDashOffset = -ts / 30; ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.quadraticCurveTo((o.x + tx) / 2, Math.min(o.y, ty) - 120, tx, ty); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(o.x, o.y, Math.max(o.w, o.h) / 2 + 14 + pisca * 6, 0, PI2); ctx.stroke(); ctx.font = '700 34px system-ui'; ctx.textAlign = 'center'; ctx.fillText('👆', o.x, o.y - Math.max(o.w, o.h) / 2 - 22 - pisca * 8); ctx.restore(); } }
+  }
+  function medidor(ctx, pct, ts, arrumando) {
+    if (arrumando) pct = 1 - pct;
     var w = 360, x = W / 2 - w / 2, y = 110;
     ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; arred(ctx, x - 10, y - 6, w + 20, 40, 18); ctx.fill();
     var g = ctx.createLinearGradient(x, 0, x + w, 0); g.addColorStop(0, '#c6ff3d'); g.addColorStop(0.5, '#ffd166'); g.addColorStop(1, '#ff4fa3');
     ctx.fillStyle = 'rgba(255,255,255,.15)'; arred(ctx, x, y + 4, w, 20, 10); ctx.fill();
     ctx.fillStyle = g; arred(ctx, x, y + 4, Math.max(20, w * pct), 20, 10); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = '700 18px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🧸 ' + Math.round(pct * 100) + '%', W / 2, y + 14 + (pct >= 1 ? Math.sin(ts / 80) * 2 : 0));
+    ctx.fillStyle = '#fff'; ctx.font = '700 18px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText((arrumando ? '🧹 ' : '🧸 ') + Math.round(pct * 100) + '%', W / 2, y + 14 + (pct >= 1 ? Math.sin(ts / 80) * 2 : 0));
     ctx.restore();
   }
   return { criar: criar, desenhar: desenhar, luz: luz, medidor: medidor, CENAS: CENAS, CASA: CASA, NOMES: NOMES, W: W, H: H };
