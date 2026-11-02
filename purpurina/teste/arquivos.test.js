@@ -52,3 +52,14 @@ test('baixar: baixar.js na página e interruptores fora do arquivo', () => {
 test('baixar.js igual ao do Vruuum! (um só jeito de montar o arquivo)', () => {
   assert.equal(ler('baixar.js'), fs.readFileSync(path.join(pasta, '..', 'vruuum', 'baixar.js'), 'utf8'));
 });
+
+test('músicas: toda música da rádio existe, está no sw.js e tem crédito em musicas/LICENCAS.md', () => {
+  const urls = require('../som.js').PurpurinaSom.GRAVADAS.map(g => g.url), lic = ler('musicas/LICENCAS.md');
+  const doSw = JSON.parse(ler('sw.js').match(/var MUSICAS = (\[[^\]]*\]);/)[1].replace(/'/g, '"'));
+  assert.ok(urls.length >= 20, 'pelo menos 20 músicas');
+  assert.equal(urls[0], 'musicas/disco-medusae.mp3', 'a de abertura continua sendo a primeira');
+  assert.deepEqual(doSw, urls, 'a mesma lista no sw.js');
+  urls.forEach(u => { assert.ok(fs.existsSync(path.join(pasta, u)), u + ' existe'); assert.ok(lic.includes('`' + u.split('/')[1] + '`'), u + ' tem crédito'); });
+  const sobrando = fs.readdirSync(path.join(pasta, 'musicas')).filter(f => f.endsWith('.mp3') && !urls.includes('musicas/' + f));
+  assert.deepEqual(sobrando, [], 'nenhum MP3 fora da rádio');
+});
