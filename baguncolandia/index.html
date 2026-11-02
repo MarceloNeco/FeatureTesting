@@ -71,6 +71,7 @@
   </div>
   <div id="tvRodape"><div id="tvCanto"></div><div id="tvTitulo"></div></div>
   <button id="tvSair" type="button" aria-label="Sair / Exit">✕</button>
+  <div id="tvSom"><button class="sec btMudo" id="localMudo" type="button" aria-pressed="false">🔊</button><button class="sec btMusica" id="localMusica" type="button" aria-pressed="false">🎵</button></div>
   <div id="tvLocalBar"><p id="dicaGire" class="muted" data-t="Fica melhor com o aparelho deitado 🔄|Better with the device in landscape 🔄">Fica melhor com o aparelho deitado 🔄</p>
     <div class="grupo" id="localModos">
       <button class="sec opt ativo" data-v="corta" type="button">🍉</button><button class="sec opt" data-v="pega" type="button">🎈</button><button class="sec opt" data-v="chuta" type="button">⚽</button><button class="sec opt" data-v="pula" type="button">🪵</button><button class="sec opt" data-v="bolas" type="button">🎳</button><button class="sec opt" data-v="mistura" type="button">🎪</button>
@@ -109,6 +110,7 @@
     <h2 data-t="Quem vai jogar|Who’s playing">Quem vai jogar</h2>
     <div id="lobbyJogadores" class="lobbyLista"></div>
     <div id="lobbyResumo" class="resumo"></div>
+    <p id="lobbyDica" class="dicaLobby"></p>
     <p class="muted" data-t="Escolha o modo no celular e toque em ▶ Começar (ou OK no controle da TV).|Pick the mode on the phone and tap ▶ Start (or OK on the TV remote).">Escolha o modo no celular e toque em ▶ Começar (ou OK no controle da TV).</p>
   </div>
 </div>
@@ -144,6 +146,8 @@
       <button class="big" id="btComecar" type="button">▶ <span data-t="Começar|Start">Começar</span></button>
       <button class="sec" id="btPausa" type="button" title="Pausar / continuar" style="flex:0 0 auto">⏸</button>
       <button class="sec" id="btParar" type="button" title="Parar" style="flex:0 0 auto">⏹</button>
+      <button class="sec btMudo" id="btMudo" type="button" aria-pressed="false" style="flex:0 0 auto">🔊</button>
+      <button class="sec btMusica" id="btMusica" type="button" aria-pressed="false" style="flex:0 0 auto">🎵</button>
     </div>
     <div class="row">
       <button class="sec" id="btPularCal" type="button" style="display:none" data-t="Pular a calibração|Skip calibration">Pular a calibração</button>

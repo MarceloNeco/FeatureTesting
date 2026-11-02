@@ -26,6 +26,10 @@ Endereço: `https://solverone.com.br/FeatureTesting/baguncolandia/` (atalho para
 **Música**: em 🎵 Música no celular, cole um link do YouTube (vídeo ou playlist); a TV toca num
 cantinho. Com tempo "🎵 a música", a rodada dura a música inteira.
 
+**Música do jogo e botões de som**: o jogo toca música o tempo todo, uma diferente a cada rodada (todas criadas
+pelo próprio jogo). **🔊** deixa tudo mudo (efeitos, música e voz); **🎵** liga ou desliga só a música. Ficam na coluna
+da direita nos modos sem TV e ao lado de ⏸ ⏹ no celular ligado à TV; a escolha fica guardada no aparelho.
+
 **Música da sala pelo microfone**: em 🎵 Música, toque em **🎤 Seguir a música da sala** e deixe o celular
 ouvir (ele pede o microfone uma vez). Toque qualquer música em qualquer aparelho: o jogo acelera no ritmo
 e as bordas da TV pulsam na batida. O som não sai do celular.
@@ -101,7 +105,7 @@ Tire uma foto dessa caixa e mande: é o que falta para achar o problema. O desen
 | `esqueleto.js` | esqueleto por IA (MediaPipe Pose em `libs/mediapipe/`, carregado só quando a pessoa liga); devolve 13 pontos espelhados |
 | `spotify.js` / `config.js` | Spotify como controle remoto (PKCE, sem segredo); `config.js` guarda só o Client ID público |
 | `sw.js` | cache da pasta; `VERSAO` tem de ser igual a `APP_VERSION` |
-| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js` e `voltar.test.js` (Chromium) |
+| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js`, `voltar.test.js` e `som.test.js` (Chromium) |
 
 Rodar os testes: `node --test baguncolandia/teste/*.test.js` e `node baguncolandia/teste/pagina.test.js`.
 

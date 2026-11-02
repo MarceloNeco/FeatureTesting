@@ -1,12 +1,14 @@
 /* Bagunçolândia — sons sintetizados no WebAudio (nenhum arquivo de áudio, nada com direito autoral).
-   Som.iniciar() num toque (o navegador exige gesto); Som.tocar(nome); Som.musica(true/false) é a
-   música de carregamento/lobby em laço (arpejo alegre + baixo + batida), também sintetizada. */
+   Som.iniciar() num toque (o navegador exige gesto); Som.tocar(nome); Som.musica(true/false, faixa) toca em laço
+   uma das FAIXAS (0 = carregamento/lobby; as outras, uma por rodada), também sintetizadas.
+   Som.mudo(v) cala tudo (efeitos e música); Som.semMusica(v) liga/desliga só a música; Som.abaixar(v) baixa a
+   música enquanto a voz explica (calibração). */
 (function (root) {
   'use strict';
-  var AC = root.AudioContext || root.webkitAudioContext, ctx = null, master = null, mudo = false, loop = null;
+  var AC = root.AudioContext || root.webkitAudioContext, ctx = null, master = null, mudo = false, loop = null, semMusica = false, desejada = null, baixo = false;
   function iniciar() {
     if (!AC) return false;
-    if (!ctx) { ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.5; master.connect(ctx.destination); }
+    if (!ctx) { ctx = new AC(); master = ctx.createGain(); master.gain.value = mudo ? 0 : 0.5; master.connect(ctx.destination); }
     if (ctx.state === 'suspended') ctx.resume().catch(function () {});
     return true;
   }
@@ -61,19 +63,38 @@
     for (var c = 0; c < 2; c++) { var d = b.getChannelData(c); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
     return b;
   }
-  function musica(ligar) {
+  /* As faixas são a mesma música-base com outro andamento, outro tom, outra ordem de acordes, outra batida e outro
+     timbre e desenho de melodia: soam como músicas diferentes sem nenhum arquivo. */
+  var FAIXAS = [
+    { bpm: 124, tom: 0, ordem: [0, 1, 2, 3], batida: 'reta', lead: 'triangle', desloc: 0 },     // 0: carregamento e "Quem vai jogar"
+    { bpm: 132, tom: 2, ordem: [2, 3, 0, 1], batida: 'reta', lead: 'square', desloc: 1 },
+    { bpm: 104, tom: -3, ordem: [0, 3, 1, 2], batida: 'balanco', lead: 'triangle', desloc: -1 },
+    { bpm: 140, tom: 5, ordem: [3, 0, 1, 2], batida: 'galope', lead: 'sawtooth', desloc: 0 },
+    { bpm: 116, tom: -5, ordem: [0, 2, 3, 1], batida: 'balanco', lead: 'square', desloc: 2 },
+    { bpm: 128, tom: 3, ordem: [2, 1, 3, 0], batida: 'galope', lead: 'triangle', desloc: -2 },
+    { bpm: 120, tom: 7, ordem: [0, 1, 3, 2], batida: 'reta', lead: 'sine', desloc: 1 }
+  ];
+  function volMusica() { return baixo ? 0.14 : 0.42; }
+  function parar() { if (loop) { clearInterval(loop.timer); try { loop.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.4); } catch (e) {} var velho = loop; setTimeout(function () { try { velho.g.disconnect(); } catch (e) {} }, 1500); loop = null; } }
+  function musica(ligar, faixa) {
     if (!ctx) return;
-    if (!ligar) { if (loop) { clearInterval(loop.timer); try { loop.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.4); } catch (e) {} var velho = loop; setTimeout(function () { try { velho.g.disconnect(); } catch (e) {} }, 1500); loop = null; } return; }
-    if (loop) return;
-    var g = ctx.createGain(); g.gain.value = 0.0001; g.connect(master); g.gain.setTargetAtTime(0.42, ctx.currentTime, 0.8);
+    if (!ligar) { desejada = null; parar(); return; }
+    desejada = (faixa >= 0 && faixa < FAIXAS.length) ? faixa : 0;
+    if (semMusica) return;
+    if (loop && loop.faixa === desejada) return;
+    parar(); tocarFaixa(desejada);
+  }
+  function tocarFaixa(fx) {
+    var F = FAIXAS[fx], k = Math.pow(2, F.tom / 12);
+    var g = ctx.createGain(); g.gain.value = 0.0001; g.connect(master); g.gain.setTargetAtTime(volMusica(), ctx.currentTime, 0.8);
     if (!reverb) { reverb = ctx.createConvolver(); reverb.buffer = impulso(); }
     var rev = ctx.createGain(); rev.gain.value = 0.22; reverb.connect(rev); rev.connect(g);
-    var delay = ctx.createDelay(1); delay.delayTime.value = 60 / 124 * 0.75; var fb = ctx.createGain(); fb.gain.value = 0.3; var dg = ctx.createGain(); dg.gain.value = 0.25;
+    var delay = ctx.createDelay(1); delay.delayTime.value = 60 / F.bpm * 0.75; var fb = ctx.createGain(); fb.gain.value = 0.3; var dg = ctx.createGain(); dg.gain.value = 0.25;
     delay.connect(fb); fb.connect(delay); delay.connect(dg); dg.connect(g);
     var padF = ctx.createBiquadFilter(); padF.type = 'lowpass'; padF.frequency.value = 1400; padF.Q.value = 0.7; var padG = ctx.createGain(); padG.gain.value = 0.16; padF.connect(padG); padG.connect(g); padG.connect(reverb);
     var bassF = ctx.createBiquadFilter(); bassF.type = 'lowpass'; bassF.frequency.value = 520; var bassG = ctx.createGain(); bassG.gain.value = 0.3; bassF.connect(bassG); bassG.connect(g);
     var leadG = ctx.createGain(); leadG.gain.value = 0.16; leadG.connect(g); leadG.connect(delay); leadG.connect(reverb);
-    var bpm = 124, semi = 60 / bpm / 4, t = ctx.currentTime + 0.1, passo = 0, melI = 0, melAte = 0;
+    var bpm = F.bpm, semi = 60 / bpm / 4, t = ctx.currentTime + 0.1, passo = 0, melI = 0, melAte = 0;
     function osc(tipo, f, t0, dur, dest, vol, detune, ataque) {
       var o = ctx.createOscillator(), e = ctx.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t0); if (detune) o.detune.value = detune;
       e.gain.setValueAtTime(0.0001, t0); e.gain.exponentialRampToValueAtTime(vol, t0 + (ataque || 0.01)); e.gain.setValueAtTime(vol, t0 + dur * 0.7); e.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
@@ -83,23 +104,29 @@
     function palma(t0) { for (var k = 0; k < 3; k++) ruidoEm(t0 + k * 0.012, 0.09, 0.28, 1900, g); ruidoEm(t0 + 0.03, 0.3, 0.12, 1500, reverb); }
     function chimbal(t0, forte) { ruidoEm(t0, forte ? 0.08 : 0.035, forte ? 0.12 : 0.07, 8000, g); }
     function ruidoEm(t0, dur, vol, f, dest) { var n = Math.floor(ctx.sampleRate * dur), b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n); var s = ctx.createBufferSource(), e = ctx.createGain(), fl = ctx.createBiquadFilter(); s.buffer = b; fl.type = f > 5000 ? 'highpass' : 'bandpass'; fl.frequency.value = f; fl.Q.value = 0.9; e.gain.value = vol; s.connect(fl); fl.connect(e); e.connect(dest); s.start(t0); }
-    loop = { g: g, timer: setInterval(function () {
+    loop = { g: g, faixa: fx, timer: setInterval(function () {
       while (t < ctx.currentTime + 0.5) {
-        var compasso = Math.floor(passo / 16) % 8, acorde = ACORDES[compasso % 4], semic = passo % 16, tempo = Math.floor(semic / 4), sub = semic % 4;
+        var compasso = Math.floor(passo / 16) % 8, grau = F.ordem[compasso % 4], acorde = ACORDES[grau], semic = passo % 16, tempo = Math.floor(semic / 4), sub = semic % 4;
         // bateria
-        if (sub === 0) bumbo(t);
-        if (sub === 0 && (tempo === 1 || tempo === 3)) palma(t);
+        if (F.batida === 'reta' ? sub === 0 : F.batida === 'balanco' ? (semic === 0 || semic === 6 || semic === 8 || semic === 14) : (sub === 0 || semic === 3 || semic === 11)) bumbo(t);
+        if (F.batida === 'balanco' ? (semic === 4 || semic === 12) : (sub === 0 && (tempo === 1 || tempo === 3))) palma(t);
         if (sub === 0 || sub === 2) chimbal(t, sub === 2);
         if (compasso === 7 && semic >= 12) ruidoEm(t, 0.08, 0.2, 2600, g);   // viradinha no fim da volta
         // baixo em colcheias, oitava acima nas colcheias fracas
-        if (sub === 0 || sub === 2) osc('sawtooth', BAIXO[compasso % 4] * (sub === 2 ? 2 : 1), t, semi * 1.8, bassF, 0.5, 0, 0.005);
+        if (sub === 0 || sub === 2) osc('sawtooth', BAIXO[grau] * k * (sub === 2 ? 2 : 1), t, semi * 1.8, bassF, 0.5, 0, 0.005);
         // pad: no início de cada tempo, pulsando (como um sidechain)
-        if (sub === 0) { var durP = semi * 3.6; acorde.forEach(function (f, k) { osc('sawtooth', f, t + 0.02, durP, padF, 0.08, -7, 0.03); osc('sawtooth', f, t + 0.02, durP, padF, 0.08, 7, 0.03); if (k === 0) osc('square', f / 2, t + 0.02, durP, padF, 0.05, 0, 0.03); }); }
+        if (sub === 0) { var durP = semi * 3.6; acorde.forEach(function (f, i) { f *= k; osc('sawtooth', f, t + 0.02, durP, padF, 0.08, -7, 0.03); osc('sawtooth', f, t + 0.02, durP, padF, 0.08, 7, 0.03); if (i === 0) osc('square', f / 2, t + 0.02, durP, padF, 0.05, 0, 0.03); }); }
         // melodia-gancho (começa na 2ª volta, para a introdução respirar)
-        if (passo >= 128 && t >= melAte) { var n = GANCHO[melI % GANCHO.length]; melI++; var durN = (n[0] === 0 && n.length === 3 ? n[2] : n[1]) * semi; if (n[0] !== 0) { osc('triangle', PENTA[n[0] - 1], t, durN * 0.95, leadG, 0.9, 0, 0.01); osc('square', PENTA[n[0] - 1] * 2, t, durN * 0.6, leadG, 0.18, 5, 0.01); } melAte = t + durN; }
+        if (passo >= 128 && t >= melAte) { var n = GANCHO[melI % GANCHO.length]; melI++; var durN = (n[0] === 0 && n.length === 3 ? n[2] : n[1]) * semi; if (n[0] !== 0) { var fm = PENTA[Math.max(0, Math.min(PENTA.length - 1, n[0] - 1 + F.desloc))] * k; osc(F.lead, fm, t, durN * 0.95, leadG, F.lead === 'triangle' || F.lead === 'sine' ? 0.9 : 0.35, 0, 0.01); osc('square', fm * 2, t, durN * 0.6, leadG, 0.18, 5, 0.01); } melAte = t + durN; }
         t += semi; passo++;
       }
     }, 120) };
   }
-  root.Som = { iniciar: iniciar, tocar: tocar, musica: musica, mudo: function (v) { if (v != null) mudo = !!v; return mudo; }, pronto: function () { return !!ctx; } };
+  function fixarMudo(v) { mudo = !!v; if (master) master.gain.setTargetAtTime(mudo ? 0 : 0.5, ctx.currentTime, 0.05); }
+  function fixarSemMusica(v) { semMusica = !!v; if (!ctx) return; if (semMusica) parar(); else if (desejada != null) { var d = desejada; desejada = null; musica(true, d); } }
+  function abaixar(v) { baixo = !!v; if (loop) loop.g.gain.setTargetAtTime(volMusica(), ctx.currentTime, 0.3); }
+  root.Som = { iniciar: iniciar, tocar: tocar, musica: musica, FAIXAS: FAIXAS.length, abaixar: abaixar,
+    mudo: function (v) { if (v != null) fixarMudo(v); return mudo; },
+    semMusica: function (v) { if (v != null) fixarSemMusica(v); return semMusica; },
+    pronto: function () { return !!ctx; } };
 })(typeof self !== 'undefined' ? self : this);

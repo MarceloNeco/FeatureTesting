@@ -6,10 +6,16 @@
       "data": "02/Nov/2026",
       "hora": "10:07:00",
       "pt": [
-        "Tela inicial mais clara: os botões ficam em duas caixas, \"Com a TV\" (Esta é a TV, Este é o celular) e \"Sem a TV\" (Jogar com o corpo, Jogar com o dedo), cada um com uma linha dizendo o que faz."
+        "Tela inicial mais clara: os botões ficam em duas caixas, \"Com a TV\" (Esta é a TV, Este é o celular) e \"Sem a TV\" (Jogar com o corpo, Jogar com o dedo), cada um com uma linha dizendo o que faz.",
+        "Música o tempo todo: toca na tela \"Quem vai jogar\" e durante o jogo, e cada rodada tem uma música diferente (são 7, todas criadas pelo próprio jogo). Enquanto a voz explica a calibração, a música fica baixinha.",
+        "Dois botões de som sempre à mão: 🔊 deixa tudo mudo (efeitos, música e voz; a legenda continua) e 🎵 liga ou desliga só a música. A escolha fica guardada no aparelho; no celular ligado à TV, vale também para a TV.",
+        "Tela \"Quem vai jogar\" nos modos sem TV: o ⏸ só aparece durante a rodada, os 6 modos cabem numa fileira só e, com 👥 2, aparecem os dois bonecos e a explicação de como duas pessoas jogam."
       ],
       "en": [
-        "Clearer start screen: the buttons sit in two boxes, \"With the TV\" (This is the TV, This is the phone) and \"Without the TV\" (Play with your body, Play with your finger), each with a line saying what it does."
+        "Clearer start screen: the buttons sit in two boxes, \"With the TV\" (This is the TV, This is the phone) and \"Without the TV\" (Play with your body, Play with your finger), each with a line saying what it does.",
+        "Music all the time: it plays on the \"Who’s playing\" screen and during the game, and each round has a different song (7 of them, all made by the game itself). While the voice explains calibration, the music goes quiet.",
+        "Two sound buttons always at hand: 🔊 mutes everything (effects, music and voice; captions stay) and 🎵 turns only the music on or off. The choice is saved on the device; on a phone linked to the TV, it applies to the TV too.",
+        "\"Who’s playing\" screen in the no-TV modes: ⏸ only shows during a round, the 6 modes fit in one row and, with 👥 2, both avatars show with an explanation of how two people play."
       ]
     },
     {
