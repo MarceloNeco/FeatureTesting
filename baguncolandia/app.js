@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.15', APP_UPDATED = '02/11/2026';
+  var APP_VERSION = '0.8.16', APP_UPDATED = '02/11/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -167,7 +167,7 @@
       function comBonecos(d, chave) { var w = document.createElement('div'); w.className = 'bonecos'; var n = tv.cfg.jogadores === 2 && (tv.local || tv.cfg.celulares === 1) ? 2 : 1; for (var k = 0; k < n; k++) { var cv = document.createElement('canvas'); cv.width = 120; cv.height = 160; cv.setAttribute('data-boneco', chave + ':' + k); w.appendChild(cv); animarBoneco(cv, bonecoDe(chave, k)); } d.appendChild(w); }
       function umBoneco(d, chave, k) { var w = document.createElement('div'); w.className = 'bonecos'; var cv = document.createElement('canvas'); cv.width = 120; cv.height = 160; cv.setAttribute('data-boneco', chave + ':' + k); w.appendChild(cv); animarBoneco(cv, bonecoDe(chave, k)); d.appendChild(w); }
       var dois = tv.local && tv.cfg.jogadores === 2;
-      if (tv.local) for (var q = 0; q < (dois ? 2 : 1); q++) { var dq = document.createElement('div'); dq.className = 'jog'; dq.style.setProperty('--cor', cores[q]); umBoneco(dq, 'local', q); var nq = document.createElement('span'); if (q === 1) nq.id = 'lobbyNomeJ2'; nq.textContent = q === 0 ? (tv.nome1 || T('Você', 'You')) : (tv.nome2 || T('2ª pessoa', '2nd player')); dq.appendChild(nq); L.appendChild(dq); }
+      if (tv.local) for (var q = 0; q < (dois ? 2 : 1); q++) { var dq = document.createElement('div'); dq.className = 'jog'; dq.style.setProperty('--cor', cores[q]); umBoneco(dq, 'local', q); dq.classList.add('trocavel'); dq.title = T('Toque para trocar o boneco', 'Tap to change the avatar'); dq.onclick = (function (qq) { return function () { CelApp.trocarBoneco(qq); }; })(q); var nq = document.createElement('span'); if (q === 1) nq.id = 'lobbyNomeJ2'; nq.textContent = q === 0 ? (tv.nome1 || T('Você', 'You')) : (tv.nome2 || T('2ª pessoa', '2nd player')); dq.appendChild(nq); L.appendChild(dq); }
       $('lobbyNome2').style.display = dois ? '' : 'none';
       if (dois) { $('nome2').value = tv.nome2; if (!tv.nome2) setTimeout(function () { $('nome2').focus(); }, 300); }
       tv.jog.forEach(function (j, i) {
@@ -290,7 +290,7 @@
       var figs = Figuras.lista(tv.cfg.turmas);
       if (!figs.some(function (f) { return f.papel === 'fruta'; })) figs = Figuras.lista();   // sem fruta nenhuma não dá para cortar
       var nCasas = window.Casa ? Casa.CENAS.length : 3; tv.casaN = tv.casaN == null ? Math.floor(Math.random() * nCasas) : (tv.casaN + 1) % nCasas;   // 🧸 Bagunça: cada rodada num lugar (sala, quarto, jardim, cozinha, banheiro, parquinho)
-      tv.partida = Bagunca.criarPartida({ modo: tv.cfg.modo, jogadores: tv.cfg.jogadores, duracao: tv.cfg.duracao, dificuldade: tv.cfg.dificuldade, figuras: figs, cenaCasa: window.Casa ? Casa.CENAS[tv.casaN] : null });
+      tv.partida = Bagunca.criarPartida({ modo: tv.cfg.modo, jogadores: tv.cfg.jogadores, duracao: tv.cfg.duracao, dificuldade: tv.cfg.dificuldade, figuras: figs, cenaCasa: window.Casa ? Casa.CENAS[tv.casaN] : null, dicas: dicasLigadas() });
       Object.keys(tv.caixas).forEach(function (j) { var c = tv.caixas[j]; if (c) { tv.partida.zonaChute(+j, Math.min(0.95, c.y + c.h * 0.6)); tv.partida.calibrar(+j, c); } });
       if (tv.toque) { tv.dedoCorpo = {}; for (var jt = 0; jt < tv.cfg.jogadores; jt++) { tv.partida.calibrar(jt, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }); tv.partida.corpo(jt, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }, performance.now()); } }
       Desenho.limpar(); Desenho.ambiente(tv.cfg.ambiente, tv.cfg.cena);
@@ -415,9 +415,10 @@
       $('localPausa').onclick = function () { comando({ acao: 'pausar' }); };
       $('localMudo').onclick = function () { aplicarSom(!SOM.mudo, SOM.semMusica); };
       $('casaAnt').onclick = function () { comando({ acao: 'casa', dir: -1 }); };
-      $('casaDica').onclick = function () { if (tv.partida && tv.partida.dica) tv.partida.dica(); };
+      $('casaDica').onclick = function () { var v = !dicasLigadas(); try { localStorage.setItem('bagunca:dicas', v ? '1' : '0'); } catch (e) {} if (tv.partida && tv.partida.dicas) tv.partida.dicas(v); botaoDica(); };   // 💡 liga e desliga as dicas (fica guardado)
+      botaoDica();
       // 🧹 depois do 🧸 Bagunça: a mesma bagunça (em todos os cômodos que visitaram) vira arrumação
-      $('localArrumar').onclick = function () { if (!tv.partida || !tv.partida.arrumar || tv.fase !== 'fim') return; tv.partida.arrumar(); tv.arrumando = true; tv.podio = null; tv.fase = 'jogando'; $('tv').classList.remove('podearrumar'); Desenho.legenda(null); navCasa(); };
+      $('localArrumar').onclick = function () { if (!tv.partida || !tv.partida.arrumar || tv.fase !== 'fim') return; tv.partida.arrumar(); if (tv.partida.dicas) tv.partida.dicas(dicasLigadas()); tv.arrumando = true; tv.podio = null; tv.fase = 'jogando'; $('tv').classList.remove('podearrumar'); Desenho.legenda(null); navCasa(); };
       $('casaProx').onclick = function () { comando({ acao: 'casa', dir: 1 }); };
       $('nome2').addEventListener('input', function () { tv.nome2 = $('nome2').value.replace(/\s+/g, ' ').trim().slice(0, 14); try { localStorage.setItem('bagunca:nome2', tv.nome2); } catch (e) {} var c = $('lobbyNomeJ2'); if (c) c.textContent = tv.nome2 || T('2ª pessoa', '2nd player'); });
       $('localMusica').onclick = function () { aplicarSom(SOM.mudo, !SOM.semMusica); };
@@ -462,6 +463,8 @@
       }
       cv.addEventListener('pointerup', solta); cv.addEventListener('pointercancel', solta);
     }
+    function dicasLigadas() { try { return localStorage.getItem('bagunca:dicas') !== '0'; } catch (e) { return true; } }
+    function botaoDica() { var v = dicasLigadas(); $('casaDica').classList.toggle('ativo', v); $('casaDica').querySelector('span').textContent = v ? T('Dicas: sim', 'Hints: on') : T('Dicas: não', 'Hints: off'); }
     function sairLocal() {
       dedos = {}; tv.dedoCorpo = {}; tv.toque = false; $('tv').classList.remove('toque');
       cancelAnimationFrame(tv.raf); tv.raf = 0; tv.partida = null; tv.fase = 'carregando'; Som.musica(false); Desenho.legenda(null);
@@ -639,7 +642,7 @@
         return g;
       }
       var prev = document.createElement('div'); prev.className = 'previa'; var cv = document.createElement('canvas'); cv.width = 300; cv.height = 400; prev.appendChild(cv); container.appendChild(prev);
-      var quem = linha(T('Quem', 'Who')); grupo(quem, [{ v: 0, t: T('Boneco 1', 'Avatar 1') }, { v: 1, t: T('Boneco 2', 'Avatar 2') }], function () { return cel.quem; }, function (v) { cel.quem = v; montarPicker(container); }, 'grupo quem');
+      var quem = linha(T('Quem', 'Who')); grupo(quem, [{ v: 0, t: T('👤 1ª pessoa', '👤 1st player') }, { v: 1, t: T('👥 2ª pessoa (quando jogam 2)', '👥 2nd player (when 2 play)') }], function () { return cel.quem; }, function (v) { cel.quem = v; montarPicker(container); }, 'grupo quem');
       var atual = function () { return cel.bonecos[cel.quem]; };
       function muda(k, v) {
         atual()[k] = v;
@@ -754,7 +757,12 @@
     $('linhaCelulares').style.display = 'none';
     try { if (localStorage.getItem('bagunca:esqueleto') === '1') setTimeout(function () { if (!cel.esqueleto) { Esqueleto.carregar().then(function () { cel.esqueleto = true; $('btEsqueleto').classList.add('ativo'); if (cel.local) TVApp.tv.esqueletoLigado = true; }).catch(function () {}); } }, 1500); } catch (e) {}
     desenharHist();
-    return { entrar: entrar, sair: sair, trocarCameraLocal: trocarCameraLocal, cel: cel };
+    /* tocar no cartão do lobby (sem TV): volta para "Meu boneco" já aberto na pessoa certa */
+    function trocarBoneco(q) {
+      history.back(); cel.quem = q;
+      setTimeout(function () { var d = $('bonecoEntrar'); d.open = true; montarPicker(d.querySelector('.picker')); d.scrollIntoView({ block: 'start' }); }, 250);
+    }
+    return { entrar: entrar, sair: sair, trocarCameraLocal: trocarCameraLocal, cel: cel, trocarBoneco: trocarBoneco };
   })();
 
   /* ---------- papel ---------- */

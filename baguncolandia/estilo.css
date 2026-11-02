@@ -119,6 +119,8 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #tv.local #tvLobby .muted { display: none; }
 #tv.local .lobbyLista .jog { font-size: 1.1rem; padding: .5rem 1.2rem; min-width: 0; border-width: 2px; box-shadow: 0 0 1rem var(--cor, #fff); }
 #tv.local .lobbyLista .jog small { font-size: .8rem; }
+#tv.local .lobbyLista .jog.trocavel { cursor: pointer; position: relative; }
+#tv.local .lobbyLista .jog.trocavel::after { content: "✏️"; position: absolute; top: .3rem; right: .4rem; font-size: 1rem; }
 #tv.local .resumo { font-size: .95rem; padding: .5rem .9rem; }
 #tv.local #tvCarregando { padding-bottom: 3rem; }
 #tv.local .melancia { width: 24vh; height: 24vh; }
@@ -213,7 +215,8 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #tv.local.casa.jogando #casaNav { display: flex; }
 #casaNav button { pointer-events: auto; background: rgba(0,0,0,.55); color: #fff; border: 2px solid rgba(255,255,255,.4); border-radius: 999px; padding: .35rem .9rem; font-size: 1rem; min-height: 44px; }
 /* 🧹 arrumação: dica no meio das setinhas; botão para arrumar depois da bagunça; o modo só no jogo com o dedo */
-#casaDica { display: none; }
+#casaDica { display: none; margin-left: auto; margin-right: .6rem; }   /* 💡 junto do ▶: o chão do meio fica para as caixas */
+#casaDica:not(.ativo) { opacity: .7; }
 #tv.arrumando #casaDica { display: inline-block; }
 #localArrumar { display: none; flex: 1 1 100%; background: var(--ouro); color: #1a1446; }
 #tv.podearrumar:not(.jogando) #localArrumar { display: block; }
