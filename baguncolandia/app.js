@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.11', APP_UPDATED = '02/11/2026';
+  var APP_VERSION = '0.8.12', APP_UPDATED = '02/11/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -184,7 +184,7 @@
       requestAnimationFrame(vivo);
     }
     function resumo() {
-      var c = tv.cfg, m = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), pula: T('🪵 Pula e abaixa', '🪵 Jump and duck'), bolas: T('🎳 Bagunça de bolas', '🎳 Ball mayhem'), mistura: T('🎪 Bagunça total', '🎪 Total mayhem'), bagunca: T('🧸 Bagunça (sala, quarto ou jardim)', '🧸 Mayhem (living room, bedroom or garden)') }[c.modo] || '';
+      var c = tv.cfg, m = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), pula: T('🪵 Pula e abaixa', '🪵 Jump and duck'), bolas: T('🎳 Bagunça de bolas', '🎳 Ball mayhem'), mistura: T('🎪 Bagunça total', '🎪 Total mayhem'), bagunca: T('🧸 Bagunça na casa (6 lugares)', '🧸 House mayhem (6 places)') }[c.modo] || '';
       var d = c.duracao ? (c.duracao >= 120 ? '2 min' : c.duracao + ' s') : T('🎵 a música inteira', '🎵 the whole song');
       var n = { crianca: T('Criança', 'Kids'), normal: 'Normal', maluco: T('Maluco', 'Crazy') }[c.dificuldade];
       var amb = c.ambiente === 'paisagem' ? T('🏞️ paisagem', '🏞️ landscape') : T('📷 câmera', '📷 camera');
@@ -283,7 +283,7 @@
     function rodada() {
       var figs = Figuras.lista(tv.cfg.turmas);
       if (!figs.some(function (f) { return f.papel === 'fruta'; })) figs = Figuras.lista();   // sem fruta nenhuma não dá para cortar
-      tv.casaN = tv.casaN == null ? Math.floor(Math.random() * 3) : (tv.casaN + 1) % 3;   // 🧸 Bagunça: cada rodada num lugar (sala, quarto, jardim)
+      var nCasas = window.Casa ? Casa.CENAS.length : 3; tv.casaN = tv.casaN == null ? Math.floor(Math.random() * nCasas) : (tv.casaN + 1) % nCasas;   // 🧸 Bagunça: cada rodada num lugar (sala, quarto, jardim, cozinha, banheiro, parquinho)
       tv.partida = Bagunca.criarPartida({ modo: tv.cfg.modo, jogadores: tv.cfg.jogadores, duracao: tv.cfg.duracao, dificuldade: tv.cfg.dificuldade, figuras: figs, cenaCasa: window.Casa ? Casa.CENAS[tv.casaN] : null });
       Object.keys(tv.caixas).forEach(function (j) { var c = tv.caixas[j]; if (c) { tv.partida.zonaChute(+j, Math.min(0.95, c.y + c.h * 0.6)); tv.partida.calibrar(+j, c); } });
       if (tv.toque) { tv.dedoCorpo = {}; for (var jt = 0; jt < tv.cfg.jogadores; jt++) { tv.partida.calibrar(jt, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }); tv.partida.corpo(jt, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }, performance.now()); } }
@@ -324,6 +324,7 @@
     }
     var somAte = {};
     function som(ev) {
+      if (ev.t === 'casa' && ev.fala) { var ag2 = performance.now(); if (ag2 > (somAte.fala || 0)) { somAte.fala = ag2 + 2500; dizer(ev.fala[0], ev.fala[1]); } }   // papagaio e a mamãe falam (com legenda)
       if (ev.t === 'casa') { if (!ev.som) return; var agora = performance.now(); if (agora < (somAte[ev.som] || 0)) return; somAte[ev.som] = agora + (ev.silencioso ? 120 : 60); Som.tocar(ev.som); return; }   // 🧸 Bagunça: um som por coisa (sem embolar)
       if (ev.t === 'bagunca100') { Som.tocar('fim'); dizer('Bagunça total!', 'Total mayhem!'); return; }
       if (ev.t === 'corte') Som.tocar('corte');

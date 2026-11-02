@@ -2,6 +2,21 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.12",
+      "data": "02/Nov/2026",
+      "hora": "12:45:00",
+      "pt": [
+        "🧸 Bagunça agora tem 6 lugares: sala, quarto, jardim e os novos cozinha (geladeira que abre, torneira com água, panelas e tampas que rolam), banheiro (bolhas de sabão para estourar, patinhos, toalhas e o papel higiênico que desenrola pelo chão) e parquinho (escorregador, gangorra, castelo de areia, bambolê).",
+        "Bichos: o Picolé (cavachon branquinho) está em todo lugar; o gato dorme, mia, pula de prateleira em prateleira e derruba coisas; o papagaio fala e sai voando; a tartaruga anda devagarinho e se esconde no casco; passarinhos no jardim e no parquinho.",
+        "Nos últimos segundos, a mamãe vem chegando... e no fim: \"Que bagunça é essa?!\""
+      ],
+      "en": [
+        "🧸 Mayhem now has 6 places: living room, bedroom, garden and the new kitchen (fridge that opens, running tap, pots and rolling lids), bathroom (soap bubbles to pop, rubber ducks, towels and toilet paper unrolling across the floor) and playground (slide, seesaw, sandcastle, hula hoop).",
+        "Animals: Picolé (the white cavachon) is everywhere; the cat sleeps, meows, jumps from shelf to shelf and knocks things over; the parrot talks and flies around; the turtle walks slowly and hides in its shell; birds in the garden and playground.",
+        "In the last seconds, Mom is coming... and at the end: \"What is this mess?!\""
+      ]
+    },
+    {
       "versao": "0.8.11",
       "data": "02/Nov/2026",
       "hora": "12:14:00",

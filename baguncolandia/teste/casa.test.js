@@ -69,3 +69,47 @@ test('o jogo aceita o modo bagunca pela mensagem do celular', () => {
   const v = Bagunca.validar({ t: 'cmd', id: 'abc12345', acao: 'config', modo: 'bagunca' });
   assert.ok(v && v.modo === 'bagunca');
 });
+
+test('seis lugares, cada um com os seus bichos', () => {
+  assert.deepStrictEqual(Casa.CENAS, ['sala', 'quarto', 'jardim', 'cozinha', 'banheiro', 'parquinho']);
+  const bichos = (c) => { const M = partida(c).estado().casa; return ['cachorro', 'gato', 'papagaio', 'tartaruga', 'passaros'].filter((k) => M[k]); };
+  assert.deepStrictEqual(bichos('sala'), ['cachorro', 'gato', 'papagaio', 'tartaruga']);
+  assert.deepStrictEqual(bichos('cozinha'), ['cachorro', 'gato', 'papagaio']);
+  assert.ok(bichos('parquinho').includes('tartaruga') && bichos('parquinho').includes('passaros'));
+  for (const c of Casa.CENAS) assert.ok(partida(c).estado().casa.obs.length >= 20, c + ' com poucas coisas');
+});
+
+test('cozinha: geladeira abre, torneira liga; banheiro: bolhas e papel desenrolando; parquinho: castelo desmorona', () => {
+  let p = partida('cozinha'), M = p.estado().casa;
+  p.movimento(0, [[(M.geladeira.x + 90) / 1280, (M.geladeira.y + 300) / 720, 100]], 1000); correr(p, 1500);
+  assert.ok(M.geladeira.abre > 0.9, 'a geladeira não abriu');
+  p.movimento(0, [[M.torneira.x / 1280, M.torneira.y / 720, 100]], 5000); correr(p, 50);
+  assert.strictEqual(M.torneira.ligada, true, 'a torneira não ligou');
+  p = partida('banheiro'); M = p.estado().casa;
+  p.movimento(0, [[300 / 1280, 480 / 720, 100]], 1000); correr(p, 300);
+  assert.ok(M.banheira.bolhas.length >= 5, 'sem bolhas');
+  passar(p, [1120, 400], [1240, 380], 3000); correr(p, 3000);
+  assert.ok(M.papel.pts.length >= 5, 'o papel não desenrolou');
+  p = partida('parquinho'); M = p.estado().casa;
+  p.movimento(0, [[M.castelo.x / 1280, (M.castelo.y - 50) / 720, 100]], 1000); correr(p, 50);
+  assert.strictEqual(M.castelo.inteiro, false, 'o castelo não desmoronou');
+});
+
+test('gato mia e pula; papagaio fala e voa; tartaruga se esconde', () => {
+  const p = partida('sala'), M = p.estado().casa;
+  p.movimento(0, [[M.gato.x / 1280, (M.gato.y - 25) / 720, 100]], 1000); correr(p, 100);
+  assert.ok(M.gato.salto || M.gato.miau > 0, 'o gato não reagiu');
+  p.movimento(0, [[M.papagaio.x / 1280, M.papagaio.y / 720, 100]], 3000); correr(p, 100);
+  assert.ok(M.papagaio.voa > 0 && M.papagaio.fala > 0, 'o papagaio não voou nem falou');
+  p.movimento(0, [[M.tartaruga.x / 1280, (M.chao - 20) / 720, 100]], 6000); correr(p, 50);
+  assert.ok(M.tartaruga.esconde > 0, 'a tartaruga não se escondeu');
+  assert.ok(p.eventos().some((e) => e.fala), 'o papagaio não disse nada');
+});
+
+test('nos últimos segundos a mamãe chega e, no fim, vê a bagunça', () => {
+  const p = Casa.criar({ cenaCasa: 'quarto', duracao: 10 }); p.comecar();
+  correr(p, 5000); assert.ok(p.estado().casa.mae, 'a mamãe não apareceu');
+  correr(p, 6000); const M = p.estado().casa;
+  assert.ok(M.mae.viu, 'a mamãe não viu a bagunça');
+  assert.ok(p.eventos().some((e) => e.som === 'mamae'));
+});
