@@ -34,8 +34,8 @@
   }
 
   // ---------- música: a "rádio" do jogo ----------
-  /* Toca as 26 músicas gravadas (musicas/*.mp3: Kevin MacLeod, CC BY 4.0, SuperTuxKart, CC BY-SA, e HoliznaCC0,
-     CC0; créditos em musicas/LICENCAS.md) e, de vez em quando, uma das de rock feitas pelo rock.js. Tocam sem parar, uma depois da outra.
+  /* Toca as 36 músicas gravadas (musicas/*.mp3: Kevin MacLeod e Anthem of Rain, CC BY 4.0, SuperTuxKart, CC BY-SA,
+     e HoliznaCC0, CC0; créditos em musicas/LICENCAS.md) e, de vez em quando, uma das de rock feitas pelo rock.js. Tocam sem parar, uma depois da outra.
      Sem a gravada (sem internet e ainda não guardada, ou no arquivo baixado), pula para a próxima.
      Um único <audio> para tudo (o iPhone só deixa tocar o elemento que já tocou depois de um toque). */
   var GRAVADAS = [
@@ -66,7 +66,18 @@
     { url: 'musicas/holizna-punk.mp3', nome: 'Rock Montage: Punk', autor: 'HoliznaCC0', licenca: 'CC0' },
     { url: 'musicas/holizna-americana.mp3', nome: 'Rock Montage: Americana', autor: 'HoliznaCC0', licenca: 'CC0' },
     { url: 'musicas/holizna-grunge.mp3', nome: 'Rock Montage: Grunge', autor: 'HoliznaCC0', licenca: 'CC0' },
-    { url: 'musicas/holizna-classic.mp3', nome: 'Rock Montage: Classic', autor: 'HoliznaCC0', licenca: 'CC0' }
+    { url: 'musicas/holizna-classic.mp3', nome: 'Rock Montage: Classic', autor: 'HoliznaCC0', licenca: 'CC0' },
+    // 1.4.0: mais 10 rocks animados: 4 da banda Anthem of Rain (instrumentais, CC BY 4.0), 1 do HoliznaCC0 (CC0) e 5 do Kevin MacLeod
+    { url: 'musicas/anthem-rock-this-house.mp3', nome: 'Rock This House', autor: 'Anthem of Rain', licenca: 'CC BY 4.0' },
+    { url: 'musicas/anthem-bad-nostalgia.mp3', nome: 'Bad Nostalgia', autor: 'Anthem of Rain', licenca: 'CC BY 4.0' },
+    { url: 'musicas/anthem-so-my-love.mp3', nome: 'So My Love', autor: 'Anthem of Rain', licenca: 'CC BY 4.0' },
+    { url: 'musicas/anthem-leave-the-country.mp3', nome: 'Leave the Country', autor: 'Anthem of Rain', licenca: 'CC BY 4.0' },
+    { url: 'musicas/holizna-way-of-the-samurai.mp3', nome: 'Way of the Samurai', autor: 'HoliznaCC0', licenca: 'CC0' },
+    { url: 'musicas/retrofuture-clean.mp3', nome: 'RetroFuture Clean', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/zap-beat.mp3', nome: 'Zap Beat', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/el-magicia.mp3', nome: 'El Magicia', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/gearhead.mp3', nome: 'Gearhead', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/bet-you-can-2.mp3', nome: 'Bet You Can (ver 2)', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' }
   ];
   var lista = [], atual = -1, audio = null, aoTrocar = null, falhas = 0;
   // as gravadas em ordem sorteada (cada vez que abre o jogo começa por uma diferente) e, de 8 em 8 gravadas,

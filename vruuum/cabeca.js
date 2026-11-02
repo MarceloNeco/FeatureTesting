@@ -94,7 +94,7 @@
      giro, a pele é colada numa esfera, ponto a ponto: cada ponto vai para onde estaria numa bola girando
      (o rosto entra pelo lado, encolhendo perto da borda; o que passa para trás some).
      O contorno continua redondo o tempo todo — nada de "folha de papel virando". Orelhas, chapéus e
-     tranças (o que fica fora da bola) trocam suavemente de um lado para o outro. Luz e sombra ficam
+     tranças (o que fica fora da bola) são os das costas e ficam firmes; a bola é sempre cheia. Luz e sombra ficam
      paradas por cima, como numa bola de verdade. */
   var TS = 192, R0 = TS / 2 / 1.9;
   var peles = {}, nPeles = 0, nFoto = 0, rascunho = null;
@@ -119,6 +119,19 @@
     c.fillStyle = 'rgba(255,255,255,.12)'; c.beginPath(); c.moveTo(-r * 0.7, -r * 0.3); c.lineTo(-r * 0.2, -r * 0.5); c.lineTo(-r * 0.5, r * 0.5); c.closePath(); c.fill();
     c.restore();
   }
+  // a cor que mais aparece dentro da bola (cabelo, pelo, capacete), para tapar os buracos do desenho
+  function corMaisComum(cv) {
+    var px = cv.getContext('2d').getImageData(0, 0, TS, TS).data, conta = {}, melhor = null, max = 0;
+    for (var y = 0; y < TS; y += 2) for (var x = 0; x < TS; x += 2) {
+      var dx = x - TS / 2, dy = y - TS / 2; if (dx * dx + dy * dy > R0 * R0) continue;
+      var i = (y * TS + x) * 4; if (px[i + 3] < 200) continue;
+      var k = (px[i] >> 4) + ',' + (px[i + 1] >> 4) + ',' + (px[i + 2] >> 4);
+      conta[k] = (conta[k] || 0) + 1; if (conta[k] > max) { max = conta[k]; melhor = k; }
+    }
+    if (!melhor) return '#888';
+    var q = melhor.split(',');
+    return 'rgb(' + (q[0] * 16 + 8) + ',' + (q[1] * 16 + 8) + ',' + (q[2] * 16 + 8) + ')';
+  }
   // pele de um lado ('costas' ou 'frente'); com capacete (cor), a pele é o capacete. null se a foto ainda não carregou
   function pele(info, lado, capCor) {
     var k = lado + '|' + idPiloto(info) + '|' + (capCor || '');
@@ -130,12 +143,19 @@
     else if (capCor) { var rosto = pele(info, 'frente'); if (!rosto) return null; capaceteFrente(c, R0, capCor, rosto.tudo); }
     else if (lado === 'costas') costas(c, 0, 0, R0 * 2, info.emoji, info.foto, null, info.personagem);
     else frente(c, 0, 0, R0 * 2, info.emoji, info.foto, info.personagem);
-    var dentro = tela(TS, TS), d = dentro.getContext('2d');   // só a bola
-    d.beginPath(); d.arc(TS / 2, TS / 2, R0, 0, Math.PI * 2); d.clip(); d.drawImage(tudo, 0, 0);
+    // só a bola, sem buracos: o que o desenho não cobre ganha a cor de cabelo/pelo das costas (senão, no giro,
+    // aparecia o que estava atrás da cabeça e ela ficava "oca")
+    var base = lado === 'costas' ? corMaisComum(tudo) : (pele(info, 'costas', capCor) || {}).base || '#888';
+    var dentro = tela(TS, TS), d = dentro.getContext('2d');
+    d.beginPath(); d.arc(TS / 2, TS / 2, R0, 0, Math.PI * 2); d.clip(); d.fillStyle = base; d.fill(); d.drawImage(tudo, 0, 0);
     var fora = tela(TS, TS), f = fora.getContext('2d');   // só o que sai da bola (orelhas, chapéu...)
     f.drawImage(tudo, 0, 0); f.globalCompositeOperation = 'destination-out'; f.beginPath(); f.arc(TS / 2, TS / 2, R0 * 0.99, 0, Math.PI * 2); f.fill();
     if (++nPeles > 80) { peles = {}; nPeles = 1; }
-    peles[k] = { tudo: tudo, dentro: dentro, fora: fora, dados: d.getImageData(0, 0, TS, TS).data };
+    // para o giro: a mesma bola com uma borda extra da cor de cabelo, para o ponto lido bem na beirada não
+    // misturar com o vazio (fazia uma risca escura no meio do giro)
+    var am = tela(TS, TS), ac = am.getContext('2d');
+    ac.fillStyle = base; ac.beginPath(); ac.arc(TS / 2, TS / 2, R0 + 4, 0, Math.PI * 2); ac.fill(); ac.drawImage(dentro, 0, 0);
+    peles[k] = { tudo: tudo, dentro: dentro, fora: fora, base: base, dados: ac.getImageData(0, 0, TS, TS).data };
     return peles[k];
   }
   // cola as duas peles numa esfera de raio r, girada de "giro", ponto a ponto (sem emendas): para cada
@@ -179,9 +199,10 @@
     if (!rascunho || rascunho.width < M) rascunho = tela(Math.max(M, 64), Math.max(M, 64));
     var s = rascunho.getContext('2d'), o = M / 2;
     s.setTransform(1, 0, 0, 1, 0, 0); s.globalCompositeOperation = 'source-over'; s.globalAlpha = 1; s.clearRect(0, 0, M + 2, M + 2);
-    var cg = Math.cos(giro), wc = Math.max(0, Math.min(1, (cg + 0.25) / 0.5)), lado = TS * esc;
-    if (wc > 0) { s.globalAlpha = wc; s.drawImage(pc.fora, o - lado / 2, o - lado / 2, lado, lado); }
-    if (wc < 1) { s.globalAlpha = 1 - wc; s.drawImage(pf.fora, o - lado / 2, o - lado / 2, lado, lado); }
+    // o que sai da bola (chapéu, orelhas, tranças) é o das costas e fica firme: misturar com o da frente
+    // fazia um "aro" fantasma em volta da cabeça no meio do giro
+    var cg = Math.cos(giro), lado = TS * esc;
+    s.drawImage(pc.fora, o - lado / 2, o - lado / 2, lado, lado);
     s.globalAlpha = 1;
     if (Math.abs(Math.sin(giro)) < 1e-3) { var pl = cg > 0 ? pc : pf; s.drawImage(pl.dentro, o - lado / 2, o - lado / 2, lado, lado); }   // parado: a pele direto
     else { var N = bolaGirada(pc, pf, giro, r); s.drawImage(bolaCv, 0, 0, N, N, o - N / 2, o - N / 2, N, N); }
@@ -217,7 +238,7 @@
       var tw = 1 - 0.14 * Math.abs(Math.sin(e.giro));
       elipse(c, cx + Math.sin(e.giro) * r * 0.12, cy + r * 1.55, r * 1.5 * tw, r * 0.85, 0, info.camisa || '#3a2f73');
     }
-    cabeca3d(c, cx, cy, r, pc, pf, e.giro, inclina, v.aberto ? 0.32 : v.capacete ? 0 : 0.14);
+    cabeca3d(c, cx, cy, r, pc, pf, e.giro, inclina, v.aberto ? 0.22 : v.capacete ? 0 : 0.14);
     c.restore();
     if (e.sorriso > 0) brilhinho(c, cx, cy, r, e.sorriso);
     if (!v.capacete && !v.aberto) {   // reflexo do vidro por cima
