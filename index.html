@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>FeatureTesting — Laboratório de Features</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-180.png">
+<meta name="theme-color" content="#0f1115">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FeatureTesting">
 <style>
 :root{
   --bg:#0f1115; --card:#1a1d24; --card-hover:#22262f;
@@ -36,6 +43,14 @@ a.card:hover{background:var(--card-hover);border-color:var(--accent);transform:t
   header p{font-size:.85rem}
   main{padding-top:16px}
 }
+/* instalar como app e tela cheia */
+.acoes{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.acoes button{min-height:44px;padding:8px 16px;border-radius:22px;border:1px solid var(--border);
+  background:var(--accent-soft);color:var(--text);font-size:.9rem;font-weight:600;cursor:pointer}
+.acoes button:hover{border-color:var(--accent)}
+.passos{max-width:560px;margin:0 auto 16px;text-align:left;background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:14px 16px;font-size:.9rem;line-height:1.5}
+.passos ol{margin:8px 0 0;padding-left:20px}
 footer{text-align:center;color:var(--muted);font-size:.8rem;padding:20px;border-top:1px solid var(--border)}
 footer a{color:var(--accent);text-decoration:none}
 </style>
@@ -45,14 +60,19 @@ footer a{color:var(--accent);text-decoration:none}
 <header>
   <h1>🧪 Feature<span>Testing</span></h1>
   <p>Laboratório de experimentos — cada card é uma feature que roda direto no navegador</p>
+  <div class="acoes">
+    <button type="button" id="btInstalar">📲 Instalar como app</button>
+    <button type="button" id="btTela" hidden>⛶ Tela cheia</button>
+  </div>
 </header>
 
 <main>
+  <div class="passos" id="passos" hidden aria-live="polite"></div>
   <div class="grid" id="grid"></div>
 </main>
 
 <footer>
-  <a href="https://github.com/SEUUSUARIO/FeatureTesting" target="_blank">repositório no GitHub</a> · atualizado em 31/10/2026
+  <a href="https://github.com/SEUUSUARIO/FeatureTesting" target="_blank">repositório no GitHub</a> · atualizado em 02/11/2026
 </footer>
 
 <script>
@@ -208,6 +228,93 @@ FEATURES.forEach(f => {
     '<span class="tag ' + f.status + '">' + (f.status === 'ativo' ? '✅ testar' : '🚧 em breve') + '</span>';
   grid.appendChild(a);
 });
+</script>
+<script>
+/* Instalar como app (ícone na tela inicial do celular/tablet ou no computador) e tela cheia.
+   Chrome, Edge e Samsung Internet oferecem o pedido de instalação (beforeinstallprompt); nos outros
+   (iPhone/iPad, Safari do Mac, Firefox) o botão mostra o passo a passo do próprio navegador.
+   Instalado, abre em tela cheia (manifest "fullscreen"); onde o sistema não deixa (computador),
+   o primeiro toque liga a tela cheia. */
+(function () {
+  var EN = !/^pt/i.test(navigator.language || 'pt');
+  var T = function (pt, en) { return EN ? en : pt; };
+  var btI = document.getElementById('btInstalar'), btT = document.getElementById('btTela'), passos = document.getElementById('passos');
+  var mm = function (q) { return window.matchMedia && window.matchMedia(q).matches; };
+  var instalado = mm('(display-mode: fullscreen)') || mm('(display-mode: standalone)') || navigator.standalone === true;
+  var pedido = null;
+  btI.textContent = '📲 ' + T('Instalar como app', 'Install as app');
+  if (instalado) btI.hidden = true;
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); pedido = e; });
+  window.addEventListener('appinstalled', function () {
+    btI.hidden = true; pedido = null;
+    mostrar(T('✓ Instalado. Procure o ícone 🧪 FeatureTesting na tela inicial ou na lista de apps.', '✓ Installed. Look for the 🧪 FeatureTesting icon on your home screen or app list.'));
+  });
+
+  function mostrar(titulo, itens) {
+    passos.textContent = '';
+    var p = document.createElement('strong'); p.textContent = titulo; passos.appendChild(p);
+    if (itens) {
+      var ol = document.createElement('ol');
+      itens.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; ol.appendChild(li); });
+      passos.appendChild(ol);
+    }
+    passos.hidden = false;
+  }
+  function passoAPasso() {
+    var ua = navigator.userAgent;
+    var ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    if (ios) return mostrar(T('No iPhone ou iPad:', 'On iPhone or iPad:'), [
+      T('Toque em Compartilhar (o quadrado com a seta ⬆️).', 'Tap Share (the square with the ⬆️ arrow).'),
+      T('Role e toque em "Adicionar à Tela de Início".', 'Scroll and tap "Add to Home Screen".'),
+      T('Toque em "Adicionar". O ícone 🧪 aparece na tela.', 'Tap "Add". The 🧪 icon shows up on the screen.')]);
+    if (/Android/.test(ua)) {
+      if (/SamsungBrowser/.test(ua)) return mostrar(T('No navegador da Samsung:', 'In Samsung Internet:'), [
+        T('Toque no menu ≡ (embaixo, à direita).', 'Tap the ≡ menu (bottom right).'),
+        T('Toque em "Adicionar página a" → "Tela inicial".', 'Tap "Add page to" → "Home screen".')]);
+      return mostrar(T('No celular ou tablet Android:', 'On an Android phone or tablet:'), [
+        T('Toque no menu ⋮ (em cima, à direita).', 'Tap the ⋮ menu (top right).'),
+        T('Toque em "Instalar app" ou "Adicionar à tela inicial".', 'Tap "Install app" or "Add to home screen".')]);
+    }
+    if (/Firefox/.test(ua)) return mostrar(T('O Firefox do computador não instala sites como app.', 'Firefox on desktop cannot install sites as apps.'), [
+      T('Abra este endereço no Google Chrome ou no Microsoft Edge.', 'Open this address in Google Chrome or Microsoft Edge.'),
+      T('Toque em 📲 Instalar como app de novo.', 'Tap 📲 Install as app again.')]);
+    if (/Macintosh/.test(ua) && /Safari/.test(ua) && !/Chrome|Chromium|Edg\//.test(ua)) return mostrar(T('No Safari do Mac:', 'In Safari on Mac:'), [
+      T('Menu Arquivo → "Adicionar ao Dock".', 'File menu → "Add to Dock".')]);
+    if (/Edg\//.test(ua)) return mostrar(T('No Microsoft Edge:', 'In Microsoft Edge:'), [
+      T('Clique no menu … (em cima, à direita) → "Aplicativos".', 'Click the … menu (top right) → "Apps".'),
+      T('Clique em "Instalar este site como um aplicativo".', 'Click "Install this site as an app".')]);
+    return mostrar(T('No Google Chrome:', 'In Google Chrome:'), [
+      T('Clique no ícone de instalar na ponta direita da barra de endereço (tela com seta ⬇️).', 'Click the install icon at the right end of the address bar (screen with a ⬇️ arrow).'),
+      T('Ou: menu ⋮ → "Transmitir, salvar e compartilhar" → "Instalar página como app".', 'Or: ⋮ menu → "Cast, save and share" → "Install page as app".')]);
+  }
+  btI.addEventListener('click', function () {
+    if (!pedido) return passoAPasso();
+    pedido.prompt();
+    pedido.userChoice.then(function (r) { if (r.outcome === 'accepted') btI.hidden = true; });
+    pedido = null;
+  });
+
+  /* tela cheia (o iPhone não deixa: lá o app instalado já abre sem a barra do navegador) */
+  var raiz = document.documentElement;
+  var pedirTela = raiz.requestFullscreen || raiz.webkitRequestFullscreen;
+  var emTela = function () { return !!(document.fullscreenElement || document.webkitFullscreenElement); };
+  if (!pedirTela || mm('(display-mode: fullscreen)')) return;
+  function rotulo() { btT.textContent = emTela() ? '⛶ ' + T('Sair da tela cheia', 'Exit full screen') : '⛶ ' + T('Tela cheia', 'Full screen'); }
+  function alternar() {
+    if (emTela()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else { var r = pedirTela.call(raiz); if (r && r.catch) r.catch(function () {}); }
+  }
+  rotulo(); btT.hidden = false;
+  btT.addEventListener('click', alternar);
+  document.addEventListener('fullscreenchange', rotulo);
+  document.addEventListener('webkitfullscreenchange', rotulo);
+  if (instalado) document.addEventListener('pointerdown', function primeiro(e) {
+    document.removeEventListener('pointerdown', primeiro);
+    if (!emTela() && e.target !== btT) alternar();
+  });
+})();
 </script>
 </body>
 </html>
