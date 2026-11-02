@@ -20,7 +20,7 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
   as opções ganham a tela (o Voltar do celular também volta para as partes).
 - **🔍 Zoom**: ao escolher uma parte da maquiagem, dos olhos ou dos brincos, o palco chega perto do rosto sozinho; no
   colar e no broche, do busto; na pulseira e no anel, das mãos; no cabelo e nas coroas, da cabeça. Nas roupas e no
-  cenário volta a mostrar a personagem inteira. O botão 🔍 do topo liga o zoom e o 🧍 desliga.
+  cenário volta a mostrar a personagem inteira. O botão 🔍 do topo liga o zoom e o 👗 desliga.
 - Na maquiagem, o **pincel vai até o rosto** e a maquiagem aparece com brilho. Tocar na personagem faz ela girar.
 - **↩** desfaz a última troca · **🎲** sorteia um visual surpresa que combina (a personagem continua) ·
   **🔄** começa de novo (tira maquiagem, roupa e acessórios; a personagem continua; dá para desfazer).
