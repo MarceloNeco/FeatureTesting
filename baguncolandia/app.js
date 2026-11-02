@@ -16,12 +16,22 @@
   var TESTE = /[?&]teste\b/.test(location.search);   // página de teste: sem pareamento, pontos falsos pelo window.BaguncaTeste
   /* Botão Voltar do celular: cada tela aberta (entrar, jogo) ganha uma entrada no histórico; o Voltar fecha só a
      de cima, e só da tela inicial é que se sai. Um ponto só no código: nada de pushState espalhado.
-     abrir(aoVoltar) = nova camada; fechar(n) = a tela já foi fechada pelo botão dela, tira n entradas sem chamar nada. */
+     abrir(aoVoltar) = nova camada; fechar(n) = a tela já foi fechada pelo botão dela, tira n entradas sem chamar nada.
+     No menu inicial o Voltar não sai direto: avisa "Toque em Voltar de novo para sair" e só o segundo sai. Para isso,
+     depois do primeiro toque da pessoa entra uma entrada de guarda (o Chrome ignora entrada criada sem toque). */
   var Nav = (function () {
-    var pilha = [], ignorar = 0;
+    var pilha = [], ignorar = 0, guarda = false, avisoTimer = 0;
+    try { history.replaceState({ bagunca: 0, inicio: 1 }, ''); } catch (e) {}
+    function armar() { if (guarda) return; guarda = true; try { history.pushState({ bagunca: 'guarda' }, ''); } catch (e) {} }
+    document.addEventListener('pointerdown', armar, true); document.addEventListener('keydown', armar, true);
+    function avisarSaida() {
+      var a = $('avisoSair'); a.textContent = T('Toque em Voltar de novo para sair da Bagunçolândia', 'Tap Back again to leave Mayhemland');
+      a.classList.add('ativo'); clearTimeout(avisoTimer); avisoTimer = setTimeout(function () { a.classList.remove('ativo'); }, 2500);
+    }
     window.addEventListener('popstate', function () {
       if (ignorar) { ignorar--; return; }
-      var c = pilha.pop(); if (c) { try { c(); } catch (e) {} }
+      var c = pilha.pop(); if (c) { try { c(); } catch (e) {} return; }
+      guarda = false; avisarSaida();   // chegou na entrada do início: o próximo Voltar sai (a guarda volta no próximo toque)
     });
     return {
       abrir: function (aoVoltar) { pilha.push(aoVoltar); try { history.pushState({ bagunca: pilha.length }, ''); } catch (e) {} },
