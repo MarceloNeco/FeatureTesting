@@ -161,7 +161,7 @@ test('traços novos desenham de frente, girando e de costas', () => {
   const L = [{ formaOlho: 'amendoados', distOlhos: 'afastados', formaBoca: 'sorrisinho', nariz: 'batatinha', rosto: 'largo', cabelo: 'armado', oculos: 'retangular' },
     { formaOlho: 'caidos', distOlhos: 'juntos', formaBoca: 'cheinha', nariz: 'reto', rosto: 'quadradinho', cabelo: 'armadoLongo', oculos: 'gatinho' },
     { formaOlho: 'puxadinhos', formaBoca: 'larga', nariz: 'largo', rosto: 'comprido', oculos: 'aviador' }, { formaOlho: 'pequenos', formaBoca: 'fininha', oculos: 'meioAro' },
-    { formaOlho: 'grandes', formaBoca: 'pequenininha', oculos: 'redondoGrande' }, { oculos: 'quadrado' }, { oculos: 'oval' }, { oculos: 'fininho' }];
+    { formaOlho: 'grandes', formaBoca: 'pequenininha', oculos: 'redondoGrande' }, { formaOlho: 'fininhos' }, { formaOlho: 'fininhosPuxados', oculos: 'retangular' }, { formaOlho: 'sorridentes', cilios: 'arco', sombra: 'simples' }, { oculos: 'quadrado' }, { oculos: 'oval' }, { oculos: 'fininho' }];
   for (const l of L) for (const a of [0, 40, 90, 140, 200, 300]) {
     const s = B.svg(Object.assign(V.novo(), l), { id: 'n', angulo: a, anim: true }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), JSON.stringify(l) + a);
   }

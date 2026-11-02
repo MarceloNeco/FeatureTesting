@@ -112,7 +112,8 @@
     ] },
     { id: 'formaOlho', grupo: 'eu', ico: '👁️', pt: 'Formato dos olhos', en: 'Eye shape', area: A.olhos, zoom: 'rosto', opcoes: [
       o('redondos', 'Redondinhos', 'Round'), o('amendoados', 'Amendoados', 'Almond'), o('grandes', 'Grandões', 'Big'),
-      o('pequenos', 'Pequenos', 'Small'), o('puxadinhos', 'Puxadinhos', 'Upturned'), o('caidos', 'Caidinhos', 'Downturned')
+      o('pequenos', 'Pequenos', 'Small'), o('puxadinhos', 'Puxadinhos', 'Upturned'), o('caidos', 'Caidinhos', 'Downturned'),
+      o('fininhos', 'Fininhos (sem dobrinha)', 'Narrow monolid'), o('fininhosPuxados', 'Fininhos puxadinhos', 'Narrow upturned monolid'), o('sorridentes', 'Fechadinhos sorrindo', 'Smiling crescent')
     ] },
     { id: 'distOlhos', grupo: 'eu', ico: '↔️', pt: 'Olhos perto ou longe', en: 'Eye spacing', area: A.olhos, zoom: 'rosto', opcoes: [
       o('juntos', 'Mais juntinhos', 'Closer together'), o('normal', 'No meio', 'Middle'), o('afastados', 'Mais afastados', 'Farther apart')

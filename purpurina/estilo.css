@@ -115,10 +115,11 @@ ul { list-style: none; }
 .cat-bt { min-width: 0; overflow: hidden; background: rgba(255, 255, 255, .08); border-radius: 14px; padding: 3px 2px; font-size: .74rem; line-height: 1.05; border: 2px solid transparent; min-height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
 .cat-bt .i { font-size: 1.25rem; }
 .cat-bt[aria-pressed="true"] { background: var(--rosa); color: #fff; }
-/* passo 1: as partes da aba, grandes e todas à vista */
-.cats { align-content: start; }
-.cats .cat-bt { min-height: 64px; font-size: .85rem; }
-.cats .cat-bt .i { font-size: 1.6rem; }
+/* passo 1: as partes da aba, todas à vista (5 por linha no celular em pé); se ainda não couberem, a lista
+   rola com o dedo e aparece o "⬇ mais" — o palco com o rosto continua à vista em cima */
+.cats { align-content: start; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding-bottom: 4px; }
+.cats .cat-bt { min-height: 60px; font-size: .8rem; }
+.cats .cat-bt .i { font-size: 1.5rem; }
 /* passo 2: a parte escolhida em cima, com o botão para voltar às partes */
 .parte-bar { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .parte-bar[hidden] { display: none; }
