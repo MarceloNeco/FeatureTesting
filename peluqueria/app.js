@@ -3,7 +3,7 @@
    (PeluqueriaDebug.passo). Nada de innerHTML com dado de fora; textos por textContent. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.6.5', APP_UPDATED = '02/11/2026';
+  var APP_VERSION = '0.6.6', APP_UPDATED = '02/11/2026';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.Peluqueria;
   var TESTE = /[?&]teste\b/.test(location.search);
@@ -335,4 +335,18 @@
   s.setAttribute('data-nome', 'Peluqueria'); s.setAttribute('data-icone', 'icone-192.png');
   s.setAttribute('data-so-com', 'instalar'); s.setAttribute('data-flutuante', ''); s.setAttribute('data-sw', 'nao');
   document.body.appendChild(s);
+})();
+
+/* Tela cheia no celular e no tablet (ex.: tablet Fire, cujo navegador abre o atalho ainda com a barra de endereço):
+   ao tocar em "Jogar", como nos outros jogos do Bolinho, some a barra de endereço.
+   Só em tela de toque e se ainda não estiver como aplicativo. iPhone não permite: lá nada acontece. */
+(function () {
+  var d = document, el = d.documentElement;
+  if (!(el.requestFullscreen || el.webkitRequestFullscreen) || !window.matchMedia) return;
+  if (!matchMedia("(pointer: coarse)").matches || matchMedia("(display-mode: fullscreen)").matches || matchMedia("(display-mode: standalone)").matches) return;
+  function telaCheia() {
+    if (d.fullscreenElement || d.webkitFullscreenElement) return;
+    try { var p = el.requestFullscreen ? el.requestFullscreen({ navigationUI: "hide" }) : el.webkitRequestFullscreen(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+  }
+  var b = d.getElementById("btJogar"); if (b) b.addEventListener("click", telaCheia);
 })();
