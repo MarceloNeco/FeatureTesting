@@ -117,7 +117,7 @@
     else if (ev.t === 'bateu') { fumaca(ev.x, ev.y); D.flash = 0.3; texto(T('Ai! −1 vida', 'Ouch! −1 life'), ev.x, ev.y - 60, '#ff5252', 36); }
     else if (ev.t === 'aviso') { D.aviso = { tipo: ev.tipo, j: ev.j, ate: D.ultimo + 1000 }; }
     else if (ev.t === 'fim') { confete(); }
-    else if (ev.t === 'casa') { if (ev.texto) texto(ev.texto, ev.x, ev.y - 40, ev.texto === '+10' ? CORES.ouro : cor, ev.texto === '+10' ? 30 : 36); if (ev.festa) estrelas(ev.x, ev.y, cor, 6); if (ev.pontos > 0) pop(ev.j || 0); }
+    else if (ev.t === 'casa') { if (ev.texto) texto(T(ev.texto, ev.textoEn || ev.texto), ev.x, ev.y - 40, ev.texto === '+10' ? CORES.ouro : cor, ev.texto === '+10' ? 30 : 36); if (ev.festa) estrelas(ev.x, ev.y, cor, 6); if (ev.pontos > 0) pop(ev.j || 0); }
     else if (ev.t === 'bagunca100') { confete(); D.flash = 0.5; texto(T('BAGUNÇA TOTAL! 🎉 +100', 'TOTAL MAYHEM! 🎉 +100'), W / 2, 320, CORES.ouro, 66, true); }
   }
   function pop(j) { D.pops[j] = D.ultimo; }
@@ -360,7 +360,7 @@
       var s = estado.restante, mm = Math.floor(s / 60), ss = s % 60; ctx.fillText(mm + ':' + (ss < 10 ? '0' : '') + ss, W / 2, 16);
     }
     // modo atual (pequeno)
-    var nomeModo = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), pula: T('🪵 Pula e abaixa', '🪵 Jump and duck'), bolas: T('🎳 Bagunça de bolas', '🎳 Ball mayhem'), bagunca: estado.casa ? { sala: T('🧸 Bagunça na sala', '🧸 Living-room mayhem'), quarto: T('🧸 Bagunça no quarto', '🧸 Bedroom mayhem'), jardim: T('🧸 Bagunça no jardim', '🧸 Garden mayhem') }[estado.casa.cena] : '' }[estado.modo] || '';
+    var nomeModo = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), pula: T('🪵 Pula e abaixa', '🪵 Jump and duck'), bolas: T('🎳 Bagunça de bolas', '🎳 Ball mayhem'), bagunca: estado.casa ? { sala: T('🧸 Bagunça na sala', '🧸 Living-room mayhem'), quarto: T('🧸 Bagunça no quarto', '🧸 Bedroom mayhem'), jardim: T('🧸 Bagunça no jardim', '🧸 Garden mayhem'), cozinha: T('🧸 Bagunça na cozinha', '🧸 Kitchen mayhem'), banheiro: T('🧸 Bagunça no banheiro', '🧸 Bathroom mayhem'), parquinho: T('🧸 Bagunça no parquinho', '🧸 Playground mayhem') }[estado.casa.cena] : '' }[estado.modo] || '';
     ctx.textAlign = 'center'; ctx.font = '600 24px ' + D.fonte; ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillText(nomeModo, W / 2, 76);
     if (D.modoAviso && ts < D.modoAviso.ate) { var a = Math.min(1, (D.modoAviso.ate - ts) / 500); ctx.globalAlpha = a; ctx.font = '700 80px ' + D.fonte; ctx.fillStyle = CORES.ciano; sombra(ctx, CORES.ciano, 30); ctx.fillText({ corta: T('🍉 Corta!', '🍉 Slice!'), pega: T('🎈 Pega!', '🎈 Catch!'), chuta: T('⚽ Chuta!', '⚽ Kick!'), pula: T('🪵 Pula e abaixa!', '🪵 Jump and duck!'), bolas: T('🎳 Bagunça de bolas!', '🎳 Ball mayhem!') }[D.modoAviso.modo], W / 2, 280); ctx.globalAlpha = 1; }
     if (D.aviso && ts < D.aviso.ate) { var rj = jogs[D.aviso.j] ? jogs[D.aviso.j].raia : jogs[0].raia, pisc = Math.floor(ts / 120) % 2 === 0 || D.menos; ctx.textAlign = 'center'; ctx.font = '700 96px ' + D.fonte; ctx.fillStyle = pisc ? (D.aviso.tipo === 'baixo' ? CORES.ouro : CORES.ciano) : '#fff'; sombra(ctx, ctx.fillStyle, 30); ctx.fillText(D.aviso.tipo === 'baixo' ? T('⬆ PULA!', '⬆ JUMP!') : T('⬇ ABAIXA!', '⬇ DUCK!'), rj.x + rj.w / 2, 230); ctx.shadowBlur = 0; }

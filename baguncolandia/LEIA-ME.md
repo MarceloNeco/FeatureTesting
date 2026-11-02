@@ -26,11 +26,14 @@ Endereço: `https://solverone.com.br/FeatureTesting/baguncolandia/` (atalho para
 **Música**: em 🎵 Música no celular, cole um link do YouTube (vídeo ou playlist); a TV toca num
 cantinho. Com tempo "🎵 a música", a rodada dura a música inteira.
 
-**🧸 Bagunça na casa**: cada rodada num lugar (sala, quarto ou jardim), cheio de coisas arrumadas. Bata nelas e
+**🧸 Bagunça na casa**: cada rodada num lugar (sala, quarto, jardim, cozinha, banheiro ou parquinho), cheio de coisas arrumadas. Bata nelas e
 tudo vai bagunçando, sem quebrar: livro cai e abre, torre de blocos desaba, bola quica e sai pela janela aberta, o
 lustre balança e muda a cor da luz, o interruptor acende e apaga, a janela abre e fecha devagar, o quadro fica
 torto, o cachorrinho anda, late e corre atrás da bola; no jardim, a árvore solta folhas, os passarinhos voam e o
-balanço balança. O Bagunçômetro (no alto) vai de 0 a 100 %; chegar a 100 % dá bônus. O motor mora em `casa.js`.
+balanço balança. Na cozinha, geladeira e torneira; no banheiro, bolhas de sabão e o papel higiênico que desenrola; no
+parquinho, escorregador, gangorra e castelo de areia. Bichos: o **Picolé** (o cavachon da família, desenhado em código),
+o gato, o papagaio que fala, a tartaruga e os passarinhos. Nos últimos segundos a mamãe vem chegando. O Bagunçômetro
+(no alto) vai de 0 a 100 %; chegar a 100 % dá bônus. O motor mora em `casa.js`.
 
 **Música do jogo e botões de som**: o jogo toca música o tempo todo, uma diferente a cada rodada: 13 músicas de
 verdade em `musicas/` (domínio público, ver `CREDITOS.md`). Sem internet, toca as que o próprio jogo cria. **🔊** deixa tudo mudo (efeitos, música e voz); **🎵** liga ou desliga só a música. Ficam na coluna
