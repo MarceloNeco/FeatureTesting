@@ -2,6 +2,17 @@
   "app": "peluqueria",
   "versoes": [
     {
+      "versao": "0.6.6",
+      "data": "02/Nov/2026",
+      "hora": "12:30:00",
+      "pt": [
+        "Tela cheia no celular e no tablet: no primeiro toque some a barra de endereço do navegador (ex.: tablet Fire), como um aplicativo."
+      ],
+      "en": [
+        "Full screen on phones and tablets: the first tap hides the browser address bar (e.g. Fire tablet), like an app."
+      ]
+    },
+    {
       "versao": "0.6.5",
       "data": "02/Nov/2026",
       "hora": "12:00:00",
