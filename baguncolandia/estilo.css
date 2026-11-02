@@ -177,3 +177,7 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #avisoSair { position: fixed; left: 50%; bottom: 2rem; transform: translate(-50%, 1rem); z-index: 1000; max-width: calc(100% - 2rem); background: var(--card); color: var(--text); border: 2px solid var(--lima); border-radius: 14px; padding: .8rem 1.1rem; font-weight: 600; text-align: center; opacity: 0; pointer-events: none; transition: opacity .2s ease-out, transform .2s ease-out; }
 #avisoSair.ativo { opacity: 1; transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: reduce) { #avisoSair { transition: none; } }
+/* tela inicial: os botões em duas caixas, "Com a TV" e "Sem a TV", cada um com uma linha dizendo o que faz */
+.caixa { display: flex; flex-direction: column; gap: .75rem; border: 2px solid var(--border); border-radius: 18px; padding: .9rem; }
+.caixa h2 { font-size: 1.05rem; font-weight: 700; color: var(--muted); margin: 0 0 -.15rem .2rem; }
+.caixa button small { display: block; font-size: .85rem; font-weight: 500; opacity: .85; margin-top: .3rem; line-height: 1.3; }

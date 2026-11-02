@@ -56,9 +56,9 @@ armadura), cor da roupa, acessório (laço, coroa, tiara, óculos, boné, chapé
 fica fixa no topo enquanto você escolhe. Boneco 1 e Boneco 2 (para duas pessoas no mesmo celular). Fica
 guardado no celular. O desenho do boneco mora em `boneco.js`.
 
-**Só o celular (sem TV)**: na tela inicial, 🎧. O jogo roda no próprio celular, com a câmera frontal.
+**🤸 Jogar com o corpo (sem TV)**: na tela inicial, caixa "Sem a TV". O jogo roda no próprio celular, com a câmera frontal.
 
-**🖐️ No dedo (celular ou tablet, sem câmera)**: na tela inicial, 🖐️. Deite o aparelho. O dedo corta, pega
+**👆 Jogar com o dedo (sem TV e sem câmera)**: na tela inicial, caixa "Sem a TV". Deite o aparelho. O dedo corta, pega
 e chuta; deslize para cima para pular e para baixo para abaixar; o boneco anda com o dedo. 👥 2 = duas
 pessoas no mesmo tablet, uma em cada metade. Sem calibração. É a "versão de bolso": no fim, o jogo
 convida a chamar a TV e jogar com o corpo todo.

@@ -2,6 +2,17 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.10",
+      "data": "02/Nov/2026",
+      "hora": "10:07:00",
+      "pt": [
+        "Tela inicial mais clara: os botões ficam em duas caixas, \"Com a TV\" (Esta é a TV, Este é o celular) e \"Sem a TV\" (Jogar com o corpo, Jogar com o dedo), cada um com uma linha dizendo o que faz."
+      ],
+      "en": [
+        "Clearer start screen: the buttons sit in two boxes, \"With the TV\" (This is the TV, This is the phone) and \"Without the TV\" (Play with your body, Play with your finger), each with a line saying what it does."
+      ]
+    },
+    {
       "versao": "0.8.9",
       "data": "02/Nov/2026",
       "hora": "09:24:00",
