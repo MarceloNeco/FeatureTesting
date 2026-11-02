@@ -52,6 +52,7 @@
     <button id="btNumeros" class="grande ciano" type="button" data-t="🔢 Pintar por números|🔢 Paint by numbers"></button>
     <div class="linha-menu">
       <button id="btComMao" class="medio" type="button" data-t="🖐 Desenhar com a mão|🖐 Draw with your hand"></button>
+      <button id="btAprender" class="medio" type="button" data-t="🎓 Aprender a brincar|🎓 Learn to play"></button>
       <button id="btMeus" class="medio" type="button"><span data-t="🖼️ Meus desenhos|🖼️ My drawings"></span> <span id="qtdMeus" class="bolha">0</span></button>
     </div>
     <div class="linha-menu">
@@ -157,6 +158,7 @@
     <canvas id="tela" aria-label="Folha de desenho / Drawing sheet"></canvas>
     <div id="tvChip" class="tv-chip" hidden></div>
     <div id="flutua" class="flutua">
+      <button id="btTour" class="mini" type="button" aria-label="Como brincar (passo a passo) / How to play (tour)">❓</button>
       <button id="btColinha" class="mini" type="button" hidden aria-label="Colinha / Cheat sheet" aria-pressed="false">👀</button>
       <button id="btVariacao" class="mini" type="button" hidden aria-label="Outras cores / Other colors">🎨</button>
       <button id="btDica" class="mini" type="button" hidden aria-label="Dica / Hint">🪄</button>
@@ -210,6 +212,7 @@
 <script src="mao.js"></script>
 <script src="../recursos.js" data-app="feature-tester" data-fora-do-arquivo></script>
 <script src="../atualizar.js" data-fora-do-arquivo></script>
+<script src="tour.js"></script>
 <script src="app.js"></script>
 <script src="sala.js"></script>
 <script src="tv.js"></script>

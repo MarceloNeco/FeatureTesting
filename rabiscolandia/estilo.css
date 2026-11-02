@@ -202,3 +202,30 @@ button:focus-visible, input:focus-visible, .carta:focus-visible { outline: 3px s
 .separador { flex: 0 0 auto; width: 3px; border-radius: 2px; background: var(--borda); align-self: stretch; margin: 4px 3px; }
 .barra-direita .separador, .barra-esquerda .separador { width: auto; height: 3px; margin: 3px 4px; }
 .ctrl-painel .separador { display: none; }
+
+/* ---------- passo a passo com o Rabisquinho (tour.js) ---------- */
+.tour { position: fixed; inset: 0; z-index: 80; cursor: pointer; }
+.tour-luz { position: fixed; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(10, 6, 30, .62); pointer-events: none; transition: left .3s ease, top .3s ease, width .3s ease, height .3s ease; }
+.tour-luz::after { content: ''; position: absolute; inset: -6px; border-radius: 22px; border: 4px solid var(--ouro); animation: anelTour 1.2s ease-in-out infinite; }
+@keyframes anelTour { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.08); opacity: .55; } }
+.tour-balao { position: fixed; background: #fff; color: #2a1e66; border-radius: 22px; padding: 12px 14px 10px; box-shadow: 0 12px 34px rgba(0, 0, 0, .45); cursor: default; border: 3px solid var(--ouro); }
+.tour-balao.pula { animation: puloBalao .45s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes puloBalao { 0% { transform: scale(.4) translateY(14px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+.tour-balao::after { content: ''; position: absolute; width: 18px; height: 18px; background: #fff; border: 3px solid var(--ouro); transform: rotate(45deg); }
+.tour-balao.seta-cima::after { bottom: -11px; left: calc(var(--seta-x, 50%) - 9px); border-top: 0; border-left: 0; }
+.tour-balao.seta-baixo::after { top: -11px; left: calc(var(--seta-x, 50%) - 9px); border-bottom: 0; border-right: 0; }
+.tour-balao.seta-esq::after { right: -11px; top: calc(var(--seta-y, 50%) - 9px); border-bottom: 0; border-left: 0; }
+.tour-balao.seta-dir::after { left: -11px; top: calc(var(--seta-y, 50%) - 9px); border-top: 0; border-right: 0; }
+.tour-balao.seta-meio::after { display: none; }
+.tour-cab { display: flex; align-items: center; gap: 8px; color: #6a3fd6; }
+.tour-eu { font-size: 2rem; display: inline-block; animation: balancaEu 1.4s ease-in-out infinite; }
+@keyframes balancaEu { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg) translateY(-3px); } }
+.tour-fala { font-size: 1.12rem; line-height: 1.4; margin: 6px 0 10px; font-weight: 500; }
+.tour-botoes { display: flex; align-items: center; gap: 6px; }
+.tour-bt { min-width: 44px; min-height: 44px; border-radius: 14px; background: #efeaff; color: #2a1e66; font-size: 1.15rem; font-weight: 700; padding: 0 10px; }
+.tour-bt:disabled { opacity: .35; }
+.tour-bt.forte { background: linear-gradient(180deg, #ffb35c, var(--laranja)); color: #fff; margin-left: auto; padding: 0 16px; }
+.tour-pos { color: #8a80b8; font-size: .9rem; }
+@media (prefers-reduced-motion: reduce) { .tour-balao.pula, .tour-eu, .tour-luz::after { animation: none; } .tour-luz { transition: none; } }
+.tour.sem-alvo { background: rgba(10, 6, 30, .62); }
+.tour-bt, .tour-pos { white-space: nowrap; }
