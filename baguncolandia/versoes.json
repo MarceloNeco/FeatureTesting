@@ -2,6 +2,17 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.17",
+      "data": "02/Nov/2026",
+      "hora": "15:03:27",
+      "pt": [
+        "🖥️ Botão de tela inteira: no tablet e no celular, quando a barra de endereço aparece (por exemplo, depois de travar e destravar o tablet), surge uma abinha na borda esquerda — um toque e a tela fica inteira de novo. Depois de travar, o primeiro toque ao voltar já põe em tela inteira sozinho."
+      ],
+      "en": [
+        "🖥️ Full-screen button: on tablets and phones, when the address bar shows up (for example after locking and unlocking the tablet), a small tab appears on the left edge — one tap and the screen is full again. After locking, the first tap on returning goes full screen by itself."
+      ]
+    },
+    {
       "versao": "0.8.16",
       "data": "02/Nov/2026",
       "hora": "14:30:00",

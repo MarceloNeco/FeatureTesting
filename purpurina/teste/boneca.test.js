@@ -219,3 +219,27 @@ test('patins: de frente as rodas ficam de pé e estreitas; de lado, redondas', (
   assert.ok(!/<circle cx="[^"]*" cy="661" r="6" fill="#ffd166"/.test(frente), 'sem roda redonda de frente');
   assert.ok((lado.match(/r="6.5" fill="#ffd166"/g) || []).length >= 2, 'de lado as rodas são redondas');
 });
+
+test('pés descalços: de frente, unha em cima de cada dedo (5 por pé); de costas, calcanhar sem unha', () => {
+  const e = Object.assign(V.novo(), { sapatos: 'nenhum', unhas: 'arco', calca: 'nenhum', saia: 'nenhum' });
+  const arco = ['#ff5a6e', '#ffd23f', '#5cc46a', '#5ac8ff', '#b892ff'];
+  const unhasPe = (s) => [...s.matchAll(/<ellipse cx="([\d.]+)" cy="([\d.]+)" rx="([\d.]+)" ry="[\d.]+" fill="([^"]+)" stroke/g)].filter(m => arco.includes(m[4]) && +m[2] > 640).map(m => [+m[1], +m[2], +m[3]]);
+  const frente = B.svg(e, { id: 'f' });
+  const u = unhasPe(frente);
+  assert.equal(u.length, 10, 'cinco unhas em cada pé');
+  u.forEach(q => assert.ok(q[1] < 656, 'a unha fica no dedo, não embaixo do pé (y ' + q[1] + ')'));
+  // dedão (unha maior) do lado de dentro
+  const esq = u.filter(q => q[0] < 200).sort((a, b) => b[2] - a[2])[0], dir = u.filter(q => q[0] > 200).sort((a, b) => b[2] - a[2])[0];
+  assert.ok(esq[0] > 172 && dir[0] < 228, 'dedão para dentro');
+  assert.equal(unhasPe(B.svg(e, { id: 'c', angulo: 180 })).length, 0, 'de costas não aparecem as unhas');
+});
+
+test('cabelo comprido: nenhum penteado desce até os pés e, girando, não fica um "fantasma" transparente', () => {
+  const P2 = require('../pecas.js');
+  for (const cabelo of P2.categoria('cabelo').opcoes.map(o => o.id)) {
+    const s = B.svg(Object.assign(V.novo(), { cabelo }), { id: 'q', fundo: false });
+    let mx = 0; s.replace(/<path d="([^"]*)"[^>]*fill="url\(#q-cab\)"/g, (m, d) => { d.replace(/(-?[\d.]+),(-?[\d.]+)/g, (a, x, y) => { mx = Math.max(mx, +y); }); });
+    assert.ok(mx < 600, cabelo + ' desce até y ' + mx);
+  }
+  for (const a of [20, 30, 45]) assert.ok(!/url\(#q-trasC\)"><g opacity=/.test(B.svg(Object.assign(V.novo(), { cabelo: 'sereia' }), { id: 'q', angulo: a })), a + '°: sem cabelo transparente');
+});

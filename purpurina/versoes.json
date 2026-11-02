@@ -2,6 +2,25 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.17.0",
+      "data": "02/Nov/2026",
+      "hora": "15:03:27",
+      "pt": [
+        "🦶 Pés de verdade: descalça, de frente, o pé tem cinco dedinhos (o dedão do lado de dentro) e cada unha fica em cima do seu dedo — não mais numa fileira embaixo do pé. De lado, calcanhar, peito do pé e a unha do dedão; de costas, o calcanhar. Na rasteirinha e no chinelo os dedinhos também aparecem.",
+        "💇 Cabelo comprido girando direito: sumiu a \"sombra\" transparente que aparecia do lado no começo do giro, e o cabelo de sereia agora vai até perto do joelho (antes ia até o chão e, girando, parecia embaixo dos pés).",
+        "💡 Desfile: barra de refletores coloridos no teto, piscando um atrás do outro com fachos de luz, e as pernas andando de verdade — dobra o joelho e levanta o pé, uma de cada vez.",
+        "🖥️ Botão de tela inteira: no tablet e no celular, quando a barra de endereço aparece (por exemplo, depois de travar e destravar o tablet), surge uma abinha na borda esquerda — um toque e a tela fica inteira de novo. Depois de travar, o primeiro toque ao voltar já põe em tela inteira sozinho.",
+        "👗 O botão de voltar a ver a personagem inteira (depois do zoom) aparecia como um quadradinho vazio no tablet Fire: agora é 👗."
+      ],
+      "en": [
+        "🦶 Real feet: barefoot, from the front, each foot has five little toes (big toe on the inside) and every nail sits on its own toe — no longer in a row under the foot. From the side, heel, instep and the big-toe nail; from behind, the heel. Sandals and flip-flops show the toes too.",
+        "💇 Long hair turns properly: the transparent \"ghost\" on the side at the start of a turn is gone, and mermaid hair now reaches near the knee (it used to reach the floor and, turning, looked like it was under the feet).",
+        "💡 Runway: a bar of colored spotlights on the ceiling, flashing one after another with light beams, and legs that really walk — knee bends and the foot lifts, one at a time.",
+        "🖥️ Full-screen button: on tablets and phones, when the address bar shows up (for example after locking and unlocking the tablet), a small tab appears on the left edge — one tap and the screen is full again. After locking, the first tap on returning goes full screen by itself.",
+        "👗 The button to see the whole character again (after zooming) showed as an empty box on the Fire tablet: now it's 👗."
+      ]
+    },
+    {
       "versao": "0.16.0",
       "data": "02/Nov/2026",
       "hora": "14:47:45",
