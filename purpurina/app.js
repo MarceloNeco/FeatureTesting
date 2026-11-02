@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.11.1';
+  var APP_VERSION = '0.11.2';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TOQUE = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
@@ -894,7 +894,8 @@
   function maisNova(a, b) { var x = String(a).split('.').map(Number), y = String(b).split('.').map(Number); for (var i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); } return false; }
   var ultimaConferida = 0;
   function conferirVersao() {
-    if (EM_ARQUIVO || !window.fetch || Date.now() - ultimaConferida < 5 * 60000) return;
+    // o aviso comum dos jogos (../atualizar.js) já cuida disso: um aviso só na tela
+    if (window.SolverAtualizar || EM_ARQUIVO || !window.fetch || Date.now() - ultimaConferida < 5 * 60000) return;
     ultimaConferida = Date.now();
     fetch('versoes.json?v=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
       var nova = j && j.versoes && j.versoes[0] && j.versoes[0].versao;
