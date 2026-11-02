@@ -2,6 +2,21 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "1.8.0",
+      "data": "02/Nov/2026",
+      "hora": "21:30:00",
+      "pt": [
+        "1 ou 2 jogadores mais claro: o jogo sempre abre com 1 jogador (antes ficava guardado e aparecia 2 sem ninguém pedir). Os botões viraram 👤 1 jogador e 👥 2 jogadores (tela dividida); na garagem, com 2 jogadores, tem o botão ✕ Só 1 jogador, e o botão de correr diz Correr! · 2 jogadores.",
+        "Controles explicados: no 3-2-1 e nos primeiros segundos da corrida, as setas e o botão de pular piscam com a explicação (segure: virar, toque: pular) e, com 2 jogadores, cada metade mostra de quem é (Jogador 1, esta metade da tela é sua). Com 2 jogadores, as setas ficam mais visíveis.",
+        "Corpo de menina ou de menino: nova escolha na garagem (👧 Menina / 👦 Menino). A menina anda de skate de saia rodada e blusinha com coração. Escolhendo um personagem, o corpo acompanha (Branca de Neve, Emília: menina; Papai Noel, Saci: menino); bichinhos ficam com a escolha da criança. Rivais também têm meninas e meninos."
+      ],
+      "en": [
+        "Clearer 1 or 2 players: the game always opens with 1 player (before, the choice was saved and 2 players showed up without anyone asking). The buttons are now 👤 1 player and 👥 2 players (split screen); in the garage, with 2 players, there is a ✕ Just 1 player button, and the race button says Race! · 2 players.",
+        "Controls explained: during 3-2-1 and the first seconds of the race, the arrows and the jump button blink with a hint (hold: steer, tap: jump) and, with 2 players, each half says whose it is (Player 1, this half of the screen is yours). With 2 players the arrows stay more visible.",
+        "Girl or boy body: new choice in the garage (👧 Girl / 👦 Boy). The girl skates in a twirly skirt and a top with a heart. Picking a character sets the body (Snow White, Emília: girl; Santa, Saci: boy); animals keep the child's choice. Rivals include girls and boys too."
+      ]
+    },
+    {
       "versao": "1.7.1",
       "data": "02/Nov/2026",
       "hora": "15:03:27",

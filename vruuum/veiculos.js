@@ -180,7 +180,8 @@
     linha(c, [W * 0.385, H * 0.885, W * 0.555, H * 0.885], '#9aa0a6', H * 0.011);   // truck de trás
     [0.37, 0.57].forEach(function (x) { caixa(c, W * (x - 0.038), H * 0.868, W * 0.076, H * 0.038, W * 0.02, '#f1ead6'); caixa(c, W * (x - 0.038), H * 0.868, W * 0.076, H * 0.011, W * 0.01, 'rgba(255,255,255,.75)'); });
   }
-  function skatista(c, W, H, cor, emoji, fase) {
+  function skatista(c, W, H, cor, emoji, fase, corpo) {   // corpo: 'menina' (saia, blusinha com coração) ou 'menino'
+    var menina = corpo !== 'menino';
     fase = ((fase || 0) % 1 + 1) % 1;
     var escura = tom(cor, -0.35), clara = tom(cor, 0.2), g = giroCorpo(fase), cg = Math.cos(g), sg = Math.sin(g);
     // pé de trás: onde está em cada momento da remada
@@ -203,22 +204,34 @@
     // tênis: remando, o da frente aponta para a frente (calcanhar); deslizando, os dois ficam de lado no shape
     if (deitado > 0.5) tenisLado(c, W * 0.455, H * 0.8, W * 0.15, tom(cor, -0.2)); else tenis(c, W * 0.455, H * 0.8, W * 0.11, 0, tom(cor, -0.2));
     if (deitado > 0.5) tenisLado(c, W * px, H * py, W * 0.16, tom(cor, -0.2)); else tenis(c, W * px, H * py, W * 0.11 * perto, sola, tom(cor, -0.2));
-    // bermuda (estreita com o giro)
+    // bermuda (menino) ou saia rodada com pregas (menina), estreitando com o giro
     var lb = 0.14 * (0.62 + 0.38 * cg);
+    if (menina) {
+      var saia = tom(cor, -0.3), lb2 = lb + 0.06;
+      c.fillStyle = saia; c.beginPath();
+      c.moveTo(W * (0.5 - lb + 0.01), H * 0.47); c.lineTo(W * (0.5 + lb - 0.01), H * 0.47);
+      c.lineTo(W * (0.5 + lb2), H * 0.6); c.quadraticCurveTo(W * 0.5, H * 0.615, W * (0.5 - lb2), H * 0.6); c.closePath(); c.fill();
+      c.strokeStyle = 'rgba(0,0,0,.18)'; c.lineWidth = Math.max(1, W * 0.007);
+      for (var pq = -2; pq <= 2; pq++) { c.beginPath(); c.moveTo(W * (0.5 + pq * lb * 0.35), H * 0.48); c.lineTo(W * (0.5 + pq * lb2 * 0.4), H * 0.605); c.stroke(); }
+      c.fillStyle = 'rgba(255,255,255,.75)'; c.beginPath(); c.moveTo(W * (0.5 - lb2), H * 0.597); c.quadraticCurveTo(W * 0.5, H * 0.612, W * (0.5 + lb2), H * 0.597);
+      c.lineTo(W * (0.5 + lb2), H * 0.604); c.quadraticCurveTo(W * 0.5, H * 0.619, W * (0.5 - lb2), H * 0.604); c.closePath(); c.fill();
+    } else {
     c.fillStyle = SHORT; c.beginPath();
     c.moveTo(W * (0.5 - lb), H * 0.47); c.lineTo(W * (0.5 + lb), H * 0.47); c.lineTo(W * (0.5 + lb - 0.005), H * 0.585);
     c.lineTo(W * 0.505, H * 0.6); c.lineTo(W * 0.5, H * 0.545); c.lineTo(W * 0.495, H * 0.6); c.lineTo(W * (0.5 - lb + 0.005), H * 0.585); c.closePath(); c.fill();
     c.fillStyle = 'rgba(255,255,255,.07)'; c.fillRect(W * (0.5 - lb + 0.02), H * 0.48, W * (lb * 2 - 0.04), H * 0.015);
+    }
     // camiseta: o tronco gira de lado (pé esquerdo na frente): as costas ficam à esquerda e o lado direito do
     // corpo aparece à direita, mais escuro
     var A = 0.13, B = 0.085, meia = Math.sqrt(A * A * cg * cg + B * B * sg * sg), esp = -B * sg * 0.9;   // largura vista e a coluna
     c.save(); c.translate(W * 0.5, 0); c.scale(meia / A, 1); c.translate(-W * 0.5, 0);
     c.fillStyle = grad(c, H * 0.22, H * 0.52, clara, escura); c.beginPath();
-    c.moveTo(W * 0.385, H * 0.505); c.quadraticCurveTo(W * 0.36, H * 0.38, W * 0.37, H * 0.3);
+    var cint = menina ? 0.025 : 0;   // blusinha mais acinturada
+    c.moveTo(W * (0.385 + cint), H * 0.505); c.quadraticCurveTo(W * (0.36 + cint * 1.6), H * 0.4, W * 0.37, H * 0.3);
     c.lineTo(W * 0.37, H * 0.3); c.quadraticCurveTo(W * 0.39, H * 0.225, W * 0.43, H * 0.215);
     c.quadraticCurveTo(W * 0.5, H * 0.232, W * 0.57, H * 0.215); c.quadraticCurveTo(W * 0.61, H * 0.225, W * 0.63, H * 0.3);
-    c.quadraticCurveTo(W * 0.64, H * 0.38, W * 0.615, H * 0.505);
-    c.quadraticCurveTo(W * 0.5, H * 0.52, W * 0.385, H * 0.505); c.closePath(); c.fill();
+    c.quadraticCurveTo(W * (0.64 - cint * 1.6), H * 0.4, W * (0.615 - cint), H * 0.505);
+    c.quadraticCurveTo(W * 0.5, H * 0.52, W * (0.385 + cint), H * 0.505); c.closePath(); c.fill();
     c.save(); c.clip();
     var xc = 0.5 + esp * (A / meia);   // a coluna, em coordenadas antes do "scale"
     c.fillStyle = 'rgba(0,0,0,' + (0.28 * sg).toFixed(3) + ')'; c.fillRect(W * (xc + 0.06), H * 0.2, W * 0.3, H * 0.35);   // lado direito, virado
@@ -226,7 +239,7 @@
     c.strokeStyle = 'rgba(0,0,0,.16)'; c.lineWidth = Math.max(1, W * 0.008); c.lineCap = 'round';
     [[xc - 0.05, 0.3, xc - 0.07, 0.46], [xc + 0.07, 0.32, xc + 0.085, 0.47], [xc, 0.38, xc - 0.01, 0.5]].forEach(function (q) { c.beginPath(); c.moveTo(W * q[0], H * q[1]); c.quadraticCurveTo(W * (q[0] + 0.02), H * (q[1] + q[3]) / 2, W * q[2], H * q[3]); c.stroke(); });
     c.save(); c.translate(W * xc, H * 0.33); c.scale(Math.max(0.35, cg), 1);
-    c.fillStyle = 'rgba(255,255,255,.85)'; c.font = '800 ' + Math.round(H * 0.045) + 'px ' + FONTE; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('7', 0, 0);
+    c.fillStyle = 'rgba(255,255,255,.85)'; c.font = '800 ' + Math.round(H * 0.045) + 'px ' + FONTE; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(menina ? '♥' : '7', 0, 0);
     c.restore(); c.restore();
     // pescoço e cabeça neutra (cabelo), coberta pelo piloto vivo
     caixa(c, W * 0.455, H * 0.17, W * 0.09, H * 0.06, W * 0.03, PELE_SOMBRA);

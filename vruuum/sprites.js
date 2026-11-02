@@ -429,12 +429,12 @@
     return b;
   }
   // carro (ou moto, avião...) de cada jogador: o desenho vem do veiculos.js; sem ele, o carro clássico
-  function carroJogador(cor, emoji, tipo, px) {
+  function carroJogador(cor, emoji, tipo, px, corpo) {   // corpo: 'menina' ou 'menino' (skate)
     var V = raiz.VruuumVeiculos, v = V && V.achar(tipo);
     if (!v) return fazer(800, 640, function (c, W, H) { carroTras(c, W, H, cor, emoji, true); }, px || 256);
     if (!v.quadros) return fazer(v.w, v.h, function (c, W, H) { v.desenhar(c, W, H, cor, emoji); }, px || 256);
     var qs = [];   // animado (skate): um desenho para cada momento do movimento
-    for (var k = 0; k < v.quadros; k++) qs.push(fazer(v.w, v.h, (function (f) { return function (c, W, H) { v.desenhar(c, W, H, cor, emoji, f); }; })(k / v.quadros), px || 256));
+    for (var k = 0; k < v.quadros; k++) qs.push(fazer(v.w, v.h, (function (f) { return function (c, W, H) { v.desenhar(c, W, H, cor, emoji, f, corpo); }; })(k / v.quadros), px || 256));
     return { w: v.w, h: v.h, img: qs[0].img, quadros: qs };
   }
   // o quadro certo de um desenho animado (fase de 0 a 1); os parados voltam eles mesmos
