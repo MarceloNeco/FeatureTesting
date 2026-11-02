@@ -2,6 +2,21 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.16.0",
+      "data": "02/Nov/2026",
+      "hora": "14:47:45",
+      "pt": [
+        "✨ Os quadradinhos chegam dançando: ao abrir uma parte, trocar de aba ou de tela, as opções entram uma atrás da outra, rápido e suave (no app todo; quem pediu menos movimento no aparelho vê tudo parado).",
+        "🔕 Sem música e ⏭ próxima música, no canto da tela de brincar e no alto do menu. O \"sem música\" fica guardado: abrindo de novo, continua sem (os sons dos botões continuam).",
+        "🎶 Rádio só com músicas animadas: 20 músicas novas de dança e pop sem voz (disco, house, funk, synth-pop), do mesmo autor da de abertura (Disco Medusae, que continua). Saíram as mais lentas e \"sombrias\"."
+      ],
+      "en": [
+        "✨ The little squares dance in: when opening a part or switching tabs or screens, the options come in one after another, quick and smooth (across the app; with reduced motion on the device, nothing moves).",
+        "🔕 No music and ⏭ next song, in the corner of the play screen and at the top of the menu. \"No music\" is remembered: opening again, it stays off (button sounds keep playing).",
+        "🎶 A radio with only upbeat songs: 20 new instrumental dance-pop songs (disco, house, funk, synth-pop) by the same composer as the opening one (Disco Medusae, which stays). The slower, \"gloomy\" ones are gone."
+      ]
+    },
+    {
       "versao": "0.15.0",
       "data": "02/Nov/2026",
       "hora": "14:10:27",

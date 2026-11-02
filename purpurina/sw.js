@@ -1,16 +1,20 @@
 /* Purpurina — service worker: guarda a pasta no aparelho para abrir sem internet.
    Código (html, js, css, json): rede primeiro com 4 s de espera, senão a cópia; fonte e imagens:
-   cópia primeiro. Músicas gravadas (MP3, ~17 MB): baixadas em segundo plano depois de instalar e na primeira
+   cópia primeiro. Músicas gravadas (MP3, ~47 MB): as 3 primeiras baixadas em segundo plano depois de instalar, as outras na primeira
    vez que tocam, num cache próprio que não muda a cada versão (não baixam de novo). Cache com o nome do app: só apaga caches "purpurina-" (nunca os dos outros apps
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js e a versoes.json). */
-var VERSAO = '0.15.0';
+var VERSAO = '0.16.0';
 var CACHE = 'purpurina-v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'pecas.js', 'visual.js', 'boneca.js', 'som.js', 'app.js', 'sala.js', 'musica.js', 'tv.js', 'baixar.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js', '../atualizar.js', '../janela.js', '../cofre.js', 'ia-foto.js'];
 var CACHE_MUSICAS = 'purpurina-musicas-v1';
-var MUSICAS = ['musicas/disco-medusae.mp3', 'musicas/shoepop.mp3', 'musicas/sunglasses.mp3', 'musicas/electrodoodle.mp3', 'musicas/beach.mp3', 'musicas/walking-shoes.mp3', 'musicas/friend-to-friend.mp3', 'musicas/yippee.mp3'];
+var MUSICAS = ['musicas/disco-medusae.mp3', 'musicas/glitter-blast.mp3', 'musicas/who-likes-to-party.mp3', 'musicas/miami-viceroy.mp3', 'musicas/boogie-party.mp3', 'musicas/raving-energy.mp3', 'musicas/airport-lounge.mp3', 'musicas/cloud-dancer.mp3', 'musicas/got-funk.mp3', 'musicas/newer-wave.mp3', 'musicas/moonlight-beach.mp3', 'musicas/your-call.mp3', 'musicas/club-seamus.mp3', 'musicas/celebration.mp3', 'musicas/funky-one.mp3', 'musicas/neon-laser-horizon.mp3', 'musicas/beauty-flow.mp3', 'musicas/voxel-revolution.mp3', 'musicas/c-funk.mp3', 'musicas/laserpack.mp3', 'musicas/shiny-tech.mp3'];
+// em segundo plano só as 3 primeiras (a rádio começa por elas); as outras ficam guardadas na primeira vez que tocam.
+// Música que saiu da rádio sai também do aparelho.
 function guardarMusicas() {
   return caches.open(CACHE_MUSICAS).then(function (c) {
-    return Promise.all(MUSICAS.map(function (m) {
+    var todas = MUSICAS.map(function (m) { return new URL(m, self.registration.scope).href; });
+    c.keys().then(function (ks) { ks.forEach(function (k) { if (todas.indexOf(k.url) < 0) c.delete(k); }); });
+    return Promise.all(MUSICAS.slice(0, 3).map(function (m) {
       var url = new URL(m, self.registration.scope).href;
       return c.match(url).then(function (r) { return r || fetch(url).then(function (resp) { if (resp.status === 200) return c.put(url, resp); }); }).catch(function () {});
     }));

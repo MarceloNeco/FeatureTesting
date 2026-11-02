@@ -289,3 +289,8 @@ dialog.pp-ia::backdrop { background: rgba(20, 6, 36, .72); }
 @keyframes ppFaisca { 0%, 100% { transform: scale(.1) rotate(0deg); opacity: 0; } 35% { transform: scale(1.15) rotate(30deg); opacity: 1; } 55% { transform: scale(.75) rotate(45deg); opacity: .9; } 80% { transform: scale(.2) rotate(70deg); opacity: .2; } }
 @keyframes ppPisca { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
 @media (prefers-reduced-motion: reduce) { .pp-fa, .pp-pi { animation: none; } }
+
+/* chegada dos quadradinhos (app.js: chegar): entram um atrás do outro, subindo e crescendo, rápido mas suave */
+.chega { animation: chegar .3s cubic-bezier(.2, .9, .3, 1.15) both; animation-delay: calc(var(--i, 0) * 22ms); }
+@keyframes chegar { from { opacity: 0; transform: translateY(14px) scale(.82); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .chega { animation: none; } }
