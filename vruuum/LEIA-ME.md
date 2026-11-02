@@ -58,7 +58,7 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/vruuum/ · 
 | Grupo | Veículos |
 |---|---|
 | 🚗 Carros | Clássico, GT Redondo (traseira redonda), Superesportivo (largo, aerofólio), Kart, Monstrão |
-| 🏍️ Moto e skate | Moto (deita nas curvas) e Skate (menino de costas, um pé no shape e o outro empurrando a rua; quanto mais rápido, mais rema) |
+| 🏍️ Moto e skate | Moto (deita nas curvas) e Skate (menino de costas, um pé no shape e o outro empurrando a rua; quanto mais rápido, mais rema; deslizando fica de lado, pé esquerdo na frente; os braços seguem a curva: o de dentro desce, o de fora sobe) |
 | ✈️ No céu | Aviãozinho (hélice), Jato (fogo azul no turbo), Helicóptero (rotor girando) |
 
 - Cada um tem um jeito (barrinhas de velocidade e curvas), com diferenças pequenas, de no máximo uns 10%.

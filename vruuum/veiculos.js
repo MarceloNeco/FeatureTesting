@@ -182,53 +182,92 @@
   }
   function skatista(c, W, H, cor, emoji, fase) {
     fase = ((fase || 0) % 1 + 1) % 1;
-    var camisa = cor, escura = tom(cor, -0.35), clara = tom(cor, 0.2);
+    var escura = tom(cor, -0.35), clara = tom(cor, 0.2), g = giroCorpo(fase), cg = Math.cos(g), sg = Math.sin(g);
     // pé de trás: onde está em cada momento da remada
-    var px, py, sola = 0, noChao = false, perto = 1;
+    var px, py, sola = 0, noChao = false, perto = 1, deitado = 0;
     if (fase < 0.45) { var a = suave(fase / 0.45); px = mistura(0.63, 0.7, a); py = mistura(0.84, 0.975, a); noChao = true; perto = mistura(1, 1.18, a); }
-    else if (fase < 0.65) { var b = (fase - 0.45) / 0.2; px = mistura(0.7, 0.57, suave(b)); py = mistura(0.975, 0.82, suave(b)) - Math.sin(Math.PI * b) * 0.07; sola = Math.sin(Math.PI * Math.min(1, b * 1.3)); perto = mistura(1.18, 1, b); }
-    else { var d = suave((fase - 0.65) / 0.08); px = mistura(0.57, 0.545, d); py = mistura(0.82, 0.835, d); }
-    var balanco = Math.sin(fase * Math.PI * 2);   // braços balançam ao contrário da perna
+    else if (fase < 0.65) { var b = (fase - 0.45) / 0.2; px = mistura(0.7, 0.5, suave(b)); py = mistura(0.975, 0.835, suave(b)) - Math.sin(Math.PI * b) * 0.07; sola = Math.sin(Math.PI * Math.min(1, b * 1.3)); perto = mistura(1.18, 1, b); }
+    else { var d = suave((fase - 0.65) / 0.08); px = mistura(0.5, 0.485, d); py = 0.845; deitado = d; }
     shape(c, W, H, tom(cor, 0.1));
     if (noChao) oval(c, W * px, H * (py + 0.005), W * 0.06 * perto, H * 0.012, 'rgba(0,0,0,.3)');
+    // quadris giram com o corpo: o direito (de trás) fica mais perto de quem olha
+    var mq = 0.055 * cg + 0.01;
     // perna de trás (direita): quadril -> joelho -> pé
-    var qd = [W * 0.555, H * 0.55], pd = [W * px, H * (py - 0.045 * perto)], jd = joelho(qd[0], qd[1], pd[0], pd[1], H * 0.27, 1);
+    var qd = [W * (0.5 + mq), H * 0.55], pd = [W * px, H * (py - 0.045 * perto)], jd = joelho(qd[0], qd[1], pd[0], pd[1], H * 0.27, 1);
     membro(c, qd, jd, W * 0.062, W * 0.05, PELE, PELE_SOMBRA); membro(c, jd, pd, W * 0.05, W * 0.036 * perto, PELE, PELE_SOMBRA);
     caixa(c, pd[0] - W * 0.038 * perto, pd[1] - H * 0.012, W * 0.076 * perto, H * 0.022, W * 0.01, '#fdfdfd');   // meia
-    tenis(c, W * px, H * py, W * 0.11 * perto, sola, tom(cor, -0.2));
-    // perna da frente (esquerda): pé em cima do shape, joelho um pouco dobrado
-    var qe = [W * 0.445, H * 0.55], pe = [W * 0.45, H * 0.765], je = joelho(qe[0], qe[1], pe[0], pe[1], H * 0.222, -1);
+    // perna da frente (esquerda): pé em cima do shape, perto do bico
+    var qe = [W * (0.5 - mq), H * 0.55], pe = [W * 0.455, H * 0.765], je = joelho(qe[0], qe[1], pe[0], pe[1], H * 0.222, -1);
     membro(c, qe, je, W * 0.062, W * 0.05, PELE, PELE_SOMBRA); membro(c, je, pe, W * 0.05, W * 0.036, PELE, PELE_SOMBRA);
     caixa(c, pe[0] - W * 0.038, pe[1] - H * 0.012, W * 0.076, H * 0.022, W * 0.01, '#fdfdfd');
-    tenis(c, W * 0.45, H * 0.8, W * 0.11, 0, tom(cor, -0.2));
-    // bermuda
+    // tênis: remando, o da frente aponta para a frente (calcanhar); deslizando, os dois ficam de lado no shape
+    if (deitado > 0.5) tenisLado(c, W * 0.455, H * 0.8, W * 0.15, tom(cor, -0.2)); else tenis(c, W * 0.455, H * 0.8, W * 0.11, 0, tom(cor, -0.2));
+    if (deitado > 0.5) tenisLado(c, W * px, H * py, W * 0.16, tom(cor, -0.2)); else tenis(c, W * px, H * py, W * 0.11 * perto, sola, tom(cor, -0.2));
+    // bermuda (estreita com o giro)
+    var lb = 0.14 * (0.62 + 0.38 * cg);
     c.fillStyle = SHORT; c.beginPath();
-    c.moveTo(W * 0.36, H * 0.47); c.lineTo(W * 0.64, H * 0.47); c.lineTo(W * 0.635, H * 0.585);
-    c.lineTo(W * 0.505, H * 0.6); c.lineTo(W * 0.5, H * 0.545); c.lineTo(W * 0.495, H * 0.6); c.lineTo(W * 0.365, H * 0.585); c.closePath(); c.fill();
-    c.fillStyle = 'rgba(255,255,255,.07)'; c.fillRect(W * 0.38, H * 0.48, W * 0.24, H * 0.015);
-    // tronco e braços um pouco mais estreitos (corpo de criança: cabeça grande, ombros pequenos)
-    c.save(); c.translate(W * 0.5, H * 0.5); c.scale(0.86, 1); c.translate(-W * 0.5, -H * 0.5);
-    // braços: ombro -> cotovelo -> mão, meio dobrados, balançando
-    [[-1, -balanco], [1, balanco]].forEach(function (l) {
-      var s = l[0], bb = l[1], om = [W * (0.5 + s * 0.15), H * 0.255], co = [W * (0.5 + s * (0.235 + bb * 0.015)), H * (0.375 - bb * 0.01)], mao = [W * (0.5 + s * (0.25 + bb * 0.03)), H * (0.475 - bb * 0.03)];
-      membro(c, om, co, W * 0.048, W * 0.04, PELE, PELE_SOMBRA); membro(c, co, mao, W * 0.04, W * 0.032, PELE, PELE_SOMBRA);
-      circ(c, mao[0], mao[1], W * 0.04, PELE);
-    });
-    // camiseta larga, com mangas curtas e dobras
+    c.moveTo(W * (0.5 - lb), H * 0.47); c.lineTo(W * (0.5 + lb), H * 0.47); c.lineTo(W * (0.5 + lb - 0.005), H * 0.585);
+    c.lineTo(W * 0.505, H * 0.6); c.lineTo(W * 0.5, H * 0.545); c.lineTo(W * 0.495, H * 0.6); c.lineTo(W * (0.5 - lb + 0.005), H * 0.585); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.07)'; c.fillRect(W * (0.5 - lb + 0.02), H * 0.48, W * (lb * 2 - 0.04), H * 0.015);
+    // camiseta: o tronco gira de lado (pé esquerdo na frente): as costas ficam à esquerda e o lado direito do
+    // corpo aparece à direita, mais escuro
+    var A = 0.13, B = 0.085, meia = Math.sqrt(A * A * cg * cg + B * B * sg * sg), esp = -B * sg * 0.9;   // largura vista e a coluna
+    c.save(); c.translate(W * 0.5, 0); c.scale(meia / A, 1); c.translate(-W * 0.5, 0);
     c.fillStyle = grad(c, H * 0.22, H * 0.52, clara, escura); c.beginPath();
-    c.moveTo(W * 0.37, H * 0.505); c.quadraticCurveTo(W * 0.34, H * 0.38, W * 0.355, H * 0.3);
-    c.lineTo(W * 0.29, H * 0.335); c.lineTo(W * 0.255, H * 0.285); c.quadraticCurveTo(W * 0.3, H * 0.225, W * 0.41, H * 0.215);
-    c.quadraticCurveTo(W * 0.5, H * 0.235, W * 0.59, H * 0.215); c.quadraticCurveTo(W * 0.7, H * 0.225, W * 0.745, H * 0.285);
-    c.lineTo(W * 0.71, H * 0.335); c.lineTo(W * 0.645, H * 0.3); c.quadraticCurveTo(W * 0.66, H * 0.38, W * 0.63, H * 0.505);
-    c.quadraticCurveTo(W * 0.5, H * 0.52, W * 0.37, H * 0.505); c.closePath(); c.fill();
-    c.strokeStyle = 'rgba(0,0,0,.16)'; c.lineWidth = Math.max(1, W * 0.008); c.lineCap = 'round';
-    [[0.44, 0.3, 0.42, 0.46], [0.56, 0.32, 0.585, 0.47], [0.5, 0.38, 0.49, 0.5]].forEach(function (q) { c.beginPath(); c.moveTo(W * q[0], H * q[1]); c.quadraticCurveTo(W * (q[0] + 0.02), H * (q[1] + q[3]) / 2, W * q[2], H * q[3]); c.stroke(); });
-    c.fillStyle = 'rgba(255,255,255,.85)'; c.font = '800 ' + Math.round(H * 0.045) + 'px ' + FONTE; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('7', W * 0.5, H * 0.33);
+    c.moveTo(W * 0.385, H * 0.505); c.quadraticCurveTo(W * 0.36, H * 0.38, W * 0.37, H * 0.3);
+    c.lineTo(W * 0.37, H * 0.3); c.quadraticCurveTo(W * 0.39, H * 0.225, W * 0.43, H * 0.215);
+    c.quadraticCurveTo(W * 0.5, H * 0.232, W * 0.57, H * 0.215); c.quadraticCurveTo(W * 0.61, H * 0.225, W * 0.63, H * 0.3);
+    c.quadraticCurveTo(W * 0.64, H * 0.38, W * 0.615, H * 0.505);
+    c.quadraticCurveTo(W * 0.5, H * 0.52, W * 0.385, H * 0.505); c.closePath(); c.fill();
+    c.save(); c.clip();
+    var xc = 0.5 + esp * (A / meia);   // a coluna, em coordenadas antes do "scale"
+    c.fillStyle = 'rgba(0,0,0,' + (0.28 * sg).toFixed(3) + ')'; c.fillRect(W * (xc + 0.06), H * 0.2, W * 0.3, H * 0.35);   // lado direito, virado
     c.restore();
+    c.strokeStyle = 'rgba(0,0,0,.16)'; c.lineWidth = Math.max(1, W * 0.008); c.lineCap = 'round';
+    [[xc - 0.05, 0.3, xc - 0.07, 0.46], [xc + 0.07, 0.32, xc + 0.085, 0.47], [xc, 0.38, xc - 0.01, 0.5]].forEach(function (q) { c.beginPath(); c.moveTo(W * q[0], H * q[1]); c.quadraticCurveTo(W * (q[0] + 0.02), H * (q[1] + q[3]) / 2, W * q[2], H * q[3]); c.stroke(); });
+    c.save(); c.translate(W * xc, H * 0.33); c.scale(Math.max(0.35, cg), 1);
+    c.fillStyle = 'rgba(255,255,255,.85)'; c.font = '800 ' + Math.round(H * 0.045) + 'px ' + FONTE; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('7', 0, 0);
+    c.restore(); c.restore();
     // pescoço e cabeça neutra (cabelo), coberta pelo piloto vivo
     caixa(c, W * 0.455, H * 0.17, W * 0.09, H * 0.06, W * 0.03, PELE_SOMBRA);
     circ(c, W * 0.5, H * 0.105, H * 0.072, '#3a2a20');   // menor que a cabeça viva, para não aparecer na borda quando ela vira
     piloto(c, emoji, W * 0.5, H * 0.105, H * 0.2);
+  }
+  function tenisLado(c, x, y, w, cor) {   // tênis visto de lado, atravessado no shape (bico para a direita)
+    var h = w * 0.36;
+    caixa(c, x - w / 2, y - h, w, h, h * 0.45, '#f6f6f8');
+    caixa(c, x - w / 2, y - h * 0.28, w, h * 0.28, h * 0.12, '#d8d8de');
+    caixa(c, x - w * 0.12, y - h * 0.85, w * 0.3, h * 0.45, h * 0.15, cor);
+  }
+  // quanto o corpo está virado de lado (rad): remando fica mais de frente, deslizando fica de lado
+  function giroCorpo(fase) {
+    fase = ((fase || 0) % 1 + 1) % 1;
+    if (fase < 0.45) return 0.35;
+    if (fase < 0.7) return 0.35 + 0.55 * suave((fase - 0.45) / 0.25);
+    if (fase < 0.9) return 0.9;
+    return 0.9 - 0.55 * suave((fase - 0.9) / 0.1);
+  }
+  /* braços do skatista, desenhados ao vivo (seguem a curva). lado: -1 virando à esquerda, 1 à direita.
+     Como um avião inclinando: o braço de DENTRO da curva desce e o de FORA sobe (virando à esquerda, o esquerdo
+     desce e o direito sobe). qual: 'longe' (o esquerdo, atrás do corpo: desenhar ANTES do boneco) ou 'perto'
+     (o direito, na frente: desenhar DEPOIS). x0, y0, W, H: onde o boneco está desenhado. */
+  function bracosSkate(c, x0, y0, W, H, cor, fase, lado, qual) {
+    fase = ((fase || 0) % 1 + 1) % 1; lado = Math.max(-1, Math.min(1, lado || 0));
+    var g = giroCorpo(fase), cg = Math.cos(g), A = 0.13 * Math.sqrt(cg * cg + 0.43 * Math.sin(g) * Math.sin(g));
+    var bal = fase < 0.65 ? Math.sin(fase / 0.65 * Math.PI * 2) * 0.5 : 0, s = qual === 'longe' ? -1 : 1;
+    var esq = Math.max(0, -lado), dir = Math.max(0, lado);   // quanto vira para cada lado
+    var desce = s < 0 ? esq : dir, sobe = s < 0 ? dir : esq;  // este braço está do lado de dentro (desce) ou de fora (sobe)?
+    var ox = 0.5 + s * 0.13 * cg * (s < 0 ? 0.9 : 1.05), oy = s < 0 ? 0.24 : 0.25;
+    var hx = ox + s * (0.1 + 0.07 * sobe + 0.02 * desce) + (s < 0 ? -0.02 : 0.015) * bal;
+    var hy = (s < 0 ? 0.43 : 0.47) - 0.17 * sobe + 0.05 * desce - 0.02 * bal * s;
+    var om = [x0 + W * ox, y0 + H * oy], mao = [x0 + W * hx, y0 + H * hy];
+    var co = joelho(om[0], om[1], mao[0], mao[1], H * (s < 0 ? 0.23 : 0.25), s);
+    var k = s < 0 ? 0.85 : 1;   // o de trás parece um pouco menor
+    membro(c, om, co, W * 0.045 * k, W * 0.038 * k, PELE, PELE_SOMBRA); membro(c, co, mao, W * 0.038 * k, W * 0.03 * k, PELE, PELE_SOMBRA);
+    circ(c, mao[0], mao[1], W * 0.036 * k, PELE);
+    // manga curta da camiseta
+    var mx = om[0] + (co[0] - om[0]) * 0.42, my = om[1] + (co[1] - om[1]) * 0.42;
+    membro(c, om, [mx, my], W * 0.06 * k, W * 0.052 * k, tom(cor, s < 0 ? -0.25 : 0.05), null);
   }
 
   // ---------- céu ----------
@@ -289,7 +328,7 @@
     { id: 'kart', janela: { elipse: [0.5, 0.24, 0.184, 0.221] }, cab: [0.5, 0.25, 0.34], capacete: true, grupo: 'terra', nome: ['Kart', 'Kart'], w: 720, h: 600, vel: 0.96, curva: 1.12, desenhar: kart },
     { id: 'monstrao', janela: { poli: [0.29, 0.07, 0.71, 0.07, 0.71, 0.22, 0.29, 0.22] }, cab: [0.5, 0.17, 0.14], grupo: 'terra', nome: ['Monstrão', 'Monster Truck'], w: 960, h: 920, vel: 0.95, curva: 0.98, desenhar: monstrao },
     { id: 'moto', janela: { elipse: [0.5, 0.14, 0.18, 0.123] }, cab: [0.5, 0.15, 0.22], capacete: true, grupo: 'moto', nome: ['Moto', 'Motorbike'], w: 520, h: 760, vel: 1.03, curva: 1.1, desenhar: moto },
-    { id: 'skate', janela: { elipse: [0.5, 0.1, 0.3, 0.2] }, cab: [0.5, 0.1, 0.2], aberto: true, quadros: 12, grupo: 'moto', nome: ['Skate', 'Skateboard'], w: 560, h: 780, vel: 0.94, curva: 1.15, desenhar: skatista },
+    { id: 'skate', janela: { elipse: [0.5, 0.1, 0.3, 0.2] }, cab: [0.5, 0.1, 0.2], aberto: true, quadros: 12, bracos: true, grupo: 'moto', nome: ['Skate', 'Skateboard'], w: 560, h: 780, vel: 0.94, curva: 1.15, desenhar: skatista },
     { id: 'aviao', janela: { elipse: [0.5, 0.44, 0.075, 0.1] }, cab: [0.5, 0.47, 0.16], grupo: 'ar', nome: ['Aviãozinho', 'Little Plane'], w: 1500, h: 760, vel: 1, curva: 1.05, desenhar: aviao, helice: true },
     { id: 'jato', janela: { elipse: [0.5, 0.43, 0.06, 0.09] }, cab: [0.5, 0.46, 0.14], grupo: 'ar', nome: ['Jato', 'Jet'], w: 1300, h: 700, vel: 1.1, curva: 0.92, desenhar: jato, fogo: true },
     { id: 'heli', janela: { elipse: [0.5, 0.48, 0.16, 0.15] }, cab: [0.5, 0.52, 0.21], grupo: 'ar', nome: ['Helicóptero', 'Helicopter'], w: 1100, h: 900, vel: 0.95, curva: 1.12, desenhar: helicoptero, rotor: true }
@@ -302,7 +341,7 @@
   function achar(id) { for (var k = 0; k < LISTA.length; k++) if (LISTA[k].id === id) return LISTA[k]; return null; }
   function voa(id) { var v = achar(id); return !!(v && v.grupo === 'ar'); }
 
-  var VruuumVeiculos = { LISTA: LISTA, GRUPOS: GRUPOS, achar: achar, voa: voa, tom: tom };
+  var VruuumVeiculos = { LISTA: LISTA, GRUPOS: GRUPOS, achar: achar, voa: voa, tom: tom, bracosSkate: bracosSkate, giroCorpo: giroCorpo };
   if (typeof module !== 'undefined' && module.exports) module.exports = VruuumVeiculos;
   else raiz.VruuumVeiculos = VruuumVeiculos;
 })(this);
