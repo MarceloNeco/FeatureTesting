@@ -4,7 +4,7 @@
    (banco "rabiscolandia"). Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.8';
+  var APP_VERSION = '0.1.9';
   var $ = function (id) { return document.getElementById(id); };
   var F = window.DesenhoFolha, P = window.DesenhoPaginas || { LISTA: [], CATEGORIAS: [] }, Pt = window.DesenhoPintura;
   var Som = window.DesenhoSom || { iniciar: function () {}, musica: function () {}, musicaLigada: function () { return false; }, efeito: function () {}, efeitos: function () {}, efeitosLigados: function () { return false; }, proxima: function () {}, nomeAtual: function () { return ''; } };
@@ -28,6 +28,8 @@
   if (typeof pref.musica !== 'boolean') pref.musica = true;
   if (typeof pref.efeitos !== 'boolean') pref.efeitos = true;
   pref.feitas = pref.feitas || {};
+  pref.tour = pref.tour || {};
+  if (typeof pref.voz !== 'boolean') pref.voz = true;
   function salvarPref() { gravar('rabiscolandia.pref', pref); }
 
   // ---------- idioma ----------
@@ -56,6 +58,7 @@
   function voltar() { if (pilha.length) history.back(); else mostrar('menu'); }
   window.addEventListener('popstate', function () {
     if (ignorar) { ignorar--; if (aposFechar) { var fn = aposFechar; aposFechar = null; fn(); } return; }
+    if (window.DesenhoTour && DesenhoTour.aberto()) { tourNoHistorico = false; DesenhoTour.terminar(true); return; }   // Voltar do celular fecha só o passo a passo
     if (janelaAberta) { fecharJanela(); return; }
     if (!$('painel').hidden) { fecharPainel(true); return; }
     if (pilha.length) mostrar(pilha.pop());
@@ -249,9 +252,26 @@
     $('tituloPintar').textContent = pag ? N(pag) : t('Desenho livre', 'Free drawing');
     $('btColinha').hidden = !pag; $('btVariacao').hidden = !pag; $('btDica').hidden = m !== 'numeros';
     colinha(false); montarBarra(); $('btDesfazer').disabled = !motor.podeDesfazer();
+    // primeira vez neste jeito de brincar: o Rabisquinho aparece sozinho e ensina (na TV, só pelo ❓)
+    var qual = tourDe(m);
+    if (!TV && !pref.tour[qual]) setTimeout(function () { if (atual === 'pintar' && !(window.DesenhoTour && DesenhoTour.aberto())) comecarTour(qual); }, 700);
   }
+  /* ---------- passo a passo com o Rabisquinho (tour.js): balões animados, lidos em voz alta ---------- */
+  function tourDe(m) { return m === 'numeros' ? 'numeros' : m === 'colorir' ? 'colorir' : 'livre'; }
+  function comecarTour(qual) {
+    if (!window.DesenhoTour) return;
+    fecharPainel(true);
+    pref.tour[qual] = 1; salvarPref();   // já viu (mesmo que saia no meio): não abre sozinho de novo
+    if (!tourNoHistorico) { tourNoHistorico = true; try { history.pushState({ tour: 1 }, ''); } catch (e) { /* ok */ } }
+    DesenhoTour.comecar(qual, { t: t, lingua: pref.lingua, voz: pref.voz, aoMudarVoz: function (v) { pref.voz = v; salvarPref(); },
+      aoTerminar: function () { if (tourNoHistorico) { tourNoHistorico = false; ignorar++; history.back(); } } });
+  }
+  var tourNoHistorico = false;
+  $('btTour').addEventListener('click', function () { if (motor) comecarTour(tourDe(motor.modo())); });
+  $('btAprender').addEventListener('click', function () { pref.tour.livre = 0; abrirLivre(); });
   function entrarNoPintar() { if (motor) { motor.iniciar(); aplicarLado(); } }
-  function sairDoPintar() { salvarAgora(); fecharPainel(true); if (motor) motor.parar(); desligarMao(); }
+  function sairDoPintar() {
+    if (window.DesenhoTour) { DesenhoTour.terminar(true); tourNoHistorico = false; } salvarAgora(); fecharPainel(true); if (motor) motor.parar(); desligarMao(); }
   $('btSair').addEventListener('click', function () { voltar(); });
   $('btDesfazer').addEventListener('click', function () { if (motor && motor.desfazer()) Som.efeito('desfazer'); });
   $('btZoomMais').addEventListener('click', function () { motor.zoom(1.4); });
