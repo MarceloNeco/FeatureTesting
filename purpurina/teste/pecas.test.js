@@ -129,7 +129,7 @@ test('menina ou menino, rosto e nariz: escolhas novas da personagem', () => {
 test('traços para parecer com qualquer criança: olhos, boca, nariz, rosto, cabelo armado e armações', () => {
   const e = V.novo();
   assert.equal(e.formaOlho, 'redondos'); assert.equal(e.distOlhos, 'normal'); assert.equal(e.formaBoca, 'coracao');
-  for (const [c, n] of [['formaOlho', 6], ['distOlhos', 3], ['formaBoca', 6]]) assert.equal(P.categoria(c).opcoes.length, n, c);
+  for (const [c, n] of [['formaOlho', 9], ['distOlhos', 3], ['formaBoca', 6]]) assert.equal(P.categoria(c).opcoes.length, n, c);
   for (const id of ['batatinha', 'largo', 'reto']) assert.ok(P.opcao('nariz', id), id);
   for (const id of ['largo', 'quadradinho', 'comprido']) assert.ok(P.opcao('rosto', id), id);
   for (const id of ['armado', 'armadoLongo']) assert.ok(P.opcao('cabelo', id), id);
