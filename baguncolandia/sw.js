@@ -2,9 +2,9 @@
    baixar de novo. Código (html, js, css, json): rede primeiro com 4 s de espera, senão a cópia;
    fonte, imagens e biblioteca: cópia primeiro. Cache com o nome do app (nunca apaga o dos outros apps
    da mesma origem). Subir VERSAO a cada release (igual a APP_VERSION em app.js). */
-var VERSAO = '0.8.9';
+var VERSAO = '0.8.16';
 var CACHE = 'bagunca-v' + VERSAO;
-var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'figuras.js', 'cenas.js', 'boneco.js', 'desenho.js', 'sala.js', 'voz.js', 'som.js', 'calibrar.js', 'config.js', 'batida.js', 'spotify.js', 'esqueleto.js', 'libs/supabase.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js', '../atualizar.js'];
+var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'jogo.js', 'casa.js', 'figuras.js', 'cenas.js', 'boneco.js', 'desenho.js', 'sala.js', 'voz.js', 'som.js', 'calibrar.js', 'config.js', 'batida.js', 'spotify.js', 'esqueleto.js', 'libs/supabase.js', 'fontes/fredoka.woff2', 'icone-192.png', 'icone-512.png', 'manifest.webmanifest', 'versoes.json', '../recursos.js', '../atualizar.js'];
 // A parte da câmera (MediaPipe em libs/mediapipe/, ~28 MB) só baixava na primeira vez que alguém ligava o boneco;
 // sem internet, essa primeira vez falhava. Agora fica guardada sozinha depois de abrir, mas só no Wi-Fi.
 var PESADOS = ['libs/mediapipe/vision_bundle.mjs', 'libs/mediapipe/vision_wasm_internal.js', 'libs/mediapipe/vision_wasm_internal.wasm', 'libs/mediapipe/pose_landmarker_lite.task', 'libs/mediapipe/hand_landmarker.task'];
@@ -30,6 +30,7 @@ self.addEventListener('fetch', function (e) {
   var req = e.request; if (req.method !== 'GET') return;
   var url = new URL(req.url);
   if (url.origin !== location.origin) return;   // YouTube, Supabase, STUN: nunca passa pelo cache
+  if (/\/musicas\//.test(url.pathname)) return;   // músicas: o navegador baixa aos pedaços enquanto toca (sem internet, o jogo toca a sintetizada)
   var pesado = /\.(woff2|png|webp|jpg|jpeg|svg|wasm|task|mjs)$/i.test(url.pathname) || /\/libs\//.test(url.pathname);
   if (pesado) {
     e.respondWith(caches.match(req).then(function (r) { return r || fetch(req).then(function (resp) { if (resp.ok) caches.open(CACHE).then(function (c) { c.put(req, resp.clone()); }); return resp; }); }));

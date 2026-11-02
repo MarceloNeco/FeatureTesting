@@ -119,6 +119,8 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #tv.local #tvLobby .muted { display: none; }
 #tv.local .lobbyLista .jog { font-size: 1.1rem; padding: .5rem 1.2rem; min-width: 0; border-width: 2px; box-shadow: 0 0 1rem var(--cor, #fff); }
 #tv.local .lobbyLista .jog small { font-size: .8rem; }
+#tv.local .lobbyLista .jog.trocavel { cursor: pointer; position: relative; }
+#tv.local .lobbyLista .jog.trocavel::after { content: "✏️"; position: absolute; top: .3rem; right: .4rem; font-size: 1rem; }
 #tv.local .resumo { font-size: .95rem; padding: .5rem .9rem; }
 #tv.local #tvCarregando { padding-bottom: 3rem; }
 #tv.local .melancia { width: 24vh; height: 24vh; }
@@ -177,3 +179,45 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #avisoSair { position: fixed; left: 50%; bottom: 2rem; transform: translate(-50%, 1rem); z-index: 1000; max-width: calc(100% - 2rem); background: var(--card); color: var(--text); border: 2px solid var(--lima); border-radius: 14px; padding: .8rem 1.1rem; font-weight: 600; text-align: center; opacity: 0; pointer-events: none; transition: opacity .2s ease-out, transform .2s ease-out; }
 #avisoSair.ativo { opacity: 1; transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: reduce) { #avisoSair { transition: none; } }
+/* tela inicial: os botões em duas caixas, "Com a TV" e "Sem a TV", cada um com uma linha dizendo o que faz */
+.caixa { display: flex; flex-direction: column; gap: .75rem; border: 2px solid var(--border); border-radius: 18px; padding: .9rem; }
+.caixa h2 { font-size: 1.05rem; font-weight: 700; color: var(--muted); margin: 0 0 -.15rem .2rem; }
+.caixa button small { display: block; font-size: .85rem; font-weight: 500; opacity: .85; margin-top: .3rem; line-height: 1.3; }
+/* modos sem TV: ⏸ só durante a rodada; os 6 modos numa fileira só; 🔊 e 🎵 sempre à mão, na coluna da direita */
+#localPausa { display: none; }
+#tvLocalBar .grupo { flex-wrap: nowrap; }
+#tvLocalBar .grupo button { flex: 1 1 0; min-width: 0; max-width: 4.6rem; padding: .4rem 0; }
+#tvSom { display: none; position: absolute; right: 1.5vh; top: calc(1.5vh + 52px); z-index: 9; flex-direction: column; gap: 8px; }
+#tv.local #tvSom { display: flex; }
+#tv.local.jogando #tvSom { top: calc(1.5vh + 104px); }
+#tv.local.toque.jogando #tvSom { top: calc(1.5vh + 156px); }
+#tvSom button { width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; font-size: 1.1rem; border: 0; }
+.btMusica { position: relative; }
+.btMusica.off { opacity: .55; }
+.btMusica.off::after { content: ''; position: absolute; left: 22%; right: 22%; top: 50%; height: 3px; background: var(--erro); border-radius: 2px; transform: rotate(-45deg); }
+.dicaLobby { color: var(--ouro); font-size: 1rem; text-align: center; max-width: 32rem; margin: 0 auto; }
+.dicaLobby:empty { display: none; }
+/* "Quem vai jogar" com duas pessoas no mesmo aparelho: o nome da 2ª (o último usado já vem escrito) */
+.nome2 { display: flex; align-items: center; justify-content: center; gap: .5rem; flex-wrap: wrap; color: var(--text); font-weight: 600; }
+.nome2 input { width: 11rem; max-width: 60vw; font: inherit; padding: .5rem .7rem; border-radius: 12px; border: 2px solid var(--border); background: var(--card); color: var(--text); }
+/* celular deitado: o palco nunca estica (fica 16:9 no meio; os botões vão para a faixa do lado) */
+#tvPalco { width: min(100%, calc(100vh * 16 / 9)); width: min(100%, calc(100dvh * 16 / 9)); }
+@media (max-height: 460px) {
+  #tvSair, #tv.jogando #localPausa, #tv.toque.jogando #localBoneco, #tvSom button { width: 38px; height: 38px; min-height: 38px; font-size: 1rem; }
+  #tv.jogando #localPausa { top: calc(1.5vh + 44px); }
+  #tv.toque.jogando #localBoneco { top: calc(1.5vh + 88px); }
+  #tvSom { gap: 6px; top: calc(1.5vh + 44px); }
+  #tv.local.jogando #tvSom { top: calc(1.5vh + 88px); }
+  #tv.local.toque.jogando #tvSom { top: calc(1.5vh + 132px); }
+}
+/* 🧸 Bagunça: setinhas para o cômodo vizinho, nos cantos de baixo */
+#casaNav { display: none; position: absolute; left: 1.5vh; right: 1.5vh; bottom: 1.5vh; z-index: 9; justify-content: space-between; pointer-events: none; }
+#tv.local.casa.jogando #casaNav { display: flex; }
+#casaNav button { pointer-events: auto; background: rgba(0,0,0,.55); color: #fff; border: 2px solid rgba(255,255,255,.4); border-radius: 999px; padding: .35rem .9rem; font-size: 1rem; min-height: 44px; }
+/* 🧹 arrumação: dica no meio das setinhas; botão para arrumar depois da bagunça; o modo só no jogo com o dedo */
+#casaDica { display: none; margin-left: auto; margin-right: .6rem; }   /* 💡 junto do ▶: o chão do meio fica para as caixas */
+#casaDica:not(.ativo) { opacity: .7; }
+#tv.arrumando #casaDica { display: inline-block; }
+#localArrumar { display: none; flex: 1 1 100%; background: var(--ouro); color: #1a1446; }
+#tv.podearrumar:not(.jogando) #localArrumar { display: block; }
+#tv:not(.toque) #localModos button[data-v="arrumar"] { display: none; }

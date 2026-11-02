@@ -156,3 +156,66 @@ test('volta completa sem pular: a cabeça é sempre a girada (de 1° a 359°) e 
   assert.ok(larg(180) < larg(10) * 0.02, 'de costas quase sem pele');
   assert.ok(!/<path d="M126,152 Q200,96 274,152"/.test(B.svg(e, { id: 't', angulo: 180 })), 'tiara não aparece de costas');
 });
+
+test('traços novos desenham de frente, girando e de costas', () => {
+  const L = [{ formaOlho: 'amendoados', distOlhos: 'afastados', formaBoca: 'sorrisinho', nariz: 'batatinha', rosto: 'largo', cabelo: 'armado', oculos: 'retangular' },
+    { formaOlho: 'caidos', distOlhos: 'juntos', formaBoca: 'cheinha', nariz: 'reto', rosto: 'quadradinho', cabelo: 'armadoLongo', oculos: 'gatinho' },
+    { formaOlho: 'puxadinhos', formaBoca: 'larga', nariz: 'largo', rosto: 'comprido', oculos: 'aviador' }, { formaOlho: 'pequenos', formaBoca: 'fininha', oculos: 'meioAro' },
+    { formaOlho: 'grandes', formaBoca: 'pequenininha', oculos: 'redondoGrande' }, { formaOlho: 'fininhos' }, { formaOlho: 'fininhosPuxados', oculos: 'retangular' }, { formaOlho: 'sorridentes', cilios: 'arco', sombra: 'simples' }, { oculos: 'quadrado' }, { oculos: 'oval' }, { oculos: 'fininho' }];
+  for (const l of L) for (const a of [0, 40, 90, 140, 200, 300]) {
+    const s = B.svg(Object.assign(V.novo(), l), { id: 'n', angulo: a, anim: true }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), JSON.stringify(l) + a);
+  }
+  // olhos afastados ficam mais longe um do outro (e a lente do óculos vai junto)
+  const lente = (d) => (B.svg(Object.assign(V.novo(), { distOlhos: d, oculos: 'retangular' }), { id: 'o', fundo: false }).match(/translate\((-?\d+) 0\)/) || [0, '0'])[1];
+  assert.equal(lente('afastados'), '-9'); assert.equal(lente('juntos'), '7');
+});
+
+test('testa: a linha do cabelo sobe ou desce, de frente e girando, e o cacheado solto desenha', () => {
+  for (const testa of ['baixa', 'normal', 'alta', 'bemAlta']) for (const cabelo of ['cachosSoltos', 'franja', 'longo', 'coqueDuplo']) for (const a of [0, 60, 180]) {
+    const s = B.svg(Object.assign(V.novo(), { testa, cabelo, cabeloCor: 'loiroEscuro', olhos: 'cinza' }), { id: 't', angulo: a }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), testa + cabelo + a);
+  }
+  const franja = (t) => B.svg(Object.assign(V.novo(), { cabelo: 'franja', testa: t }), { id: 'f', fundo: false });
+  assert.notEqual(franja('alta'), franja('normal')); assert.notEqual(franja('baixa'), franja('normal'));
+});
+
+test('testa alta: de lado a cabeça não fica careca (a linha do cabelo sobe só na testa, não nas têmporas nem até o cocuruto)', () => {
+  const pts = (testa, a) => { const d = (B.svg(Object.assign(V.novo(), { testa, cabelo: 'rabinhoCachos' }), { id: 'k', angulo: a }).match(/id="k-peleR"><path d="([^"]+)"/) || [])[1]; return [...d.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map(m => [+m[1], +m[2]]); };
+  for (const testa of ['normal', 'alta', 'bemAlta']) for (const a of [80, 90, 100, -90]) {
+    const q = pts(testa, a), topo = Math.min(...q.map(v => v[1]));
+    assert.ok(topo >= 112, testa + ' ' + a + '°: a pele chega no alto da cabeça (y ' + topo + ')');
+    // na frente da orelha (costeleta), a linha do cabelo fica quase onde fica com a testa normal
+    const perto = (v) => Math.min(...v.filter(t => Math.abs(t[0] - 200) < 14 && t[1] < 230).map(t => t[1]));
+    assert.ok(perto(q) >= perto(pts('normal', a)) - 6, testa + ' ' + a + '°: a pele sobe na frente da orelha até y ' + perto(q));
+  }
+});
+
+test('menina: queixo pequeno e maxilar suave em todos os formatos de rosto (menino continua igual)', () => {
+  const P2 = require('../pecas.js');
+  // largura do contorno de lado na altura do queixo (y ≈ 285): a menina fica para trás do menino
+  const frente = (e) => { const d = (B.svg(e, { id: 'q', angulo: 90 }).match(/id="q-rostoV"><path d="([^"]+)"/) || [])[1]; let mx = 0; d.replace(/M([\d.]+),([\d.]+)a([\d.]+),([\d.]+)/g, (m, x, y, rx, ry) => { const cy = +y, top = cy - +ry, bot = cy + +ry; if (top < 282 && bot > 282) { const k = (282 - cy) / +ry; mx = Math.max(mx, +x + +rx + +rx * Math.sqrt(1 - k * k)); } }); return mx; };
+  for (const rosto of P2.categoria('rosto').opcoes.map(o => o.id)) {
+    const menina = frente(Object.assign(V.novo(), { rosto })), menino = frente(Object.assign(V.novo(), { rosto, personagem: 'menino' }));
+    assert.ok(menina < menino, 'queixo da menina mais delicado: ' + rosto + ' ' + menina + ' x ' + menino);
+  }
+});
+
+test('glitter brilha de verdade: lantejoulas e faíscas animadas na tela, paradas na foto', () => {
+  for (const g of ['bochechas', 'olhos', 'cabelo', 'tudo']) for (const a of [0, 60]) {
+    const e = Object.assign(V.novo(), { glitter: g, glitterCor: 'arco', batom: 'brilho' });
+    const tela = B.svg(e, { id: 'g', anim: true, angulo: a }), foto = B.svg(e, { id: 'g', anim: false, angulo: a });
+    assert.equal(bemFormado(tela), ''); assert.ok(!/NaN|undefined/.test(tela), g + a);
+    if (a === 0 || g === 'bochechas') assert.ok((tela.match(/class="pp-fa"/g) || []).length >= 3, g + ' ' + a + ': faíscas animadas');
+    assert.ok(!/pp-fa|pp-pi/.test(foto), g + ': na foto fica parado');
+  }
+  const boca = B.svg(Object.assign(V.novo(), { batom: 'brilho' }), { id: 'b', anim: true });
+  assert.match(boca, /id="b-labG"/, 'o glitter da boca fica só dentro da boca');
+});
+
+test('patins: de frente as rodas ficam de pé e estreitas; de lado, redondas', () => {
+  const e = Object.assign(V.novo(), { sapatos: 'patins', calca: 'nenhum' });
+  const frente = B.svg(e, { id: 'p' }), lado = B.svg(e, { id: 'p', angulo: 90 });
+  const rodas = [...frente.matchAll(/<rect x="[^"]*" y="651" width="9" height="16"/g)];
+  assert.equal(rodas.length, 4, 'duas rodas da frente em cada pé, em pé');
+  assert.ok(!/<circle cx="[^"]*" cy="661" r="6" fill="#ffd166"/.test(frente), 'sem roda redonda de frente');
+  assert.ok((lado.match(/r="6.5" fill="#ffd166"/g) || []).length >= 2, 'de lado as rodas são redondas');
+});

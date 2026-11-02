@@ -15,7 +15,7 @@ Endereço: `https://solverone.com.br/FeatureTesting/baguncolandia/` (atalho para
    Deixe a câmera ligar (o celular pergunta uma vez).
 3. **Apoie o celular** deitado, virado para quem vai jogar, a uns 2 metros, com luz boa.
 4. No celular, escolha o **modo** (🍉 Corta-corta, 🎈 Pega-pega, ⚽ Chuta-chuta, 🪵 Pula e abaixa,
-   🎳 Bagunça de bolas, 🎪 Bagunça total), o **ambiente** (🏞️ Paisagem + boneco, com cenário à escolha, ou
+   🎳 Bagunça de bolas, 🎪 Bagunça total, 🧸 Bagunça na casa), o **ambiente** (🏞️ Paisagem + boneco, com cenário à escolha, ou
    📷 Câmera, em que você aparece na TV), quantas **pessoas** (1 ou 2), quantos **celulares** (1 filmando
    os dois, ou 2), o **tempo** e o **nível**.
 5. Toque em **▶ Começar** (ou OK no controle da TV). Siga a **voz e a legenda**: saia da frente da
@@ -25,6 +25,30 @@ Endereço: `https://solverone.com.br/FeatureTesting/baguncolandia/` (atalho para
 
 **Música**: em 🎵 Música no celular, cole um link do YouTube (vídeo ou playlist); a TV toca num
 cantinho. Com tempo "🎵 a música", a rodada dura a música inteira.
+
+**🧸 Bagunça na casa**: cada rodada num lugar (sala, quarto, jardim, cozinha, banheiro ou parquinho), cheio de coisas arrumadas. Bata nelas e
+tudo vai bagunçando, sem quebrar: livro cai e abre, torre de blocos desaba, bola quica e sai pela janela aberta, o
+lustre balança e muda a cor da luz, o interruptor acende e apaga, a janela abre e fecha devagar, o quadro fica
+torto, o cachorrinho anda, late e corre atrás da bola; no jardim, a árvore solta folhas, os passarinhos voam e o
+balanço balança. Na cozinha, geladeira e torneira; no banheiro, bolhas de sabão e o papel higiênico que desenrola; no
+parquinho, escorregador, gangorra e castelo de areia. Bichos: o **Picolé** (o cavachon da família, desenhado em código),
+o gato, o papagaio que fala, a tartaruga e os passarinhos. Nos últimos segundos a mamãe vem chegando. As setinhas ◀ ▶
+(nos cantos de baixo; setas no controle da TV) levam ao cômodo vizinho, e cada cômodo guarda a bagunça. Em cada lugar há
+aparelhos que funcionam ao toque (TV, pianinho, aquário, móbile, cuco, torradeira, micro-ondas, chuveiro, descarga,
+sapo, irrigador, varal, correio, pipa…): a tabela `APAR` do `casa.js`. O Bagunçômetro
+(no alto) vai de 0 a 100 %; chegar a 100 % dá bônus. O motor mora em `casa.js`.
+
+**🧹 Arrumar a bagunça** (por enquanto só no jogo com o dedo): no fim do 🧸 aparece o botão "🧹 Arrumar a bagunça", que
+arruma a mesma bagunça (todos os cômodos visitados); o modo 🧹 Arrumar começa com uma bagunça sorteada. Arraste cada
+coisa: aparece a sombra do lugar certo e, perto dele, ela encaixa. Um toque fecha livro, endireita o quadro, fecha a
+geladeira, desliga a torneira e acende a luz; passar o dedo varre as folhas; o que caiu de aparelhos (torrada, carta,
+roupa, meia) vai para o cesto 🧺. O que morava no chão vai para **caixas transparentes**, uma por tipo (⚽ bolas, 🧱 blocos,
+🧸 brinquedos, 🍳 cozinha, 🧴 banho, 🪣 parquinho); o que mora na prateleira volta para a prateleira. **💡 Dicas: sim / não**
+(fica guardado): ligadas, cada lugar vazio tem um tracejado e, depois de 5 s parado, uma seta mostra o próximo. Sem relógio: acaba com festa.
+
+**Música do jogo e botões de som**: o jogo toca música o tempo todo, uma diferente a cada rodada: 13 músicas de
+verdade em `musicas/` (domínio público, ver `CREDITOS.md`). Sem internet, toca as que o próprio jogo cria. **🔊** deixa tudo mudo (efeitos, música e voz); **🎵** liga ou desliga só a música. Ficam na coluna
+da direita nos modos sem TV e ao lado de ⏸ ⏹ no celular ligado à TV; a escolha fica guardada no aparelho.
 
 **Música da sala pelo microfone**: em 🎵 Música, toque em **🎤 Seguir a música da sala** e deixe o celular
 ouvir (ele pede o microfone uma vez). Toque qualquer música em qualquer aparelho: o jogo acelera no ritmo
@@ -56,9 +80,9 @@ armadura), cor da roupa, acessório (laço, coroa, tiara, óculos, boné, chapé
 fica fixa no topo enquanto você escolhe. Boneco 1 e Boneco 2 (para duas pessoas no mesmo celular). Fica
 guardado no celular. O desenho do boneco mora em `boneco.js`.
 
-**Só o celular (sem TV)**: na tela inicial, 🎧. O jogo roda no próprio celular, com a câmera frontal.
+**🤸 Jogar com o corpo (sem TV)**: na tela inicial, caixa "Sem a TV". O jogo roda no próprio celular, com a câmera frontal.
 
-**🖐️ No dedo (celular ou tablet, sem câmera)**: na tela inicial, 🖐️. Deite o aparelho. O dedo corta, pega
+**👆 Jogar com o dedo (sem TV e sem câmera)**: na tela inicial, caixa "Sem a TV". Deite o aparelho. O dedo corta, pega
 e chuta; deslize para cima para pular e para baixo para abaixar; o boneco anda com o dedo. 👥 2 = duas
 pessoas no mesmo tablet, uma em cada metade. Sem calibração. É a "versão de bolso": no fim, o jogo
 convida a chamar a TV e jogar com o corpo todo.
@@ -92,16 +116,18 @@ Tire uma foto dessa caixa e mande: é o que falta para achar o problema. O desen
 | `jogo.js` | motor puro (sem DOM): física, acertos, pontos, combos, vidas, poderes, validação de mensagens. Testável no Node. |
 | `desenho.js` | pinta o estado no canvas da TV: figuras, cortes, suco, rastros, placar, legendas, pódio |
 | `figuras.js` | catálogo de figuras (SVG): frutas, doces, bolas, turma própria, clássicos de domínio público, `meus/` |
+| `casa.js` | modo 🧸 Bagunça: os três lugares, as coisas, a física (cair, quicar, derrubar em cadeia) e os especiais (lustre, janela, interruptor, quadro, cachorro, árvore, passarinhos); `Casa.criar` tem a mesma cara de partida do `jogo.js` |
 | `cenas.js` | cenários vetoriais do ambiente Paisagem (praia, floresta, espaço, cidade) |
 | `boneco.js` | o boneco personalizável (corpo em pé, cabeças, cabelos, roupas, acessórios, marionete) |
 | `sala.js` | pareamento (Supabase broadcast), WebRTC, câmera, visão (diferença entre quadros) |
 | `calibrar.js` | calibração guiada: fundo → silhueta → braços → chute → pulo |
-| `voz.js` / `som.js` | fala (speechSynthesis, regras SolverONE) e sons sintetizados (WebAudio) |
+| `voz.js` / `som.js` | fala (speechSynthesis, regras SolverONE), sons sintetizados (WebAudio) e as músicas |
+| `musicas/` | 13 MP3 de domínio público (FreePD, CC0); lista em `TRILHA` no `som.js` |
 | `batida.js` | microfone → batida e BPM (sem IA; `estimarBpm` é pura e testada no Node) |
 | `esqueleto.js` | esqueleto por IA (MediaPipe Pose em `libs/mediapipe/`, carregado só quando a pessoa liga); devolve 13 pontos espelhados |
 | `spotify.js` / `config.js` | Spotify como controle remoto (PKCE, sem segredo); `config.js` guarda só o Client ID público |
 | `sw.js` | cache da pasta; `VERSAO` tem de ser igual a `APP_VERSION` |
-| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js` e `voltar.test.js` (Chromium) |
+| `teste/` | `jogo.test.js`, `figuras.test.js`, `batida.test.js` e `casa.test.js` (Node), `pagina.test.js`, `voltar.test.js`, `som.test.js`, `musica.test.js` e `reacao.test.js` (Chromium) |
 
 Rodar os testes: `node --test baguncolandia/teste/*.test.js` e `node baguncolandia/teste/pagina.test.js`.
 

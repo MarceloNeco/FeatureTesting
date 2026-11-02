@@ -105,7 +105,7 @@ test('resumo para leitor de tela em PT e EN', () => {
 
 test('toda parte que dá para tirar tem a opção 🚫 (nenhum), menos as do corpo (pele, rosto, nariz, olhos, cabelo…) e cenário', () => {
   for (const c of P.CATEGORIAS) {
-    if (['personagem', 'pele', 'rosto', 'nariz', 'olhos', 'cabelo', 'cenario'].includes(c.id)) continue;
+    if (['personagem', 'pele', 'rosto', 'nariz', 'testa', 'formaOlho', 'distOlhos', 'formaBoca', 'olhos', 'cabelo', 'cenario'].includes(c.id)) continue;
     const ids = c.opcoes.map(o => o.id);
     assert.ok(ids[0] === 'nenhum' || (c.id === 'estampa' && ids[0] === 'liso'), c.id + ' sem 🚫');
   }
@@ -124,4 +124,18 @@ test('menina ou menino, rosto e nariz: escolhas novas da personagem', () => {
   assert.equal(V.aplicar(m, 'personagem', 'menina').cabelo, P.PADRAO.cabelo);
   for (let i = 0; i < 20; i++) { const s = V.surpresa(m, Math.random); assert.equal(s.personagem, 'menino'); assert.equal(s.vestido, 'nenhum'); assert.equal(s.batom, 'nenhum'); }
   assert.ok(P.categoria('cabelo').opcoes.length >= 39, 'muitos penteados');
+});
+
+test('traços para parecer com qualquer criança: olhos, boca, nariz, rosto, cabelo armado e armações', () => {
+  const e = V.novo();
+  assert.equal(e.formaOlho, 'redondos'); assert.equal(e.distOlhos, 'normal'); assert.equal(e.formaBoca, 'coracao');
+  assert.equal(P.categoria('testa').opcoes.length, 4); assert.equal(e.testa, 'normal');
+  for (const [c, n] of [['formaOlho', 9], ['distOlhos', 3], ['formaBoca', 6]]) assert.equal(P.categoria(c).opcoes.length, n, c);
+  for (const id of ['batatinha', 'largo', 'reto']) assert.ok(P.opcao('nariz', id), id);
+  for (const id of ['largo', 'quadradinho', 'comprido']) assert.ok(P.opcao('rosto', id), id);
+  for (const id of ['armado', 'armadoLongo']) assert.ok(P.opcao('cabelo', id), id);
+  for (const id of ['retangular', 'quadrado', 'gatinho', 'oval', 'redondoGrande', 'aviador', 'meioAro', 'fininho']) assert.ok(P.opcao('oculos', id), id);
+  // a surpresa não mexe no jeito da criança
+  const eu = Object.assign(V.novo(), { formaOlho: 'amendoados', distOlhos: 'afastados', formaBoca: 'sorrisinho', nariz: 'batatinha' });
+  const s = V.surpresa(eu, Math.random); for (const k of ['formaOlho', 'distOlhos', 'formaBoca', 'nariz']) assert.equal(s[k], eu[k], k);
 });

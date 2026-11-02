@@ -2,6 +2,77 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.15.0",
+      "data": "02/Nov/2026",
+      "hora": "14:10:27",
+      "pt": [
+        "🔄 Giro sem \"careca\": com a testa alta (ou bem alta), a linha do cabelo sobe só no meio da testa — nas têmporas e no alto da cabeça o cabelo fica no lugar, de frente, de lado e de costas.",
+        "✨ Glitter de verdade: lantejoulas de vários tons com pontinho de luz e estrelinhas que crescem, giram e piscam na tela — nas bochechas, perto dos olhos, no cabelo, na chuva de glitter, no batom com glitter, nas unhas e no tênis de glitter.",
+        "🛼 Patins certos: de frente as rodinhas aparecem de pé e estreitas (com o freio rosa na ponta); de lado, redondas."
+      ],
+      "en": [
+        "🔄 No more \"bald\" turn: with a high forehead, the hairline rises only in the middle of the forehead — the temples and the top of the head keep their hair, from the front, the side and the back.",
+        "✨ Real glitter: sequins in several shades with a speck of light, and little stars that grow, spin and twinkle on screen — on the cheeks, around the eyes, in the hair, in the glitter shower, on glitter lipstick, nails and glitter sneakers.",
+        "🛼 Proper roller skates: from the front the wheels stand upright and narrow (with the pink toe stop); from the side, round."
+      ]
+    },
+    {
+      "versao": "0.14.1",
+      "data": "02/Nov/2026",
+      "hora": "13:57:18",
+      "pt": [
+        "👧 Rosto de menina delicado em todos os formatos: queixinho pequeno e recolhido, maxilar suave (o quadradinho fica arredondado) e lábios que acompanham — de frente e, principalmente, de lado, sem ficar \"queixuda\". O menino continua como estava."
+      ],
+      "en": [
+        "👧 A delicate girl face in every shape: a small, tucked chin, a soft jaw (the square one gets rounded) and lips that follow — from the front and especially from the side, with no big chin. The boy stays as he was."
+      ]
+    },
+    {
+      "versao": "0.14.0",
+      "data": "02/Nov/2026",
+      "hora": "11:45:35",
+      "pt": [
+        "🙆 Testa: baixinha, no meio, alta ou testona — a linha do cabelo sobe ou desce em qualquer penteado, de frente e girando.",
+        "💇 Cabelo novo: cacheado solto com risca no meio, sem franja, com os cachinhos caindo dos lados do rosto.",
+        "🎨 Cor de cabelo nova: loiro escuro. Cores de olho novas: azul-acinzentados e verde-acinzentados."
+      ],
+      "en": [
+        "🙆 Forehead: low, middle, high or very high — the hairline goes up or down with any hairstyle, from the front and while spinning.",
+        "💇 New hairstyle: loose curls with a middle part, no bangs, with the curls falling on both sides of the face.",
+        "🎨 New hair color: dark blonde. New eye colors: grey-blue and grey-green."
+      ]
+    },
+    {
+      "versao": "0.13.1",
+      "data": "02/Nov/2026",
+      "hora": "11:25:36",
+      "pt": [
+        "👁️ 3 formatos de olho novos, para todas as crianças se verem no jogo: fininhos (sem a dobrinha da pálpebra), fininhos puxadinhos e fechadinhos sorrindo (meia-lua).",
+        "👆 As partes da aba (Pele, Rosto, Olhos, Mechas…) ficam menores e cabem todas na tela, sem esconder o rosto; se o texto do celular estiver grande e não couber, a lista rola com o dedo e aparece o \"⬇ mais\"."
+      ],
+      "en": [
+        "👁️ 3 new eye shapes, so every child can see themselves in the game: narrow monolid, narrow upturned monolid and smiling crescent.",
+        "👆 The tab's parts (Skin, Face, Eyes, Highlights…) are smaller and all fit on screen without covering the face; if the phone text is big and they don't fit, the list scrolls with your finger and \"⬇ more\" shows up."
+      ]
+    },
+    {
+      "versao": "0.13.0",
+      "data": "02/Nov/2026",
+      "hora": "10:36:23",
+      "pt": [
+        "🧒 Fazer uma personagem parecida com qualquer criança: formato dos olhos (redondinhos, amendoados, grandões, pequenos, puxadinhos, caidinhos), olhos mais juntinhos ou mais afastados, 6 bocas (coraçãozinho, fininha, cheinha, larga, pequenininha, sorrisinho), narizes novos (batatinha, largo, reto) e rostos novos (largo, quadradinho, comprido).",
+        "💇 Cabelo ondulado armadinho (no ombro e longo), com risca no meio, volume e fiozinhos soltos. De lado, todo cabelo comprido agora tem volume atrás da cabeça.",
+        "👓 8 armações de óculos novas: retangular, quadradona, gatinho, oval, redonda grandona, aviador, meio aro e aro fininho — em todas as cores. As lentes acompanham a distância dos olhos.",
+        "✨ Preparada (escondida por enquanto) a foto de cinema com IA: redesenha a personagem com luz e sombra de filme de animação. A chave de IA (Gemini ou OpenAI) fica no cofre comum da SolverONE, com o PIN do adulto; para a IA vai só o desenho."
+      ],
+      "en": [
+        "🧒 Make a character that looks like any child: eye shape (round, almond, big, small, upturned, downturned), eyes closer together or farther apart, 6 mouths (little heart, thin, full, wide, tiny, little smile), new noses (button bulb, wide, straight) and new face shapes (wide, square, long).",
+        "💇 Big wavy hair (shoulder length and long), with a middle part, volume and flyaways. From the side, all long hair now has volume behind the head.",
+        "👓 8 new glasses frames: rectangle, square, cat-eye, oval, big round, aviator, half-rim and thin wire — in every color. The lenses follow the eye spacing.",
+        "✨ Ready (hidden for now): the AI movie-style photo, which redraws the character with animated-film light and shadow. The AI key (Gemini or OpenAI) stays in the SolverONE shared vault, behind the adult's PIN; only the drawing goes to the AI."
+      ]
+    },
+    {
       "versao": "0.12.0",
       "data": "02/Nov/2026",
       "hora": "09:25:24",
