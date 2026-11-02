@@ -86,3 +86,9 @@ Resumo do que nunca pode ser esquecido (o detalhe está na diretriz):
 - **Trabalho demorado** (foto, OCR, IA, importação, áudio) roda no módulo `Fundo`: nunca morre ao sair da tela,
   Wake Lock, aviso antes de fechar, pílula de andamento, resultado entregue onde a pessoa estiver.
 - **Feedback dos usuários**: pergunta do dia, 💬 em toda tela e no AssistONE, tudo estruturado no RootifyONE.
+
+## Jogos do Bolinho de Chuva: mudaram para o repositório `kids`
+
+Desde 02/Nov/2026 a Bagunçolândia, a Peluqueria, o Vruuum!, a Purpurina, a Rabiscolândia, a Dança na Sala e os atalhos
+de TV LG moram no repositório **kids** (solverone.com.br/kids/), com o histórico. Aqui ficaram só páginas que levam ao
+endereço novo. **Não crie nem altere jogo aqui** — abra a conversa no repositório kids.

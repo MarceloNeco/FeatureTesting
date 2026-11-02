@@ -8,7 +8,7 @@
         "pt": "Dança na Sala",
         "en": "Living Room Dance"
       },
-      "pagina": "danca-na-sala.html"
+      "pagina": "../kids/danca-na-sala.html"
     },
     {
       "id": "baguncolandia",
@@ -16,7 +16,7 @@
         "pt": "Bagunçolândia (Bolinho de Chuva)",
         "en": "Mayhemland (Rain Dumpling)"
       },
-      "pagina": "baguncolandia/"
+      "pagina": "../kids/baguncolandia/"
     },
     {
       "id": "peluqueria",
@@ -24,7 +24,7 @@
         "pt": "Peluqueria (Bolinho de Chuva)",
         "en": "Peluqueria (Rain Dumpling)"
       },
-      "pagina": "peluqueria/"
+      "pagina": "../kids/peluqueria/"
     },
     {
       "id": "vruuum",
@@ -32,7 +32,7 @@
         "pt": "Vruuum! (Bolinho de Chuva)",
         "en": "Vruuum! (Rain Dumpling)"
       },
-      "pagina": "vruuum/"
+      "pagina": "../kids/vruuum/"
     },
     {
       "id": "purpurina",
@@ -40,7 +40,7 @@
         "pt": "Purpurina (Bolinho de Chuva)",
         "en": "Purpurina (Rain Dumpling)"
       },
-      "pagina": "purpurina/"
+      "pagina": "../kids/purpurina/"
     },
     {
       "id": "purpurina-ia",
@@ -48,7 +48,7 @@
         "pt": "Purpurina: foto de cinema com IA (começa desligada)",
         "en": "Purpurina: AI movie-style photo (starts off)"
       },
-      "pagina": "purpurina/"
+      "pagina": "../kids/purpurina/"
     },
     {
       "id": "rabiscolandia",
@@ -56,7 +56,7 @@
         "pt": "Rabiscolândia (Bolinho de Chuva)",
         "en": "Rabiscolândia (Rain Dumpling)"
       },
-      "pagina": "rabiscolandia/"
+      "pagina": "../kids/rabiscolandia/"
     },
     {
       "id": "arch-one",
