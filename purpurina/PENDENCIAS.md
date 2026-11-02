@@ -39,3 +39,4 @@ Situação: 🟡 aberta · 🔵 em andamento · ⏸ aguardando o dono · ✅ fei
 | 33 | Faltaram olhos orientais (japonês, coreano, chinês: afinadinhos, fechadinhos), para representar todas as etnias com respeito. | dono, 02/Nov/2026 | ✅ v0.13.1 (fininhos sem a dobrinha da pálpebra, fininhos puxadinhos, fechadinhos sorrindo) |
 | 34 | Formatos de orelha (o dono procurou a orelha da filha e não achou). | dono, 02/Nov/2026 | 🟡 |
 | 35 | Última fileira das partes (Mechas, Olhos) cortada embaixo e sem conseguir arrastar com o dedo; sem esconder o rosto nem deixar pequeno demais. | dono, 02/Nov/2026 | ✅ v0.13.1 (partes menores, 5 por linha; lista rola com o dedo e tem "⬇ mais" quando não cabe) |
+| 36 | Segunda filha do dono (fotos não entram no repositório): tamanho da testa, cabelo cacheado solto loiro, olhos claros. | dono, 02/Nov/2026 | ✅ v0.14.0 (testa em 4 alturas, cacheado solto com risca no meio, loiro escuro, olhos azul- e verde-acinzentados) |

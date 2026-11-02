@@ -11,7 +11,7 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
 ## Como brincar
 
 - Toque em **✨ Toque para brilhar!** (o navegador só deixa tocar som depois de um toque).
-- **🎨 Brincar livre**: o estúdio. Embaixo ficam 6 abas: **👧 Eu** (pele, menina ou menino — o jogo é feito para meninas, menina é o padrão —, 8 formatos de rosto, 8 de nariz, 9 formatos de olho (inclusive fininhos sem dobrinha e fechadinhos sorrindo) e a distância entre eles, 6 bocas, 41 penteados, mechas, olhos), **💄 Maquiagem**
+- **🎨 Brincar livre**: o estúdio. Embaixo ficam 6 abas: **👧 Eu** (pele, menina ou menino — o jogo é feito para meninas, menina é o padrão —, 8 formatos de rosto, 8 de nariz, 4 alturas de testa, 9 formatos de olho (inclusive fininhos sem dobrinha e fechadinhos sorrindo) e a distância entre eles, 6 bocas, 42 penteados, mechas, olhos), **💄 Maquiagem**
   (base, blush, sombra, delineado, 12 cílios, 💅 unhas, batom, glitter, adesivos), **👗 Roupas** (13 vestidos, 11 blusas,
   8 saias, 9 calças, 9 estampas, 28 sapatos), **💎 Joias** (18 brincos, 14 colares, pulseiras, anéis e broches),
   **👑 Acessórios** (coroas, chapéus, tiaras e faixas, laços e presilhas, 12 óculos/armações, bolsas) e **🏞️ Cenário** (8 lugares). Cada parte tem

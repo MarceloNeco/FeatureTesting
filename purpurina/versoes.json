@@ -2,6 +2,21 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.14.0",
+      "data": "02/Nov/2026",
+      "hora": "11:45:35",
+      "pt": [
+        "🙆 Testa: baixinha, no meio, alta ou testona — a linha do cabelo sobe ou desce em qualquer penteado, de frente e girando.",
+        "💇 Cabelo novo: cacheado solto com risca no meio, sem franja, com os cachinhos caindo dos lados do rosto.",
+        "🎨 Cor de cabelo nova: loiro escuro. Cores de olho novas: azul-acinzentados e verde-acinzentados."
+      ],
+      "en": [
+        "🙆 Forehead: low, middle, high or very high — the hairline goes up or down with any hairstyle, from the front and while spinning.",
+        "💇 New hairstyle: loose curls with a middle part, no bangs, with the curls falling on both sides of the face.",
+        "🎨 New hair color: dark blonde. New eye colors: grey-blue and grey-green."
+      ]
+    },
+    {
       "versao": "0.13.1",
       "data": "02/Nov/2026",
       "hora": "11:25:36",
