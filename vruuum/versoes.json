@@ -2,6 +2,19 @@
   "app": "vruuum",
   "versoes": [
     {
+      "versao": "1.5.0",
+      "data": "02/Nov/2026",
+      "hora": "11:30:00",
+      "pt": [
+        "Curvas consertadas: segurando o volante para dentro da curva, agora sempre dá para fazer a curva. Antes, nas curvas mais fortes, a força que joga para fora era maior que o volante (1,5 vez no Normal e 2,5 vezes no Turbo) e o carro ia para o acostamento mesmo segurando. A curva ainda empurra um pouco para fora, mas nunca mais que 40% do volante.",
+        "Skatista mais natural: quando desliza, ele fica de lado no skate (pé esquerdo na frente, os dois pés atravessados no shape); quando rema, fica mais de frente. Os braços agora seguem as curvas, como as asas de um avião inclinando: virando para a esquerda, o braço esquerdo desce e o direito sobe; para a direita, o contrário. Na garagem ele mostra as curvas para os dois lados."
+      ],
+      "en": [
+        "Curves fixed: holding the steering toward the inside of a curve now always gets you through. Before, on the sharpest curves, the force pushing outward was stronger than the steering (1.5x on Normal and 2.5x on Turbo) and the car went off to the shoulder even while holding. The curve still pushes outward a little, but never more than 40% of the steering.",
+        "More natural skater: when coasting he stands sideways on the board (left foot forward, both feet across the deck); when pushing he faces more forward. The arms now follow the curves like the wings of a banking plane: turning left, the left arm goes down and the right arm goes up; turning right, the opposite. In the garage he shows curves to both sides."
+      ]
+    },
+    {
       "versao": "1.4.1",
       "data": "02/Nov/2026",
       "hora": "12:00:00",

@@ -51,6 +51,7 @@
     if (q > 0) { j.estrelas -= q; e.eventos.push({ tipo: 'perdeu', j: j.n, q: q }); }
   }
 
+  var FORA_MAX = 0.4;   // força da curva, no máximo, em fração do volante
   function moverJogador(e, j, ent, dt) {
     var pista = e.pista, cfg = pista.cfg, mod = j.mod || {}, max = cfg.velMax * (mod.vel || 1);   // mod: jeito do veículo (veiculos.js)
     var seg = P.achar(pista, j.z), pct = j.vel / max;
@@ -63,10 +64,13 @@
       j.pulo = j.puloMax = PULINHO; j.recarga = RECARGA; e.eventos.push({ tipo: 'pulo', j: j.n, manual: true });
     }
 
-    // volante e força da curva (empurra para fora; no nível Criança quase nada)
+    // volante e força da curva (empurra para fora; no nível Criança quase nada). A força da curva nunca passa
+    // de 40% do volante: segurando para dentro, sempre dá para fazer a curva (antes, nas curvas fortes, ela
+    // chegava a 1,5x o volante no Normal e 2,5x no Turbo, e o carro ia para o acostamento mesmo segurando)
     var dx = dt * 2 * Math.max(pct, 0.35) * (mod.curva || 1);
+    var fora = Math.max(-FORA_MAX, Math.min(FORA_MAX, seg.curva * cfg.centrifuga));
     j.x += dx * dir;
-    j.x -= dx * pct * seg.curva * cfg.centrifuga;
+    j.x -= dx * pct * fora;
     // nível Criança: sem mexer no volante, o carro volta sozinho para a estrada
     if (cfg.ajuda && !dir && Math.abs(j.x) > 0.8) j.x -= (j.x > 0 ? 1 : -1) * dt * 0.8;
     j.x = Math.max(-cfg.limiteX, Math.min(cfg.limiteX, j.x));

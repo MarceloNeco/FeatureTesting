@@ -259,3 +259,21 @@ test('rival lado a lado com o jogador não fica batendo e voltando (não treme)'
     assert.ok(tums <= 2, nivel + ': bateu ' + tums + ' vezes');
   }
 });
+
+test('em qualquer curva, segurando o volante para dentro o carro vence a força da curva (com folga)', () => {
+  // antes: curva forte para a esquerda + volante todo para a esquerda = carro indo para o acostamento da direita
+  for (const nivel of ['crianca', 'normal', 'turbo']) {
+    for (const sem of [1, 5, 9, 13]) {
+      const e = M.novaCorrida(nivel, sem, 1);
+      e.fase = 'corrida'; e.carros = [];
+      for (const s of e.pista.segs) s.coisas = [];
+      const j = e.jogadores[0];
+      const forte = e.pista.segs.reduce((a, s) => Math.abs(s.curva) > Math.abs(a.curva) ? s : a);
+      j.z = forte.i * P.SEG; j.x = 0; j.vel = e.pista.cfg.velMax * 1.45;   // pior caso: com turbo
+      const x0 = j.x;
+      M.atualizar(e, [{ dir: forte.curva > 0 ? 1 : -1 }], 0.2);
+      const andou = (j.x - x0) * Math.sign(forte.curva);
+      assert.ok(andou > 0.05, nivel + ' semente ' + sem + ': curva ' + forte.curva.toFixed(1) + ', andou para dentro ' + andou.toFixed(3));
+    }
+  }
+});
