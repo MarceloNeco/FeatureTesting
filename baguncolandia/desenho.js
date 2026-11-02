@@ -165,6 +165,7 @@
     }
     if (!estado) { camadaTexto(ctx, ts, dtMs); return; }
     var jogs = estado.jogadores, dois = jogs.length === 2, modo = estado.modo, casa = !!(estado.casa && root.Casa);
+    D.casaM = casa ? estado.casa : null;
     if (casa) seguro('casa', function () { root.Casa.desenhar(ctx, estado.casa, ts, D.leve); });   // 🧸 Bagunça: a sala, o quarto ou o jardim
     // raias dos jogadores: borda neon na cor de cada um e divisória luminosa
     jogs.forEach(function (jg, j) {
@@ -186,6 +187,7 @@
     });
     // boneco de cada jogador (ambiente paisagem)
     if ((paisagem || casa) && (D.mostrarBoneco !== false || estado.modo === 'pula')) jogs.forEach(function (jg, j) { seguro('boneco', function () { boneco(ctx, jg, j, ts, dt); }); });   // no modo do dedo a pessoa pode esconder o boneco (menos no Pula e abaixa)
+    if (casa && estado.casa.arrumando) seguro('guias', function () { root.Casa.guias(ctx, estado.casa, ts); });   // 🧹 dicas e o que está na mão: por cima do boneco
     // as coisas
     seguro('coisas', function () { estado.coisas.forEach(function (c) {
       if (c.morta) return;
@@ -229,7 +231,8 @@
   function avatarCfg(j) { return root.Boneco.normalizar(D.avatares[j] || D.avatares[0] || {}, j); }
   function boneco(ctx, jg, j, ts, dt) {
     if (jg.esqueleto) { marionete(ctx, jg, j, ts); return; }
-    var r = jg.raia, A = r.h * (jg.raia.w < W ? 0.36 : 0.42), chao = r.y + r.h * (root.Cenas ? root.Cenas.CHAO : 0.86), cfg = avatarCfg(j), cor = cfg.cor, corpo = jg.corpo || { x: 0.5 }, av = D.av[j] || (D.av[j] = {});
+    var cs = D.casaM, r = jg.raia, A = cs ? 175 : r.h * (jg.raia.w < W ? 0.36 : 0.42), chao = cs ? cs.chao + 4 : r.y + r.h * (root.Cenas ? root.Cenas.CHAO : 0.86),   // 🧸 na casa: tamanho de criança perto dos móveis (e menor que a mamãe)
+      cfg = avatarCfg(j), cor = cfg.cor, corpo = jg.corpo || { x: 0.5 }, av = D.av[j] || (D.av[j] = {});
     var x = r.x + corpo.x * r.w;
     if (av.x == null) av.x = x; av.vx = (x - av.x) / Math.max(dt, 0.001); av.x = x;
     var rc = D.reac[j]; if (rc && ts >= rc.ate) rc = D.reac[j] = null;

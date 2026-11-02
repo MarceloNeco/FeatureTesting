@@ -167,3 +167,26 @@ test('🧹 depois do 🧸: a mesma bagunça vira arrumação, e o que a torradei
   assert.ok(!M.obs.includes(torrada), 'a torrada não foi para o cesto');
   p.dica(); assert.ok(M.dica, 'a dica não apontou nada');
 });
+
+test('🧹 caixas transparentes: o que morava no chão vai para a caixa do seu tipo; dicas ligam e desligam', () => {
+  const p = Casa.criar({ cenaCasa: 'sala', modo: 'arrumar', aleatorio: (() => { let s = 7; return () => (s = (s * 9301 + 49297) % 233280) / 233280; })() }); p.comecar(); p.avancar(16);
+  const M = p.estado().casa;
+  assert.ok(M.caixas && M.caixas.length >= 2, 'devia ter caixas');
+  const bola = M.obs.find((o) => o.caixa === 'bolas'), C = M.caixas.find((c) => c.id === 'bolas');
+  assert.ok(bola && C, 'a bola do chão devia ir para a caixa de bolas');
+  assert.ok(bola.x0 > C.x && bola.x0 < C.x + C.w && bola.y0 > C.y && bola.y0 <= M.chao + 4, 'o lugar da bola é dentro da caixa');
+  assert.ok(!M.obs.some((o) => o.caixa === 'bolas' && o.tipo === 'vaso'), 'vaso não vai para caixa');
+  if (!(bola.segurado) && p.pegar('a', 0, bola.x / 1280, bola.y / 720)) { p.mover('a', bola.x0 / 1280, bola.y0 / 720); p.largar('a'); }
+  correr(p, 500);
+  assert.ok(bola.guardado && Math.hypot(bola.x - bola.x0, bola.y - bola.y0) < 1, 'a bola devia ficar guardada na caixa');
+  p.dicas(false); assert.strictEqual(p.estado().casa.dicas, false); assert.strictEqual(M.dica, null);
+  correr(p, 7000); assert.strictEqual(M.dica, null, 'dicas desligadas: nada aparece sozinho');
+  p.dicas(true); assert.ok(M.dica, 'ligou: a dica aponta uma coisa');
+});
+
+test('o risco do dedo some quando o dedo para (não fica preso na tela)', () => {
+  const p = partida('sala');
+  p.movimento(0, [[0.3, 0.5, 100]], 1000); p.movimento(0, [[0.5, 0.5, 100]], 1050); p.avancar(16);
+  assert.ok(p.estado().jogadores[0].rastro.length > 0);
+  correr(p, 600); assert.strictEqual(p.estado().jogadores[0].rastro.length, 0);
+});
