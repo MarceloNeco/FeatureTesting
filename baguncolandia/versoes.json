@@ -2,6 +2,23 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.11",
+      "data": "02/Nov/2026",
+      "hora": "11:27:00",
+      "pt": [
+        "O boneco agora reage: quando acerta, pula de alegria com os braços para cima e, no jogo com o dedo, salta até a fruta; quando pega algo ruim, põe as mãos na cabeça e faz cara de dor.",
+        "Duas pessoas no mesmo aparelho: cada uma tem o seu cartão com o boneco e o nome, e o jogo pede o nome da 2ª pessoa (o último usado já vem escrito, dá para trocar).",
+        "\"Pula e abaixa\" e \"Bagunça de bolas\" agora aparecem com o nome na tela \"Quem vai jogar\" (antes aparecia \"undefined\").",
+        "Com duas pessoas, o placar da direita não fica mais escondido atrás dos botões."
+      ],
+      "en": [
+        "The avatar now reacts: on a hit it jumps for joy with arms up and, in finger mode, leaps to the fruit; when it grabs something bad, it holds its head and makes a pained face.",
+        "Two people on the same device: each gets a card with avatar and name, and the game asks for the 2nd player's name (the last one used is already filled in and can be changed).",
+        "\"Jump and duck\" and \"Ball mayhem\" now show their names on the \"Who’s playing\" screen (it used to say \"undefined\").",
+        "With two people, the right-hand score is no longer hidden behind the buttons."
+      ]
+    },
+    {
       "versao": "0.8.10",
       "data": "02/Nov/2026",
       "hora": "10:07:00",
