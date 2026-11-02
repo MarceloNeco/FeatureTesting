@@ -101,7 +101,7 @@ Tire uma foto dessa caixa e mande: é o que falta para achar o problema. O desen
 | `esqueleto.js` | esqueleto por IA (MediaPipe Pose em `libs/mediapipe/`, carregado só quando a pessoa liga); devolve 13 pontos espelhados |
 | `spotify.js` / `config.js` | Spotify como controle remoto (PKCE, sem segredo); `config.js` guarda só o Client ID público |
 | `sw.js` | cache da pasta; `VERSAO` tem de ser igual a `APP_VERSION` |
-| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js` (Chromium) |
+| `teste/` | `jogo.test.js`, `figuras.test.js` e `batida.test.js` (Node), `pagina.test.js` e `voltar.test.js` (Chromium) |
 
 Rodar os testes: `node --test baguncolandia/teste/*.test.js` e `node baguncolandia/teste/pagina.test.js`.
 
