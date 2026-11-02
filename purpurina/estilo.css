@@ -282,3 +282,10 @@ dialog.pp-ia::backdrop { background: rgba(20, 6, 36, .72); }
 .pp-ia-carregando { height: 10px; border-radius: 999px; background: linear-gradient(90deg, #ff5fb4, #8a4fe0, #7ee8ff, #ff5fb4); background-size: 300% 100%; animation: ppIa 1.6s linear infinite; }
 @keyframes ppIa { to { background-position: 300% 0; } }
 @media (prefers-reduced-motion: reduce) { .pp-ia-carregando { animation: none; } }
+
+/* glitter da boneca: a faísca cresce, gira um pouco e some; as lantejoulas piscam (boneca.js: pp-fa / pp-pi) */
+.pp-fa { transform-box: fill-box; transform-origin: center; animation: ppFaisca 2s ease-in-out infinite; }
+.pp-pi { animation: ppPisca 2s ease-in-out infinite; }
+@keyframes ppFaisca { 0%, 100% { transform: scale(.1) rotate(0deg); opacity: 0; } 35% { transform: scale(1.15) rotate(30deg); opacity: 1; } 55% { transform: scale(.75) rotate(45deg); opacity: .9; } 80% { transform: scale(.2) rotate(70deg); opacity: .2; } }
+@keyframes ppPisca { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .pp-fa, .pp-pi { animation: none; } }

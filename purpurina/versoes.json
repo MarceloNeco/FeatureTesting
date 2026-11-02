@@ -2,6 +2,21 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.15.0",
+      "data": "02/Nov/2026",
+      "hora": "14:10:27",
+      "pt": [
+        "🔄 Giro sem \"careca\": com a testa alta (ou bem alta), a linha do cabelo sobe só no meio da testa — nas têmporas e no alto da cabeça o cabelo fica no lugar, de frente, de lado e de costas.",
+        "✨ Glitter de verdade: lantejoulas de vários tons com pontinho de luz e estrelinhas que crescem, giram e piscam na tela — nas bochechas, perto dos olhos, no cabelo, na chuva de glitter, no batom com glitter, nas unhas e no tênis de glitter.",
+        "🛼 Patins certos: de frente as rodinhas aparecem de pé e estreitas (com o freio rosa na ponta); de lado, redondas."
+      ],
+      "en": [
+        "🔄 No more \"bald\" turn: with a high forehead, the hairline rises only in the middle of the forehead — the temples and the top of the head keep their hair, from the front, the side and the back.",
+        "✨ Real glitter: sequins in several shades with a speck of light, and little stars that grow, spin and twinkle on screen — on the cheeks, around the eyes, in the hair, in the glitter shower, on glitter lipstick, nails and glitter sneakers.",
+        "🛼 Proper roller skates: from the front the wheels stand upright and narrow (with the pink toe stop); from the side, round."
+      ]
+    },
+    {
       "versao": "0.14.1",
       "data": "02/Nov/2026",
       "hora": "13:57:18",
