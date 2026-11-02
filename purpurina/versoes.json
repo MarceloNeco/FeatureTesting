@@ -2,6 +2,34 @@
   "app": "purpurina",
   "versoes": [
     {
+      "versao": "0.14.0",
+      "data": "02/Nov/2026",
+      "hora": "11:45:35",
+      "pt": [
+        "🙆 Testa: baixinha, no meio, alta ou testona — a linha do cabelo sobe ou desce em qualquer penteado, de frente e girando.",
+        "💇 Cabelo novo: cacheado solto com risca no meio, sem franja, com os cachinhos caindo dos lados do rosto.",
+        "🎨 Cor de cabelo nova: loiro escuro. Cores de olho novas: azul-acinzentados e verde-acinzentados."
+      ],
+      "en": [
+        "🙆 Forehead: low, middle, high or very high — the hairline goes up or down with any hairstyle, from the front and while spinning.",
+        "💇 New hairstyle: loose curls with a middle part, no bangs, with the curls falling on both sides of the face.",
+        "🎨 New hair color: dark blonde. New eye colors: grey-blue and grey-green."
+      ]
+    },
+    {
+      "versao": "0.13.1",
+      "data": "02/Nov/2026",
+      "hora": "11:25:36",
+      "pt": [
+        "👁️ 3 formatos de olho novos, para todas as crianças se verem no jogo: fininhos (sem a dobrinha da pálpebra), fininhos puxadinhos e fechadinhos sorrindo (meia-lua).",
+        "👆 As partes da aba (Pele, Rosto, Olhos, Mechas…) ficam menores e cabem todas na tela, sem esconder o rosto; se o texto do celular estiver grande e não couber, a lista rola com o dedo e aparece o \"⬇ mais\"."
+      ],
+      "en": [
+        "👁️ 3 new eye shapes, so every child can see themselves in the game: narrow monolid, narrow upturned monolid and smiling crescent.",
+        "👆 The tab's parts (Skin, Face, Eyes, Highlights…) are smaller and all fit on screen without covering the face; if the phone text is big and they don't fit, the list scrolls with your finger and \"⬇ more\" shows up."
+      ]
+    },
+    {
       "versao": "0.13.0",
       "data": "02/Nov/2026",
       "hora": "10:36:23",

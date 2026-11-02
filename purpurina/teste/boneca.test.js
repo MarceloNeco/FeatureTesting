@@ -161,11 +161,19 @@ test('traços novos desenham de frente, girando e de costas', () => {
   const L = [{ formaOlho: 'amendoados', distOlhos: 'afastados', formaBoca: 'sorrisinho', nariz: 'batatinha', rosto: 'largo', cabelo: 'armado', oculos: 'retangular' },
     { formaOlho: 'caidos', distOlhos: 'juntos', formaBoca: 'cheinha', nariz: 'reto', rosto: 'quadradinho', cabelo: 'armadoLongo', oculos: 'gatinho' },
     { formaOlho: 'puxadinhos', formaBoca: 'larga', nariz: 'largo', rosto: 'comprido', oculos: 'aviador' }, { formaOlho: 'pequenos', formaBoca: 'fininha', oculos: 'meioAro' },
-    { formaOlho: 'grandes', formaBoca: 'pequenininha', oculos: 'redondoGrande' }, { oculos: 'quadrado' }, { oculos: 'oval' }, { oculos: 'fininho' }];
+    { formaOlho: 'grandes', formaBoca: 'pequenininha', oculos: 'redondoGrande' }, { formaOlho: 'fininhos' }, { formaOlho: 'fininhosPuxados', oculos: 'retangular' }, { formaOlho: 'sorridentes', cilios: 'arco', sombra: 'simples' }, { oculos: 'quadrado' }, { oculos: 'oval' }, { oculos: 'fininho' }];
   for (const l of L) for (const a of [0, 40, 90, 140, 200, 300]) {
     const s = B.svg(Object.assign(V.novo(), l), { id: 'n', angulo: a, anim: true }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), JSON.stringify(l) + a);
   }
   // olhos afastados ficam mais longe um do outro (e a lente do óculos vai junto)
   const lente = (d) => (B.svg(Object.assign(V.novo(), { distOlhos: d, oculos: 'retangular' }), { id: 'o', fundo: false }).match(/translate\((-?\d+) 0\)/) || [0, '0'])[1];
   assert.equal(lente('afastados'), '-9'); assert.equal(lente('juntos'), '7');
+});
+
+test('testa: a linha do cabelo sobe ou desce, de frente e girando, e o cacheado solto desenha', () => {
+  for (const testa of ['baixa', 'normal', 'alta', 'bemAlta']) for (const cabelo of ['cachosSoltos', 'franja', 'longo', 'coqueDuplo']) for (const a of [0, 60, 180]) {
+    const s = B.svg(Object.assign(V.novo(), { testa, cabelo, cabeloCor: 'loiroEscuro', olhos: 'cinza' }), { id: 't', angulo: a }); assert.equal(bemFormado(s), ''); assert.ok(!/NaN|undefined/.test(s), testa + cabelo + a);
+  }
+  const franja = (t) => B.svg(Object.assign(V.novo(), { cabelo: 'franja', testa: t }), { id: 'f', fundo: false });
+  assert.notEqual(franja('alta'), franja('normal')); assert.notEqual(franja('baixa'), franja('normal'));
 });

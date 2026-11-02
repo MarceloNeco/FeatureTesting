@@ -150,14 +150,14 @@
       out.push(elip(116, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }), elip(284, 216, 12, 17, { fill: pele, stroke: peleE, 'stroke-width': 2 }));
       out.push(pintar(rosto, 'url(#' + I + 'pele)', peleE));
       var sob = mistura(cab, '#2a1c1a', 0.45);
-      out.push(luzLados(pele, menino, dO), luzMeio(pele), base(e.base, pele, rosto), blush(e, C('blush').hex, I), deslocar(-dO, olho(164, -1, e, I, C, 0, op.anim)), deslocar(dO, olho(236, 1, e, I, C, 0, op.anim)));
+      out.push(luzLados(pele, menino, dO, ['fininhos', 'fininhosPuxados', 'sorridentes'].indexOf(e.formaOlho) >= 0), luzMeio(pele), base(e.base, pele, rosto), blush(e, C('blush').hex, I), deslocar(-dO, olho(164, -1, e, I, C, 0, op.anim)), deslocar(dO, olho(236, 1, e, I, C, 0, op.anim)));
       out.push(deslocar(-dO, linha(sobr[0], sob, sobr[2])), deslocar(dO, linha(sobr[1], sob, sobr[2])));
       out.push(narizFrente(e.nariz, pele));
       out.push(formaDaBoca(e, boca(e, C('batom'), pele, I)));
       if (vis('adesivo')) out.push(adesivo(e.adesivo, 266, 250, 13));
       if (e.glitter === 'bochechas' || e.glitter === 'olhos') out.push(glitter(e, C('glitter'), op.anim));
       // ---------- cabelo da frente e acessórios do rosto ----------
-      out.push(cabeloFrente(e, I, cab, cabE));
+      out.push(subirTesta(cabeloFrente(e, I, cab, cabE), TESTA[e.testa] || 0));
       if (vis('brincos')) out.push(brincos(e.brincos, C('brincos'), I));
       if (vis('oculos')) out.push(oculos(e.oculos, C('oculos'), dO));
     }
@@ -269,14 +269,14 @@
       var xE = xa(-sg * 90, 86), xF = xa(sg * 90, 86), zE = Math.cos((-sg * 90) * G + rad), zF = Math.cos((sg * 90) * G + rad);
       defs += '<clipPath id="' + I + 'rostoV"><path d="' + cont + '"/></clipPath><clipPath id="' + I + 'cabV"><path d="' + contV + '"/></clipPath>' +
         '<clipPath id="' + I + 'mE"><rect x="0" y="0" width="200" height="720"/></clipPath><clipPath id="' + I + 'mD"><rect x="200" y="0" width="200" height="720"/></clipPath>';
-      var hf = torcer(cabeloFrente(e, I, cab, cabE), false, radS, sg);
+      var hf = torcer(subirTesta(cabeloFrente(e, I, cab, cabE), TESTA[e.testa] || 0), false, radS, sg);
       // de três-quartos para trás, a franja fica dentro do contorno da cabeça (não sai um "bico" atrás)
       defs += '<clipPath id="' + I + 'cabF"><path d="' + contV + '"/>' + (cos > 0.35 ? '<rect x="' + (sg > 0 ? -400 : 200) + '" y="-200" width="600" height="1200"/>' : '') + '</clipPath>';
       // a pele do rosto (região presa na cabeça) e o contorno: traço da cor do cabelo onde é cabelo, da pele onde é rosto
-      var peleD = regiaoPele(radS, menino);
+      var peleD = regiaoPele(radS, menino, TESTA[e.testa] || 0);
       // cabelo de trás: no alto quem mostra o cabelo é a própria cabeça (já é de cabelo); dele só aparece o que desce,
       // do meio da cabeça para baixo — assim não forma bico em cima. Coque, rabo, puffs e cachos ficam inteiros (passam da cabeça).
-      var alto = ['coque', 'coqueDuplo', 'coqueBaguncado', 'meio', 'rabinhoAlto', 'rabinhoCachos', 'puffs', 'rabo', 'chiquinhas', 'afro', 'cacheado', 'cachosCurtos', 'encaracolado', 'lateral', 'armado', 'armadoLongo'].indexOf(e.cabelo) >= 0;
+      var alto = ['coque', 'coqueDuplo', 'coqueBaguncado', 'meio', 'rabinhoAlto', 'rabinhoCachos', 'puffs', 'rabo', 'chiquinhas', 'afro', 'cacheado', 'cachosCurtos', 'encaracolado', 'lateral', 'armado', 'armadoLongo', 'cachosSoltos'].indexOf(e.cabelo) >= 0;
       // cabelo curto (não desce pelas costas): fica todo dentro do contorno da cabeça, sem "aba" sobrando de lado
       var ysT = (cabeloTras(e, I, cab, cabE).match(/,(-?\d*\.?\d+)/g) || []).map(function (t) { return +t.slice(1); }), curtoT = !alto && ysT.length && Math.max.apply(null, ysT) < 330;
       if (curtoT) defs += '<clipPath id="' + I + 'trasC"><path d="' + contorno(radS, 8, e.rosto, e.nariz, menino) + '"/></clipPath>'; else
@@ -297,7 +297,7 @@
       var bs = e.base === 'natural' ? '' : base(e.base, pele, rosto); if (e.base === 'bronze') bs = bs.replace(/^<path[^>]*\/>/, '');
       var xn = xa(0, 84), cn = esc(pele, 0.28);
       defs += '<linearGradient id="' + I + 'sombV" gradientUnits="userSpaceOnUse" x1="' + n(xn - sg * 6) + '" y1="0" x2="' + n(xn + sg * 70) + '" y2="0"><stop offset="0" stop-color="#e88a90" stop-opacity="0"/><stop offset="1" stop-color="#e88a90" stop-opacity="' + n(0.14 * as) + '"/></linearGradient>';
-      var lados = luzLados(pele, menino, dO) + bs +
+      var lados = luzLados(pele, menino, dO, ['fininhos', 'fininhosPuxados', 'sorridentes'].indexOf(e.formaOlho) >= 0) + bs +
         blush(e, C('blush').hex, I) + (e.glitter === 'bochechas' || e.glitter === 'olhos' ? glitter(e, C('glitter'), op.anim) : '') + (vis('adesivo') ? adesivo(e.adesivo, 266, 250, 13) : '');
       var olhar = sen * 11;
       var azO = 26.3 + dO * 0.62;
@@ -497,6 +497,7 @@
       case 'coque': if (e.cabeca !== 'chapeu' && e.cabeca !== 'gorro') s = circ(200, 96, 40, f) + linha2('M172,90 Q200,70 228,92', cabE) + linha2('M170,104 Q200,84 230,106', cabE); break;
       case 'trancas': s = ''; break;
       case 'armado': s = armadoTras(410, f, cab, cabE) + frizz(cabE, cab, 5); break;
+      case 'cachosSoltos': s = armadoTras(420, f, cab, cabE) + texturaCachos(200, 330, 112, 90, 30, cab, cabE, 13) + frizz(cabE, cab, 7); break;
       case 'armadoLongo': s = armadoTras(500, f, cab, cabE) + frizz(cabE, cab, 9); break;
       case 'lisoPontas': s = p('M106,210 Q100,100 200,95 Q300,100 294,210 L300,404 Q304,444 272,446 Q248,446 250,424 L150,424 Q152,446 128,446 Q96,444 100,404Z', f) + FIOS; break;
       case 'lisoRepartido': s = p(COSTAS_LONGO, f) + FIOS; break;
@@ -611,6 +612,14 @@
           p('M138,142 Q142,98 194,90 Q248,86 266,116 Q250,106 230,110 Q208,114 192,128 Q172,136 158,152Z', f) + p('M160,120 Q192,96 236,100', { fill: 'none', stroke: '#fff', 'stroke-width': 4, opacity: 0.3, 'stroke-linecap': 'round' }) +
           p('M170,128 Q200,108 244,110', { fill: 'none', stroke: cabE, 'stroke-width': 1.6, opacity: 0.5, 'stroke-linecap': 'round' });
         break;
+      case 'cachosSoltos':
+        // risca no meio, sem franja: a testa fica à mostra e os cachos soltos caem dos lados do rosto, em molinhas
+        s = p('M108,230 Q100,102 200,98 Q300,102 292,230 Q290,174 266,150 Q238,130 208,128 Q201,126 200,118 Q199,126 192,128 Q162,130 134,150 Q110,174 108,230Z', f) +
+          dois('M110,200 Q102,226 106,250 L124,254 Q120,230 122,206Z', f) + molinha(110, 252, 8, 13, f, cabE) + molinha(290, 252, 8, 13, f, cabE) +
+          molinha(126, 300, 5, 11, f, cabE) + molinha(274, 300, 5, 11, f, cabE) +
+          dois('M188,120 Q160,128 140,150', { fill: 'none', stroke: cabE, 'stroke-width': 1.4, opacity: 0.45, 'stroke-linecap': 'round' }) +
+          dois('M176,110 Q150,116 132,134', { fill: 'none', stroke: '#fff', 'stroke-width': 4, opacity: 0.2, 'stroke-linecap': 'round' });
+        brilho = false; break;
       case 'armado': case 'armadoLongo':
         // risca no meio: as duas metades descem pelos lados da testa e caem onduladas ao lado do rosto (cortina)
         var fim = e.cabelo === 'armado' ? 360 : 430;
@@ -688,13 +697,22 @@
     for (k = 1; k <= 5; k++) pts.push([-88, 306 - k * 19]);
     return pts;
   })();
-  function regiaoPele(th, menino) {
+  function regiaoPele(th, menino, dT) {
     return PELE_AZ.map(function (q, i) {
       // th vai de -180° a 180°: o que passa de 90° para um lado encosta na borda desse lado (de costas, tudo de um lado só)
       var a = q[0] * Math.PI / 180 + th, r = raioCabeca(q[1], menino);
       var x = Math.abs(a) <= Math.PI / 2 ? 200 + r * Math.sin(a) : 200 + (a > 0 ? 1 : -1) * (r + 3);
-      return (i ? 'L' : 'M') + n(x) + ',' + n(q[1]);
+      return (i ? 'L' : 'M') + n(x) + ',' + n(q[1] - (dT || 0) * pesoTesta(q[1]) * (q[1] < 215 ? 1 : 0));
     }).join('') + 'Z';
+  }
+  /* testa: sobe (ou desce) a linha do cabelo da frente. Só a faixa da franja e das têmporas anda (de y 100 a 285, com
+     as pontas suaves): o alto da cabeça e as mechas compridas ficam onde estavam. d > 0 = testa mais alta. */
+  var TESTA = { baixa: -8, alta: 15, bemAlta: 30 };
+  function pesoTesta(y) { return y <= 100 ? 0 : y < 140 ? (y - 100) / 40 : y <= 225 ? 1 : y < 285 ? (285 - y) / 60 : 0; }
+  function subirTesta(s, d) {
+    if (!d || !s) return s;
+    return s.replace(/(\sd=")([^"]*)"/g, function (m, a, dd) { return a + dd.replace(/(-?\d*\.?\d+),(-?\d*\.?\d+)/g, function (m2, x, y) { return x + ',' + n(+y - d * pesoTesta(+y)); }) + '"'; })
+      .replace(/cy="([^"]*)"/g, function (m, y) { return 'cy="' + n(+y - d * pesoTesta(+y)) + '"'; });
   }
   // pinta o contorno sem as linhas de dentro: primeiro o traço grosso, depois o recheio por cima
   function pintar(d, recheio, traco, larg) { return p(d, { fill: 'none', stroke: traco, 'stroke-width': (larg || 2.2) * 2, 'stroke-linejoin': 'round' }) + p(d, { fill: recheio }); }
@@ -784,8 +802,9 @@
   // luz e sombra do rosto de frente: dos lados (testa, bochechas, pálpebras) e do meio (nariz e queixo)
   /* luz do rosto: só luz e cor de pele saudável (rosado nas bochechas, brilho na testa, no nariz e no queixo).
      Nada de sombra escura na parte de baixo do rosto ou dos lados — de longe parecia barba. */
-  function luzLados(pele, menino, dO) {
-    var rosa = menino ? 0.04 : 0.12, dobra = menino ? 0.25 : 0.55, a = n(-(dO || 0)), b = n(dO || 0);
+  // semMonolid: olho fininho sem a dobrinha da pálpebra (a linha da dobra não aparece)
+  function luzLados(pele, menino, dO, semDobra) {
+    var rosa = menino ? 0.04 : 0.12, dobra = semDobra ? 0 : menino ? 0.25 : 0.55, a = n(-(dO || 0)), b = n(dO || 0);
     return elip(152, 246, 26, 16, { fill: '#ff8f9a', opacity: rosa }) + elip(248, 246, 26, 16, { fill: '#ff8f9a', opacity: rosa }) +
       elip(200, 150, 40, 12, { fill: '#fff', opacity: 0.07 }) +
       p('M146,201 Q164,178 182,199', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: dobra, transform: 'translate(' + a + ' 0)' }) + p('M218,199 Q236,178 254,201', { fill: 'none', stroke: esc(pele, 0.22), 'stroke-width': 1.3, opacity: dobra, transform: 'translate(' + b + ' 0)' });
@@ -859,6 +878,16 @@
   }
   function olho(cx, lado, e, I, C, olhar, piscar) {
     var cy = 214, ix = cx + (olhar || 0), s = '', som = C('sombra'), del = C('delineado').hex, cil = C('cilios').hex;
+    // fechadinhos sorrindo: o olho vira um arquinho (meia-lua) com os cílios por cima — ele "sorri" com os olhos
+    if (e.formaOlho === 'sorridentes') {
+      var corA = e.delineado !== 'nenhum' ? del : '#2a1c1a', arco = 'M' + (cx - 19) + ',' + (cy + 4) + ' Q' + cx + ',' + (cy - 14) + ' ' + (cx + 19) + ',' + (cy + 4);
+      var r0 = '';
+      if (e.sombra !== 'nenhum') r0 += p('M' + (cx - 21) + ',' + (cy + 3) + ' Q' + cx + ',' + (cy - 30) + ' ' + (cx + 21) + ',' + (cy + 3) + ' Q' + cx + ',' + (cy - 12) + ' ' + (cx - 21) + ',' + (cy + 3) + 'Z', { fill: e.sombra === 'arco' ? '#ff8fc8' : som.hex, opacity: 0.7 });
+      r0 += p(arco, { fill: 'none', stroke: corA, 'stroke-width': e.delineado === 'grosso' ? 5.5 : 4, 'stroke-linecap': 'round' });
+      if (e.cilios !== 'nenhum' && e.personagem !== 'menino') [0.75, 0.9].forEach(function (t0) { var tt = lado > 0 ? t0 : 1 - t0, x0 = (1 - tt) * (1 - tt) * (cx - 19) + 2 * (1 - tt) * tt * cx + tt * tt * (cx + 19), y0 = (1 - tt) * (1 - tt) * (cy + 4) + 2 * (1 - tt) * tt * (cy - 14) + tt * tt * (cy + 4);
+        r0 += p('M' + n(x0) + ',' + n(y0) + ' l' + (lado * 6) + ',-6', { stroke: e.cilios === 'arco' ? '#ff8fc8' : cil, 'stroke-width': 2.2, 'stroke-linecap': 'round' }); });
+      return r0;
+    }
     function palpebra(alt, larg) { return 'M' + (cx - larg) + ',' + (cy - 2) + 'Q' + cx + ',' + (cy - alt) + ' ' + (cx + larg) + ',' + (cy - 2) + 'Q' + cx + ',' + (cy - alt * 0.55) + ' ' + (cx - larg) + ',' + (cy - 2) + 'Z'; }
     switch (e.sombra) {
       case 'simples': s += p(palpebra(40, 26), { fill: som.hex, opacity: 0.8 }); break;
@@ -899,7 +928,7 @@
     if (e.cilios === 'fadinha') s += p(estrela4(cx + lado * 29, cy - 22, 4.5), { fill: '#fff' }) + circ(cx + lado * 22, cy - 28, 1.4, { fill: '#fff' });
     // menino: olho um pouco menor e mais reto (mesmo desenho, sem cara de boneca)
     // formato do olho: o mesmo desenho, esticado e inclinado (menino: um pouco menor e mais reto)
-    var FO = { amendoados: [1.1, 0.78, -5], grandes: [1.14, 1.14, 0], pequenos: [0.84, 0.84, 0], puxadinhos: [1.04, 0.86, -11], caidos: [1.04, 0.9, 9] }[e.formaOlho] || [1, 1, 0];
+    var FO = { amendoados: [1.1, 0.78, -5], grandes: [1.14, 1.14, 0], pequenos: [0.84, 0.84, 0], puxadinhos: [1.04, 0.86, -11], caidos: [1.04, 0.9, 9], fininhos: [1.1, 0.66, 0], fininhosPuxados: [1.1, 0.66, -9], sorridentes: [1, 1, 0] }[e.formaOlho] || [1, 1, 0];
     var men = e.personagem === 'menino', sxO = FO[0] * (men ? 0.88 : 1), syO = FO[1] * (men ? 0.84 : 1), rotO = FO[2] * lado;
     var mexe = sxO !== 1 || syO !== 1 || rotO !== 0;
     var abre = mexe ? '<g transform="translate(' + cx + ' 214) rotate(' + rotO + ') scale(' + n(sxO * 100) / 100 + ' ' + n(syO * 100) / 100 + ') translate(' + (-cx) + ' -214)">' : '', fecha0 = mexe ? '</g>' : '';
