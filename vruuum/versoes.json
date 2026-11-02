@@ -15,6 +15,17 @@
       ]
     },
     {
+      "versao": "1.4.1",
+      "data": "02/Nov/2026",
+      "hora": "12:00:00",
+      "pt": [
+        "Aviso de versão nova dentro do jogo: quando sai uma atualização, aparece no topo \"✨ Versão nova — Atualizar\". Um toque baixa a versão nova, troca a cópia guardada no aparelho (para continuar funcionando sem internet) e recarrega. Nunca recarrega sozinho no meio da partida."
+      ],
+      "en": [
+        "New-version notice inside the game: when an update is out, \"✨ New version — Update\" shows at the top. One tap downloads it, replaces the copy saved on the device (so it keeps working offline) and reloads. It never reloads by itself mid-game."
+      ]
+    },
+    {
       "versao": "1.4.0",
       "data": "02/Nov/2026",
       "hora": "00:10:00",

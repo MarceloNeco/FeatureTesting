@@ -196,3 +196,9 @@ button:focus-visible, input:focus-visible, .carta:focus-visible { outline: 3px s
 .musica-item .txt { display: grid; }
 .musica-item small { color: var(--muted); font-size: .78rem; }
 .musica-item[aria-pressed="true"] { border-color: var(--ouro); background: var(--card2); }
+/* ---------- grossura do traço: traços de verdade, do fininho ao bem grosso ---------- */
+.grossura { flex: 0 0 auto; width: 58px; height: 44px; min-height: 44px; border-radius: 14px; background: var(--card); border: 3px solid transparent; display: grid; place-items: center; padding: 0; }
+.grossura[aria-pressed="true"] { border-color: var(--ouro); background: var(--card2); box-shadow: 0 0 0 2px rgba(255, 209, 102, .35); }
+.separador { flex: 0 0 auto; width: 3px; border-radius: 2px; background: var(--borda); align-self: stretch; margin: 4px 3px; }
+.barra-direita .separador, .barra-esquerda .separador { width: auto; height: 3px; margin: 3px 4px; }
+.ctrl-painel .separador { display: none; }
