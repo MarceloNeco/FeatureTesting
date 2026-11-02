@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.10', APP_UPDATED = '02/11/2026';
+  var APP_VERSION = '0.8.11', APP_UPDATED = '02/11/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -65,6 +65,7 @@
   var TVApp = (function () {
     var tv = { bonecos: {}, dedoCorpo: {}, sala: null, cfg: Object.assign({}, CFG_PADRAO, { turmas: Object.assign({}, CFG_PADRAO.turmas) }), partida: null, fase: 'carregando', local: false, visaoLocal: null, jog: [], raias: {}, player: null, tocando: false, titulo: '', videoAtual: '', lista: [], indice: -1, calib: null, nomes: [], ultimoQuadro: 0, raf: 0, podio: null, pendente: null, caixas: {}, vozLiberada: false, fimMusica: false };
 
+    try { tv.nome2 = localStorage.getItem('bagunca:nome2') || ''; } catch (e) { tv.nome2 = ''; }   // 2ª pessoa no mesmo aparelho: o último nome usado volta sozinho
     var limpaLegenda = 0;
     function dizer(pt, en) {
       Desenho.legenda(T(pt, en), '#fff', false);
@@ -164,7 +165,11 @@
       // o boneco escolhido aparece em cima do nome (os dois, quando uma câmera filma duas pessoas)
       function bonecoDe(chave, k) { return function () { return (tv.bonecos[chave] || {})[k] || Boneco.normalizar({}, k); }; }
       function comBonecos(d, chave) { var w = document.createElement('div'); w.className = 'bonecos'; var n = tv.cfg.jogadores === 2 && (tv.local || tv.cfg.celulares === 1) ? 2 : 1; for (var k = 0; k < n; k++) { var cv = document.createElement('canvas'); cv.width = 120; cv.height = 160; cv.setAttribute('data-boneco', chave + ':' + k); w.appendChild(cv); animarBoneco(cv, bonecoDe(chave, k)); } d.appendChild(w); }
-      if (tv.local) { var d0 = document.createElement('div'); d0.className = 'jog'; d0.style.setProperty('--cor', cores[0]); comBonecos(d0, 'local'); d0.appendChild(document.createTextNode(tv.nomes[0] || T('Você', 'You'))); L.appendChild(d0); }
+      function umBoneco(d, chave, k) { var w = document.createElement('div'); w.className = 'bonecos'; var cv = document.createElement('canvas'); cv.width = 120; cv.height = 160; cv.setAttribute('data-boneco', chave + ':' + k); w.appendChild(cv); animarBoneco(cv, bonecoDe(chave, k)); d.appendChild(w); }
+      var dois = tv.local && tv.cfg.jogadores === 2;
+      if (tv.local) for (var q = 0; q < (dois ? 2 : 1); q++) { var dq = document.createElement('div'); dq.className = 'jog'; dq.style.setProperty('--cor', cores[q]); umBoneco(dq, 'local', q); var nq = document.createElement('span'); if (q === 1) nq.id = 'lobbyNomeJ2'; nq.textContent = q === 0 ? (tv.nome1 || T('Você', 'You')) : (tv.nome2 || T('2ª pessoa', '2nd player')); dq.appendChild(nq); L.appendChild(dq); }
+      $('lobbyNome2').style.display = dois ? '' : 'none';
+      if (dois) { $('nome2').value = tv.nome2; if (!tv.nome2) setTimeout(function () { $('nome2').focus(); }, 300); }
       tv.jog.forEach(function (j, i) {
         var d = document.createElement('div'); d.className = 'jog'; d.style.setProperty('--cor', cores[i] || '#fff');
         if (!(tv.cfg.celulares === 1 && i > 0)) comBonecos(d, j.id); d.appendChild(document.createTextNode(j.nome)); var s = document.createElement('small'); s.textContent = j.ligado ? T('📱 conectado', '📱 connected') : T('⏳ conectando…', '⏳ connecting…'); d.appendChild(s); L.appendChild(d);
@@ -179,7 +184,7 @@
       requestAnimationFrame(vivo);
     }
     function resumo() {
-      var c = tv.cfg, m = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), mistura: T('🎪 Bagunça total', '🎪 Total mayhem') }[c.modo];
+      var c = tv.cfg, m = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), pula: T('🪵 Pula e abaixa', '🪵 Jump and duck'), bolas: T('🎳 Bagunça de bolas', '🎳 Ball mayhem'), mistura: T('🎪 Bagunça total', '🎪 Total mayhem'), bagunca: T('🧸 Bagunça (sala, quarto ou jardim)', '🧸 Mayhem (living room, bedroom or garden)') }[c.modo] || '';
       var d = c.duracao ? (c.duracao >= 120 ? '2 min' : c.duracao + ' s') : T('🎵 a música inteira', '🎵 the whole song');
       var n = { crianca: T('Criança', 'Kids'), normal: 'Normal', maluco: T('Maluco', 'Crazy') }[c.dificuldade];
       var amb = c.ambiente === 'paisagem' ? T('🏞️ paisagem', '🏞️ landscape') : T('📷 câmera', '📷 camera');
@@ -225,7 +230,7 @@
       cheia(''); tv.podio = null;
       tv.faixa = tv.faixa ? (tv.faixa % (Som.FAIXAS - 1)) + 1 : 1 + Math.floor(Math.random() * (Som.FAIXAS - 1));   // uma música por rodada, nunca a mesma da anterior
       if (tv.tocando) Som.musica(false); else Som.musica(true, tv.faixa);   // tocando YouTube: ele é a música
-      tv.nomes = tv.local ? (tv.cfg.jogadores === 2 ? [tv.nomes[0] || T('Esquerda', 'Left'), T('Direita', 'Right')] : [tv.nomes[0] || T('Você', 'You')]) : (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2 ? [tv.jog[0].nome + ' 1', tv.jog[0].nome + ' 2'] : tv.jog.slice(0, tv.cfg.jogadores).map(function (j) { return j.nome; }));
+      tv.nomes = tv.local ? (tv.cfg.jogadores === 2 ? [tv.nome1 || T('Esquerda', 'Left'), tv.nome2 || T('Direita', 'Right')] : [tv.nomes[0] || T('Você', 'You')]) : (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2 ? [tv.jog[0].nome + ' 1', tv.jog[0].nome + ' 2'] : tv.jog.slice(0, tv.cfg.jogadores).map(function (j) { return j.nome; }));
       if (tv.cfg.celulares === 1 && tv.cfg.jogadores === 2 && !tv.local) tv.nomes = [T('Esquerda', 'Left'), T('Direita', 'Right')];
       Desenho.nomes(tv.nomes); aplicarBonecos();
       calibrar().then(function () { if (soCalibrar) { lobby(); return; } return contagem().then(rodada); });
@@ -278,12 +283,13 @@
     function rodada() {
       var figs = Figuras.lista(tv.cfg.turmas);
       if (!figs.some(function (f) { return f.papel === 'fruta'; })) figs = Figuras.lista();   // sem fruta nenhuma não dá para cortar
-      tv.partida = Bagunca.criarPartida({ modo: tv.cfg.modo, jogadores: tv.cfg.jogadores, duracao: tv.cfg.duracao, dificuldade: tv.cfg.dificuldade, figuras: figs });
+      tv.casaN = tv.casaN == null ? Math.floor(Math.random() * 3) : (tv.casaN + 1) % 3;   // 🧸 Bagunça: cada rodada num lugar (sala, quarto, jardim)
+      tv.partida = Bagunca.criarPartida({ modo: tv.cfg.modo, jogadores: tv.cfg.jogadores, duracao: tv.cfg.duracao, dificuldade: tv.cfg.dificuldade, figuras: figs, cenaCasa: window.Casa ? Casa.CENAS[tv.casaN] : null });
       Object.keys(tv.caixas).forEach(function (j) { var c = tv.caixas[j]; if (c) { tv.partida.zonaChute(+j, Math.min(0.95, c.y + c.h * 0.6)); tv.partida.calibrar(+j, c); } });
       if (tv.toque) { tv.dedoCorpo = {}; for (var jt = 0; jt < tv.cfg.jogadores; jt++) { tv.partida.calibrar(jt, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }); tv.partida.corpo(jt, { x: 0.4, y: 0.1, w: 0.2, h: 0.8 }, performance.now()); } }
       Desenho.limpar(); Desenho.ambiente(tv.cfg.ambiente, tv.cfg.cena);
-      $('tv').classList.toggle('paisagem', tv.cfg.ambiente === 'paisagem');
-      tv.partida.comecar(); tv.fase = 'jogando'; tv.fimMusica = false; $('tv').classList.add('jogando');
+      $('tv').classList.toggle('paisagem', tv.cfg.ambiente === 'paisagem' || tv.cfg.modo === 'bagunca');
+      tv.partida.comecar(); tv.fase = 'jogando'; if (tv.cfg.modo === 'bagunca') dizer('Hora da bagunça! Bata em tudo!', 'Mayhem time! Hit everything!');   // na fase de jogo a legenda some sozinha tv.fimMusica = false; $('tv').classList.add('jogando');
       if (tv.cfg.duracao === 0 && tv.player && !tv.tocando) { try { tv.player.playVideo(); } catch (e) {} }
       window.BaguncaDebug = tv;   // só para testes automáticos (nada de segredo aqui)
     }
@@ -316,7 +322,10 @@
       var erros = Desenho.erros().concat(tv.errosJs || []);
       b.textContent = 'v' + APP_VERSION + ' · ' + (Desenho.estaLeve() ? 'leve' : 'normal') + ' · ' + tv.dbgFps + ' fps · ' + tv.fase + ' · voz TV: ' + (Voz.disponivel() ? (tv.vozLiberada ? 'sim' : 'sim, sem toque') : 'não') + '\n' + navigator.userAgent.slice(0, 90) + (erros.length ? '\nERROS:\n' + erros.join('\n') : '\nsem erros');
     }
+    var somAte = {};
     function som(ev) {
+      if (ev.t === 'casa') { if (!ev.som) return; var agora = performance.now(); if (agora < (somAte[ev.som] || 0)) return; somAte[ev.som] = agora + (ev.silencioso ? 120 : 60); Som.tocar(ev.som); return; }   // 🧸 Bagunça: um som por coisa (sem embolar)
+      if (ev.t === 'bagunca100') { Som.tocar('fim'); dizer('Bagunça total!', 'Total mayhem!'); return; }
       if (ev.t === 'corte') Som.tocar('corte');
       else if (ev.t === 'pegou') Som.tocar(ev.mascote ? 'mascote' : 'pegou');
       else if (ev.t === 'chutou') Som.tocar('chute');
@@ -384,8 +393,8 @@
       tela(''); $('tv').classList.add('ativa'); $('tv').classList.toggle('local', tv.local);
       Desenho.iniciar($('tvCanvas'), { nomes: [] });
       Som.iniciar(); Voz.liberar(); tv.vozLiberada = !!opts.gesto;
-      tv.toque = !!opts.toque; $('tv').classList.toggle('toque', tv.toque);
-      if (tv.local) { tv.visaoLocal = opts.visao || null; tv.videoLocal = opts.video || null; tv.esqueletoLigado = !!opts.esqueleto; tv.nomes = opts.nomes || [opts.nome || T('Você', 'You')]; if (opts.video) $('tvFundo').appendChild(opts.video); }
+      tv.toque = !!opts.toque; $('tv').classList.toggle('toque', tv.toque); Desenho.dedo(tv.toque); Desenho.iconesDireita(tv.local);
+      if (tv.local) { tv.visaoLocal = opts.visao || null; tv.videoLocal = opts.video || null; tv.esqueletoLigado = !!opts.esqueleto; tv.nome1 = opts.nome || ''; tv.nomes = opts.nomes || [opts.nome || T('Você', 'You')]; if (opts.video) $('tvFundo').appendChild(opts.video); }
       if (tv.toque) { ligarToque(); try { tv.mostrarBoneco = localStorage.getItem('bagunca:bonecoDedo') === '1'; } catch (e) { tv.mostrarBoneco = false; } } else tv.mostrarBoneco = true;   // no dedo o boneco começa escondido
       $('localBoneco').classList.toggle('ativo', !!tv.mostrarBoneco); Desenho.mostrarBoneco(tv.mostrarBoneco);
       try { if (!tv.local && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {}
@@ -397,6 +406,7 @@
       $('localComecar').onclick = function () { if (tv.fase === 'lobby' || tv.fase === 'fim') comecar(); };
       $('localPausa').onclick = function () { comando({ acao: 'pausar' }); };
       $('localMudo').onclick = function () { aplicarSom(!SOM.mudo, SOM.semMusica); };
+      $('nome2').addEventListener('input', function () { tv.nome2 = $('nome2').value.replace(/\s+/g, ' ').trim().slice(0, 14); try { localStorage.setItem('bagunca:nome2', tv.nome2); } catch (e) {} var c = $('lobbyNomeJ2'); if (c) c.textContent = tv.nome2 || T('2ª pessoa', '2nd player'); });
       $('localMusica').onclick = function () { aplicarSom(SOM.mudo, !SOM.semMusica); };
       $('localCamera').onclick = function () { CelApp.trocarCameraLocal(); };
       $('localBoneco').onclick = function () { tv.mostrarBoneco = !tv.mostrarBoneco; $('localBoneco').classList.toggle('ativo', tv.mostrarBoneco); Desenho.mostrarBoneco(tv.mostrarBoneco); try { localStorage.setItem('bagunca:bonecoDedo', tv.mostrarBoneco ? '1' : '0'); } catch (e) {} };
@@ -404,6 +414,7 @@
       $('localModos').querySelectorAll('button').forEach(function (b) { b.onclick = function () { $('localModos').querySelectorAll('button').forEach(function (x) { x.classList.remove('ativo'); }); b.classList.add('ativo'); comando({ acao: 'config', modo: b.getAttribute('data-v') }); }; });
       // teclado / controle da TV: OK (Enter) começa; Esc/Voltar nada
       document.addEventListener('keydown', function (e) {
+        if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;   // digitando um nome
         if (!$('tv').classList.contains('ativa')) return;
         if (!tv.vozLiberada) { tv.vozLiberada = true; Voz.liberar(); Som.iniciar(); }
         if (e.key === 'Enter' || e.key === ' ') { if (tv.fase === 'lobby' || tv.fase === 'fim') comecar(); else if (tv.fase === 'jogando' || tv.fase === 'pausa') comando({ acao: 'pausar' }); else if (tv.fase === 'calibrando' && tv.calib) tv.calib.pular(); }

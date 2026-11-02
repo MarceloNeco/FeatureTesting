@@ -2,6 +2,25 @@
   "app": "baguncolandia",
   "versoes": [
     {
+      "versao": "0.8.11",
+      "data": "02/Nov/2026",
+      "hora": "12:14:00",
+      "pt": [
+        "Modo novo 🧸 Bagunça na casa: uma sala, um quarto ou um jardim cheios de coisas arrumadas para bagunçar. Livro cai e abre, torre de blocos desaba, bola sai pela janela, o lustre balança e muda a cor da luz, o interruptor acende e apaga, a janela abre devagar, o quadro fica torto, o cachorrinho late e corre atrás da bola; no jardim, folhas caem, passarinhos voam e o balanço balança. Com Bagunçômetro e sons para cada coisa.",
+        "O boneco agora reage: quando acerta, pula de alegria com os braços para cima e, no jogo com o dedo, salta até a fruta; quando pega algo ruim, põe as mãos na cabeça e faz cara de dor.",
+        "Duas pessoas no mesmo aparelho: cada uma tem o seu cartão com o boneco e o nome, e o jogo pede o nome da 2ª pessoa (o último usado já vem escrito, dá para trocar).",
+        "\"Pula e abaixa\" e \"Bagunça de bolas\" agora aparecem com o nome na tela \"Quem vai jogar\" (antes aparecia \"undefined\").",
+        "Com duas pessoas, o placar da direita não fica mais escondido atrás dos botões."
+      ],
+      "en": [
+        "New 🧸 House mayhem mode: a living room, a bedroom or a garden full of tidy things to mess up. Books fall and open, block towers tumble, balls fly out the window, the chandelier swings and changes the light colour, the switch turns lights on and off, the window opens smoothly, the picture goes crooked, the puppy barks and chases the ball; in the garden, leaves fall, birds fly off and the swing swings. With a Mess-o-meter and a sound for everything.",
+        "The avatar now reacts: on a hit it jumps for joy with arms up and, in finger mode, leaps to the fruit; when it grabs something bad, it holds its head and makes a pained face.",
+        "Two people on the same device: each gets a card with avatar and name, and the game asks for the 2nd player's name (the last one used is already filled in and can be changed).",
+        "\"Jump and duck\" and \"Ball mayhem\" now show their names on the \"Who’s playing\" screen (it used to say \"undefined\").",
+        "With two people, the right-hand score is no longer hidden behind the buttons."
+      ]
+    },
+    {
       "versao": "0.8.10",
       "data": "02/Nov/2026",
       "hora": "10:07:00",

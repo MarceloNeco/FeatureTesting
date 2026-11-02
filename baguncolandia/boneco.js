@@ -39,7 +39,8 @@
   function costura(ctx, x1, y1, x2, y2, cor) { ctx.save(); ctx.strokeStyle = cor; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.restore(); }
 
   /* ================= CORPO EM PÉ =================
-     origem no meio dos pés; A = altura total; o = { balanco, andando, bE, bD, pulando, ts }
+     origem no meio dos pés; A = altura total; o = { balanco, andando, bE, bD, pulando, ts, pose }
+     pose: 'festa' (acertou: rosto de alegria e brilhos) ou 'dor' (pegou algo ruim: mãos na cabeça, careta, suor).
      Proporções de criança: cabeça 0.40A, tronco 0.27A, pernas 0.22A, pescoço curto. */
   function corpoEmPe(ctx, cfg, A, o) {
     cfg = normalizar(cfg); o = o || {};
@@ -58,8 +59,8 @@
       ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.beginPath(); ctx.ellipse(fx + s * L * 0.5, fy - L * 0.1, L * 1.3, L * 0.35, 0, 0, 6.2832); ctx.fill();
     });
     tronco(ctx, cfg, A, tw, th, ty, escuro);
-    // braços: manga curta na cor da roupa, antebraço em pele, mãozinha de luva
-    [[-1, o.bE || 0], [1, o.bD || 0]].forEach(function (bb) {
+    // braços: manga curta na cor da roupa, antebraço em pele, mãozinha de luva (na dor, vão para a cabeça: desenhados depois dela)
+    function bracos() { [[-1, o.bE || 0], [1, o.bD || 0]].forEach(function (bb) {
       var s = bb[0], up = bb[1], ox = s * tw * 0.52, oy = ty + th * 0.18;
       var ang = (0.25 + up * 1.55) + (o.andando ? bal * s * 0.4 * (1 - up) : 0);   // ângulo a partir de "para baixo": levantado = para fora e para cima
       var ex = ox + s * Math.sin(ang) * A * 0.11, ey = oy + Math.cos(ang) * A * 0.11;
@@ -68,12 +69,41 @@
       ctx.strokeStyle = cfg.pele; ctx.lineWidth = L; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(hx, hy); ctx.stroke();
       ctx.fillStyle = cfg.pele; ctx.beginPath(); ctx.arc(hx, hy, L * 0.95, 0, 6.2832); ctx.fill();
       ctx.strokeStyle = tom(cfg.pele, 0.8); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(hx, hy, L * 0.95, 0, 6.2832); ctx.stroke();
-    });
-    // pescoço + cabeça (balança de leve ao andar)
+    }); }
+    function maosNaCabeca() {
+      [-1, 1].forEach(function (s) {
+        var ox = s * tw * 0.52, oy = ty + th * 0.18, ex = s * tw * 1.05, ey = ty - A * 0.04, hx = s * hs * 0.42, hy = ty - hs * 0.66;
+        ctx.strokeStyle = cfg.roupa === 'armadura' ? '#b0bec5' : cor; ctx.lineWidth = L * 1.4; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ex, ey); ctx.stroke();
+        ctx.strokeStyle = cfg.pele; ctx.lineWidth = L; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(hx, hy); ctx.stroke();
+        ctx.fillStyle = cfg.pele; ctx.beginPath(); ctx.arc(hx, hy, L * 1.05, 0, 6.2832); ctx.fill();
+        ctx.strokeStyle = tom(cfg.pele, 0.8); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(hx, hy, L * 1.05, 0, 6.2832); ctx.stroke();
+      });
+    }
+    if (o.pose !== 'dor') bracos();
+    // pescoço + cabeça (balança de leve ao andar; na dor, chacoalha)
     ctx.fillStyle = cfg.pele; ctx.fillRect(-L * 0.6, ty - L * 0.6, L * 1.2, L * 1.2);
-    ctx.save(); ctx.translate(0, ty - hs * 0.46 + Math.abs(bal) * 2); ctx.rotate(bal * 0.06);
-    cabeca(ctx, cfg, hs, ts); ctx.restore();
+    ctx.save(); ctx.translate(0, ty - hs * 0.46 + Math.abs(bal) * 2); ctx.rotate(bal * 0.06 + (o.pose === 'dor' ? Math.sin(ts / 45) * 0.08 : 0));
+    cabeca(ctx, cfg, hs, ts, o.pose); enfeitesDaPose(ctx, hs, o.pose, ts); ctx.restore();
+    if (o.pose === 'dor') maosNaCabeca();
     ctx.restore();
+  }
+  /* brilhos da alegria e, na dor, gotinha de suor e estrelinhas rodando (valem para qualquer cabeça, até as da turma) */
+  function enfeitesDaPose(ctx, hs, pose, ts) {
+    if (!pose) return;
+    var R = hs / 2;
+    ctx.save();
+    if (pose === 'festa') {
+      for (var i = 0; i < 5; i++) { var a = i * 1.2566 + ts / 300, d = R * (1.25 + 0.12 * Math.sin(ts / 90 + i)); estrela(ctx, Math.cos(a) * d, Math.sin(a) * d * 0.8 - R * 0.2, R * 0.13, i % 2 ? OURO : '#fff'); }
+    } else {
+      ctx.fillStyle = 'rgba(120,200,255,.9)'; ctx.beginPath(); ctx.moveTo(R * 0.92, -R * 0.62); ctx.quadraticCurveTo(R * 1.08, -R * 0.3, R * 0.92, -R * 0.22); ctx.quadraticCurveTo(R * 0.76, -R * 0.3, R * 0.92, -R * 0.62); ctx.fill();
+      for (var k = 0; k < 3; k++) { var b = k * 2.094 + ts / 160; estrela(ctx, Math.cos(b) * R * 0.75, -R * 1.2 + Math.sin(b) * R * 0.18, R * 0.12, OURO); }
+    }
+    ctx.restore();
+  }
+  function estrela(ctx, x, y, r, cor) {
+    ctx.fillStyle = cor; ctx.beginPath();
+    for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r; ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+    ctx.closePath(); ctx.fill();
   }
 
   function asas(ctx, A, y, ts) {
@@ -130,7 +160,7 @@
   }
 
   /* ================= CABEÇA (origem no centro; hs = diâmetro) ================= */
-  function cabeca(ctx, cfg, hs, ts) {
+  function cabeca(ctx, cfg, hs, ts, expr) {
     cfg = normalizar(cfg);
     var tipo = cfg.cabeca, R = hs / 2;
     ctx.save();
@@ -172,6 +202,7 @@
       ctx.strokeStyle = '#8b3a4a'; ctx.lineWidth = R * 0.05; ctx.beginPath(); ctx.moveTo(-R * 0.22, R * 0.52); ctx.quadraticCurveTo(0, R * 0.72, R * 0.22, R * 0.52); ctx.stroke();
       ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-R * 0.14, R * 0.56); ctx.quadraticCurveTo(0, R * 0.66, R * 0.14, R * 0.56); ctx.closePath(); ctx.fill();
     }
+    expressao(ctx, cfg, R, expr);
     // sardas no hobbit, barba no mago
     if (tipo === 'hobbit') { ctx.fillStyle = tom(cfg.pele, 0.75); [[-0.55, 0.32], [-0.45, 0.4], [-0.62, 0.42], [0.55, 0.32], [0.45, 0.4], [0.62, 0.42]].forEach(function (p) { ctx.beginPath(); ctx.arc(p[0] * R, p[1] * R, R * 0.025, 0, 6.2832); ctx.fill(); }); }
     if (tipo === 'mago') { ctx.fillStyle = '#eceff1'; ctx.beginPath(); ctx.moveTo(-R * 0.6, R * 0.35); ctx.quadraticCurveTo(-R * 0.5, R * 1.3, 0, R * 1.55); ctx.quadraticCurveTo(R * 0.5, R * 1.3, R * 0.6, R * 0.35); ctx.quadraticCurveTo(0, R * 0.75, -R * 0.6, R * 0.35); ctx.fill(); ctx.fillStyle = '#cfd8dc'; ctx.beginPath(); ctx.ellipse(0, R * 0.46, R * 0.3, R * 0.1, 0, 0, 6.2832); ctx.fill(); }
@@ -180,6 +211,28 @@
     if (tipo === 'mago') chapeuMago(ctx, R, cfg.cor);
     ctx.restore();
     acessorio(ctx, cfg, hs);
+  }
+  /* rosto da alegria e da dor: cobre os olhos e a boca de sempre com a pele e desenha a careta por cima */
+  function expressao(ctx, cfg, R, expr) {
+    if (expr !== 'festa' && expr !== 'dor') return;
+    ctx.save(); ctx.fillStyle = cfg.pele;
+    [-1, 1].forEach(function (s) { ctx.beginPath(); ctx.ellipse(s * R * 0.36, -R * 0.04, R * 0.28, R * 0.37, 0, 0, 6.2832); ctx.fill(); });
+    ctx.beginPath(); ctx.ellipse(0, R * 0.57, R * 0.33, R * 0.22, 0, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = 'rgba(255,110,150,.35)'; [-1, 1].forEach(function (s) { ctx.beginPath(); ctx.ellipse(s * R * 0.5, R * 0.3, R * 0.2, R * 0.13, 0, 0, 6.2832); ctx.fill(); });
+    ctx.strokeStyle = ESCURO; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = R * 0.075;
+    if (expr === 'festa') {
+      [-1, 1].forEach(function (s) { var ex = s * R * 0.36; ctx.beginPath(); ctx.moveTo(ex - R * 0.15, R * 0.07); ctx.quadraticCurveTo(ex, -R * 0.17, ex + R * 0.15, R * 0.07); ctx.stroke(); });   // olhos fechados de alegria ^ ^
+      ctx.strokeStyle = tom(cfg.corCabelo, 0.85); ctx.lineWidth = R * 0.05; [-1, 1].forEach(function (s) { ctx.beginPath(); ctx.moveTo(s * R * 0.2, -R * 0.36); ctx.quadraticCurveTo(s * R * 0.38, -R * 0.48, s * R * 0.54, -R * 0.38); ctx.stroke(); });
+      ctx.fillStyle = '#7a1f2e'; ctx.beginPath(); ctx.moveTo(-R * 0.28, R * 0.44); ctx.quadraticCurveTo(0, R * 0.98, R * 0.28, R * 0.44); ctx.closePath(); ctx.fill();   // bocão aberto
+      ctx.fillStyle = '#ff7a8f'; ctx.beginPath(); ctx.ellipse(0, R * 0.66, R * 0.12, R * 0.07, 0, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.fillRect(-R * 0.19, R * 0.44, R * 0.38, R * 0.07);
+    } else {
+      [-1, 1].forEach(function (s) { var ex = s * R * 0.36; ctx.beginPath(); ctx.moveTo(ex + s * R * 0.15, -R * 0.11); ctx.lineTo(ex - s * R * 0.1, R * 0.02); ctx.lineTo(ex + s * R * 0.15, R * 0.15); ctx.stroke(); });   // olhos apertados > <
+      ctx.strokeStyle = tom(cfg.corCabelo, 0.85); ctx.lineWidth = R * 0.055; [-1, 1].forEach(function (s) { ctx.beginPath(); ctx.moveTo(s * R * 0.16, -R * 0.42); ctx.lineTo(s * R * 0.52, -R * 0.28); ctx.stroke(); });   // sobrancelhas de preocupação
+      ctx.fillStyle = '#7a1f2e'; ctx.beginPath(); ctx.ellipse(0, R * 0.58, R * 0.22, R * 0.12, 0, 0, 6.2832); ctx.fill();   // boca de "ai!" com os dentes cerrados
+      ctx.fillStyle = '#fff'; ctx.fillRect(-R * 0.17, R * 0.52, R * 0.34, R * 0.055); ctx.fillRect(-R * 0.17, R * 0.6, R * 0.34, R * 0.05);
+    }
+    ctx.restore();
   }
   function cabeloTras(ctx, cfg, R) {
     var c = cfg.corCabelo, e = cfg.cabelo; if (e === 'careca' || cfg.cabeca === 'cavaleiro') return;

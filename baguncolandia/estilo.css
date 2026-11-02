@@ -195,3 +195,6 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 .btMusica.off::after { content: ''; position: absolute; left: 22%; right: 22%; top: 50%; height: 3px; background: var(--erro); border-radius: 2px; transform: rotate(-45deg); }
 .dicaLobby { color: var(--ouro); font-size: 1rem; text-align: center; max-width: 32rem; margin: 0 auto; }
 .dicaLobby:empty { display: none; }
+/* "Quem vai jogar" com duas pessoas no mesmo aparelho: o nome da 2ª (o último usado já vem escrito) */
+.nome2 { display: flex; align-items: center; justify-content: center; gap: .5rem; flex-wrap: wrap; color: var(--text); font-weight: 600; }
+.nome2 input { width: 11rem; max-width: 60vw; font: inherit; padding: .5rem .7rem; border-radius: 12px; border: 2px solid var(--border); background: var(--card); color: var(--text); }
