@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.15.0';
+  var APP_VERSION = '0.16.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TOQUE = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
@@ -14,6 +14,21 @@
   var TV = /[?&]tv=sim\b/.test(location.search) || (/[?&]tv=auto\b/.test(location.search) && (!TOQUE || TELEVISAO));
   if (TV) document.documentElement.classList.add('tv');
   var CALMO = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  /* chegada dos quadradinhos: ao abrir uma parte, trocar de aba ou de tela, os botões entram um atrás do outro,
+     rápido e suave (classe .chega no estilo.css). Só na navegação; tocar numa opção não faz tudo pular de novo. */
+  function chegar() {
+    if (CALMO) return;
+    Array.prototype.forEach.call(arguments, function (caixa) {
+      if (!caixa || caixa.hidden || !caixa.getClientRects().length) return;   // escondida: não anima
+      var k = 0;
+      Array.prototype.forEach.call(caixa.children, function (el) {
+        if (el.hidden) return;
+        el.classList.remove('chega'); void el.offsetWidth;
+        el.style.setProperty('--i', Math.min(k++, 14)); el.classList.add('chega');
+        el.addEventListener('animationend', function fim() { el.classList.remove('chega'); el.removeEventListener('animationend', fim); });
+      });
+    });
+  }
   var MAX_LOOKS = 30;
 
   function ler(k, padrao) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : padrao; } catch (e) { return padrao; } }
@@ -44,6 +59,8 @@
     if (id === 'looks') listaLooks();
     if (id === 'estudio') desenharTudo();
     if (window.PurpurinaTV && PurpurinaTV.aoMostrar) PurpurinaTV.aoMostrar(id);
+    var tela = $(id);
+    if (tela) chegar.apply(null, Array.prototype.slice.call(tela.querySelectorAll('.botoes-menu, .linha-menu, #listaDesafios, #listaLooks, .fontes, .controles-musica, #cats:not([hidden]), #estilos:not([hidden]), #cores:not([hidden])')));
     setTimeout(focarPrimeiro, 30);
   }
   function ir(id) { if (id === atual) return; pilha.push(atual); try { history.pushState({ purpurina: pilha.length }, ''); } catch (e) { /* sem histórico: segue */ } mostrar(id); }
@@ -76,7 +93,7 @@
       caixa.appendChild(bt);
     });
     var vid = $('janelaVideo'); vid.hidden = !o.video; if (o.video) { vid.src = o.video; try { vid.play(); } catch (e) { /* ok */ } } else vid.removeAttribute('src');
-    $('janela').hidden = false;
+    $('janela').hidden = false; chegar(caixa);
     if (!(mesma && janelaAberta)) { janelaAberta = true; try { history.pushState({ janela: 1 }, ''); } catch (e) { /* ok */ } }
     setTimeout(function () { var p = caixa.querySelector('button'); if (p) p.focus(); }, 30);
   }
@@ -88,11 +105,14 @@
   var tRecado = 0;
   function recado(msg) { var r = $('recado'); r.textContent = msg; r.hidden = false; clearTimeout(tRecado); tRecado = setTimeout(function () { r.hidden = true; }, 2600); }
 
+  // quem escolheu 🔕 sem música não ouve música ao entrar (os efeitos continuam); o ⏭ ou o 🎵 ligam de novo
+  function semMusica() { try { return localStorage.getItem('purpurina.semMusica') === '1'; } catch (e) { return false; } }
+
   // ---------- entrada e menu ----------
   var livre = V.limpar(ler('purpurina.atual', null));
   function entrar() {
     if (atual !== 'entrada') return;
-    Som.iniciar(); Som.musica(true); Som.tocar('brilho');
+    Som.iniciar(); if (!semMusica()) Som.musica(true); Som.tocar('brilho');
     telaCheia();
     try { history.replaceState({ inicio: 1 }, ''); } catch (e) { /* ok */ }
     mostrar('menu');
@@ -269,7 +289,7 @@
     naParte = true;
   }
   // volta da lista de opções para as partes (pelo botão ⬅ ou pelo Voltar do celular)
-  function mostrarPartes() { naParte = false; desenharGrupos(); zoomDaParte(); }
+  function mostrarPartes() { naParte = false; desenharGrupos(); zoomDaParte(); chegar($('cats')); }
   function sairDaParte() { if (parteNoHist) { parteNoHist = false; ignorar++; history.back(); } }
   $('btPartes').addEventListener('click', function () { Som.tocar('clique'); if (parteNoHist) history.back(); else mostrarPartes(); });
   function desenharGrupos() {
@@ -280,7 +300,7 @@
       var i = document.createElement('span'); i.className = 'i'; i.textContent = g.ico;
       var tx = document.createElement('span'); tx.className = 't'; tx.textContent = N(g); tx.setAttribute('data-curto', g.curto ? N(g.curto) : '');
       b.appendChild(i); b.appendChild(tx);
-      b.addEventListener('click', function () { grupoAtual = g.id; Som.tocar('aba'); sairDaParte(); naParte = false; desenharGrupos(); desenharOpcoes(); zoomDaParte(); });
+      b.addEventListener('click', function () { grupoAtual = g.id; Som.tocar('aba'); sairDaParte(); naParte = false; desenharGrupos(); desenharOpcoes(); zoomDaParte(); chegar($('cats'), $('cores'), $('estilos')); });
       caixa.appendChild(b);
     });
     encaixarAbas();
@@ -301,7 +321,7 @@
       var ci = document.createElement('span'); ci.className = 'i'; ci.textContent = c.ico; var ct = document.createElement('span'); ct.textContent = N(c);
       b.appendChild(ci); b.appendChild(ct);
       b.setAttribute('aria-pressed', String(c.id === catPorGrupo[grupoAtual]));
-      b.addEventListener('click', function () { catPorGrupo[grupoAtual] = c.id; Som.tocar('clique'); entrarNaParte(); desenharGrupos(); desenharOpcoes(); $('opcoes').scrollTop = 0; zoomDaParte(); });
+      b.addEventListener('click', function () { catPorGrupo[grupoAtual] = c.id; Som.tocar('clique'); entrarNaParte(); desenharGrupos(); desenharOpcoes(); $('opcoes').scrollTop = 0; zoomDaParte(); chegar($('cores'), $('estilos')); });
       cc.appendChild(b);
     });
   }

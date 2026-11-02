@@ -104,9 +104,33 @@
     comando(e.tocando ? 'pausar' : 'tocar');
   });
   $('btFecharMini').addEventListener('click', function () { local.parar(); });
+  // atalhos na tela de brincar e no menu: 🔕 sem música (fica guardado) e ⏭ próxima música (liga se estava sem)
+  function guardarSemMusica(sim) { try { localStorage.setItem('purpurina.semMusica', sim ? '1' : '0'); } catch (e) { /* ok */ } }
+  function tocandoAgora() { return !!(conectado() ? (cel.tvMusica || {}).tocando : local.estado().tocando); }
+  function semMusica() {
+    if (tocandoAgora()) { comando('parar'); guardarSemMusica(true); A.recado(t('🔕 Sem música', '🔕 No music')); }
+    else { comando('tocar'); guardarSemMusica(false); A.recado(t('🎶 Música ligada', '🎶 Music on')); }
+    setTimeout(atualizarSemMusica, 60);
+  }
+  function proximaMusica() {
+    var ligar = !tocandoAgora();
+    comando('prox'); if (ligar) comando('tocar'); guardarSemMusica(false);
+    setTimeout(function () { atualizarSemMusica(); var e = conectado() ? cel.tvMusica : local.estado(); if (e && e.titulo) A.recado('🎶 ' + e.titulo.split(' — ')[0]); }, 80);
+  }
+  function atualizarSemMusica() {
+    var toca = tocandoAgora();
+    ['btSemMusica', 'btSemMusicaMenu'].forEach(function (id) {
+      var b = $(id); if (!b) return;
+      b.textContent = toca ? '🔕' : '🎶'; b.setAttribute('aria-pressed', toca ? 'false' : 'true');
+      b.setAttribute('aria-label', toca ? t('Sem música', 'No music') : t('Ligar a música', 'Music on'));
+    });
+  }
+  ['btSemMusica', 'btSemMusicaMenu'].forEach(function (id) { if ($(id)) $(id).addEventListener('click', semMusica); });
+  ['btProxMusica', 'btProxMusicaMenu'].forEach(function (id) { if ($(id)) $(id).addEventListener('click', proximaMusica); });
   function mostrarMusica(e, daTV) {
     if (!e) return;
     if (daTV !== conectado()) return;
+    setTimeout(atualizarSemMusica, 0);
     var nome = e.fonte === 'youtube' ? '▶ YouTube' : e.fonte === 'spotify' ? '🟢 Spotify' : '✨ Purpurina';
     $('musicaAgora').textContent = (e.tocando ? '🎶 ' : '⏸ ') + nome + (e.titulo && e.titulo !== 'YouTube' && e.titulo !== 'Spotify' ? ' · ' + e.titulo : '');
     $('btMusTocar').textContent = e.tocando ? '⏸' : '▶';
@@ -115,7 +139,7 @@
     else if (e.erro === 'invalido') $('musicaAviso').textContent = t('Esse vídeo não abriu (privado ou apagado). Escolha outro.', "This video didn't open (private or deleted). Pick another one.");
     else if (e.erro === 'sem-internet') $('musicaAviso').textContent = t('Precisa de internet para o YouTube e o Spotify.', 'YouTube and Spotify need internet.');
   }
-  escolherFonte('purpurina'); atualizarSelos();
+  escolherFonte('purpurina'); atualizarSelos(); atualizarSemMusica();
 
   // ===================================================================== TV
   var tv = { sala: null, codigo: '', jog: {}, som: false, tocador: null, ultimaMsg: 0 };
