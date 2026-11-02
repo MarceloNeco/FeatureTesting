@@ -11,10 +11,10 @@ Endereço (depois do merge): https://solverone.com.br/FeatureTesting/purpurina/ 
 ## Como brincar
 
 - Toque em **✨ Toque para brilhar!** (o navegador só deixa tocar som depois de um toque).
-- **🎨 Brincar livre**: o estúdio. Embaixo ficam 6 abas: **👧 Eu** (pele, menina ou menino — o jogo é feito para meninas, menina é o padrão —, 5 formatos de rosto, 5 de nariz, 39 penteados, mechas, olhos), **💄 Maquiagem**
+- **🎨 Brincar livre**: o estúdio. Embaixo ficam 6 abas: **👧 Eu** (pele, menina ou menino — o jogo é feito para meninas, menina é o padrão —, 8 formatos de rosto, 8 de nariz, formato e distância dos olhos, 6 bocas, 41 penteados, mechas, olhos), **💄 Maquiagem**
   (base, blush, sombra, delineado, 12 cílios, 💅 unhas, batom, glitter, adesivos), **👗 Roupas** (13 vestidos, 11 blusas,
   8 saias, 9 calças, 9 estampas, 28 sapatos), **💎 Joias** (18 brincos, 14 colares, pulseiras, anéis e broches),
-  **👑 Acessórios** (coroas, chapéus, tiaras e faixas, laços e presilhas, óculos, bolsas) e **🏞️ Cenário** (8 lugares). Cada parte tem
+  **👑 Acessórios** (coroas, chapéus, tiaras e faixas, laços e presilhas, 12 óculos/armações, bolsas) e **🏞️ Cenário** (8 lugares). Cada parte tem
   estilos (com miniatura do resultado) e bolinhas de cor. Escolher é em dois passos, para caber no celular: primeiro
   aparecem as partes da aba, grandes; tocou numa, as partes recolhem no botão **⬅ Partes**, o palco diminui um pouco e
   as opções ganham a tela (o Voltar do celular também volta para as partes).
@@ -131,6 +131,7 @@ desafio novo e desfile começam a próxima. Só silenciam com o app escondido (o
 | `tv.js` | modo TV (código, até 4 personagens, desfile, música), celular-controle (📺 Conectar) e a tela 🎵 Música. |
 | `app.js` | telas, Voltar do celular, estúdio, zoom do palco, pincel e faíscas, foto, looks, desfile, confete, teclado/TV, instalar e baixar. `APP_VERSION` aqui. |
 | `baixar.js` | **cópia idêntica** do `vruuum/baixar.js` (o teste confere): monta o `.html` de arquivo único. |
+| `ia-foto.js` | ✨ foto de cinema com IA (escondida: ?ia=1 ou interruptor `purpurina-ia`): manda só o desenho para o Gemini ou a OpenAI; chave no cofre comum (`../cofre.js` + `../janela.js`, cópias dos masters do rootify-one), com o PIN do adulto. Partes sem tela testadas em `teste/ia.test.js`. |
 | `sw.js` | cache `purpurina-v…` para funcionar sem internet e `purpurina-musicas-v1` para as músicas. `VERSAO` aqui. |
 | `versoes.json` | novidades de cada versão (PT e EN). |
 | `teste/` | testes no Node: `node --test purpurina/teste/*.test.js` (rodar da raiz do repositório). |

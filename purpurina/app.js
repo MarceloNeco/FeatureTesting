@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.12.0';
+  var APP_VERSION = '0.13.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TOQUE = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
@@ -153,7 +153,7 @@
   // desafio começa limpinho, com a personagem dela (pele, cabelo, olhos) e o cenário do tema
   function baseDesafio(d) {
     var e = V.novo();
-    ['personagem', 'pele', 'rosto', 'nariz', 'cabelo', 'cabeloCor', 'olhos'].forEach(function (k) { e[k] = livre[k]; });
+    ['personagem', 'pele', 'rosto', 'nariz', 'formaOlho', 'distOlhos', 'formaBoca', 'cabelo', 'cabeloCor', 'olhos'].forEach(function (k) { e[k] = livre[k]; });
     if (e.personagem === 'menino') e.cilios = 'nenhum';
     e.cenario = d.cenario; return e;
   }
@@ -489,8 +489,8 @@
     var d = desafioAtual();
     function limpo(tudo) {
       var e = d ? baseDesafio(d) : V.novo();
-      if (!tudo) ['personagem', 'pele', 'rosto', 'nariz', 'cabelo', 'cabeloCor', 'mechas', 'mechasCor', 'olhos'].forEach(function (k) { e[k] = estado[k]; });
-      else ['personagem', 'pele', 'rosto', 'nariz', 'cabelo', 'cabeloCor', 'mechas', 'mechasCor', 'olhos'].forEach(function (k) { e[k] = P.PADRAO[k]; });
+      if (!tudo) ['personagem', 'pele', 'rosto', 'nariz', 'formaOlho', 'distOlhos', 'formaBoca', 'cabelo', 'cabeloCor', 'mechas', 'mechasCor', 'olhos'].forEach(function (k) { e[k] = estado[k]; });
+      else ['personagem', 'pele', 'rosto', 'nariz', 'formaOlho', 'distOlhos', 'formaBoca', 'cabelo', 'cabeloCor', 'mechas', 'mechasCor', 'olhos'].forEach(function (k) { e[k] = P.PADRAO[k]; });
       e.cenario = d ? d.cenario : (tudo ? P.PADRAO.cenario : estado.cenario);
       mudar(e, null); Som.tocar('desfazer');
       recado(t('Pronto, começou de novo! ↩ desfaz.', 'Done, starting over! ↩ undoes.'));
@@ -606,9 +606,40 @@
       } }];
       if (podeCompartilhar) botoes.push({ t: t('📤 Compartilhar', '📤 Share'), ficar: true, fn: function () { navigator.share({ files: [arquivo], title: 'Purpurina' }).catch(function () { /* cancelou */ }); } });
       if (VIDEO_OK) botoes.push({ t: t('🎬 Vídeo girando', '🎬 Spinning video'), ficar: true, fn: video });
+      if (iaLigada()) botoes.push({ t: t('✨ Foto de cinema (IA)', '✨ Movie-style photo (AI)'), fn: fotoIA });
       botoes.push({ t: t('Fechar', 'Close') });
       abrirJanela({ titulo: t('📸 Que foto linda!', '📸 What a lovely photo!'), img: url, alt: V.resumo(estado, pref.lingua), botoes: botoes }, true);
     }).catch(function () { abrirJanela({ titulo: t('📸 Foto', '📸 Photo'), texto: t('Não deu para tirar a foto agora. Tente de novo.', "Couldn't take the photo now. Try again."), botoes: [{ t: t('Fechar', 'Close') }] }, true); });
+  }
+
+  /* ---------- ✨ foto de cinema com IA (escondida: ver ia-foto.js) ----------
+     Para a IA vai só o desenho (personagem + cenário, 832×1248) e uma descrição em inglês do visual. */
+  function iaLigada() { return !EM_ARQUIVO && !!(window.PurpurinaIA && window.SolverCofre && window.SolverJanela && PurpurinaIA.ligada()); }
+  function imagemParaIA() {
+    var W2 = 832, H2 = 1248;
+    return Promise.all([imagemDe(B.svg(estado, { id: 'iaF', soFundo: true, largura: W2, altura: H2 })), imagemDe(B.svg(estado, { id: 'iaB', fundo: false, realce: false, largura: W2, altura: H2 }))])
+      .then(function (imgs) {
+        return new Promise(function (ok, erro) {
+          var cv = document.createElement('canvas'); cv.width = W2; cv.height = H2;
+          comporEstudio(cv.getContext('2d'), W2, H2, imgs[0], imgs[1]);
+          cv.toBlob(function (b) { if (b) ok(b); else erro(new Error('sem imagem')); }, 'image/png');
+        });
+      });
+  }
+  function mostrarFotoIA(blob) {
+    var url = URL.createObjectURL(blob), nome = 'purpurina-cinema-' + carimbo() + '.png';
+    var arquivo = null; try { arquivo = new File([blob], nome, { type: blob.type || 'image/png' }); } catch (e) { /* navegador antigo */ }
+    var botoes = [{ t: t('💾 Salvar no celular', '💾 Save to device'), classe: 'grande', ficar: true, fn: function () {
+      var a = document.createElement('a'); a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+      recado(t('A foto foi para a pasta Downloads (ou Arquivos).', 'The photo went to your Downloads (or Files).'));
+    } }];
+    if (arquivo && navigator.canShare && navigator.canShare({ files: [arquivo] })) botoes.push({ t: t('📤 Compartilhar', '📤 Share'), ficar: true, fn: function () { navigator.share({ files: [arquivo], title: 'Purpurina' }).catch(function () { /* cancelou */ }); } });
+    botoes.push({ t: t('✨ Fazer outra', '✨ Make another'), fn: fotoIA }, { t: t('Fechar', 'Close') });
+    Som.tocar('tada');
+    abrirJanela({ titulo: t('✨ Foto de cinema!', '✨ Movie-style photo!'), texto: t('Feita por IA a partir do seu desenho.', 'Made by AI from your drawing.'), img: url, alt: V.resumo(estado, pref.lingua), botoes: botoes });
+  }
+  function fotoIA() {
+    PurpurinaIA.abrir({ t: t, imagem: imagemParaIA, descricao: function () { return V.resumo(estado, 'en'); }, mostrarFoto: mostrarFotoIA, recado: recado });
   }
 
   /* ---------- vídeo da personagem girando ----------

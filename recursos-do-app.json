@@ -43,6 +43,14 @@
       "pagina": "purpurina/"
     },
     {
+      "id": "purpurina-ia",
+      "nome": {
+        "pt": "Purpurina: foto de cinema com IA (começa desligada)",
+        "en": "Purpurina: AI movie-style photo (starts off)"
+      },
+      "pagina": "purpurina/"
+    },
+    {
       "id": "rabiscolandia",
       "nome": {
         "pt": "Rabiscolândia (Bolinho de Chuva)",
