@@ -177,3 +177,13 @@ test('testa: a linha do cabelo sobe ou desce, de frente e girando, e o cacheado 
   const franja = (t) => B.svg(Object.assign(V.novo(), { cabelo: 'franja', testa: t }), { id: 'f', fundo: false });
   assert.notEqual(franja('alta'), franja('normal')); assert.notEqual(franja('baixa'), franja('normal'));
 });
+
+test('menina: queixo pequeno e maxilar suave em todos os formatos de rosto (menino continua igual)', () => {
+  const P2 = require('../pecas.js');
+  // largura do contorno de lado na altura do queixo (y ≈ 285): a menina fica para trás do menino
+  const frente = (e) => { const d = (B.svg(e, { id: 'q', angulo: 90 }).match(/id="q-rostoV"><path d="([^"]+)"/) || [])[1]; let mx = 0; d.replace(/M([\d.]+),([\d.]+)a([\d.]+),([\d.]+)/g, (m, x, y, rx, ry) => { const cy = +y, top = cy - +ry, bot = cy + +ry; if (top < 282 && bot > 282) { const k = (282 - cy) / +ry; mx = Math.max(mx, +x + +rx + +rx * Math.sqrt(1 - k * k)); } }); return mx; };
+  for (const rosto of P2.categoria('rosto').opcoes.map(o => o.id)) {
+    const menina = frente(Object.assign(V.novo(), { rosto })), menino = frente(Object.assign(V.novo(), { rosto, personagem: 'menino' }));
+    assert.ok(menina < menino, 'queixo da menina mais delicado: ' + rosto + ' ' + menina + ' x ' + menino);
+  }
+});

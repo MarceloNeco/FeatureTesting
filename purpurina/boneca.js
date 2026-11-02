@@ -308,7 +308,7 @@
       if (cos > 0.05) fe += '<g opacity="' + n(cos) + '">' + proj(narizFrente(e.nariz, pele), 200, 0, 84, null, 0.05) + '</g>';
       if (as > 0.12 && cos > -0.2) fe += linha('M' + n(xn - sg * 9 * as) + ',226 Q' + n(xn - sg * 2 * as) + ',240 ' + n(xn - sg * 6 * as) + ',250', cn, 2, n(Math.min(0.55, as)) ) +
         linha('M' + n(xn - sg * 11 * as) + ',250 Q' + n(xn - sg * 7 * as) + ',245 ' + n(xn - sg * 3 * as) + ',251', cn, 2.2, n(Math.min(0.8, as * 1.2)));
-      fe += proj(formaDaBoca(e, boca(e, C('batom'), pele, I)), 200, 0, 68, null, -0.3);
+      fe += proj(formaDaBoca(e, boca(e, C('batom'), pele, I)), 200, 0, menino ? 68 : 60, null, -0.3);
       s += '<g clip-path="url(#' + I + 'rostoV)"><g clip-path="url(#' + I + 'peleR)">' + fe + '</g></g>';
       // de costas, o cabelo de trás cai por cima da cabeça e das costas
       if (cos < 0) s += '<g clip-path="url(#' + I + 'trasC)">' + torcer(cabeloTras(e, I, cab, cabE), true, radS) + '</g>';
@@ -671,7 +671,18 @@
   var LABIOS_V = [{ c: [0, 61, 67], r: [13, 6, 7] }, { c: [0, 69, 65], r: [11, 6, 7] }];
   // contorno da cabeça girada de th (radianos; + olha para a direita): união das elipses; extra = folga (volume do cabelo)
   function contorno(th, extra, forma, nariz, menino) {
-    var vs = (VOLUMES[forma] || VOLUMES.oval).concat(NARIZ_V[nariz] || NARIZ_V.botao, LABIOS_V), c = Math.cos(th), s = Math.sin(th), d = '';
+    var base0 = VOLUMES[forma] || VOLUMES.oval;
+    /* menina: queixinho pequeno e recolhido (de lado não fica "queixudo") e maxilar suave — o cantinho do rosto
+       quadradinho fica mais alto e redondinho. Continua sendo cada formato, só que delicado. */
+    if (!menino) base0 = base0.map(function (v) {
+      if (v.c[0] === 0 && v.c[1] >= 70) return { c: [0, v.c[1] - 4, v.c[2] - 24], r: [v.r[0] * 0.75, v.r[1] * 0.8, v.r[2] * 0.6] };
+      if (v.c[0] === 0 && v.c[1] >= 30 && v.c[1] < 70) return { c: [0, v.c[1] - 2, v.c[2] - 8], r: [v.r[0] * 0.97, v.r[1] * 0.92, v.r[2] * 0.9] };   // maxilar menor e mais para trás
+      if (v.c[0] !== 0 && v.c[1] >= 60) return { c: [v.c[0] * 0.85, v.c[1] - 10, v.c[2] - 6], r: [v.r[0] * 0.85, v.r[1] * 0.8, v.r[2] * 0.85] };
+      return v;
+    });
+    // menina: os lábios acompanham o maxilar (um pouco para trás e menores), sem ficar "bicudo" de lado
+    var lab = menino ? LABIOS_V : LABIOS_V.map(function (v) { return { c: [0, v.c[1] - 1, v.c[2] - 9], r: [v.r[0] * 0.92, v.r[1] * 0.85, v.r[2] * 0.85] }; });
+    var vs = base0.concat(NARIZ_V[nariz] || NARIZ_V.botao, lab), c = Math.cos(th), s = Math.sin(th), d = '';
     // menino: queixo e maxilar um pouquinho mais largos (sem exagero)
     if (menino) vs = vs.map(function (v, k) { return k === 1 || k === 2 ? { c: v.c, r: [v.r[0] + (k === 1 ? 5 : 4), v.r[1], v.r[2]] } : v; });
     vs.forEach(function (v) {
