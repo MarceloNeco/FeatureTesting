@@ -4,7 +4,7 @@
    livre", os looks favoritos e as estrelas de cada desafio. Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.16.0';
+  var APP_VERSION = '0.17.0';
   var $ = function (id) { return document.getElementById(id); };
   var P = window.PurpurinaPecas, V = window.PurpurinaVisual, B = window.PurpurinaBoneca, Som = window.PurpurinaSom;
   var TOQUE = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
@@ -237,7 +237,7 @@
   function alvoZoom() { var c = catAtual(); return P.ZOOM[(c && c.zoom) || 'rosto']; }
   function zoom(liga, animar) {
     zoomLigado = !!liga;
-    var b = $('btZoom'); b.setAttribute('aria-pressed', String(zoomLigado)); b.textContent = zoomLigado ? '🧍' : '🔍';
+    var b = $('btZoom'); b.setAttribute('aria-pressed', String(zoomLigado)); b.textContent = zoomLigado ? '👗' : '🔍';   // 👗 (e não 🧍, que o Fire antigo mostra como um quadrado vazio)
     b.setAttribute('aria-label', zoomLigado ? t('Ver a personagem inteira', 'See the whole character') : t('Chegar perto (zoom)', 'Zoom in'));
     var de = vista.slice(), para = zoomLigado ? alvoZoom().slice() : INTEIRA.slice(), id = ++animZoom;
     if (de.join() === para.join()) return;
@@ -742,10 +742,10 @@
     var d = desafioAtual(), r = d ? V.avaliar(estado, d) : null;
     ir('desfile');
     var seq = ++desfileSeq, pas = $('passarela'), mod = $('modelo'), palco = $('palcoDesfile');
-    $('cenaDesfile').innerHTML = B.passarela('pas');
+    $('cenaDesfile').innerHTML = B.passarela('pas') + B.tetoShow();   // teto com refletores: camada presa no alto
     function vale() { return seq === desfileSeq && atual === 'desfile'; }
     function depois(ms, fn) { setTimeout(function () { if (vale()) fn(); }, ms); }
-    function pose(op) { pas.innerHTML = B.svg(estado, Object.assign({ id: 'desfile', fundo: false, anim: !CALMO, realce: false }, op || {})); }
+    function pose(op) { pas.innerHTML = B.svg(estado, Object.assign({ id: 'desfile', fundo: false, anim: !CALMO, realce: false, passos: true }, op || {})); }   // passos: as pernas andam enquanto ela anda (estilo.css)
     // posição na passarela: k = 0 (lá no fundo) até 1 (na frente); a cena é cortada por baixo (slice), como no boneca.js
     function lugar(k) {
       desfileK = k; desfileLugar = lugar;

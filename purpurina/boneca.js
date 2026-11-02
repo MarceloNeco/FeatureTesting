@@ -137,11 +137,20 @@
       return p(d, { stroke: peleE, 'stroke-width': larg + 2.6, 'stroke-linecap': 'round', fill: 'none', opacity: 0.85 }) + p(d, { stroke: peleS, 'stroke-width': larg, 'stroke-linecap': 'round', fill: 'none' }) +
         p(d, { stroke: pele, 'stroke-width': larg * 0.72, 'stroke-linecap': 'round', fill: 'none' }) + '<g transform="translate(-2.5 0)">' + p(d, { stroke: peleL, 'stroke-width': larg * 0.26, 'stroke-linecap': 'round', fill: 'none', opacity: 0.55 }) + '</g>';
     }
+    var iniPernas = out.length;
     ['M177,455 L173,640', 'M223,455 L227,640'].forEach(function (d) { out.push(membro(d, 29)); });
-    out.push(sapatos(e, C('sapatos'), pele, peleE, peca));
+    out.push(sapatos(e, C('sapatos'), pele, peleE, peca, corpoCostas));
 
     // ---------- parte de baixo ----------
     if (vis('calca')) out.push(calca(e.calca, C('calca'), peca, linha, pele));
+    /* opcoes.passos (desfile): cada perna — com o sapato e a perna da calça — vira um grupo próprio, que dobra o
+       joelho e levanta o pé (classes pp-passo-e / pp-passo-d no estilo.css, uma de cada vez, só enquanto ela anda).
+       A saia e o vestido vêm depois, por cima, e balançam com o corpo. De frente apenas. */
+    if (op.passos && !angB) {
+      var pernas = out.splice(iniPernas).join('');
+      defs += '<clipPath id="' + I + 'pernaE"><rect x="-200" y="0" width="400" height="900"/></clipPath><clipPath id="' + I + 'pernaD"><rect x="200" y="0" width="400" height="900"/></clipPath>';
+      out.push('<g class="pp-passo-e"><g clip-path="url(#' + I + 'pernaE)">' + pernas + '</g></g>', '<g class="pp-passo-d"><g clip-path="url(#' + I + 'pernaD)">' + pernas + '</g></g>');
+    }
     if (vis('saia')) out.push(saia(e.saia, C('saia'), peca, linha));
 
     // ---------- pescoço, tronco e braços ----------
@@ -271,11 +280,19 @@
     // sapato de lado (bico para a frente); descalça mostra o pé
     function sapatoLado(x, la) {
       var t = e.sapatos, c = C('sapatos'), s;
-      if (t === 'nenhum') s = p('M' + (x - 8) + ',636 Q' + (x + 18) + ',634 ' + (x + 26) + ',648 Q' + (x + 14) + ',654 ' + (x - 8) + ',652Z', { fill: pele, stroke: peleE, 'stroke-width': 1.6 });
-      else {
+      // descalça: calcanhar atrás, peito do pé descendo até os dedos na frente, sola reta e a unha do dedão em cima
+      var forma = 'M' + (x - 10) + ',634 L' + (x - 10) + ',632 L' + (x + 8) + ',632 L' + (x + 30) + ',648 Q' + (x + 30) + ',656 ' + (x + 18) + ',656 L' + (x - 10) + ',656Z';
+      if (t === 'nenhum') {
+        var volta = 'M' + (x + 7) + ',628 Q' + (x + 8) + ',637 ' + (x + 14) + ',641 Q' + (x + 24) + ',644 ' + (x + 28) + ',650 Q' + (x + 30) + ',656 ' + (x + 24) + ',656 L' + (x - 6) + ',656 Q' + (x - 13) + ',655 ' + (x - 12) + ',646 Q' + (x - 11) + ',638 ' + (x - 9) + ',628';
+        forma = volta + 'Z';
+        // contorno sem o risco de cima (o pé continua a perna, sem "meia")
+        s = p(forma, { fill: pele }) + p(volta, { fill: 'none', stroke: peleE, 'stroke-width': 1.6, 'stroke-linejoin': 'round' }) +
+          p('M' + (x + 20) + ',652 Q' + (x + 21) + ',655 ' + (x + 19) + ',656', { fill: 'none', stroke: esc(pele, 0.2), 'stroke-width': 1, 'stroke-linecap': 'round' });
+        if (!la) s += unhas([[x + 26, 650, 0.85]], { tipo: e.unhas, cor: C('unhas') }, pele);
+      } else {
         var salto = ['salto', 'scarpin', 'saltoMedio', 'princesa', 'anabela', 'plataforma'].indexOf(t) >= 0, cano = t === 'bota' || t === 'galocha' || t === 'botaNeve' ? 600 : t === 'botaCano' ? 560 : t === 'patins' ? 598 : 0;
         var d = 'M' + (x - 10) + ',' + (cano || 632) + ' L' + (x + 8) + ',' + (cano || 632) + ' L' + (x + 8) + ',638 Q' + (x + 26) + ',638 ' + (x + 30) + ',' + (salto ? 652 : 648) + ' Q' + (x + 30) + ',656 ' + (x + 18) + ',656 L' + (x - 10) + ',656Z';
-        s = peca(d, c, 'sapatos');
+        s = peca(d, c, 'sapatos'); forma = d;
         if (salto) s += p('M' + (x - 10) + ',652 L' + (x - 3) + ',652 L' + (x - 5) + ',666 L' + (x - 9) + ',666Z', { fill: esc(c.hex, 0.25) });
         if (t === 'tenis' || t === 'tenisAlto' || t === 'tenisLuz' || t === 'tenisGlitter') s += p('M' + (x - 10) + ',652 L' + (x + 26) + ',652', { stroke: '#fff', 'stroke-width': 3 }) + p('M' + (x - 2) + ',640 L' + (x + 10) + ',642', { stroke: '#fff', 'stroke-width': 1.6, opacity: 0.8 });
         // patins de lado: aqui sim as rodas aparecem redondas, uma na frente e uma atrás, com o freio na ponta
@@ -284,7 +301,8 @@
           [x - 4, x + 22].forEach(function (rx) { s += circ(rx, 664, 6.5, { fill: '#ffd166', stroke: '#c9932a', 'stroke-width': 1.5 }) + circ(rx, 664, 2.6, { fill: '#fff', stroke: '#c9932a', 'stroke-width': 0.8 }); });
         }
       }
-      return s + (la ? p('M' + (x - 10) + ',634 L' + (x + 30) + ',634 L' + (x + 30) + ',666 L' + (x - 10) + ',666Z', { fill: '#2a0a3c', opacity: 0.12 }) : '');
+      // o pé de lá fica um pouco mais escuro (na sombra), só no desenho dele, sem caixa em volta
+      return s + (la ? p(forma, { fill: '#2a0a3c', opacity: 0.14 }) : '');
     }
 
     // pescoço girado: de lado fica um pouco mais largo e mais para trás, com a sombra do queixo
@@ -520,7 +538,8 @@
       case 'afro': s = elip(200, 196, 124, 116, { fill: 'url(#' + I + 'cab)' }); for (var q = 0; q < 28; q++) { var aq = q / 28 * Math.PI * 2; s += circ(200 + Math.cos(aq) * 122, 196 + Math.sin(aq) * 112, 28, f); } s += elip(200, 196, 118, 110, { fill: 'url(#' + I + 'cab)' }); break;
       case 'puffs': s = puff(116, 118, 44, f) + puff(284, 118, 44, f); break;
       case 'pixie': s = p('M108,214 Q100,100 200,95 Q300,100 292,214 L284,246 L116,246Z', f); break;
-      case 'sereia': s = p('M104,210 Q98,100 200,95 Q302,100 296,210 Q318,280 300,350 Q322,420 304,490 Q326,560 300,630 Q200,656 100,630 Q74,560 96,490 Q78,420 100,350 Q82,280 104,210Z', f); break;
+      // sereia: a mais comprida, até perto do joelho (antes ia até o chão e, girando, parecia cabelo embaixo dos pés)
+      case 'sereia': s = p('M104,210 Q98,100 200,95 Q302,100 296,210 Q318,266 300,322 Q322,378 304,434 Q326,490 300,546 Q200,566.8 100,546 Q74,490 96,434 Q78,378 100,322 Q82,266 104,210Z', f); break;
       case 'coqueDuplo': if (e.cabeca !== 'chapeu' && e.cabeca !== 'gorro') s = circ(138, 104, 33, f) + circ(262, 104, 33, f) + linha2('M118,100 Q138,82 158,100', cabE) + linha2('M242,100 Q262,82 282,100', cabE); break;
       case 'box':
         s = p('M104,210 Q98,100 200,95 Q302,100 296,210 L308,482 Q200,502 92,482Z', f);
@@ -849,7 +868,7 @@
      aparece é a parte de trás, que não está no contorno. Então, de lado, o mesmo desenho vai junto, apertado e
      empurrado para trás da cabeça, só com o preenchimento (sem os fios), por baixo do cabelo girado. */
   function volumeTras(s, th) {
-    var q = Math.abs(Math.sin(th)); if (q < 0.25 || !s) return '';
+    var q = Math.abs(Math.sin(th)); if (q < 0.05 || !s) return '';
     // só no cabelo comprido (que desce pelas costas); no curto a própria cabeça já é o volume
     var ys = (s.match(/,(-?\d*\.?\d+)/g) || []).map(function (t) { return +t.slice(1); }).concat((s.match(/cy="([^"]*)"/g) || []).map(function (t) { return +t.slice(4, -1); }));
     if (!ys.length || Math.max.apply(null, ys) < 330) return '';
@@ -858,7 +877,9 @@
     var so = s.replace(/<path [^>]*fill="none"[^>]*\/>/g, '').replace(/(stroke-width=")[\d.]+/g, '$10');
     so = so.replace(/(\sd=")([^"]*)"/g, function (m, a, d) { return a + d.replace(/(-?\d*\.?\d+),(-?\d*\.?\d+)/g, function (m2, vx, vy) { return x(+vx, +vy) + ',' + vy; }) + '"'; })
       .replace(/cx="([^"]*)" cy="([^"]*)"( rx="([^"]*)")?/g, function (m, vx, vy, temRx, rx) { return 'cx="' + x(+vx, +vy) + '" cy="' + vy + '"' + (temRx ? ' rx="' + n(+rx * Math.abs(k)) + '"' : ''); });
-    return '<g opacity="' + n(Math.min(1, (q - 0.25) / 0.3)) + '">' + so + '</g>';
+    // sempre cabelo inteiro (antes aparecia transparente no começo do giro: um "fantasma" claro do lado);
+    // no começo ele fica quase todo escondido atrás do cabelo de trás, então não dá pulo
+    return so;
   }
   // luz e sombra do rosto de frente: dos lados (testa, bochechas, pálpebras) e do meio (nariz e queixo)
   /* luz do rosto: só luz e cor de pele saudável (rosado nas bochechas, brilho na testa, no nariz e no queixo).
@@ -905,20 +926,38 @@
   function unhas(pontas, esmalte, pele) {
     var s = '', tipo = esmalte ? esmalte.tipo : 'nenhum', cor = esmalte && esmalte.cor ? esmalte.cor.hex : '#ff4fa3';
     pontas.forEach(function (q, k) {
-      var x = q[0], y = q[1], c = cor;
-      if (tipo === 'nenhum') { s += elip(x, y, 1.8, 2.3, { fill: cla(pele, 0.45), stroke: esc(pele, 0.15), 'stroke-width': 0.4 }); return; }
+      var x = q[0], y = q[1], c = cor, t = q[2] || 1;   // q[2]: tamanho (as unhas dos pés variam do dedão ao mindinho)
+      if (tipo === 'nenhum') { s += elip(x, y, 1.8 * t, 2.3 * t, { fill: cla(pele, 0.45), stroke: esc(pele, 0.15), 'stroke-width': 0.4 }); return; }
       if (tipo === 'arco') c = ARCO_UNHA[k % ARCO_UNHA.length];
       if (tipo === 'degrade') c = mistura(cor, '#ffffff', k * 0.14);
       if (tipo === 'francesinha') c = '#ffd9df';
-      s += elip(x, y, 2, 2.5, { fill: c, stroke: esc(c, 0.3), 'stroke-width': 0.5 });
-      if (tipo === 'francesinha') s += elip(x, y + 1.2, 1.9, 1.1, { fill: '#fff' });
+      s += elip(x, y, 2 * t, 2.5 * t, { fill: c, stroke: esc(c, 0.3), 'stroke-width': 0.5 });
+      if (tipo === 'francesinha') s += elip(x, y + 1.2 * t, 1.9 * t, 1.1 * t, { fill: '#fff' });
       if (tipo === 'glitter') { var ru = sorteio(k + 3); s += lantejoula(x - 0.7, y - 0.5, 0.7, cla(c, 0.5), ru, true) + lantejoula(x + 0.7, y + 0.7, 0.6, '#ffffff', ru, true) + lantejoula(x + 0.4, y - 1.1, 0.5, cla(c, 0.2), ru, false); if (k % 2 === 0) s += faisca(x + 1.2, y - 1.6, 2.2, cla(c, 0.3), ru); }
       if (tipo === 'bolinhas') s += circ(x, y, 0.65, { fill: '#fff' });
       if (tipo === 'coracao' && k === 2) s += p(coracao(x, y, 0.9), { fill: '#fff' });
-      s += elip(x - 0.6, y - 0.9, 0.6, 0.9, { fill: '#fff', opacity: 0.6 });
+      s += elip(x - 0.6 * t, y - 0.9 * t, 0.6 * t, 0.9 * t, { fill: '#fff', opacity: 0.6 });
     });
     return s;
   }
+  /* pé de frente (visto um pouco de cima): o peito do pé alarga do tornozelo para os dedos, e os cinco dedinhos
+     ficam na ponta, do dedão (do lado de dentro, perto do outro pé) ao mindinho. Devolve o desenho e onde ficam as
+     unhas — em cima de cada dedo, nunca embaixo do pé. */
+  function peFrente(x, pele, peleE, deCostas) {
+    // de costas: só o calcanhar (redondinho, um pouco mais estreito), sem dedos nem unhas
+    if (deCostas) {
+      var cal = 'M' + n(x - 12) + ',630 C' + n(x - 13) + ',640 ' + n(x - 14) + ',650 ' + n(x - 8) + ',655 Q' + x + ',658 ' + n(x + 8) + ',655 C' + n(x + 14) + ',650 ' + n(x + 13) + ',640 ' + n(x + 12) + ',630';
+      return { svg: p(cal + 'Z', { fill: pele }) + p(cal, { fill: 'none', stroke: peleE, 'stroke-width': 1.5 }) + elip(x, 650, 6, 3, { fill: esc(pele, 0.1), opacity: 0.5 }), unhas: [] };
+    }
+    var d = x < 200 ? 1 : -1;   // para dentro (onde fica o dedão)
+    var dedos = [[8.4, 4.1, 650.6], [2.1, 3.3, 651.4], [-3.4, 3, 651.9], [-8.1, 2.7, 652.2], [-12.1, 2.3, 652.2]].map(function (q) { return [x + d * q[0], q[2], q[1]]; });
+    var lados = 'M' + n(x - 12) + ',630 C' + n(x - 14) + ',638 ' + n(x - 16) + ',645 ' + n(x - 15) + ',651 Q' + x + ',656 ' + n(x + 15) + ',651 C' + n(x + 16) + ',645 ' + n(x + 14) + ',638 ' + n(x + 12) + ',630';
+    var s = p(lados + 'Z', { fill: pele }) + p(lados, { fill: 'none', stroke: peleE, 'stroke-width': 1.5, 'stroke-linejoin': 'round' }) +
+      p('M' + n(x + d * 5) + ',636 Q' + n(x + d * 6.5) + ',642 ' + n(x + d * 7.5) + ',646', { fill: 'none', stroke: esc(pele, 0.12), 'stroke-width': 1.2, 'stroke-linecap': 'round', opacity: 0.55 });
+    dedos.slice().reverse().forEach(function (q) { s += elip(q[0], q[1], q[2], q[2] * 1.08, { fill: pele, stroke: peleE, 'stroke-width': 0.9 }); });
+    return { svg: s, unhas: dedos.map(function (q) { return [q[0], q[1] + q[2] * 0.12, q[2] / 3.3]; }) };
+  }
+
   function dedoDoAnel(x, lado) { var dx = DEDOS[1][0] * -lado; return [x + dx * 1.09, 515]; }
 
   // ---------- rosto ----------
@@ -1247,7 +1286,7 @@
     return asa(92, 372, 88, 42, -30) + asa(108, 462, 60, 28, 26) + asa(308, 372, 88, 42, 30) + asa(292, 462, 60, 28, -26) +
       p(estrela4(48, 340, 7), { fill: '#fff' }) + p(estrela4(352, 340, 7), { fill: '#fff' }) + circ(84, 470, 3, { fill: '#fff' }) + circ(316, 470, 3, { fill: '#fff' });
   }
-  function sapatos(e, cor, pele, peleE, peca) {
+  function sapatos(e, cor, pele, peleE, peca, deCostas) {
     var s = '', c = esc(cor.hex, 0.3), esmalte = { tipo: e.unhas, cor: P.cor('roupa', e.unhasCor) };
     function salto(x, alt, larg) { return p('M' + n(x - larg / 2) + ',656 L' + n(x + larg / 2) + ',656 L' + n(x + larg / 3) + ',' + (656 + alt) + ' L' + n(x - larg / 3) + ',' + (656 + alt) + 'Z', { fill: esc(cor.hex, 0.25), stroke: esc(cor.hex, 0.45), 'stroke-width': 1 }); }
     function bico(x) { return 'M' + (x - 16) + ',652 Q' + (x - 17) + ',634 ' + x + ',632 Q' + (x + 17) + ',634 ' + (x + 16) + ',652 Q' + x + ',661 ' + (x - 16) + ',652Z'; }
@@ -1266,13 +1305,10 @@
       return t + ret(x - 4.5, 649, 9, 12, { fill: '#ff8fb1', stroke: '#d0567c', 'stroke-width': 1.2, rx: 3.5 }) + ret(x - 21, 646, 42, 6, { fill: '#9aa3b5', stroke: '#6f7788', 'stroke-width': 1, rx: 3 });
     }
     [172, 228].forEach(function (x) {
-      var pe = elip(x, 646, 15, 8, { fill: pele, stroke: peleE, 'stroke-width': 1.5 });
+      var pf = peFrente(x, pele, peleE, deCostas), pe = pf.svg;
       switch (e.sapatos) {
         case 'nenhum':
-          s += pe;
-          var dedosPe = [-10, -5, 0, 5, 10].map(function (dx) { return [x + dx, 652 + Math.abs(dx) * 0.12]; });
-          dedosPe.forEach(function (q) { s += circ(q[0], q[1], 2.8, { fill: pele, stroke: peleE, 'stroke-width': 0.9 }); });
-          s += unhas(dedosPe.map(function (q) { return [q[0], q[1] - 0.2]; }), esmalte, pele);
+          s += pe + unhas(pf.unhas, esmalte, pele);
           break;
         case 'princesa':
           s += pe + salto(x, 6, 7) + peca(frente(x), cor, 'x') + p(estrela4(x, 643, 3), { fill: '#fff' }) + laco(x, 641, 5, cla(cor.hex, 0.45)) + circ(x, 641, 1.8, { fill: '#7ee8ff', stroke: '#fff', 'stroke-width': 0.6 });
@@ -1675,6 +1711,20 @@
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 720" preserveAspectRatio="xMidYMax slice">' + s + '</svg>';
   }
 
+  /* teto do show: uma barra de refletores coloridos que acendem um atrás do outro, cada um com o seu facho de luz.
+     Camada própria, presa no alto da passarela (o desenho da passarela é cortado em cima quando a tela está em pé). */
+  function tetoShow() {
+    var s = '', k, cores = ['#ff5fb4', '#ffd23f', '#7ee8ff', '#b892ff', '#86ecc8', '#ff8f5a'];
+    s += ret(0, 6, 400, 10, { fill: '#5a2a7a', stroke: '#8a4fb0', 'stroke-width': 1.5 }) + ret(0, 17, 400, 3, { fill: '#3a1456' });
+    for (k = 0; k < 11; k++) {
+      var lx = 20 + k * 36, cor = cores[k % cores.length], at = n((k % 2 ? k + 6 : k) * 0.16), fim = lx + (200 - lx) * 0.5;
+      s += '<g class="pas-facho" style="animation-delay:' + at + 's">' + p('M' + (lx - 6) + ',30 L' + (lx + 6) + ',30 L' + n(fim + 34) + ',240 L' + n(fim - 34) + ',240Z', { fill: cor, opacity: 0.22 }) + '</g>';
+      s += ret(lx - 7, 14, 14, 13, { fill: '#2a0a3c', rx: 4 }) + circ(lx, 29, 8.5, { fill: '#2a0a3c' }) +
+        '<g class="pas-teto" style="animation-delay:' + at + 's">' + circ(lx, 30, 14, { fill: cor, opacity: 0.4 }) + circ(lx, 29, 7, { fill: cor }) + circ(lx - 2, 27, 2.4, { fill: '#fff' }) + '</g>';
+    }
+    return '<svg class="teto-show" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" preserveAspectRatio="xMidYMin slice" aria-hidden="true">' + s + '</svg>';
+  }
+
   // ---------- cenários ----------
   function cenario(id, I) {
     var s = '', r = sorteio(99), k;
@@ -1759,7 +1809,7 @@
     return s;
   }
 
-  var API = { svg: svg, espelhar: espelhar, passarela: passarela };
+  var API = { svg: svg, espelhar: espelhar, passarela: passarela, tetoShow: tetoShow };
   raiz.PurpurinaBoneca = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })(typeof window !== 'undefined' ? window : this);
