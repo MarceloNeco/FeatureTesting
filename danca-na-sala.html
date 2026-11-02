@@ -154,7 +154,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
   <h1>💃 <span data-t="Dança na Sala|Living Room Dance"></span></h1>
   <p class="muted" data-t="A TV toca a música do YouTube e mostra quem está dançando. O celular filma, mede a energia e comanda tudo. Nada para instalar.|The TV plays the YouTube song and shows who is dancing. The phone films, measures energy and runs the show. Nothing to install."></p>
   <div class="col">
-    <p id="detectouTV" class="aviso" style="display:none" data-t="📺 Parece que isto é uma TV. Aperte OK no controle para começar (da próxima vez entra sozinho).|📺 This looks like a TV. Press OK on the remote to start (next time it starts by itself)."></p>
+    <p id="detectouTV" class="aviso" style="display:none" data-t="📺 Parece que isto é uma TV. Aperte OK no controle para começar (o OK libera o som).|📺 This looks like a TV. Press OK on the remote to start (OK turns the sound on)."></p>
     <button class="big" id="btTV">📺 <span data-t="Esta é a TV|This is the TV"></span></button>
     <button class="big sec" id="btCel">📱 <span data-t="Este é o celular|This is the phone"></span></button>
     <button class="big sec" id="btSolo">🎧 <span data-t="Só o celular (sem TV)|Phone only (no TV)"></span></button>
@@ -290,7 +290,7 @@ footer{text-align:center;color:var(--muted);font-size:.75rem;padding:24px 0 8px}
 <script>
 (function () {
 'use strict';
-var APP_VERSION = '1.3.3', APP_UPDATED = '30/10/2026';
+var APP_VERSION = '1.3.4', APP_UPDATED = '02/11/2026';
 
 /* ---------- Supabase (público por desenho; igual ao config.js do solverone-app) ---------- */
 var SUPABASE_URL = 'https://qvdvkqydhnadhewcidia.supabase.co';
@@ -353,7 +353,7 @@ function iniciarTV() {
   $('tvCanto').textContent = T('Código: ', 'Code: ') + c;
   $('tvUrl').textContent = /solverone\.com\.br$/.test(location.host) ? 'solverone.com.br/tv' : location.host + location.pathname.replace(/index\.html$/, '');
   try { var pf = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); if (pf && pf.catch) pf.catch(function () {}); } catch (e) {}   // sem toque (entrada automática) o navegador recusa: tudo bem
-  jingleLigar();
+  jingleLigar(); dbg('TV pronta');
   try { localStorage.setItem('danca:papel', 'tv'); } catch (e) {}
   ['keydown', 'click', 'touchstart'].forEach(function (ev) { document.addEventListener(ev, function () { try { if (jingle.ac && jingle.ac.state === 'suspended') jingle.ac.resume(); } catch (e) {} }, { passive: true }); });
 
@@ -431,6 +431,17 @@ function tvEstado() {
   enviar({ t: 'estado', tocando: tv.tocando, titulo: tv.titulo, pontos: p, lista: tv.lista, indice: tv.indice, video: tv.videoAtual });
 }
 
+/* ?debug no endereço: faixa no canto da TV com os últimos eventos do YouTube e se o som foi liberado
+   (estado: -1 não começou, 0 acabou, 1 tocando, 2 pausado, 3 carregando, 5 pronto). Nada de segredo. */
+var DEBUG = /[?&]debug\b/.test(location.search), dbgLinhas = [];
+function dbg(msg) {
+  if (!DEBUG) return;
+  var ua = navigator.userActivation, som = ua ? (ua.hasBeenActive ? 'toque:sim' : 'toque:NÃO') : 'toque:?';
+  dbgLinhas.push(new Date().toTimeString().slice(0, 8) + ' ' + msg); dbgLinhas = dbgLinhas.slice(-8);
+  var el = $('tvDebug'); if (!el) { el = document.createElement('pre'); el.id = 'tvDebug'; el.style.cssText = 'position:fixed;top:8px;left:8px;z-index:99;margin:0;padding:8px 12px;background:rgba(0,0,0,.75);color:#7fffa0;font:16px/1.3 monospace;pointer-events:none;border-radius:8px'; document.body.appendChild(el); }
+  el.textContent = 'v' + APP_VERSION + ' ' + som + ' áudio:' + (jingle.ac ? jingle.ac.state : '-') + '\n' + dbgLinhas.join('\n');
+}
+
 /* --- YouTube na TV --- */
 var ytFila = [], ytPedido = false;
 function apiYouTube(cb) {
@@ -450,7 +461,7 @@ function carregarYouTube() {
   });
 }
 function tvYouTubeEstado(ev) {
-  var p = tv.player;
+  var p = tv.player; dbg('estado ' + ev.data);
   tv.tocando = (ev.data === YT.PlayerState.PLAYING);
   // pausou sem ninguém pedir (o navegador da TV faz isso quando engasga): retoma sozinho, até 5x por música
   if (ev.data === YT.PlayerState.PAUSED && Date.now() - (tv.pausaPedida || 0) > 3000 && Date.now() >= (tv.podioAte || 0) && (tv.retomadas || 0) < 5) {
@@ -482,9 +493,11 @@ function tvYouTubeEstado(ev) {
 /* Erros do tocador: 2 = link inválido; 5 = problema no tocador; 100 = vídeo não existe/privado;
    101 e 150 = o dono não deixa tocar fora do YouTube. Numa playlist, pula para a próxima. */
 function tvYouTubeErro(ev) {
+  dbg('erro ' + ev.data);
   var c = ev.data, msg = (c === 101 || c === 150) ? T('Esse clipe não deixa tocar fora do YouTube. Pulando…', 'That clip cannot play outside YouTube. Skipping…')
     : (c === 100) ? T('Vídeo indisponível ou privado.', 'Video unavailable or private.')
-    : (c === 2) ? T('Playlist privada ou link inválido. No YouTube, mude a playlist para “Não listada”.', 'Private playlist or bad link. On YouTube, set the playlist to “Unlisted”.')
+    : (c === 2 && tv.pediuPlaylist) ? T('Playlist privada ou link inválido. No YouTube, mude a playlist para “Não listada”.', 'Private playlist or bad link. On YouTube, set the playlist to “Unlisted”.')
+    : (c === 2) ? T('Link do vídeo inválido. Tente outra música.', 'Invalid video link. Try another song.')
     : T('Erro do YouTube ', 'YouTube error ') + c;
   tv.titulo = msg; $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '⚠️ ' + msg;
   try { if (tv.player.getPlaylist && (tv.player.getPlaylist() || []).length > 1) setTimeout(function () { tv.player.nextVideo(); }, 1500); } catch (e) {}
@@ -602,16 +615,16 @@ function tvZerar() {
   Object.keys(tv.pontos).forEach(function (k) { tv.pontos[k].pontos = 0; tv.tiles[k] && (tv.tiles[k].querySelector('.pontos').textContent = '0'); });
 }
 function tvComando(m) {
-  var p = tv.player;
+  var p = tv.player; dbg('cmd ' + m.acao);
   tv.ultimoCmd = m.acao + (p && p.loadVideoById ? '' : ' (tocador ainda não pronto)');
   if (!p || !p.loadVideoById) { if (m.acao === 'carregar' || m.acao === 'playlist') tv.pendente = m; return; }   // chegou antes do tocador: toca assim que ele ficar pronto
   function comecar() { tv.fimMostrado = false; tv.podioAte = 0; clearTimeout(tv.timerPodio); $('tvFim').classList.remove('ativa'); $('tvCapa').style.display = 'none'; tvZerar(); tv.preCarregado = false; cargaMostrar(T('Carregando a música…', 'Loading the song…')); }
   if (m.acao === 'carregar' && m.video) {
-    comecar(); tv.titulo = m.titulo || m.video; tv.videoAtual = m.video; tv.lista = []; tv.indice = -1;
+    comecar(); tv.pediuPlaylist = false; tv.titulo = m.titulo || m.video; tv.videoAtual = m.video; tv.lista = []; tv.indice = -1;
     $('tvTitulo').style.display = 'block'; $('tvTitulo').textContent = '🎵 ' + tv.titulo;
     p.loadVideoById({ videoId: m.video, suggestedQuality: 'hd720' }); p.playVideo();
   } else if (m.acao === 'playlist' && m.lista) {
-    comecar(); tv.videoAtual = ''; tv.titulo = T('Playlist…', 'Playlist…');
+    comecar(); tv.pediuPlaylist = true; tv.videoAtual = ''; tv.titulo = T('Playlist…', 'Playlist…');
     p.loadPlaylist({ list: m.lista, listType: 'playlist', index: m.indice || 0 }); p.playVideo();
   } else if (m.acao === 'indice' && tv.lista.length) {
     comecar(); p.playVideoAt(+m.i || 0);
@@ -817,13 +830,10 @@ function entrar() {
 /* Câmeras: a primeira vez pede a traseira; depois lista TODAS as câmeras do aparelho (nos Samsung a
    grande-angular 0.5x aparece como uma câmera separada) e o botão 🔄 vai passando por elas. Zoom quando
    o navegador oferece. */
-/* Câmeras. Nos Samsung o navegador lista várias "câmeras" (grande-angular, tele, profundidade,
-   virtuais) e algumas abrem sem erro mas ficam PRETAS. Regras: tentar de novo se o aparelho ainda
-   estiver soltando a câmera anterior; se a nova ficar preta por 1,5 s, marcar como ruim (lembrada
-   neste celular) e pular para a próxima; se tudo falhar, voltar para a traseira/frontal por
-   facingMode, que sempre funciona. */
-function camsRuins() { try { return JSON.parse(localStorage.getItem('danca:camsRuins') || '[]'); } catch (e) { return []; } }
-function marcarRuim(id) { if (!id) return; var r = camsRuins(); if (r.indexOf(id) < 0) { r.push(id); try { localStorage.setItem('danca:camsRuins', JSON.stringify(r.slice(-12))); } catch (e) {} } }
+/* Câmeras. O 🔄 alterna frontal e traseira pelo facingMode, o único jeito que sempre funciona nos
+   Samsung (passar pelos deviceId abria câmeras pretas, e a lista de "câmeras ruins" da 1.3.2 acabava
+   banindo a frontal para sempre). A grande-angular vem pela barra de zoom (0.5x), quando o aparelho deixa. */
+try { localStorage.removeItem('danca:camsRuins'); } catch (e) {}   // limpa a lista antiga que banía a frontal
 function ligarCamera(deviceId, tentativa) {
   tentativa = tentativa || 0;
   if (cel.stream) cel.stream.getTracks().forEach(function (t) { t.stop(); });
@@ -836,7 +846,6 @@ function ligarCamera(deviceId, tentativa) {
       throw err;
     })
     .catch(function (err) {
-      if (deviceId) { marcarRuim(deviceId); status(T('Essa câmera não abriu. Voltando…', 'That camera did not open. Going back…'), 'erro'); }
       // último recurso: traseira (ou frontal) por facingMode, depois qualquer uma
       return navigator.mediaDevices.getUserMedia({ video: { facingMode: cel.frente ? 'user' : 'environment' }, audio: false })
         .catch(function () { return navigator.mediaDevices.getUserMedia({ video: true, audio: false }); });
@@ -847,24 +856,11 @@ function ligarCamera(deviceId, tentativa) {
       cel.frente = st.facingMode === 'user' || /front|frontal|user/i.test(track.label || '');
       $('cam').classList.toggle('frente', cel.frente);
       if (cel.pc && !modo.comp) { var sender = cel.pc.getSenders().find(function (x) { return x.track && x.track.kind === 'video'; }); if (sender) sender.replaceTrack(track); }
-      anterior = null; cel.camLuz = -1; cel.camDesde = Date.now();
-      // vigia: se não vier imagem (sem quadros, faixa muda ou tudo preto) em 1,5 s, marca ruim e pula
-      var idAtual = st.deviceId || deviceId;
-      clearTimeout(cel.vigia);
-      cel.vigia = setTimeout(function () {
-        if (cel.stream !== s) return;
-        var v2 = $('cam'), morta = !v2.videoWidth || track.readyState !== 'live' || track.muted || (cel.camLuz >= 0 && cel.camLuz < 6);
-        if (morta) { marcarRuim(idAtual); status(T('Câmera sem imagem, pulando…', 'Camera shows nothing, skipping…'), 'erro'); proximaCamera(); }
-      }, 1500);
+      anterior = null;
       return listarCameras(st.deviceId).then(function () { prepararZoom(track); });
     });
 }
-function proximaCamera() {
-  var ruins = camsRuins(), lista = cel.cams.filter(function (d) { return ruins.indexOf(d.deviceId) < 0 && !/depth|infrared|\bir\b|virtual|screen|obs|droidcam/i.test(d.label || ''); });
-  if (lista.length < 2) { ligarCamera().catch(function () {}); return; }   // só uma boa: volta para a padrão por facingMode
-  var atual = cel.cams[cel.camIdx] && cel.cams[cel.camIdx].deviceId, pos = lista.findIndex(function (d) { return d.deviceId === atual; });
-  ligarCamera(lista[(pos + 1) % lista.length].deviceId).catch(function () {});
-}
+function trocarCamera() { cel.frente = !cel.frente; ligarCamera().catch(function () {}); }
 function listarCameras(atual) {
   if (!navigator.mediaDevices.enumerateDevices) return Promise.resolve();
   return navigator.mediaDevices.enumerateDevices().then(function (ds) {
@@ -930,7 +926,7 @@ cv.width = 48; cv.height = 27;
 function medirEnergia() {
   var v = $('cam'); if (!v.videoWidth) return;
   cx.drawImage(v, 0, 0, cv.width, cv.height);
-  var d = cx.getImageData(0, 0, cv.width, cv.height).data, soma = 0, n = d.length / 4, W = cv.width, H = cv.height, luz = 0;
+  var d = cx.getImageData(0, 0, cv.width, cv.height).data, soma = 0, n = d.length / 4, W = cv.width, H = cv.height;
   var quentes = [];                                  // onde mexeu: [x 0..1, y 0..1, força 0..100]
   if (anterior) {
     for (var i = 0, c = 0; i < d.length; i += 4, c++) {
@@ -939,8 +935,6 @@ function medirEnergia() {
       if (df > 60) quentes.push([c % W, (c / W) | 0, df]);
     }
   }
-  for (var li = 0; li < d.length; li += 16) luz += d[li] + d[li + 1] + d[li + 2];
-  cel.camLuz = luz / (d.length / 16) / 3;   // 0..255: média de brilho (câmera preta ≈ 0)
   anterior = new Uint8ClampedArray(d);
   // junta os pontos quentes em até 6 grupos (células vizinhas viram um ponto só)
   quentes.sort(function (a, b) { return b[2] - a[2]; });
@@ -1227,7 +1221,7 @@ $('btTV').onclick = iniciarTV;
 $('btCel').onclick = function () { tela('entrar'); try { $('nome').value = localStorage.getItem('danca:nome') || ''; $('codigo').value = localStorage.getItem('danca:codigo') || ''; } catch (e) {} ($('nome').value ? $('codigo') : $('nome')).focus(); };
 $('btEntrar').onclick = entrar;
 $('codigo').addEventListener('keydown', function (e) { if (e.key === 'Enter') entrar(); });
-$('btCamera').onclick = function () { if (cel.cams.length < 2) return; proximaCamera(); };
+$('btCamera').onclick = function () { if (cel.cams.length < 2) return; trocarCamera(); };
 $('btSair').onclick = sair;
 $('btTocarLink').onclick = function () { tocarLink(); };
 $('link').addEventListener('keydown', function (e) { if (e.key === 'Enter') tocarLink(); });
@@ -1316,10 +1310,11 @@ document.addEventListener('keydown', function (e) {
 });
 
 /* Detecta TV: o navegador das smart TVs se identifica (LG = "Web0S"/"webOS", Samsung = "Tizen"/"SMART-TV").
-   Primeira vez: foca o botão da TV (um OK no controle basta). Depois que a TV entrou uma vez, entra sozinha. */
+   Foca o botão da TV e espera um OK no controle. NUNCA entra sozinha: sem esse toque o navegador da LG
+   bloqueia o som, e o YouTube fica preto/parado e a música de espera não toca (defeito da 1.3.0 a 1.3.3).
+   Só o app instalado da LG (?tv=auto) entra direto. */
 var pareceTV = /Web0S|webOS|SMART-TV|SmartTV|Tizen|NetCast|BRAVIA|AFT[A-Z]|CrKey|Android TV|GoogleTV|HbbTV|Roku|VIDAA|Philips.*TV/i.test(navigator.userAgent);
-var papelSalvo = ''; try { papelSalvo = localStorage.getItem('danca:papel') || ''; } catch (e) {}
-if (/[?&]tv=auto\b/.test(location.search) || (pareceTV && papelSalvo === 'tv' && !/[?&]escolher\b/.test(location.search))) iniciarTV();
+if (/[?&]tv=auto\b/.test(location.search)) iniciarTV();
 else if (pareceTV) { $('detectouTV').style.display = 'block'; $('btTV').focus(); }   // aberto pelo app da LG: já entra como TV
 else if (/[?&]tv\b/.test(location.search)) $('btTV').focus();
 })();
