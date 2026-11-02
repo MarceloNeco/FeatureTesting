@@ -4,7 +4,7 @@
    (banco "rabiscolandia"). Nada vai para a internet. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.1.7';
+  var APP_VERSION = '0.1.8';
   var $ = function (id) { return document.getElementById(id); };
   var F = window.DesenhoFolha, P = window.DesenhoPaginas || { LISTA: [], CATEGORIAS: [] }, Pt = window.DesenhoPintura;
   var Som = window.DesenhoSom || { iniciar: function () {}, musica: function () {}, musicaLigada: function () { return false; }, efeito: function () {}, efeitos: function () {}, efeitosLigados: function () { return false; }, proxima: function () {}, nomeAtual: function () { return ''; } };
@@ -322,8 +322,6 @@
     caixa.appendChild(botaoFerr('pinceis', ip.ico, t('Pincéis', 'Brushes') + ': ' + N(ip), function () { if (motor.ferramenta().pincel !== pinc) { motor.ferramenta({ pincel: pinc }); montarBarra(); } else abrirPainel('pinceis'); }, f.pincel === pinc));
     var bol = document.createElement('span'); bol.className = 'bolinha'; bol.style.background = f.cor;
     caixa.appendChild(botaoFerr('cores', bol, t('Mais cores', 'More colors'), function () { abrirPainel('cores'); }, false));
-    var pt = document.createElement('span'); pt.className = 'ponto'; var px = Math.max(6, Math.min(30, f.tam * 0.38)); pt.style.width = pt.style.height = px + 'px';
-    caixa.appendChild(botaoFerr('tamanho', pt, t('Tamanho', 'Size'), function () { abrirPainel('tamanho'); }, false));
     caixa.appendChild(botaoFerr('balde', '🪣', t('Balde de tinta', 'Paint bucket'), function () { escolherPincel('balde'); }, f.pincel === 'balde'));
     caixa.appendChild(botaoFerr('borracha', iconeBorracha(), t('Borracha', 'Eraser'), function () { escolherPincel('borracha'); aviso(t('Borracha: apaga traços, adesivos e animados — é só passar por cima', 'Eraser: erases strokes, stickers and animations — just rub over them'), 2600); }, f.pincel === 'borracha'));
     caixa.appendChild(botaoFerr('adesivo', f.pincel === 'adesivo' && f.adesivo.tipo === 'emoji' ? f.adesivo.v : '⭐', t('Adesivos', 'Stickers'), function () { abrirPainel('adesivos'); }, f.pincel === 'adesivo'));
@@ -344,9 +342,30 @@
     if (p) { var c = motor.cores() || p.cores; lista = c.concat(lista.filter(function (x) { return c.indexOf(x) < 0; })); }
     return lista;
   }
+  /* Grossura do traço: cinco traços de verdade, do fininho ao bem grosso, na cor escolhida, sempre à vista no começo
+     da faixa de cores (a filha do dono não achava o botão da bolinha). Tocar num traço = desenhar daquela grossura.
+     Também muda o tamanho do adesivo. Usado aqui e no celular de controle da TV (tv.js). */
+  var NOMES_GROSSURA = [['Traço fininho', 'Very thin line'], ['Traço fino', 'Thin line'], ['Traço médio', 'Medium line'], ['Traço grosso', 'Thick line'], ['Traço bem grosso', 'Very thick line']];
+  function grossuras(tamAtual, cor, aoEscolher) {
+    var frag = document.createDocumentFragment(), LARG = [2.5, 5, 8, 12, 17];
+    TAMANHOS.forEach(function (tm, i) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'grossura';
+      var nome = t(NOMES_GROSSURA[i][0], NOMES_GROSSURA[i][1]); b.setAttribute('aria-label', nome); b.title = nome;
+      b.setAttribute('aria-pressed', tamAtual === tm ? 'true' : 'false');
+      var cl = /^#f{6}$/i.test(cor || '') ? '#ffffff' : (cor || '#ffffff');
+      b.innerHTML = '<svg viewBox="0 0 56 40" width="48" height="34" aria-hidden="true"><path d="M8 24 C16 8, 24 34, 32 20 S 44 10, 48 18" fill="none" stroke="' + cl + '" stroke-width="' + LARG[i] + '" stroke-linecap="round"/></svg>';
+      b.addEventListener('click', function () { aoEscolher(tm, nome); });
+      frag.appendChild(b);
+    });
+    var sep = document.createElement('span'); sep.className = 'separador'; sep.setAttribute('aria-hidden', 'true'); frag.appendChild(sep);
+    return frag;
+  }
   function montarCores(caixa) {
     caixa.innerHTML = '';
     var f = motor.ferramenta();
+    caixa.appendChild(grossuras(f.tam, f.pincel === 'borracha' ? '#c9c4e6' : f.cor, function (tm, nome) {
+      motor.ferramenta({ tam: tm, tamAdesivo: 60 + tm * 3.2 }); Som.efeito('pincel'); montarBarra(); aviso('✏️ ' + nome, 1100);
+    }));
     coresDaVez().forEach(function (c) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'cor'; b.style.background = c; b.setAttribute('aria-label', t('Cor ', 'Color ') + c); b.setAttribute('aria-pressed', f.cor === c ? 'true' : 'false');
       b.addEventListener('click', function () { escolherCor(c); });
@@ -399,9 +418,9 @@
   function renderPainel(qual) {
     painelAberto = qual;
     var corpo = $('painelCorpo'); corpo.innerHTML = '';
-    var titulos = { pinceis: t('🖌️ Pincéis', '🖌️ Brushes'), cores: t('🎨 Cores', '🎨 Colors'), tamanho: t('⭕ Tamanho', '⭕ Size'), adesivos: t('⭐ Adesivos', '⭐ Stickers'), fundos: t('🏞️ Fundo', '🏞️ Background'), variacoes: t('🎨 Outras cores do desenho', '🎨 Other color sets'), musica: t('🎵 Músicas', '🎵 Music') };
+    var titulos = { pinceis: t('🖌️ Pincéis', '🖌️ Brushes'), cores: t('🎨 Cores', '🎨 Colors'), adesivos: t('⭐ Adesivos', '⭐ Stickers'), fundos: t('🏞️ Fundo', '🏞️ Background'), variacoes: t('🎨 Outras cores do desenho', '🎨 Other color sets'), musica: t('🎵 Músicas', '🎵 Music') };
     $('painelTitulo').textContent = titulos[qual] || '';
-    ({ pinceis: painelPinceis, cores: painelCores, tamanho: painelTamanho, adesivos: painelAdesivos, fundos: painelFundos, variacoes: painelVariacoes, musica: painelMusica })[qual](corpo);
+    ({ pinceis: painelPinceis, cores: painelCores, adesivos: painelAdesivos, fundos: painelFundos, variacoes: painelVariacoes, musica: painelMusica })[qual](corpo);
   }
   function fecharPainel(semHistorico) {
     if ($('painel').hidden) return;
@@ -445,16 +464,6 @@
     var inp = document.createElement('input'); inp.type = 'color'; inp.value = f.cor; inp.style.cssText = 'width:56px;height:40px;border:0;background:none';
     inp.addEventListener('input', function () { motor.ferramenta({ cor: inp.value }); montarBarra(); });
     outra.appendChild(inp); corpo.appendChild(outra);
-  }
-  function painelTamanho(corpo) {
-    var f = motor.ferramenta(), d = document.createElement('div'); d.className = 'tamanhos';
-    TAMANHOS.forEach(function (tm) {
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'tamanho'; b.setAttribute('aria-pressed', f.tam === tm ? 'true' : 'false'); b.setAttribute('aria-label', t('Tamanho ', 'Size ') + tm);
-      var i = document.createElement('i'); var px = Math.max(5, Math.min(44, tm * 0.55)); i.style.width = i.style.height = px + 'px'; i.style.background = f.cor; b.appendChild(i);
-      b.addEventListener('click', function () { motor.ferramenta({ tam: tm, tamAdesivo: 60 + tm * 3.2 }); montarBarra(); fecharPainel(); });
-      d.appendChild(b);
-    });
-    corpo.appendChild(titulo4(t('Grossura do pincel e tamanho do adesivo', 'Brush thickness and sticker size'))); corpo.appendChild(d);
   }
   /* 🎵 Músicas: liga/desliga, anterior/próxima e a lista de todas (tocar uma = toque da pessoa, o navegador sempre deixa) */
   function painelMusica(corpo) {
@@ -678,7 +687,7 @@
   window.DesenhoApp = {
     t: t, N: N, ir: ir, mostrar: mostrar, voltar: voltar, aviso: aviso, abrirJanela: abrirJanela, som: Som, pref: pref, salvarPref: salvarPref, aplicarSom: aplicarSom,
     motor: function () { criarMotor(); return motor; }, abrirLivre: abrirLivre, abrirPagina: abrirPagina, montarBarra: montarBarra, atual: function () { return atual; },
-    CORES: CORES, PINCEIS_LIVRES: PINCEIS_LIVRES, iconeBorracha: iconeBorracha, TV: TV, tipoAparelho: tipoAparelho, versao: APP_VERSION
+    CORES: CORES, PINCEIS_LIVRES: PINCEIS_LIVRES, iconeBorracha: iconeBorracha, grossuras: grossuras, TV: TV, tipoAparelho: tipoAparelho, versao: APP_VERSION
   };
 })();
 
