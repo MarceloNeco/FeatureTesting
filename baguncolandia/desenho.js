@@ -118,6 +118,7 @@
     else if (ev.t === 'aviso') { D.aviso = { tipo: ev.tipo, j: ev.j, ate: D.ultimo + 1000 }; }
     else if (ev.t === 'fim') { confete(); }
     else if (ev.t === 'casa') { if (ev.texto) texto(T(ev.texto, ev.textoEn || ev.texto), ev.x, ev.y - 40, ev.texto === '+10' ? CORES.ouro : cor, ev.texto === '+10' ? 30 : 36); if (ev.festa) estrelas(ev.x, ev.y, cor, 6); if (ev.pontos > 0) pop(ev.j || 0); }
+    else if (ev.t === 'arrumado') { confete(); D.flash = 0.4; texto(T('TUDO ARRUMADO! 🌟 Que capricho!', 'ALL TIDY! 🌟 Great job!'), W / 2, 320, CORES.ouro, 60, true); }
     else if (ev.t === 'bagunca100') { confete(); D.flash = 0.5; texto(T('BAGUNÇA TOTAL! 🎉 +100', 'TOTAL MAYHEM! 🎉 +100'), W / 2, 320, CORES.ouro, 66, true); }
   }
   function pop(j) { D.pops[j] = D.ultimo; }
@@ -215,7 +216,7 @@
     if (D.flash > 0) { ctx.fillStyle = 'rgba(255,255,255,' + Math.min(0.5, D.flash) + ')'; ctx.fillRect(0, 0, W, H); D.flash -= dt * 1.5; }
     // chuva do Chuvisco: a tela molha
     if (D.chuva > 0) { D.chuva -= dtMs; ctx.fillStyle = 'rgba(79,195,247,' + Math.min(0.35, D.chuva / 4000) + ')'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = 'rgba(200,235,255,.7)'; for (var q = 0; q < (D.menos ? 10 : 40); q++) { var rx = (q * 173 + ts / 3) % W, ry = (q * 97 + ts / 1.5) % H; ctx.fillRect(rx, ry, 2, 14); } }
-    if (casa) { seguro('luz', function () { root.Casa.luz(ctx, estado.casa, ts); }); seguro('medidor', function () { root.Casa.medidor(ctx, estado.bagunca || 0, ts); }); }
+    if (casa) { seguro('luz', function () { root.Casa.luz(ctx, estado.casa, ts); }); seguro('medidor', function () { root.Casa.medidor(ctx, estado.bagunca || 0, ts, estado.arrumando); }); }
     seguro('placar', function () { hud(ctx, estado, ts); });
     seguro('legenda', function () { camadaTexto(ctx, ts, dtMs); });
     if (t0 && !D.leve) { D.medidas.push(performance.now() - t0); if (D.medidas.length >= 60) { var soma = 0; D.medidas.forEach(function (m) { soma += m; }); if (soma / D.medidas.length > 40) leve(true); D.medidas = []; } }
@@ -361,6 +362,7 @@
     }
     // modo atual (pequeno)
     var nomeModo = { corta: T('🍉 Corta-corta', '🍉 Slice'), pega: T('🎈 Pega-pega', '🎈 Catch'), chuta: T('⚽ Chuta-chuta', '⚽ Kick'), pula: T('🪵 Pula e abaixa', '🪵 Jump and duck'), bolas: T('🎳 Bagunça de bolas', '🎳 Ball mayhem'), bagunca: estado.casa ? { sala: T('🧸 Bagunça na sala', '🧸 Living-room mayhem'), quarto: T('🧸 Bagunça no quarto', '🧸 Bedroom mayhem'), jardim: T('🧸 Bagunça no jardim', '🧸 Garden mayhem'), cozinha: T('🧸 Bagunça na cozinha', '🧸 Kitchen mayhem'), banheiro: T('🧸 Bagunça no banheiro', '🧸 Bathroom mayhem'), parquinho: T('🧸 Bagunça no parquinho', '🧸 Playground mayhem') }[estado.casa.cena] : '' }[estado.modo] || '';
+    if (estado.arrumando && estado.casa) nomeModo = { sala: T('🧹 Arrumando a sala', '🧹 Tidying the living room'), quarto: T('🧹 Arrumando o quarto', '🧹 Tidying the bedroom'), jardim: T('🧹 Arrumando o jardim', '🧹 Tidying the garden'), cozinha: T('🧹 Arrumando a cozinha', '🧹 Tidying the kitchen'), banheiro: T('🧹 Arrumando o banheiro', '🧹 Tidying the bathroom'), parquinho: T('🧹 Arrumando o parquinho', '🧹 Tidying the playground') }[estado.casa.cena] || nomeModo;
     ctx.textAlign = 'center'; ctx.font = '600 24px ' + D.fonte; ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillText(nomeModo, W / 2, 76);
     if (D.modoAviso && ts < D.modoAviso.ate) { var a = Math.min(1, (D.modoAviso.ate - ts) / 500); ctx.globalAlpha = a; ctx.font = '700 80px ' + D.fonte; ctx.fillStyle = CORES.ciano; sombra(ctx, CORES.ciano, 30); ctx.fillText({ corta: T('🍉 Corta!', '🍉 Slice!'), pega: T('🎈 Pega!', '🎈 Catch!'), chuta: T('⚽ Chuta!', '⚽ Kick!'), pula: T('🪵 Pula e abaixa!', '🪵 Jump and duck!'), bolas: T('🎳 Bagunça de bolas!', '🎳 Ball mayhem!') }[D.modoAviso.modo], W / 2, 280); ctx.globalAlpha = 1; }
     if (D.aviso && ts < D.aviso.ate) { var rj = jogs[D.aviso.j] ? jogs[D.aviso.j].raia : jogs[0].raia, pisc = Math.floor(ts / 120) % 2 === 0 || D.menos; ctx.textAlign = 'center'; ctx.font = '700 96px ' + D.fonte; ctx.fillStyle = pisc ? (D.aviso.tipo === 'baixo' ? CORES.ouro : CORES.ciano) : '#fff'; sombra(ctx, ctx.fillStyle, 30); ctx.fillText(D.aviso.tipo === 'baixo' ? T('⬆ PULA!', '⬆ JUMP!') : T('⬇ ABAIXA!', '⬇ DUCK!'), rj.x + rj.w / 2, 230); ctx.shadowBlur = 0; }

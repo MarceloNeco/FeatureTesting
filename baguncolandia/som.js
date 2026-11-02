@@ -75,6 +75,8 @@
     sapo: function (t) { [0, 0.2].forEach(function (d) { varre(140, 90, t + d, 0.15, 'square', 0.12); ruido(t + d, 0.12, 0.12, 400); }); },
     correio: function (t) { nota(1319, t, 0.5, 'sine', 0.2); nota(1047, t + 0.15, 0.6, 'sine', 0.18); },
     porta: function (t) { varre(300, 500, t, 0.25, 'sawtooth', 0.03); nota(220, t + 0.25, 0.1, 'square', 0.08); },
+    arrumou: function (t) { [784, 1047, 1319].forEach(function (f, i) { nota(f, t + i * 0.06, 0.25, 'triangle', 0.22); }); },
+    guardou: function (t) { varre(900, 300, t, 0.2, 'sine', 0.15); nota(1319, t + 0.18, 0.3, 'triangle', 0.2); },
     tchau: function (t) { varre(1200, 200, t, 0.6, 'sine', 0.2); [784, 988, 1175].forEach(function (f, i) { nota(f, t + 0.1 + i * 0.08, 0.2, 'triangle', 0.12); }); },
     corte: function (t) { ruido(t, 0.12, 0.35, 3200); nota(880, t, 0.08, 'square', 0.08); nota(1320, t + 0.03, 0.1, 'triangle', 0.12); },
     pegou: function (t) { [523, 659, 784].forEach(function (f, i) { nota(f, t + i * 0.06, 0.18, 'triangle', 0.25); }); },

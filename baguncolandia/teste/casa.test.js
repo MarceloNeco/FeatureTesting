@@ -135,3 +135,35 @@ test('aparelhos: TV liga, piano toca nota, torradeira solta torradas, sapo coaxa
   p = partida('jardim'); M = p.estado().casa; const sp = M.aparelhos.find((a) => a.tipo === 'sapo');
   toca(p, sp.x, sp.y - 20, 1000); assert.ok(sp.croac > 0 && sp.pulo, 'o sapo não pulou');
 });
+
+test('🧹 arrumação: começa bagunçado, arrasta e encaixa, livro fecha, cesto, e festa quando tudo volta ao lugar', () => {
+  const p = Casa.criar({ cenaCasa: 'sala', modo: 'arrumar', aleatorio: (() => { let s = 3; return () => (s = (s * 9301 + 49297) % 233280) / 233280; })() }); p.comecar(); p.avancar(16);
+  let e = p.estado(); const M = e.casa;
+  assert.strictEqual(e.modo, 'arrumar'); assert.strictEqual(e.restante, null, 'arrumação não tem relógio');
+  assert.ok(e.bagunca > 0.3, 'devia começar bagunçado');
+  const fora = M.obs.find((o) => Math.hypot(o.x - o.x0, o.y - o.y0) > 60);
+  assert.ok(p.pegar('a', 0, fora.x / 1280, fora.y / 720), 'não pegou');
+  p.mover('a', (fora.x0 + 200) / 1280, (fora.y0 - 100) / 720); p.largar('a'); p.avancar(16);
+  assert.ok(Math.hypot(fora.x - fora.x0, fora.y - fora.y0) > 30, 'longe do lugar não devia encaixar');
+  for (let r = 0; r < 4; r++) { M.obs.slice().sort((a, b) => b.y0 - a.y0).forEach((o, i) => { if (o.dorme && Math.hypot(o.x - o.x0, o.y - o.y0) < 1 && !o.aberto) return; if (p.pegar('k' + i, 0, o.x / 1280, o.y / 720)) { p.mover('k' + i, o.x0 / 1280, o.y0 / 720); p.largar('k' + i); } }); correr(p, 1500); }
+  assert.ok(!M.obs.some((o) => o.aberto), 'algum livro ficou aberto');
+  const toca = (x, y) => { p.pegar('t', 0, x / 1280, y / 720); p.largar('t'); p.avancar(16); };
+  if (Math.abs(M.quadro.repouso) > 0.12) toca(M.quadro.x + 60, M.quadro.y + 50);
+  if (!M.luz) toca(M.interruptor.x + 18, M.interruptor.y + 27);
+  correr(p, 300);
+  assert.ok(M.tudoArrumado, 'não terminou: ' + p.estado().bagunca);
+  assert.ok(p.eventos().some((x) => x.t === 'arrumado'), 'sem festa');
+  correr(p, 4000); assert.strictEqual(p.estado().fase, 'fim');
+});
+
+test('🧹 depois do 🧸: a mesma bagunça vira arrumação, e o que a torradeira soltou vai para o cesto', () => {
+  const p = partida('cozinha'), M = p.estado().casa, to = M.aparelhos.find((a) => a.tipo === 'torradeira');
+  p.movimento(0, [[(to.x + 30) / 1280, (to.y + 20) / 720, 100]], 1000); correr(p, 2000);
+  passar(p, [60, 220], [400, 220], 4000); correr(p, 2000);
+  const antes = p.estado().bagunca; p.terminar(); p.arrumar();
+  const e = p.estado(); assert.strictEqual(e.modo, 'arrumar'); assert.strictEqual(e.fase, 'jogando'); assert.ok(Math.abs(e.bagunca - antes) < 0.2);
+  const torrada = M.obs.find((o) => o.tipo === 'torrada');
+  assert.ok(p.pegar('c', 0, torrada.x / 1280, torrada.y / 720)); p.mover('c', (M.cesto.x + 50) / 1280, (M.cesto.y + 40) / 720); p.largar('c');
+  assert.ok(!M.obs.includes(torrada), 'a torrada não foi para o cesto');
+  p.dica(); assert.ok(M.dica, 'a dica não apontou nada');
+});

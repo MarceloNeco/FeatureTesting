@@ -212,3 +212,9 @@ select { font: inherit; width: 100%; padding: .7rem; border-radius: 14px; border
 #casaNav { display: none; position: absolute; left: 1.5vh; right: 1.5vh; bottom: 1.5vh; z-index: 9; justify-content: space-between; pointer-events: none; }
 #tv.local.casa.jogando #casaNav { display: flex; }
 #casaNav button { pointer-events: auto; background: rgba(0,0,0,.55); color: #fff; border: 2px solid rgba(255,255,255,.4); border-radius: 999px; padding: .35rem .9rem; font-size: 1rem; min-height: 44px; }
+/* 🧹 arrumação: dica no meio das setinhas; botão para arrumar depois da bagunça; o modo só no jogo com o dedo */
+#casaDica { display: none; }
+#tv.arrumando #casaDica { display: inline-block; }
+#localArrumar { display: none; flex: 1 1 100%; background: var(--ouro); color: #1a1446; }
+#tv.podearrumar:not(.jogando) #localArrumar { display: block; }
+#tv:not(.toque) #localModos button[data-v="arrumar"] { display: none; }
