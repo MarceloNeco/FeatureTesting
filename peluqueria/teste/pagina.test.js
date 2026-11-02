@@ -140,6 +140,10 @@ async function comecar(pg, nivel) {
   await ps.click('#btPausa'); await ps.click('#btSeguir');
   confere(ps.erros().length === 0, 'som: sem erros', ps.erros());
 
+  /* botão de pausa desenhado (Amazon Fire não tem o símbolo ⏸): sem emoji, com as duas barras visíveis */
+  const pb = await D(ps, () => { const b = document.querySelector('#btPausa .barras'), r = b && b.getBoundingClientRect(), c = b && getComputedStyle(b); return { txt: document.getElementById('btPausa').textContent.trim(), w: r && r.width, h: r && r.height, cor: c && c.borderLeftColor, lb: c && c.borderLeftWidth }; });
+  confere(pb.txt === '' && pb.w >= 14 && pb.h >= 14 && pb.lb === '6px' && pb.cor === 'rgb(255, 255, 255)', 'botão ⏸ desenhado no CSS, sem depender do símbolo', pb);
+
   /* iPad/iPhone antigo (iOS < 13): sem pointer events, só toque. Tocar na tela tem de parar o item. */
   const ipad = await abrir(browser, base + '?teste', { ctx: { viewport: { width: 820, height: 1180 }, hasTouch: true, isMobile: true }, antes: () => {
     const orig = EventTarget.prototype.addEventListener;
@@ -150,6 +154,16 @@ async function comecar(pg, nivel) {
   await ateAlvo(ipad); await ipad.touchscreen.tap(410, 700);
   const ip = await est(ipad);
   confere(ip.fase === 'parado' && ip.res.length === 1, 'iPad antigo (sem pointer events): tocar na tela para o item', ip);
+  // ⏸ pausa sem parar o item; tocar em cima do placar (fora do enfeite) também para o item
+  await D(ipad, () => PeluqueriaDebug.novaRodada('crianca'));
+  await ateAlvo(ipad);
+  const bp = await ipad.locator('#btPausa').boundingBox(); await ipad.touchscreen.tap(bp.x + bp.width / 2, bp.y + bp.height / 2);
+  const ip2 = await est(ipad);
+  confere(ip2.pausado && ip2.fase === 'caindo', 'tocar no ⏸ pausa e não conta como parar', ip2);
+  const bs = await ipad.locator('#btSeguir').boundingBox(); await ipad.touchscreen.tap(bs.x + bs.width / 2, bs.y + bs.height / 2);
+  await ipad.touchscreen.tap(40, 25);
+  const ip3 = await est(ipad);
+  confere(!ip3.pausado && ip3.fase === 'parado', 'tocar em qualquer lugar (até em cima do placar) para o item', ip3);
   confere(ipad.erros().length === 0, 'iPad antigo: sem erros', ipad.erros());
 
   const mudo = await abrir(browser, base + '?teste', { antes: () => { delete window.speechSynthesis; delete window.AudioContext; delete window.webkitAudioContext; window.speechSynthesis = undefined; window.AudioContext = undefined; window.webkitAudioContext = undefined; } });
@@ -201,6 +215,9 @@ async function comecar(pg, nivel) {
     await D(tv, () => PeluqueriaTVDebug.passo(PeluqueriaTVDebug.tempoAteAlvo(0))); await tv.keyboard.press('Enter');
     confere(await D(tv, () => PeluqueriaTVDebug.ultimo(0)) === 'PERFEITO', 'TV: OK do controle para o item na hora certa');
     confere(await D(tv, () => PeluqueriaTVDebug.leve === true), 'TV: modo leve ligado');
+    await D(tv, () => PeluqueriaTVDebug.passo(2100)); await D(tv, () => PeluqueriaTVDebug.passo(PeluqueriaTVDebug.tempoAteAlvo(0)));
+    await tv.mouse.click(300, 300);
+    confere(await D(tv, () => PeluqueriaTVDebug.resultados(0)) === 2, 'TV: tocar/clicar na tela (TV de toque, ponteiro do controle) também para o item');
     await tv.keyboard.press('Escape');
     confere(await tv.isVisible('#tvLobby'), 'TV: Voltar/Esc leva ao lobby');
 
@@ -220,8 +237,8 @@ async function comecar(pg, nivel) {
     await cel.click('#ctComecar'); await tv.waitForTimeout(150); await D(tv, () => PeluqueriaTVDebug.passo(2200));
     confere(await tv.isVisible('#tvJogo'), 'celular começa a rodada');
     await D(tv, () => PeluqueriaTVDebug.passo(PeluqueriaTVDebug.tempoAteAlvo(0)));
-    await cel.click('#ctParar'); await tv.waitForTimeout(250);
-    confere(await D(tv, () => PeluqueriaTVDebug.ultimo(0)) === 'PERFEITO', 'tocar PARAR no celular para o item na TV');
+    await cel.click('#controle h2'); await tv.waitForTimeout(250);
+    confere(await D(tv, () => PeluqueriaTVDebug.ultimo(0)) === 'PERFEITO', 'tocar em qualquer lugar da tela do celular-controle para o item na TV');
     await D(tv, () => PeluqueriaTVDebug.passo(2100));
     // corpo: gesto brusco simulado (esqueleto falso) para o item
     await D(tv, () => PeluqueriaTVDebug.passo(500));
@@ -293,7 +310,7 @@ async function comecar(pg, nivel) {
 
   const pdb = await abrir(browser, base + '?debug&teste');
   await passo(pdb, 500);
-  confere(/v0\.6\.1/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
+  confere(/v0\.6\.4/.test(await pdb.textContent('#debug')) && await pdb.isVisible('#debug'), '?debug mostra a versão');
   confere(await D(pdb, () => PeluqueriaDebug.leve === false), 'celular: modo leve desligado');
 
   /* ---------- revisão final ---------- */

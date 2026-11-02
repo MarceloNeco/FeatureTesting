@@ -3,7 +3,7 @@
    Partes: comum · TVApp (também o modo "só o celular") · CelApp · botões. */
 (function () {
   'use strict';
-  var APP_VERSION = '0.8.6', APP_UPDATED = '31/10/2026';
+  var APP_VERSION = '0.8.7', APP_UPDATED = '01/11/2026';
   var EN = /^en/i.test(navigator.language || '');
   function T(pt, en) { return EN ? en : pt; }
   var $ = function (id) { return document.getElementById(id); };
@@ -682,4 +682,15 @@
   if (/[?&]tv=auto\b/.test(location.search)) TVApp.iniciar({ gesto: false });   // casca da LG: já entra como TV
   else if (/[?&]tv\b/.test(location.search)) $('btTV').focus();
   if (TESTE) { window.BaguncaApp = { TVApp: TVApp, CelApp: CelApp, Bagunca: Bagunca, Figuras: Figuras, Boneco: Boneco }; }
+})();
+
+/* Botão "📲 Instalar" do Bolinho de Chuva: o cartão abre o jogo com ?instalar=1 e só então carrega a barra
+   "Instalar o aplicativo" (bolinho-de-chuva/instalar.js, do Portal, mesmo endereço). Quem só quer jogar não baixa nada a mais. */
+(function () {
+  if (!/[?&]instalar\b/.test(location.search) || location.protocol === 'file:') return;
+  var s = document.createElement('script');
+  s.src = '/bolinho-de-chuva/instalar.js';
+  s.setAttribute('data-nome', 'Bagunçolândia'); s.setAttribute('data-icone', 'icone-192.png');
+  s.setAttribute('data-so-com', 'instalar'); s.setAttribute('data-flutuante', ''); s.setAttribute('data-sw', 'nao');
+  document.body.appendChild(s);
 })();

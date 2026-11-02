@@ -2,7 +2,7 @@
    e o laço da corrida. As regras ficam em motor.js; o desenho em desenho.js; o som em som.js. */
 (function () {
   'use strict';
-  var APP_VERSION = '1.2.0';
+  var APP_VERSION = '1.3.1';
   var $ = function (id) { return document.getElementById(id); };
   var M = window.VruuumMotor, D = window.VruuumDesenho, Som = window.VruuumSom;
   var TV = /[?&]tv=auto\b/.test(location.search);
@@ -618,4 +618,15 @@
   traduzir();
   if (TV) setTimeout(function () { try { $('btEntrar').focus(); } catch (e) { /* ok */ } }, 200);
   if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(function () { /* sem modo offline */ });
+})();
+
+/* Botão "📲 Instalar" do Bolinho de Chuva: o cartão abre o jogo com ?instalar=1 e só então carrega a barra
+   "Instalar o aplicativo" (bolinho-de-chuva/instalar.js, do Portal, mesmo endereço). Quem só quer jogar não baixa nada a mais. */
+(function () {
+  if (!/[?&]instalar\b/.test(location.search) || location.protocol === 'file:') return;
+  var s = document.createElement('script');
+  s.src = '/bolinho-de-chuva/instalar.js';
+  s.setAttribute('data-nome', 'Vruuum!'); s.setAttribute('data-icone', 'icone-192.png');
+  s.setAttribute('data-so-com', 'instalar'); s.setAttribute('data-flutuante', ''); s.setAttribute('data-sw', 'nao');
+  document.body.appendChild(s);
 })();

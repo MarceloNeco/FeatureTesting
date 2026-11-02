@@ -34,29 +34,51 @@
   }
 
   // ---------- música: a "rádio" do jogo ----------
-  /* Intercala as músicas gravadas (musicas/*.mp3: Kevin MacLeod, CC BY 4.0, e SuperTuxKart, CC BY-SA;
-     créditos em musicas/LICENCAS.md) com as de rock feitas pelo rock.js. Tocam sem parar, uma depois da outra.
+  /* Toca as 26 músicas gravadas (musicas/*.mp3: Kevin MacLeod, CC BY 4.0, SuperTuxKart, CC BY-SA, e HoliznaCC0,
+     CC0; créditos em musicas/LICENCAS.md) e, de vez em quando, uma das de rock feitas pelo rock.js. Tocam sem parar, uma depois da outra.
      Sem a gravada (sem internet e ainda não guardada, ou no arquivo baixado), pula para a próxima.
      Um único <audio> para tudo (o iPhone só deixa tocar o elemento que já tocou depois de um toque). */
-  // ordem da rádio: rock de guitarra do Kevin MacLeod (CC BY 4.0) primeiro, intercalado com o SuperTuxKart (CC BY-SA)
   var GRAVADAS = [
     { url: 'musicas/volatile-reaction.mp3', nome: 'Volatile Reaction', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
     { url: 'musicas/kart-grand-prix.mp3', nome: 'Kart Grand Prix', autor: 'Weirwood', licenca: 'CC BY-SA 3.0' },
     { url: 'musicas/heroic-age.mp3', nome: 'Heroic Age', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
     { url: 'musicas/lava.mp3', nome: 'Lava', autor: 'Kalsan', licenca: 'CC BY-SA 3.0' },
     { url: 'musicas/unholy-knight.mp3', nome: 'Unholy Knight', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
-    { url: 'musicas/las-dunas-champions.mp3', nome: 'Las Dunas Champions', autor: 'ALBatross', licenca: 'CC BY-SA 4.0' }
+    { url: 'musicas/las-dunas-champions.mp3', nome: 'Las Dunas Champions', autor: 'ALBatross', licenca: 'CC BY-SA 4.0' },
+    // 1.3.0: mais 20 rocks gravados de verdade (bateria, baixo e guitarra): 15 do Kevin MacLeod (CC BY 4.0) e
+    // 5 do HoliznaCC0 (álbum "Rock Montage", CC0, domínio público)
+    { url: 'musicas/metalmania.mp3', nome: 'Metalmania', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/ready-aim-fire.mp3', nome: 'Ready Aim Fire', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/summon-the-rawk.mp3', nome: 'Summon the Rawk', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/noise-attack.mp3', nome: 'Noise Attack', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/retrofuture-nasty.mp3', nome: 'RetroFuture Nasty', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/hotrock.mp3', nome: 'Hotrock', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/neolith.mp3', nome: 'Neolith', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/iron-bacon.mp3', nome: 'Iron Bacon', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/take-the-lead.mp3', nome: 'Take the Lead', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/exhilarate.mp3', nome: 'Exhilarate', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/cool-hard-facts.mp3', nome: 'Cool Hard Facts', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/bet-you-can.mp3', nome: 'Bet You Can', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/pump.mp3', nome: 'Pump', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/breakdown.mp3', nome: 'Breakdown', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/what-you-want.mp3', nome: 'What You Want', autor: 'Kevin MacLeod (incompetech.com)', licenca: 'CC BY 4.0' },
+    { url: 'musicas/holizna-jams.mp3', nome: 'Rock Montage: Jams', autor: 'HoliznaCC0', licenca: 'CC0' },
+    { url: 'musicas/holizna-punk.mp3', nome: 'Rock Montage: Punk', autor: 'HoliznaCC0', licenca: 'CC0' },
+    { url: 'musicas/holizna-americana.mp3', nome: 'Rock Montage: Americana', autor: 'HoliznaCC0', licenca: 'CC0' },
+    { url: 'musicas/holizna-grunge.mp3', nome: 'Rock Montage: Grunge', autor: 'HoliznaCC0', licenca: 'CC0' },
+    { url: 'musicas/holizna-classic.mp3', nome: 'Rock Montage: Classic', autor: 'HoliznaCC0', licenca: 'CC0' }
   ];
   var lista = [], atual = -1, audio = null, aoTrocar = null, falhas = 0;
-  // duas gravadas, uma feita pelo jogo, duas gravadas, outra do jogo... (sem gravadas: só as do jogo)
+  // as gravadas em ordem sorteada (cada vez que abre o jogo começa por uma diferente) e, de 8 em 8 gravadas,
+  // uma das 3 feitas pelo jogo (sem gravadas, como no arquivo baixado: só as do jogo)
   function montarLista() {
     var semGravadas = !!raiz.JOGO_EM_ARQUIVO || !raiz.Audio;
     var sint = raiz.VruuumRock ? raiz.VruuumRock.MUSICAS.map(function (m, k) { return { s: k, nome: m.nome, autor: 'Vruuum!', licenca: '' }; }) : [];
     var grav = semGravadas ? [] : GRAVADAS.map(function (g) { return { g: g }; });
+    for (var k = grav.length - 1; k > 0; k--) { var r = Math.floor(Math.random() * (k + 1)), tmp = grav[k]; grav[k] = grav[r]; grav[r] = tmp; }
     lista = [];
     while (grav.length || sint.length) {
-      if (grav.length) lista.push(grav.shift());
-      if (grav.length) lista.push(grav.shift());
+      for (var q = 0; q < 8 && grav.length; q++) lista.push(grav.shift());
       if (sint.length) lista.push(sint.shift());
     }
   }

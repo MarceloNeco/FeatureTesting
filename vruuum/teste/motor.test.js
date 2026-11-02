@@ -242,3 +242,20 @@ test('rival desvia do cone na faixa dele (quase sempre)', () => {
   }
   assert.ok(desviou >= 12, 'desviou ' + desviou + ' de 20');
 });
+
+test('rival lado a lado com o jogador não fica batendo e voltando (não treme)', () => {
+  // a criança vira para cima do rival e segura: antes os dois ficavam se batendo (8 batidas em 4 s, tremendo)
+  for (const nivel of ['crianca', 'normal']) {
+    const e = M.novaCorrida(nivel, 5, 1, [{ id: 'saci', veic: 'kart', mod: {} }]);
+    e.fase = 'corrida'; e.carros = [];
+    for (const s of e.pista.segs) s.coisas = [];
+    const j = e.jogadores[0], rv = e.rivais[0];
+    j.z = rv.z = 30 * P.SEG; j.x = 0; rv.x = rv.faixa = P.FAIXAS[2]; rv.vel = j.vel = 4000;
+    let tums = 0;
+    for (let t = 0; t < 4; t += 1 / 60) {
+      M.atualizar(e, [{ dir: 1 }], 1 / 60); rv.z = j.z;   // forçados a andar juntos
+      tums += e.eventos.filter(ev => ev.tipo === 'tum').length;
+    }
+    assert.ok(tums <= 2, nivel + ': bateu ' + tums + ' vezes');
+  }
+});
