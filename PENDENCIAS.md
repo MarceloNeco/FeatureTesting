@@ -26,6 +26,7 @@ reaproveitados). Criada em 31/Out/2026, com autorização do dono.
 
 ## Histórico das entregas
 
+- **08/Nov/2026:** card ⚖️ Radar Judicial (LexSuiteONE, judicial.solverone.com.br) em 3º lugar; os 6 cards de joguinhos saem e fica um só, ☔ Bolinho de Chuva, que leva ao portal dos jogos (/kids/).
 - **02/Nov/2026:** página do laboratório instalável como app (📲 Instalar como app, ícone 🧪, abre em tela cheia) e botão ⛶ Tela cheia; `manifest.webmanifest` e ícones novos; o `index.html` passa a registrar o `sw.js`.
 - **31/Out/2026:** lista criada com o registro da Dança na Sala (no `main` já na 1.1.0). Fechou o #5 (RootifyONE 0.18.5).
 - **31/Out/2026:** 1.4.0 — card e pasta `arch-one/` (ArchONE, mapa vivo, protótipo F0, lido dos manifestos); interruptor `arch-one` no `recursos-do-app.json`. Aberto o #8.
