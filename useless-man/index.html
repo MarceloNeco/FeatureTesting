@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="only light">
+<title>The Useless Man — Guia do Homem Inútil Offline</title>
+<meta name="description" content="O guia do homem inútil: tudo o que homem precisa saber em casa e nunca sabe. Funciona sem internet. / The useless man's guide, offline.">
+<link rel="icon" href="icone.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icone-180.png">
+<meta name="theme-color" content="#ffcf33">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Useless Man">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<a class="pular" href="#conteudo" id="pular">Pular para o conteúdo</a>
+
+<header class="topo">
+  <button type="button" class="marca" id="marca" aria-label="Início">
+    <img src="icone.svg" alt="" width="36" height="36">
+    <span class="marca-txt"><b>The Useless Man</b><small id="subtitulo">Guia do Homem Inútil · Offline</small></span>
+  </button>
+  <div class="topo-acoes">
+    <div class="idioma" role="group" aria-label="Idioma / Language">
+      <button type="button" data-idioma="pt" aria-pressed="true">PT</button>
+      <button type="button" data-idioma="en" aria-pressed="false">EN</button>
+    </div>
+    <button type="button" class="ico" id="btBusca" aria-label="Buscar">🔍</button>
+    <button type="button" class="ico" id="btAjustes" aria-label="Configurações">⚙</button>
+    <button type="button" class="ico" id="btInicio" aria-label="Início">🏠</button>
+  </div>
+</header>
+<div class="faixa" aria-hidden="true"></div>
+
+<div class="aviso-versao" id="avisoVersao" hidden role="status"></div>
+<div class="selo-offline" id="seloOffline" hidden role="status"></div>
+
+<main id="conteudo" data-recurso="useless-man" tabindex="-1"></main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="../recursos.js" data-app="feature-tester"></script>
+<script src="guia.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

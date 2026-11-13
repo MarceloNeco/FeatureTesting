@@ -9,6 +9,14 @@
         "en": "ArchONE (living map, prototype)"
       },
       "pagina": "arch-one/"
+    },
+    {
+      "id": "useless-man",
+      "nome": {
+        "pt": "The Useless Man (Guia do Homem Inútil Offline)",
+        "en": "The Useless Man (offline guide)"
+      },
+      "pagina": "useless-man/"
     }
   ]
 }
