@@ -23,9 +23,11 @@ reaproveitados). Criada em 31/Out/2026, com autorização do dono.
 | 10 | Vruuum! (corrida de carrinho): testar com as crianças no celular, no tablet e na TV LG; depois, ideias de TV com o celular como volante e casca LG — detalhe em `vruuum/PENDENCIAS.md` | Dono, 01/Nov/2026 | ➡ mudou para o repositório **kids** (#11 lá), em 02/Nov/2026 |
 | 11 | Purpurina (vestir e maquiar): testar com as crianças no celular e no tablet, deitado e em pé; depois, ajustes e ideias (pintar com o dedo, mais penteados, TV) — detalhe em `purpurina/PENDENCIAS.md` | Dono, 01/Nov/2026 | ➡ mudou para o repositório **kids** (#12 lá), em 02/Nov/2026 |
 | 12 | Rabiscolândia (desenhar, colorir, pintar por números, mão na câmera, TV): testar com as crianças no celular, no iPad e na TV; depois, IA para deixar o desenho "de verdade" e o resto da lista — detalhe em `rabiscolandia/PENDENCIAS.md` | Dono, 01/Nov/2026 | ➡ mudou para o repositório **kids** (#13 lá), em 02/Nov/2026 |
+| 13 | The Useless Man: decidir se ganha repositório próprio (solverone.com.br/useless-man/) e quais itens da diretriz entram (AssistONE, 💬 opinião e pergunta do dia, ler em voz alta, A−/A+, tela cheia, entrada no Portal); ideia de "modo ela vai viajar" (anotações da própria casa: onde fica cada coisa, tamanhos, telefones, guardadas só no aparelho) | Dono, 13/Nov/2026 (0.1.0) | ⏸ aguardando o dono |
 
 ## Histórico das entregas
 
+- **13/Nov/2026:** card e pasta `useless-man/` (The Useless Man 0.1.0, Guia do Homem Inútil Offline: 90 situações em 12 categorias, PT/EN, busca, socorro rápido, medidor de inutilidade, sem internet e instalável); interruptor `useless-man` no `recursos-do-app.json`. Aberto o #13.
 - **08/Nov/2026:** card ⚖️ Radar Judicial (LexSuiteONE, judicial.solverone.com.br) em 3º lugar; os 6 cards de joguinhos saem e fica um só, ☔ Bolinho de Chuva, que leva ao portal dos jogos (/kids/).
 - **02/Nov/2026:** página do laboratório instalável como app (📲 Instalar como app, ícone 🧪, abre em tela cheia) e botão ⛶ Tela cheia; `manifest.webmanifest` e ícones novos; o `index.html` passa a registrar o `sw.js`.
 - **31/Out/2026:** lista criada com o registro da Dança na Sala (no `main` já na 1.1.0). Fechou o #5 (RootifyONE 0.18.5).
