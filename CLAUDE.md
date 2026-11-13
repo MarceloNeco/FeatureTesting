@@ -84,3 +84,19 @@ Resumo do que nunca pode ser esquecido (o detalhe está na diretriz):
 - **Trabalho demorado** (foto, OCR, IA, importação, áudio) roda no módulo `Fundo`: nunca morre ao sair da tela,
   Wake Lock, aviso antes de fechar, pílula de andamento, resultado entregue onde a pessoa estiver.
 - **Feedback dos usuários**: pergunta do dia, 💬 em toda tela e no AssistONE, tudo estruturado no RootifyONE.
+
+## Aviso do dono (13/Nov/2026) — Definition of done da plataforma e teia de integrações
+
+A **Definition of done** da SolverONE passa a ter 12 pontos: manual e orientações, AssistONE, Novidades da
+versão, termos, comunicações e e-mails, RootifyONE, ArchONE, EaglePlanONE (roadmap), retrocompatibilidade,
+segurança e LGPD, qualidade verificável e registro. Vai nascer também uma **teia de integrações** entre os apps,
+o RootifyONE, o ArchONE e o EaglePlanONE (eventos e comandos com aprovação). A diretriz nova está sendo
+desenhada; quando sair, ela manda.
+
+- **Aplicabilidade:** cada ponto vale quando for aplicável ao estágio atual deste app (hoje: só no GitHub,
+  site aberto sem login, sem banco). **Não** criar login, **não** migrar para banco e **não** criar integração
+  por causa deste aviso. O que não se aplica hoje, dizer "não aplicável hoje" e o motivo em uma linha. Quando
+  o app ganhar login, banco ou integração nova, já nasce cumprindo os pontos que passaram a valer.
+- **Em cada entrega**, dizer no resumo o que o RootifyONE, o ArchONE ou o EaglePlanONE precisariam saber
+  (integração nova ou removida, recurso novo, item do roadmap concluído).
+- **Nada de integração nova sem a regra zero.**
