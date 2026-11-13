@@ -107,3 +107,20 @@ com aprovação).
 - **Em cada entrega**, dizer no resumo o que o RootifyONE, o ArchONE ou o EaglePlanONE precisariam saber (integração
   nova ou removida, recurso novo, item do roadmap concluído).
 - **Nada de integração nova sem a regra zero.**
+
+## Aviso do dono (13/Nov/2026) — Definition of done com 12 pontos
+
+A Definition of done da plataforma passa a ter 12 pontos: manual e orientações, AssistONE, Novidades da
+versão, termos, comunicações e e-mails, RootifyONE, ArchONE, EaglePlanONE (roadmap), retrocompatibilidade,
+segurança e LGPD, qualidade verificável e registro. Vai nascer uma teia de integrações entre os apps, o
+RootifyONE, o ArchONE e o EaglePlanONE (eventos e comandos com aprovação). A diretriz nova está sendo
+desenhada; quando sair, siga-a.
+
+Aplicabilidade: cada ponto vale quando for aplicável ao estágio atual deste app (sem banco de dados, só no
+GitHub, site aberto sem login). NÃO criar login, não migrar para banco e não criar integração por causa deste
+aviso. O que não se aplica hoje, dizer "não aplicável hoje" e o motivo em uma linha. Quando este app ganhar
+login, banco ou integração nova, ele já nasce cumprindo os pontos que passaram a valer.
+
+Até a diretriz nova: (1) este aviso vale em todas as conversas deste app; (2) em cada entrega, dizer no resumo o
+que o RootifyONE, o ArchONE ou o EaglePlanONE precisariam saber (integração nova ou removida, recurso novo,
+item do roadmap concluído); (3) nada de integração nova sem a regra zero.
