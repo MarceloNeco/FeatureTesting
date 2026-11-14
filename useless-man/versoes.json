@@ -1,5 +1,22 @@
 [
   {
+    "versao": "0.2.0",
+    "data": "2026-11-14",
+    "hora": "02:33:30",
+    "pt": [
+      "Visual novo: o guia agora é o bilhete preso na porta da geladeira — post-it com a busca, folha de bloquinho para o Socorro rápido e cada situação, ímãs nas categorias e o quadro de estrelinhas no medidor de inutilidade.",
+      "No computador, uma geladeira de duas portas.",
+      "Letras novas, guardadas no próprio app (funcionam sem internet): uma de caneta para títulos e o PS, e uma feita para leitura fácil nos passos.",
+      "Ícone novo."
+    ],
+    "en": [
+      "New look: the guide is now the note stuck on the fridge door — a sticky note with the search, a notepad sheet for Quick rescue and each situation, magnets for the categories and a sticker chart for the uselessness meter.",
+      "On computers, a two-door fridge.",
+      "New fonts, stored in the app itself (they work offline): a handwritten one for titles and the PS, and one built for easy reading in the steps.",
+      "New icon."
+    ]
+  },
+  {
     "versao": "0.1.0",
     "data": "2026-11-13",
     "hora": "17:55:57",

@@ -27,6 +27,7 @@ reaproveitados). Criada em 31/Out/2026, com autorização do dono.
 
 ## Histórico das entregas
 
+- **14/Nov/2026:** The Useless Man 0.2.0 — visual novo "porta da geladeira" (post-it com a busca, folha de bloquinho, ímãs nas categorias, quadro de estrelinhas no medidor, geladeira de duas portas no computador), fontes no próprio app (Kalam e Atkinson Hyperlegible, OFL) e ícone novo.
 - **13/Nov/2026:** card e pasta `useless-man/` (The Useless Man 0.1.0, Guia do Homem Inútil Offline: 90 situações em 12 categorias, PT/EN, busca, socorro rápido, medidor de inutilidade, sem internet e instalável); interruptor `useless-man` no `recursos-do-app.json`. Aberto o #13.
 - **08/Nov/2026:** card ⚖️ Radar Judicial (LexSuiteONE, judicial.solverone.com.br) em 3º lugar; os 6 cards de joguinhos saem e fica um só, ☔ Bolinho de Chuva, que leva ao portal dos jogos (/kids/).
 - **02/Nov/2026:** página do laboratório instalável como app (📲 Instalar como app, ícone 🧪, abre em tela cheia) e botão ⛶ Tela cheia; `manifest.webmanifest` e ícones novos; o `index.html` passa a registrar o `sw.js`.

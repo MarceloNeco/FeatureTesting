@@ -1,12 +1,14 @@
 /* sw.js do The Useless Man — guarda o guia no aparelho para abrir sem internet.
    Código (página, .js, .css, .json): rede primeiro (4 s), senão a cópia guardada.
-   Ícones: cópia primeiro. O cache tem o nome do app e só apaga caches com esse prefixo
+   Ícones e fontes: cópia primeiro. O cache tem o nome do app e só apaga caches com esse prefixo
    (os apps da SolverONE dividem o mesmo endereço; apagar o dos outros tiraria o modo sem internet deles). */
-var VERSAO = '0.1.0';
+var VERSAO = '0.2.0';
 var PREFIXO = 'dgo-useless-man-';
 var CACHE = PREFIXO + 'v' + VERSAO;
 var ARQUIVOS = ['./', 'index.html', 'estilo.css', 'app.js', 'guia.js', 'versoes.json', 'manifest.webmanifest',
-  'icone.svg', 'icone-180.png', 'icone-192.png', 'icone-512.png', '../recursos.js'];
+  'icone.svg', 'icone-180.png', 'icone-192.png', 'icone-512.png', '../recursos.js',
+  'fontes/kalam-latin-400-normal.woff2', 'fontes/kalam-latin-700-normal.woff2',
+  'fontes/atkinson-hyperlegible-latin-400-normal.woff2', 'fontes/atkinson-hyperlegible-latin-700-normal.woff2'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) {
@@ -37,7 +39,7 @@ self.addEventListener('fetch', function (e) {
   var pagina = req.mode === 'navigate';
   var chave = pagina ? './' : req;
 
-  if (/\.(png|svg)$/.test(url.pathname)) {
+  if (/\.(png|svg|woff2)$/.test(url.pathname)) {
     e.respondWith(caches.match(req).then(function (c) {
       var rede = fetch(req).then(function (r) { if (r.ok) caches.open(CACHE).then(function (k) { k.put(req, r.clone()); }); return r; });
       return c || rede;
