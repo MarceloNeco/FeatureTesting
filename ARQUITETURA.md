@@ -24,6 +24,12 @@ Pendências: `PENDENCIAS.md`.
 | `leitor-ocr.html` | Só redireciona para o Leitor de Comprovantes, que ganhou repositório próprio (https://marceloneco.github.io/leitor-ocr/). | não precisa |
 | `CLAUDE.md`, `.claude/skills/diretrizes-gerais-apps/SKILL.md` | Regras do projeto e diretriz geral, copiadas do `rootify-one` ("atualize a diretriz"). | **não** à mão — copiar de novo do `rootify-one` |
 
+## Câmera e TV
+
+O motor de câmera e TV da plataforma (ler o corpo pela câmera do celular, TV como segunda tela, cascas de app para TV)
+mora no repositório próprio **motor-camtv** (https://github.com/MarceloNeco/motor-camtv), desde a pesquisa de
+19/Nov/2026. Nada disso fica aqui.
+
 ## Dança na Sala
 
 Mudou para o repositório **kids** em 02/Nov/2026 (ver `ARQUITETURA.md` de lá).
