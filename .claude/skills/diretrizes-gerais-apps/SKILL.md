@@ -20,6 +20,7 @@ seção "Domínio".
 | RiseONE | exercício, dieta e saúde | `rise-one` | beta |
 | Eleições 2026 | infográficos dos planos de governo (réplica alpha no ChatGPT Sites) | `planos-candidatos-2026` | beta |
 | Contador de Histórias | acervo, leitura e criação de histórias | `contador-de-historias` | beta |
+| **Bolinho de Chuva** | brincadeiras para criança e família: estante + Bagunçolândia, Peluqueria, Vruuum!, Purpurina, Rabiscolândia, Dança na Sala; em **solverone.com.br/kids** (saiu do FeatureTesting e do Portal em 02/Nov/2026) | `kids` | beta |
 | CifrasONE (Cifras e Acordes) | cifras com auto-rolagem, acordes, afinador | `cifras-violao` | beta |
 | PetLover | a definir | — | backlog |
 
@@ -31,6 +32,10 @@ Antes de implementar **qualquer requisito destas diretrizes que ainda não estej
 naquele app**, listar quais são e confirmar com o usuário quais entram agora. Nada de aplicar
 em silêncio o que ele não pediu naquela conversa. O que já está no módulo comum vem junto sem
 perguntar; o que é novo, pergunta.
+
+**Publicar é sempre autorizado** (decisão do dono, 02/Nov/2026: ele comanda pelo celular). Ao terminar uma mudança e
+testar, fazer o pull request e o merge (publicar) sem perguntar e, depois, contar em linguagem simples o que mudou e
+onde ver. Criar repositório novo continua pedindo permissão.
 
 ## Planilha de controle
 
@@ -277,15 +282,38 @@ Samsung Internet pintam o escuro deles por cima e a chave "Tema escuro" parece e
 
 ## Idioma e datas
 
-- PT e EN em tudo, sempre revisadas. Todo texto novo nasce nas duas línguas.
-- Seletor **PT|EN**: no **computador**, no próprio cabeçalho, junto de 🔍 📥 ⚙ 🏠 👤 (não numa
-  faixa só para ele); no **celular**, **dentro do ☰** (no topo da gaveta), para não ocupar o
-  cabeçalho. Antes de entrar (tela de boas-vindas, sem ☰), fica visível no cabeçalho também no
-  celular. Nunca na faixa do anúncio: fechar o anúncio não pode levar o idioma junto.
-- Datas: PT `17/Set/2026` · EN `Sep/17/2026`. Varredura automática a cada atualização.
+**Três idiomas oficiais (decisão do dono, 14/Nov/2026, obrigatória em todos os apps, portais e no RootifyONE):**
+
+- **PT** = português do Brasil · **EN** = inglês dos Estados Unidos · **ES** = espanhol da Espanha (castelhano
+  europeu: é onde o idioma nasceu e de onde se difundiu; **nunca** a variante da Argentina, da Colômbia ou de
+  outro país). Siglas de duas letras, sempre estas: `PT`, `EN`, `ES`.
+- **Todo texto novo nasce nos três idiomas** e a tradução é **humanizada**: revisada como gente fala, não literal;
+  glossário por app (os nomes dos apps, "SolverONE", "RootifyONE", "AssistONE" não se traduzem). Texto jurídico (termos,
+  aceites, e-mails do LexSuiteONE) em ES passa por revisão de advogado antes de publicar, como já vale para PT e EN.
+- **Um seletor só, igual em todo lugar**: a **bandeira do país + a sigla** — 🇧🇷 PT · 🇺🇸 EN · 🇪🇸 ES — lado a lado,
+  o idioma atual destacado, um toque troca. É o componente do módulo comum (`diretrizes.js`), **nunca** um toggle, um
+  dropdown ou um botão de texto feito à mão em cada app. A bandeira é um **arquivo SVG**, nunca emoji (emoji de bandeira
+  não aparece no Windows nem em todo Android): **cópia mestra na pasta `bandeiras/` do RootifyONE** (`br.svg`, `us.svg`,
+  `es.svg`, do pacote flag-icons, licença MIT, com `LEIA-ME.md` e a licença junto). Cada app copia a pasta inteira e põe
+  os três arquivos no `sw.js` (aparecem sem internet); bandeira nova se baixa do mesmo pacote e entra primeiro na mestra.
+  Primeiro uso: Bolinho de Chuva (`kids/bandeiras/`, 14/Nov/2026). Vale também nos portais (Portal de Projetos, portal do Bolinho de Chuva
+  em `kids` — **não** dentro dos joguinhos), no site e nas páginas do LexSuiteONE e no RootifyONE.
+- **Onde fica** (não muda): no **computador**, no próprio cabeçalho, junto de 🔍 📥 ⚙ 🏠 👤 (não numa faixa só para
+  ele); no **celular**, **dentro do ☰** (no topo da gaveta), para não ocupar o cabeçalho. Antes de entrar (tela de
+  boas-vindas, sem ☰), fica visível no cabeçalho também no celular. Nunca na faixa do anúncio: fechar o anúncio não pode
+  levar o idioma junto.
+- **Enquanto um app não tem o ES completo e revisado**, o seletor dele mostra só 🇧🇷 PT · 🇺🇸 EN; ES entra quando o app
+  inteiro (telas, ajuda, AssistONE, novidades, termos, e-mails) estiver traduzido. Nunca mistura ES com texto em outra
+  língua na mesma tela.
+- **Transição (regra zero):** o módulo comum ganha o terceiro idioma e o seletor novo uma vez (master no RootifyONE); cada
+  app entra numa ordem combinada com o dono, com a lista do que falta por app antes de começar.
+- Datas: PT `17/Set/2026` · EN `Sep/17/2026` · ES `17/nov/2026` (em espanhol o mês vai em minúsculas: ene, feb, mar,
+  abr, may, jun, jul, ago, sep, oct, nov, dic). Varredura automática a cada atualização.
 - Conteúdo do usuário nunca é traduzido nem tem data alterada (lista `ignorar` no config).
 - Um app pode ter tradutor próprio (`data-i18n`) convivendo com o módulo: ele apaga o
   próprio botão quando o `DGO` existe, segue `dgo:idioma` e delega datas a `DGO.formatarData`.
+  Com a regra dos três idiomas, o tradutor próprio continua só por dentro (`data-i18n` com `pt`, `en`, `es`); o **botão**
+  é sempre o do módulo.
 
 ## Padrão comum entre os apps
 
@@ -881,6 +909,37 @@ com ícone e guarda os dados separados do site.
   essa cópia guarda os dados **separados** do site (use exportar/importar para levar dados).
 - Config: `offline: { ativo: true, arquivos: [...], wizard: true }`; nos três apps de fora,
   `offline: { ativo: false }`.
+- **Aviso de versão nova dentro do app, com "Atualizar"** (decisão do dono, 02/Nov/2026; primeiro nos jogos do
+  Bolinho de Chuva, `FeatureTesting/atualizar.js`). O app instalado é um site guardado no aparelho: com internet,
+  o service worker já busca a versão nova (rede primeiro) e troca a cópia sozinho; sem internet, abre a cópia. O que
+  vale para todo app:
+  - ao abrir, anotar a versão que está rodando (`versoes.json`) e conferir de novo no site ao voltar para o app
+    (`visibilitychange`), quando a internet volta (`online`) e a cada 30 min com o app aberto (TV e tablet ficam horas
+    abertos);
+  - versão do site diferente → aviso no topo **"✨ Versão nova do <app> (x.y.z) — Atualizar / Depois"**, PT/EN, alvo de
+    44 px, sem cobrir controle e sem repassar toque/tecla para o app;
+  - **Atualizar** = `registration.update()`, esperar a cópia nova instalar no aparelho (no máximo 15 s) e recarregar;
+    **Depois** = não pergunta de novo pela mesma versão naquela aba;
+  - **nunca recarregar sozinho** (partida, formulário ou leitura no meio);
+  - o arquivo do aviso entra na lista do `sw.js` (abre sem internet) e fica fora da cópia em arquivo único.
+- **Tela cheia no celular e no tablet** (decisão do dono, 02/Nov/2026, pelo tablet Fire da Amazon, cujo navegador abre o
+  atalho da tela inicial ainda com a barra de endereço): pedir `requestFullscreen({ navigationUI: 'hide' })` num toque
+  da pessoa, só em tela de toque (`pointer: coarse`) e fora do modo aplicativo (`display-mode` standalone/fullscreen).
+  - Página de lista ou leitura (hub, Contador): no **primeiro toque** em qualquer lugar. Jogo: no botão de começar
+    (**Jogar**), porque mudar o tamanho da tela no meio de um toque da partida atrapalha.
+  - Pedir quando o dedo **sai** da tela (`pointerup`/`touchend`/`click`/`keydown`); no `pointerdown` de toque o
+    navegador ainda não libera. Recusou → tenta no próximo toque; a pessoa saiu da tela cheia → não insiste.
+  - Toque no botão de instalar não conta (a janela "Instalar" do navegador precisa daquele toque).
+  - Limites, para dizer ao usuário: sem um toque não dá; trocar de página encerra a tela cheia (cada página pede de
+    novo); iPhone não tem tela cheia de página.
+- **Vários apps de uma vez (hub, ex.: Bolinho de Chuva)**: navegador nenhum instala vários ícones de uma vez — cada app só
+  se instala a partir da própria página. O hub oferece: **"Guardar todos neste aparelho"** (registra o service worker de
+  cada app, com andamento, e todos abrem sem internet) e **"Instalar um por um"** (abre cada app com `?instalar=1&fila=1`,
+  a barra de instalar dele aparece e, depois de instalar ou pular, segue para o próximo e volta ao hub no fim). Cada
+  cartão também tem o seu **📲 Instalar**. App que depende de internet (YouTube, TV) mostra **"🌐 Só com internet"**.
+- **Cache do service worker só do próprio app** (achado em 01/Nov/2026): o `sw.js` antigo do Contador apagava, no
+  `activate`, todo cache que não fosse o dele, e abrir o Contador apagava o modo sem internet dos jogos do Bolinho.
+  Conferir em todo app: nome do cache com o nome do app e `activate` apagando só esse prefixo (ver "Versionamento").
 
 ## Rede: Wi-Fi ou dados
 

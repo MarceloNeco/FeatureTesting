@@ -1,0 +1,105 @@
+/* Mapa vivo — protótipo F0. Tokens do design system do RootifyONE (rootify.css), tema escuro por padrão. */
+:root {
+  --fundo: #0b1220; --sup: #111a2b; --sup2: #182338; --sup3: #1f2b44; --linha: #26334c; --linha-forte: #34456a;
+  --txt: #e8edf6; --txt2: #b9c3d6; --txt3: #8f9db5;
+  --acento: #34d399; --acento-txt: #06261b; --acento-suave: #10362a; --acento-borda: #1f6d51;
+  --ok: #4ade80; --ok-f: #0f2f1f; --at: #fbbf24; --at-f: #3a2a06; --er: #f87171; --er-f: #3b1212;
+  --info: #93c5fd; --info-f: #102447; --cinza: #a3b1c6; --cinza-f: #1e293b;
+  --sombra: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+  --raio: .875rem; --raio-p: .55rem; --dur: .18s; --curva: cubic-bezier(.2, .8, .2, 1);
+  --topo-h: 3.25rem; --ficha-l: 22rem;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --fundo: #f4f6fa; --sup: #ffffff; --sup2: #eef2f7; --sup3: #e4e9f1; --linha: #dfe5ee; --linha-forte: #c7d0dd;
+  --txt: #0f172a; --txt2: #334155; --txt3: #64748b;
+  --acento: #059669; --acento-txt: #ffffff; --acento-suave: #dcf5ea; --acento-borda: #a7e3c8;
+  --ok: #047857; --ok-f: #dcfce7; --at: #92400e; --at-f: #fef3c7; --er: #b91c1c; --er-f: #fee2e2;
+  --info: #1d4ed8; --info-f: #dbeafe; --cinza: #475569; --cinza-f: #e2e8f0;
+  --sombra: 0 1px 2px rgba(15, 23, 42, .05), 0 6px 20px rgba(15, 23, 42, .06);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--fundo); color: var(--txt); font: 15px/1.5 Inter, "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif; display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; }
+.g { width: 1.1rem; height: 1.1rem; flex: none; }
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+
+/* ---------- topo ---------- */
+.topo { display: flex; align-items: center; gap: .75rem 1.25rem; flex-wrap: wrap; min-height: var(--topo-h); padding: .45rem 1rem; background: var(--sup); border-bottom: 1px solid var(--linha); }
+.marca { display: flex; align-items: baseline; gap: .5rem; min-width: 0; }
+.marca-ponto { width: .6rem; height: .6rem; border-radius: 50%; background: var(--acento); align-self: center; box-shadow: 0 0 0 3px var(--acento-suave); }
+.marca-nome { font-size: 1.05rem; font-weight: 650; margin: 0; letter-spacing: -.01em; }
+.marca-sub { color: var(--txt3); font-size: .85rem; }
+.trilha ol { display: flex; gap: .25rem; list-style: none; margin: 0; padding: 0; align-items: center; flex-wrap: wrap; }
+.trilha li { display: flex; align-items: center; gap: .25rem; }
+.trilha li + li::before { content: "›"; color: var(--txt3); margin-right: .25rem; }
+.trilha button { border: 0; background: none; padding: .25rem .45rem; border-radius: var(--raio-p); color: var(--txt2); cursor: pointer; }
+.trilha button:hover { background: var(--sup2); color: var(--txt); }
+.trilha li:last-child button { color: var(--txt); font-weight: 600; }
+.busca { display: flex; align-items: center; gap: .4rem; background: var(--sup2); border: 1px solid var(--linha); border-radius: 999px; padding: .3rem .7rem; min-width: 14rem; flex: 1 1 14rem; max-width: 24rem; color: var(--txt3); }
+.busca:focus-within { border-color: var(--acento-borda); color: var(--txt2); }
+.busca input { flex: 1; min-width: 0; background: none; border: 0; color: var(--txt); font: inherit; outline: 0; }
+.busca input::placeholder { color: var(--txt3); }
+.busca output { font-size: .8rem; color: var(--txt3); white-space: nowrap; }
+.acoes { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+.camadas { display: flex; gap: .3rem; overflow-x: auto; scrollbar-width: none; }
+.chip { border: 1px solid var(--linha); background: var(--sup); border-radius: 999px; padding: .3rem .75rem; font-size: .85rem; color: var(--txt2); cursor: pointer; white-space: nowrap; transition: background var(--dur), border-color var(--dur), color var(--dur); }
+.chip:hover { background: var(--sup2); color: var(--txt); }
+.chip[aria-pressed="true"] { background: var(--acento-suave); border-color: var(--acento-borda); color: var(--txt); font-weight: 600; }
+.botao-icone { width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid var(--linha); background: var(--sup); display: inline-grid; place-items: center; cursor: pointer; color: var(--txt2); font-weight: 600; font-size: .85rem; }
+.botao-icone:hover { background: var(--sup2); color: var(--txt); }
+.botao { border: 1px solid var(--acento-borda); background: var(--acento); color: var(--acento-txt); border-radius: var(--raio-p); padding: .6rem 1rem; font-weight: 600; cursor: pointer; width: 100%; min-height: 2.75rem; }
+.botao:hover { filter: brightness(1.05); }
+
+/* ---------- palco ---------- */
+.palco { position: relative; min-height: 0; }
+#grafo { position: absolute; inset: 0; outline: 0; }
+.dica { position: absolute; left: 1rem; top: .75rem; max-width: 24rem; color: var(--txt3); font-size: .85rem; background: color-mix(in srgb, var(--fundo) 80%, transparent); padding: .25rem .5rem; border-radius: var(--raio-p); pointer-events: none; transition: opacity var(--dur); }
+.dica.some { opacity: 0; }
+
+/* ---------- ficha (o mesmo painel muda de conteúdo: nada de trocar de tela) ---------- */
+.ficha { position: absolute; top: .75rem; right: .75rem; bottom: .75rem; width: var(--ficha-l); background: var(--sup); border: 1px solid var(--linha); border-radius: var(--raio); box-shadow: var(--sombra); padding: 1rem 1.1rem 1.1rem; overflow: auto; display: flex; flex-direction: column; gap: .75rem; }
+.ficha[hidden] { display: none; }
+.ficha-topo { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.ficha-tipo { display: inline-flex; align-items: center; gap: .4rem; color: var(--txt3); font-size: .85rem; }
+.ficha-nome { margin: 0; font-size: 1.2rem; line-height: 1.25; font-weight: 650; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.ficha-resumo { margin: 0; color: var(--txt2); font-size: .92rem; }
+.fatos { margin: 0; display: grid; grid-template-columns: minmax(6.5rem, auto) 1fr; gap: .35rem .75rem; font-size: .9rem; }
+.fatos dt { color: var(--txt3); }
+.fatos dd { margin: 0; overflow-wrap: anywhere; }
+.fatos .selo { display: inline-block; padding: .05rem .5rem; border-radius: 999px; font-size: .8rem; border: 1px solid var(--linha-forte); background: var(--sup2); }
+.selo.ok { background: var(--ok-f); color: var(--ok); border-color: transparent; }
+.selo.at { background: var(--at-f); color: var(--at); border-color: transparent; }
+.selo.er { background: var(--er-f); color: var(--er); border-color: transparent; }
+.selo.info { background: var(--info-f); color: var(--info); border-color: transparent; }
+.ficha-bloco h3 { margin: 0 0 .35rem; font-size: .85rem; font-weight: 600; color: var(--txt3); }
+.vazio { margin: 0; color: var(--txt3); font-size: .9rem; border-left: 3px solid var(--linha-forte); padding-left: .6rem; }
+.ligacoes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .15rem; }
+.ligacoes button { display: flex; align-items: center; gap: .5rem; width: 100%; text-align: left; border: 0; background: none; padding: .4rem .5rem; border-radius: var(--raio-p); cursor: pointer; min-height: 2.5rem; }
+.ligacoes button:hover { background: var(--sup2); }
+.ligacoes .tipo { color: var(--txt3); font-size: .8rem; margin-left: auto; white-space: nowrap; }
+.ficha-acoes { margin-top: auto; }
+
+/* ---------- legenda ---------- */
+.legenda { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; padding: .4rem 1rem; border-top: 1px solid var(--linha); background: var(--sup); font-size: .82rem; color: var(--txt3); }
+.legenda span { display: inline-flex; align-items: center; gap: .35rem; }
+.legenda b { font-weight: 500; color: var(--txt2); }
+.legenda-camada { margin-left: auto; gap: .75rem !important; }
+.legenda-camada i { display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; margin-right: .25rem; }
+
+/* ---------- celular: a ficha vira folha de baixo ---------- */
+@media (max-width: 760px) {
+  body { font-size: 15px; }
+  .topo { padding: .4rem .75rem; gap: .5rem .75rem; }
+  .marca-sub { display: none; }
+  .trilha { order: 5; flex-basis: 100%; }
+  .busca { min-width: 0; flex-basis: 100%; max-width: none; }
+  .acoes { margin-left: 0; flex-basis: 100%; }
+  .ficha { top: auto; left: .5rem; right: .5rem; bottom: .5rem; width: auto; max-height: 52%; border-radius: var(--raio) var(--raio) var(--raio) var(--raio); }
+  .dica { max-width: calc(100% - 2rem); }
+  .legenda { gap: .6rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }

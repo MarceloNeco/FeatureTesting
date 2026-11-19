@@ -11,35 +11,26 @@ Pendências: `PENDENCIAS.md`.
 
 | Arquivo | O que faz | Pode mexer aqui? |
 |---|---|---|
-| `index.html` | Página do laboratório. A lista `FEATURES` (no fim do arquivo) gera os cards: `ic`, `nome`, `desc`, `url`, `status` (`ativo` ou `breve`). | sim — card novo = um objeto na lista |
-| `danca-na-sala.html` | Experimento **Dança na Sala / Living Room Dance**, tudo numa página (ver abaixo). Versão em `APP_VERSION`. | sim |
-| `danca-na-sala.webmanifest`, `danca-na-sala-icone.png` | Instalar a Dança na Sala na tela inicial (inclui `share_target` para receber link do Compartilhar do YouTube). | sim |
-| `sw.js` | Service worker **mínimo**: só existe para o "Adicionar à tela inicial" funcionar; não guarda nada em cache (laboratório muda toda hora). | sim, mas continua sem cache |
-| `tv-lg/` | Casca do app para TV LG (webOS): abre a página publicada com `?tv=auto`. `instalar-lg.py` empacota e instala pelo Modo Desenvolvedor da LG (baseado no free-my-tv, MIT); passo a passo em `tv-lg/LEIA-ME.md`. | sim |
+| `index.html` | Página do laboratório. A lista `FEATURES` (no fim do arquivo) gera os cards: `ic`, `nome`, `desc`, `url`, `status` (`ativo` ou `breve`). No topo, **📲 Instalar como app** (pedido do próprio navegador no Chrome/Edge/Samsung; passo a passo no iPhone/iPad, Safari do Mac e Firefox) e **⛶ Tela cheia**; instalado no computador, o primeiro toque liga a tela cheia. Textos PT/EN pelo idioma do aparelho. | sim — card novo = um objeto na lista |
+| `baguncolandia/`, `peluqueria/`, `vruuum/`, `purpurina/`, `rabiscolandia/`, `danca-na-sala.html` | **Só redirecionam.** Os jogos do Bolinho de Chuva mudaram para o repositório **kids** (solverone.com.br/kids/) em 02/Nov/2026, com o histórico. Cada pasta tem um `index.html` que leva ao endereço novo e um `sw.js` que desliga o service worker antigo (apaga só as cópias do endereço antigo). | **Não** — mexa nos jogos no repositório kids |
+| `404.html` | Link antigo de dentro de um jogo (ex.: `peluqueria/marcar.html`) vai para o mesmo lugar em `/kids/`. | Sim |
+| `manifest.webmanifest`, `icone-192.png`, `icone-512.png`, `icone-180.png` | Instalar o laboratório como app (ícone 🧪 na tela inicial do celular/tablet ou no computador). Abre em **tela cheia** (`display: fullscreen`; onde o sistema não deixa, cai em janela própria). `icone-180.png` é o ícone do iPhone/iPad (`apple-touch-icon`). | sim |
+| `sw.js` | Service worker **mínimo**, registrado pelo `index.html`: só existe para o "Instalar como app" funcionar; não guarda nada em cache (laboratório muda toda hora). | sim, mas continua sem cache |
+| `arch-one/` | **ArchONE, o mapa vivo da plataforma (protótipo F0)**, morando aqui por enquanto (decisão do dono, 31/Out/2026) até o portal próprio `arch-one` nascer na F1. Desenha a plataforma a partir dos manifestos `arch-one/manifestos/*.json` (contrato em `rootify-one/docs/specs/arquitetura-json-v1.md`), com Cytoscape.js copiado em `arch-one/lib/` (MIT, licenças ao lado). O original é `rootify-one/docs/specs/mapa-vivo/prototipo/`: mudança de verdade é feita lá e copiada para cá. Interruptor `data-recurso="arch-one"` (`recursos.js` com `data-app="feature-tester"`). Nenhum segredo: os manifestos dizem onde cada chave mora, nunca a chave. | só copiar do rootify-one |
+| `useless-man/` | **The Useless Man — Guia do Homem Inútil Offline** (0.2.0, 14/Nov/2026), morando aqui até o dono decidir se ganha repositório próprio. `guia.js` = só o conteúdo (12 `CATEGORIAS` e 90 itens em `GUIA`, PT/EN; a piada é sempre com o homem e a resposta tem de funcionar); `app.js` = a tela (rotas `#/`, `#/c/<cat>`, `#/i/<item>`, `#/ajustes`, busca sem acento com "você quis dizer", "✓ Aprendi" e medidor, Voltar do celular, instalar, aviso de versão nova); `estilo.css` (visual "porta da geladeira": post-it, folha de bloquinho pautado, ímãs, quadro de estrelinhas; geladeira de duas portas no computador); fontes Kalam e Atkinson Hyperlegible em `fontes/` (OFL, ver `CREDITOS.md`); `sw.js` próprio (cache `dgo-useless-man-vX`, código rede primeiro em 4 s, apaga só o próprio prefixo) — subir `APP_VERSION` no `app.js`, `VERSAO` no `sw.js` e a entrada no `versoes.json` juntos. Guarda no aparelho só `uselessman:idioma`, `uselessman:aprendi` e `uselessman:instalado`; nada sai do aparelho. Interruptor `data-recurso="useless-man"`. Id de item publicado não muda (é o endereço compartilhado). | sim |
 | `recursos.js` | Interruptores do RootifyONE para páginas sem o módulo comum (`SolverRecursos`, `data-recurso`). | **não** — cópia; o master fica no repositório `rootify-one` |
-| `recursos-do-app.json` | Lista pública do que este app obedece no Controle dos apps (hoje: `danca-na-sala`). Nada de segredo aqui. | sim — interruptor novo entra aqui e no `data-recurso` da página |
+| `recursos-do-app.json` | Lista pública do que este app obedece no Controle dos apps (hoje: `danca-na-sala`, `baguncolandia`, `peluqueria`, `vruuum`, `purpurina`, `rabiscolandia`, `arch-one`). Nada de segredo aqui. | sim — interruptor novo entra aqui e no `data-recurso` da página |
 | `testes-modulo-comum.html` | Roteiros de teste do módulo comum 1.9.0 (Fundo, Interruptores/Modo DEUS, Compatibilidade, Feedback); os cards "Teste: …" abrem cada seção. | sim |
 | `leitor-ocr.html` | Só redireciona para o Leitor de Comprovantes, que ganhou repositório próprio (https://marceloneco.github.io/leitor-ocr/). | não precisa |
 | `CLAUDE.md`, `.claude/skills/diretrizes-gerais-apps/SKILL.md` | Regras do projeto e diretriz geral, copiadas do `rootify-one` ("atualize a diretriz"). | **não** à mão — copiar de novo do `rootify-one` |
 
-## Dança na Sala (`danca-na-sala.html`)
+## Câmera e TV
 
-A mesma página serve a **TV** e o **celular**:
+O motor de câmera e TV da plataforma (ler o corpo pela câmera do celular, TV como segunda tela, cascas de app para TV)
+mora no repositório próprio **motor-camtv** (https://github.com/MarceloNeco/motor-camtv), desde a pesquisa de
+19/Nov/2026. Nada disso fica aqui.
 
-- **TV** (navegador da LG webOS 6.5, ou o app da pasta `tv-lg/`): "Esta é a TV" mostra um código de 4 letras.
-  Toca a música do YouTube em tela cheia e mostra as câmeras por cima, com neon, fogos e clarões
-  (suave / forte / desligado, com aviso de fotossensibilidade).
-- **Celular**: entra com nome e código; manda a câmera para a TV por **WebRTC ponto a ponto** (STUN do Google,
-  sem servidor de mídia) e mede a "energia" por diferença entre quadros (sem IA). Pelo canal de dados do WebRTC
-  manda os pontos onde houve movimento. Comandos: link de vídeo ou playlist, tocar, pausar, do início,
-  Próxima/Anterior, lista das músicas com nome (oEmbed do YouTube, sem chave). Também há o modo **só o celular**
-  (sem TV).
-- **Pareamento**: Supabase Realtime do projeto da plataforma, com a URL e a chave **publishable** (públicas por
-  desenho). Nenhum segredo no código.
-- **Interruptor**: `data-recurso="danca-na-sala"` na tela inicial + `recursos.js` com `data-app="feature-tester"`.
-  Desligado no RootifyONE → a tela some.
-- **Guardado no aparelho** (`localStorage`, chaves `danca:*`): nome, código, títulos, últimas músicas e a chave
-  opcional da YouTube Data API da própria pessoa (`danca:ytkey`, para a busca dentro do app).
-- **Bibliotecas de fora**: `supabase-js` (jsDelivr) e a API de iframe do YouTube.
+## Dança na Sala
 
-Deixados de fora de propósito, por ser laboratório: módulo `Fundo`, cache offline no `sw.js` e zip de entrega.
+Mudou para o repositório **kids** em 02/Nov/2026 (ver `ARQUITETURA.md` de lá).
+

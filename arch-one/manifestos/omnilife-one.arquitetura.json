@@ -1,0 +1,94 @@
+{
+  "contrato": 1,
+  "app": "omnilife-one",
+  "nivel": 1,
+  "nome": { "pt": "OmniLifeONE", "en": "OmniLifeONE" },
+  "descricao": {
+    "pt": "Assistente da família e da casa: compras e despensa, agenda, contatos, saúde, segurança (SOS, Vigilante), casa (senhas, manutenção), documentos e família. App inteiro num index.html, sem build. Manifesto da F0 feito à mão pelo chat Arquitetura; a filha do app completa na F1.",
+    "en": "Family and home assistant: shopping and pantry, calendar, contacts, health, safety (SOS, Watch mode), house (passwords, maintenance), documents and family. Whole app in one index.html, no build. F0 manifest written by hand by the Architecture chat; the app's own session completes it in F1."
+  },
+  "versao": "2.19.0",
+  "atualizado": "2026-10-23",
+  "repositorio": { "github": "MarceloNeco/omnilife-one", "visibilidade": "publico", "branch": "main" },
+  "hospedagem": { "tipo": "github-pages", "url": "https://solverone.com.br/omnilife-one/", "protegido_por": [] },
+  "estado": "beta",
+  "linguagens": ["html", "css", "js", "sql"],
+  "interruptores": "recursos-do-app.json",
+  "modulos": [
+    { "id": "inicio", "nome": { "pt": "Início", "en": "Home" }, "arquivos": ["index.html"], "descricao": { "pt": "Cartões do dia, recados e atalhos. Nunca desligável.", "en": "Day cards, messages and shortcuts. Never switchable." } },
+    { "id": "compras", "nome": { "pt": "🛒 Compras & Despensa", "en": "🛒 Shopping & Pantry" }, "arquivos": ["index.html"], "recurso": "compras", "descricao": { "pt": "Lista, despensa, pedidos, leitura por foto e onde comprar.", "en": "List, pantry, orders, photo reading and where to buy." } },
+    { "id": "agenda", "nome": { "pt": "📅 Agenda", "en": "📅 Calendar" }, "arquivos": ["index.html", "tarefas.js"], "recurso": "agenda", "descricao": { "pt": "Escola, tarefas, lembretes, rotina, delegômetro, assume a casa.", "en": "School, tasks, reminders, routine, delegation meter, take over the house." } },
+    { "id": "contatos", "nome": { "pt": "👥 Contatos", "en": "👥 Contacts" }, "arquivos": ["index.html"], "recurso": "contatos" },
+    { "id": "saude", "nome": { "pt": "🩺 Saúde", "en": "🩺 Health" }, "arquivos": ["index.html"], "recurso": "saude", "descricao": { "pt": "Exames, carteirinhas, remédios da família (dado sensível).", "en": "Exams, health cards, family medication (sensitive data)." } },
+    { "id": "seguranca", "nome": { "pt": "🛡 Segurança", "en": "🛡 Safety" }, "arquivos": ["index.html"], "recurso": "seguranca", "descricao": { "pt": "Cheguei, Modo Vigilante, alertas por WhatsApp/Telegram/ntfy.", "en": "I arrived, Watch mode, alerts over WhatsApp/Telegram/ntfy." } },
+    { "id": "sos", "nome": { "pt": "🆘 SOS", "en": "🆘 SOS" }, "arquivos": ["index.html"], "recurso": "sos" },
+    { "id": "casa", "nome": { "pt": "🏠 Casa", "en": "🏠 House" }, "arquivos": ["index.html"], "recurso": "casa", "descricao": { "pt": "Onde está, manutenção, Senhas da casa (cofre cifrado), guias.", "en": "Where is it, maintenance, Home passwords (encrypted vault), guides." } },
+    { "id": "documentos", "nome": { "pt": "📄 Documentos", "en": "📄 Documents" }, "arquivos": ["index.html"], "recurso": "documentos" },
+    { "id": "familia", "nome": { "pt": "👨‍👩‍👧 Família", "en": "👨‍👩‍👧 Family" }, "arquivos": ["index.html"], "recurso": "familia", "descricao": { "pt": "Membros, papéis, convites, governança e emergência (regras no banco).", "en": "Members, roles, invites, governance and emergency (rules in the database)." } },
+    { "id": "inbox", "nome": { "pt": "📥 Inbox", "en": "📥 Inbox" }, "arquivos": ["index.html"], "recurso": "inbox" },
+    { "id": "ia", "nome": { "pt": "✨ IA", "en": "✨ AI" }, "arquivos": ["index.html"], "recurso": "ia", "descricao": { "pt": "Motor de IA próprio (provedor, modelo e 'usar para' por função); chaves no cofre comum.", "en": "Own AI engine (provider, model and 'use for' per function); keys in the shared vault." } },
+    { "id": "voz", "nome": { "pt": "🎤 Voz e ditado", "en": "🎤 Voice and dictation" }, "arquivos": ["index.html"], "recurso": "voz" },
+    { "id": "clima", "nome": { "pt": "🌦 Clima", "en": "🌦 Weather" }, "arquivos": ["index.html", "clima.json"], "recurso": "clima" },
+    { "id": "deslocamento", "nome": { "pt": "🗺 Deslocamento", "en": "🗺 Travel" }, "arquivos": ["index.html", "rotas.json"], "recurso": "deslocamento" },
+    { "id": "ocr", "nome": { "pt": "🔎 Leitura de foto (OCR)", "en": "🔎 Photo reading (OCR)" }, "arquivos": ["index.html"], "recurso": "ocr" },
+    { "id": "busca", "nome": { "pt": "🔍 Busca", "en": "🔍 Search" }, "arquivos": ["index.html"], "recurso": "busca" },
+    { "id": "feedback", "nome": { "pt": "💬 Opinião e problemas", "en": "💬 Feedback and problems" }, "arquivos": ["diretrizes.js", "diretrizes-config.js"], "recurso": "feedback" },
+    { "id": "assistone", "nome": { "pt": "💡 AssistONE", "en": "💡 AssistONE" }, "arquivos": ["index.html"], "recurso": "assistone" },
+    { "id": "configuracoes", "nome": { "pt": "⚙ Configurações", "en": "⚙ Settings" }, "arquivos": ["index.html"], "descricao": { "pt": "Conta, nuvem, aparência, versões e novidades. Nunca desligável.", "en": "Account, cloud, appearance, versions and what's new. Never switchable." } }
+  ],
+  "dados": [
+    { "id": "casa-e-rotina", "nome": { "pt": "Compras, agenda, contatos e casa", "en": "Shopping, calendar, contacts and house" }, "onde": "aparelho", "pessoal": true, "sensivel": false, "retencao": { "pt": "Fica no aparelho (IndexedDB/localStorage com prefixo omnilife.) até a pessoa apagar; cópia protegida oferecida antes de qualquer limpeza.", "en": "Stays on the device (IndexedDB/localStorage, omnilife. prefix) until the person deletes it; protected backup offered before any cleanup." } },
+    { "id": "saude", "nome": { "pt": "Saúde da família", "en": "Family health" }, "onde": "aparelho", "pessoal": true, "sensivel": true, "cifrado_no_aparelho": true, "retencao": { "pt": "Só vai para a nuvem cifrado no aparelho (contrato C7).", "en": "Goes to the cloud only encrypted on the device (contract C7)." } },
+    { "id": "familia", "nome": { "pt": "Família, papéis, convites e histórico", "en": "Family, roles, invites and history" }, "onde": "supabase", "tabelas": ["omni_familia", "omni_governanca", "omni_pedidos_entrada", "omni_pedidos_verificacao", "omni_convite_info", "omni_historico", "omni_aparelhos", "omni_combinados"], "pessoal": true, "sensivel": false, "retencao": { "pt": "Enquanto a família existir; encerrar a família anonimiza (omni_anonimizar). RLS por membro.", "en": "While the family exists; closing the family anonymises (omni_anonimizar). RLS per member." } },
+    { "id": "documentos", "nome": { "pt": "Documentos da família", "en": "Family documents" }, "onde": "supabase", "tabelas": ["omni_docs"], "pessoal": true, "sensivel": true, "cifrado_no_aparelho": true },
+    { "id": "cofre-da-casa", "nome": { "pt": "Senhas da casa (cofre ponta a ponta)", "en": "Home passwords (end-to-end vault)" }, "onde": "supabase", "tabelas": ["omni_chave_privada", "omni_cofre_liberado"], "pessoal": true, "sensivel": true, "cifrado_no_aparelho": true, "retencao": { "pt": "Texto cifrado: nem o servidor nem a equipe leem. Chave da família embrulhada por membro (sol_grupo_chaves).", "en": "Ciphertext only: neither the server nor the team can read it. Family key wrapped per member (sol_grupo_chaves)." } },
+    { "id": "chaves-de-servico", "nome": { "pt": "Chaves de IA, clima, trânsito, Telegram e WhatsApp", "en": "AI, weather, traffic, Telegram and WhatsApp keys" }, "onde": "aparelho", "pessoal": true, "sensivel": true, "cifrado_no_aparelho": true, "retencao": { "pt": "Só no cofre comum (cofre.js, AES-GCM + PIN); nunca em texto aberto.", "en": "Only in the shared vault (cofre.js, AES-GCM + PIN); never in plain text." } },
+    { "id": "interruptores", "nome": { "pt": "Interruptores e comportamentos vindos do RootifyONE", "en": "Switches and behaviours from RootifyONE" }, "onde": "arquivo-publico", "pessoal": false, "sensivel": false, "retencao": { "pt": "recursos/global.json e recursos/omnilife-one.json do solverone-dados; última cópia guardada para uso sem internet.", "en": "recursos/global.json and recursos/omnilife-one.json from solverone-dados; last copy kept for offline use." } }
+  ],
+  "integracoes": [
+    { "id": "supabase", "nome": "Supabase (projeto solverone-app)", "tipo": "supabase", "host": "qvdvkqydhnadhewcidia.supabase.co", "chave": "publica", "onde_chave": "nao-se-aplica", "contrato": "PLATAFORMA-DADOS.md", "plano": "gratuito" },
+    { "id": "rootify-dados", "nome": "Arquivos mestre do RootifyONE (solverone-dados)", "tipo": "plataforma", "host": "solverone.com.br", "chave": "nenhuma", "onde_chave": "nao-se-aplica", "plano": "gratuito" },
+    { "id": "callmebot", "nome": "CallMeBot (WhatsApp)", "tipo": "api-externa", "host": "api.callmebot.com", "chave": "da-pessoa", "onde_chave": "cofre", "plano": "gratuito" },
+    { "id": "telegram", "nome": "Telegram Bot API", "tipo": "api-externa", "host": "api.telegram.org", "chave": "da-pessoa", "onde_chave": "cofre", "plano": "gratuito" },
+    { "id": "ntfy", "nome": "ntfy.sh (avisos push por tópico)", "tipo": "api-externa", "host": "ntfy.sh", "chave": "nenhuma", "onde_chave": "nao-se-aplica", "plano": "gratuito" },
+    { "id": "weatherapi", "nome": "WeatherAPI (previsão)", "tipo": "api-externa", "host": "api.weatherapi.com", "chave": "da-pessoa", "onde_chave": "cofre", "plano": "gratuito" },
+    { "id": "openstreetmap", "nome": "OpenStreetMap, Nominatim e OSRM (mapa e rotas)", "tipo": "mapa", "host": "openstreetmap.org", "chave": "nenhuma", "onde_chave": "nao-se-aplica", "plano": "gratuito" },
+    { "id": "viacep", "nome": "ViaCEP", "tipo": "api-externa", "host": "viacep.com.br", "chave": "nenhuma", "onde_chave": "nao-se-aplica", "plano": "gratuito" },
+    { "id": "ia-gemini", "nome": "Google Gemini", "tipo": "ia", "host": "generativelanguage.googleapis.com", "chave": "da-pessoa", "onde_chave": "cofre" },
+    { "id": "ia-openai", "nome": "OpenAI", "tipo": "ia", "host": "api.openai.com", "chave": "da-pessoa", "onde_chave": "cofre" },
+    { "id": "ia-anthropic", "nome": "Anthropic", "tipo": "ia", "host": "api.anthropic.com", "chave": "da-pessoa", "onde_chave": "cofre" },
+    { "id": "ia-openrouter", "nome": "OpenRouter", "tipo": "ia", "host": "openrouter.ai", "chave": "da-pessoa", "onde_chave": "cofre" },
+    { "id": "voz-assemblyai", "nome": "AssemblyAI (voz → texto)", "tipo": "voz", "host": "api.assemblyai.com", "chave": "da-pessoa", "onde_chave": "cofre" },
+    { "id": "voz-deepgram", "nome": "Deepgram (voz → texto)", "tipo": "voz", "host": "api.deepgram.com", "chave": "da-pessoa", "onde_chave": "cofre" },
+    { "id": "voz-elevenlabs", "nome": "ElevenLabs (texto → voz)", "tipo": "voz", "host": "api.elevenlabs.io", "chave": "da-pessoa", "onde_chave": "cofre" }
+  ],
+  "fluxos": [
+    { "id": "sos-alerta", "nome": { "pt": "SOS avisa a família", "en": "SOS alerts the family" }, "gatilho": { "pt": "botão 🆘 SOS (ou Vigilante sem resposta)", "en": "🆘 SOS button (or Watch mode without answer)" }, "passos": [ { "pt": "monta a mensagem com local e hora", "en": "builds the message with place and time" }, { "pt": "envia pelos canais ligados: WhatsApp (CallMeBot), Telegram, ntfy", "en": "sends through the enabled channels: WhatsApp (CallMeBot), Telegram, ntfy" }, { "pt": "registra no histórico da família", "en": "records in the family history" } ], "modulos": ["sos", "seguranca"], "dados": ["familia", "chaves-de-servico"], "integracoes": ["callmebot", "telegram", "ntfy"] },
+    { "id": "compras-por-foto", "nome": { "pt": "Compras por foto", "en": "Shopping by photo" }, "gatilho": { "pt": "foto da nota ou da despensa", "en": "photo of the receipt or the pantry" }, "passos": [ { "pt": "roda no Fundo com pílula de andamento", "en": "runs in the background with a progress pill" }, { "pt": "OCR local ou IA da pessoa lê os itens", "en": "local OCR or the person's AI reads the items" }, { "pt": "itens entram na lista para conferir", "en": "items go to the list for review" } ], "modulos": ["compras", "ocr", "ia"], "dados": ["casa-e-rotina", "chaves-de-servico"], "integracoes": ["ia-gemini", "ia-openai", "ia-anthropic", "ia-openrouter"] },
+    { "id": "entrar-na-familia", "nome": { "pt": "Entrar numa família", "en": "Join a family" }, "gatilho": { "pt": "convite aceito ou pedido de entrada", "en": "accepted invite or join request" }, "passos": [ { "pt": "função do banco cria o pedido (omni_pedir_entrada / omni_criar_convite)", "en": "database function creates the request (omni_pedir_entrada / omni_criar_convite)" }, { "pt": "responsável aprova; 48 h e emergência são regras do banco", "en": "guardian approves; 48 h and emergency are database rules" }, { "pt": "chave do cofre da família embrulhada para o novo membro", "en": "family vault key wrapped for the new member" } ], "modulos": ["familia"], "dados": ["familia", "cofre-da-casa"], "integracoes": ["supabase"] },
+    { "id": "levar-para-nuvem", "nome": { "pt": "Levar os dados do aparelho para a nuvem", "en": "Move device data to the cloud" }, "gatilho": { "pt": "logo depois de entrar na conta, ou ⚙ → Nuvem", "en": "right after signing in, or ⚙ → Cloud" }, "passos": [ { "pt": "prévia do que vai e do que fica; cópia protegida antes", "en": "preview of what goes and what stays; protected backup first" }, { "pt": "sensível só sobe cifrado no aparelho", "en": "sensitive data only goes up encrypted on the device" }, { "pt": "junta sem duplicar; cópia antiga fica até a pessoa apagar", "en": "merges without duplicates; old copy stays until the person deletes it" } ], "modulos": ["configuracoes", "familia"], "dados": ["casa-e-rotina", "saude", "documentos", "familia"], "integracoes": ["supabase"] },
+    { "id": "obedecer-interruptores", "nome": { "pt": "Obedecer ao Controle dos apps", "en": "Obey App control" }, "gatilho": { "pt": "ao abrir e ao voltar para o app (máx. a cada 5 min)", "en": "on open and on return to the app (at most every 5 min)" }, "passos": [ { "pt": "lê recursos/global.json e recursos/omnilife-one.json", "en": "reads recursos/global.json and recursos/omnilife-one.json" }, { "pt": "esconde o que tem data-recurso desligado; app desligado = tela de manutenção", "en": "hides elements whose data-recurso is off; app off = maintenance screen" } ], "modulos": ["inicio"], "dados": ["interruptores"], "integracoes": ["rootify-dados"] },
+    { "id": "feedback", "nome": { "pt": "💬 Dar uma opinião", "en": "💬 Give feedback" }, "gatilho": { "pt": "💬 em qualquer tela, ⚙ → Geral ou o aviso de erro", "en": "💬 on any screen, ⚙ → General or the error notice" }, "passos": [ { "pt": "envia pelo Fundo para sol_enviar_feedback (anexo por Storage)", "en": "sends through the background module to sol_enviar_feedback (attachment via Storage)" }, { "pt": "sem rede guarda no aparelho e manda depois", "en": "offline it is stored on the device and sent later" } ], "modulos": ["feedback"], "dados": [], "integracoes": ["supabase"] }
+  ],
+  "robos": [
+    { "id": "deploy-pages", "workflow": ".github/workflows/static.yml", "cadencia": "a cada push na main", "faz": { "pt": "Publica o repositório inteiro no GitHub Pages.", "en": "Publishes the whole repository to GitHub Pages." } }
+  ],
+  "arquivos_mestre": [
+    { "arquivo": "janela.js", "origem": "rootify-one", "versao": "1.0.2" },
+    { "arquivo": "cofre.js", "origem": "rootify-one", "versao": "1.4.1" },
+    { "arquivo": "diretrizes.js", "origem": "rootify-one", "versao": "1.12.0" },
+    { "arquivo": "recursos.js", "origem": "rootify-one" },
+    { "arquivo": "teste/sql-grants.js", "origem": "rootify-one", "versao": "1.0.1" }
+  ],
+  "dependencias": [
+    { "nome": "leaflet", "versao": "1.9.4", "licenca": "BSD-2-Clause", "como": "cdn" },
+    { "nome": "tesseract.js", "versao": "5", "licenca": "Apache-2.0", "como": "cdn" },
+    { "nome": "pdfjs-dist", "versao": "3.11.174", "licenca": "Apache-2.0", "como": "cdn" },
+    { "nome": "jspdf", "versao": "2.5.2", "licenca": "MIT", "como": "cdn" },
+    { "nome": "qrcode-generator", "versao": "1.4.4", "licenca": "MIT", "como": "cdn" },
+    { "nome": "@tensorflow/tfjs + coco-ssd", "versao": "4.22.0 / 2.2.3", "licenca": "Apache-2.0", "como": "cdn" }
+  ],
+  "testes": { "comando": "node teste/rodar.js", "arquivos": ["teste/rodar.js", "teste/mestres.js", "teste/janelas-omni.js", "teste/cofre-omni.js", "teste/sql-grants.js"] },
+  "documentos": { "arquitetura": "ARQUITETURA.md", "pendencias": "PENDENCIAS.md", "versoes": "versoes.json", "plano_supabase": "PLANO-SUPABASE-OmniLifeONE.md", "sql": "supabase/omnilife-one-v1.sql" },
+  "liga_com": ["rootify-one", "solverone-dados", "solverone-app"]
+}

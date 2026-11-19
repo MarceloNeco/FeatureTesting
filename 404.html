@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex"><title>Página não encontrada · FeatureTesting</title>
+<script>
+/* Os jogos do Bolinho de Chuva mudaram de /FeatureTesting/ para /kids/ (02/Nov/2026).
+   Endereço antigo de dentro de um jogo (ex.: /FeatureTesting/peluqueria/marcar.html) vai para o mesmo lugar no kids. */
+(function () {
+  var m = location.pathname.match(/^\/FeatureTesting\/(baguncolandia|peluqueria|vruuum|purpurina|rabiscolandia|tv-lg[a-z-]*)(\/.*)?$/);
+  if (m) location.replace('/kids/' + m[1] + (m[2] || '/') + location.search + location.hash);
+})();
+</script></head>
+<body style="background:#0b0a1f;color:#f3f0ff;font-family:system-ui,sans-serif;text-align:center;padding:3rem 1rem">
+<p>Página não encontrada. <a style="color:#3ee8ff" href="/FeatureTesting/">Feature Tester</a> ·
+<a style="color:#3ee8ff" href="/kids/">Bolinho de Chuva</a></p></body></html>

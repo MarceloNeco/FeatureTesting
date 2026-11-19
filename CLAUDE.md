@@ -74,29 +74,56 @@ Antes de qualquer alteração neste repositório, leia e siga **inteira** a dire
 Resumo do que nunca pode ser esquecido (o detalhe está na diretriz):
 
 - **Regra zero**: antes de implementar no app um requisito da diretriz que ainda não existe aqui, liste o que
-  falta e confirme com o dono. Não crie repositórios nem publique (push/Pages) sem permissão explícita.
+  falta e confirme com o dono. Não crie repositórios sem permissão explícita.
+  **Publicar é sempre autorizado** (dono, 02/Nov/2026): ao terminar e testar, faça o pull request e o merge sem
+  perguntar e conte o que mudou.
 - **Segurança**: nenhuma senha, chave de API, token ou segredo entra no código, no repositório, no chat ou em
   arquivo. Chaves de IA ficam só no cofre do navegador da pessoa. Se uma chave aparecer no chat, peça para revogar.
-- **Idioma**: textos para o usuário em PT e EN; instruções para o dono em português, passo a passo, como para
-  iniciante (ele não é desenvolvedor).
+- **Idioma** (dono, 14/Nov/2026): textos para o usuário em **PT (Brasil), EN (EUA) e ES (Espanha)**, tradução
+  humanizada; **um seletor só em todo lugar**, bandeira + sigla (🇧🇷 PT · 🇺🇸 EN · 🇪🇸 ES), componente do módulo comum,
+  nunca toggle ou dropdown próprio; ES só aparece num app quando ele está 100 % traduzido (até lá, PT|EN). Detalhe na
+  diretriz, "Idioma e datas". Instruções para o dono em português, passo a passo, como para iniciante (ele não é
+  desenvolvedor).
 - **Entrega**: um `.zip` por app, nome `<NOME APP> <VERSAO> <dd-Mmm-aaaa> <HHhMMm>.zip`, arquivos soltos na
   raiz; atualizar `versoes.json`, a versão no código, o `sw.js` e `ARQUITETURA.md`/`PENDENCIAS.md`.
 - **Trabalho demorado** (foto, OCR, IA, importação, áudio) roda no módulo `Fundo`: nunca morre ao sair da tela,
   Wake Lock, aviso antes de fechar, pílula de andamento, resultado entregue onde a pessoa estiver.
 - **Feedback dos usuários**: pergunta do dia, 💬 em toda tela e no AssistONE, tudo estruturado no RootifyONE.
 
-## Aviso do dono (13/Nov/2026) — Definition of done da plataforma e teia de integrações
+## Jogos do Bolinho de Chuva: mudaram para o repositório `kids`
 
-A **Definition of done** da SolverONE passa a ter 12 pontos: manual e orientações, AssistONE, Novidades da
-versão, termos, comunicações e e-mails, RootifyONE, ArchONE, EaglePlanONE (roadmap), retrocompatibilidade,
-segurança e LGPD, qualidade verificável e registro. Vai nascer também uma **teia de integrações** entre os apps,
-o RootifyONE, o ArchONE e o EaglePlanONE (eventos e comandos com aprovação). A diretriz nova está sendo
-desenhada; quando sair, ela manda.
+Desde 02/Nov/2026 a Bagunçolândia, a Peluqueria, o Vruuum!, a Purpurina, a Rabiscolândia, a Dança na Sala e os atalhos
+de TV LG moram no repositório **kids** (solverone.com.br/kids/), com o histórico. Aqui ficaram só páginas que levam ao
+endereço novo. **Não crie nem altere jogo aqui** — abra a conversa no repositório kids.
 
-- **Aplicabilidade:** cada ponto vale quando for aplicável ao estágio atual deste app (hoje: só no GitHub,
-  site aberto sem login, sem banco). **Não** criar login, **não** migrar para banco e **não** criar integração
-  por causa deste aviso. O que não se aplica hoje, dizer "não aplicável hoje" e o motivo em uma linha. Quando
-  o app ganhar login, banco ou integração nova, já nasce cumprindo os pontos que passaram a valer.
-- **Em cada entrega**, dizer no resumo o que o RootifyONE, o ArchONE ou o EaglePlanONE precisariam saber
-  (integração nova ou removida, recurso novo, item do roadmap concluído).
+## Aviso do dono (13/Nov/2026) — Definition of done da plataforma (vale até sair a diretriz nova; quando sair, siga-a)
+
+A DoD da SolverONE passa a ter 12 pontos: manual e orientações, AssistONE, Novidades da versão, termos, comunicações e
+e-mails, RootifyONE, ArchONE, EaglePlanONE (roadmap), retrocompatibilidade, segurança e LGPD, qualidade verificável e
+registro. Vai nascer uma teia de integrações entre os apps, o RootifyONE, o ArchONE e o EaglePlanONE (eventos e comandos
+com aprovação).
+
+- **Aplicabilidade**: cada ponto vale quando se aplica ao estágio do app (com ou sem banco, só no GitHub, site aberto sem
+  login). **Não** criar login, migrar para banco nem criar integração por causa deste aviso. O que não se aplica hoje:
+  dizer "não aplicável hoje" e o motivo em uma linha. Quando o app ganhar login, banco ou integração nova, já nasce
+  cumprindo os pontos que passaram a valer.
+- **Em cada entrega**, dizer no resumo o que o RootifyONE, o ArchONE ou o EaglePlanONE precisariam saber (integração
+  nova ou removida, recurso novo, item do roadmap concluído).
 - **Nada de integração nova sem a regra zero.**
+
+## Aviso do dono (13/Nov/2026) — Definition of done com 12 pontos
+
+A Definition of done da plataforma passa a ter 12 pontos: manual e orientações, AssistONE, Novidades da
+versão, termos, comunicações e e-mails, RootifyONE, ArchONE, EaglePlanONE (roadmap), retrocompatibilidade,
+segurança e LGPD, qualidade verificável e registro. Vai nascer uma teia de integrações entre os apps, o
+RootifyONE, o ArchONE e o EaglePlanONE (eventos e comandos com aprovação). A diretriz nova está sendo
+desenhada; quando sair, siga-a.
+
+Aplicabilidade: cada ponto vale quando for aplicável ao estágio atual deste app (sem banco de dados, só no
+GitHub, site aberto sem login). NÃO criar login, não migrar para banco e não criar integração por causa deste
+aviso. O que não se aplica hoje, dizer "não aplicável hoje" e o motivo em uma linha. Quando este app ganhar
+login, banco ou integração nova, ele já nasce cumprindo os pontos que passaram a valer.
+
+Até a diretriz nova: (1) este aviso vale em todas as conversas deste app; (2) em cada entrega, dizer no resumo o
+que o RootifyONE, o ArchONE ou o EaglePlanONE precisariam saber (integração nova ou removida, recurso novo,
+item do roadmap concluído); (3) nada de integração nova sem a regra zero.

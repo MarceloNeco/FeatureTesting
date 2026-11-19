@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- porta da geladeira (verde-menta) com o brilho do esmalte -->
+  <rect width="512" height="512" fill="#d4ebe2"/>
+  <path d="M60 0 h70 L60 512 h-70z" fill="#fff" opacity=".45"/>
+  <!-- o bilhete: post-it amarelo, torto -->
+  <g transform="rotate(-6 256 270)">
+    <rect x="116" y="128" width="280" height="280" rx="6" fill="#ffe56b"/>
+    <path d="M396 352 L340 408 L396 408z" fill="#e8c94c"/>
+    <!-- o ponto de interrogação, de caneta azul -->
+    <path d="M206 222 q0-58 52-58 q52 0 52 50 q0 34-34 50 q-18 9-18 42" stroke="#1b3d96" stroke-width="26" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="258" cy="352" r="16" fill="#1b3d96"/>
+  </g>
+  <!-- o ímã segurando o bilhete -->
+  <circle cx="250" cy="128" r="34" fill="#b8322a"/>
+  <circle cx="238" cy="116" r="11" fill="#fff" opacity=".6"/>
+</svg>
